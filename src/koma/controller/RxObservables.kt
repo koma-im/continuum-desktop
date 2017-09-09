@@ -1,8 +1,8 @@
 package controller
 
-import matrix.UserRegistering
 import javafx.event.ActionEvent
 import koma.matrix.UserId
+import matrix.UserRegistering
 import model.Room
 import rx.javafx.sources.CompositeObservable
 
@@ -15,7 +15,6 @@ object guiEvents {
 
     val createRoomRequests = CompositeObservable<ActionEvent>()
     val joinRoomRequests = CompositeObservable<ActionEvent>()
-    val syncRoomRequests = CompositeObservable<String>()
     val leaveRoomRequests = CompositeObservable<Room>()
     val uploadRoomIconRequests = CompositeObservable<Room>()
     val putRoomAliasRequests = CompositeObservable<Room>()

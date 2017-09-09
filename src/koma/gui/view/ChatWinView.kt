@@ -1,7 +1,5 @@
 package view
 
-import com.smith.faktor.UserItemModel
-import com.smith.faktor.UserState
 import controller.guiEvents
 import javafx.beans.binding.DoubleBinding
 import javafx.beans.property.Property
@@ -17,6 +15,9 @@ import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.view.ChatMainView
 import koma.gui.view.listview.RoomListView
+import koma.model.user.UserItemModel
+import koma.model.user.UserState
+import koma.storage.rooms.RoomStore
 import koma_app.appState
 import model.*
 import rx.javafx.kt.observeOnFx
@@ -69,7 +70,7 @@ class ChatView(): View() {
             }
         }
 
-        appState.roomList.addListener { observable, oldValue, newValue ->
+        RoomStore.roomList.addListener { observable, oldValue, newValue ->
             if ( !selected_room_once && newValue.isNotEmpty()) {
                 roomListView.root.selectionModel.selectFirst()
                 selected_room_once = true

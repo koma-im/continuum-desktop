@@ -1,7 +1,5 @@
 package model
 
-import com.smith.faktor.UserState
-import domain.Chunked
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -13,25 +11,17 @@ import javafx.scene.paint.Color
 import koma.graphic.getImageForName
 import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
+import koma.matrix.UserId
 import koma.matrix.room.naming.RoomAlias
-import koma_app.appState
-import koma_app.removeFirstMatching
+import koma.model.user.UserState
+import koma.storage.users.UserStore
 import rx.Observable
 import rx.javafx.kt.observeOnFx
 import rx.javafx.kt.toObservable
 import rx.lang.kotlin.filterNotNull
 import rx.schedulers.Schedulers
-import tornadofx.ItemViewModel
-import tornadofx.move
+import tornadofx.*
 
-data class RoomInitialSyncResult(
-        val membership: String,
-        val visibility: String,
-        val room_id: String,
-        // when it's an invitation, the following too are nulls
-        val state: List<StateMessage>,
-        val messages: Chunked<Message>
-)
 
 class RoomItemModel(property: ObjectProperty<Room>) : ItemViewModel<Room>(itemProperty = property) {
     val name = bind {item?.displayName}
@@ -69,6 +59,10 @@ class Room(val id: String) {
                 }
     }
 
+    fun sortMembers(){
+        FXCollections.sort(members, { a, b -> b.weight() - a.weight() })
+    }
+
     init {
         aliasesChangeActions(aliases.toObservable())
         displayName.toObservable().filter { it.isNotBlank() && !hasIcon }
@@ -88,28 +82,17 @@ class Room(val id: String) {
                 }
     }
 
-    fun updateStates(messages: List<StateMessage>) {
-        messages.forEach({applyState(it)})
 
+    fun addMember(us: UserState) {
+        members.add(us)
     }
 
-    private fun handleMemberStateMessage(stateMessage: StateMessage) {
-        val membership = stateMessage.content["membership"] ?: ""
-        when (membership) {
-            "join" -> {
-                val us = appState.getOrCreateUser(stateMessage.state_key)
-                val displayName = stateMessage.content["displayname"] ?: stateMessage.sender.toString()
-                us?.displayName?.setValue(displayName as String)
-                val av = stateMessage.content["avatar_url"] as String?
-                if (av != null) {
-                    println("got user $displayName avatar $av through states")
-                    us?.avatarURL?.set(av)
-                }
-                members.add(us)
-            }
-            "leave" -> members.removeFirstMatching { it.id.toString() == stateMessage.state_key }
-            else -> println("Not handled membership message: $membership " +
-                    "in ${displayName.get()} from ${stateMessage.sender} ")
+    fun removeMember(mid: UserId) {
+        val us = UserStore.getOrCreateUserId(mid)
+        if (members.remove(us)) {
+            println("Removed $mid from ${this.displayName}")
+        } else {
+            println("Failed to remove $mid from ${this.displayName}")
         }
     }
 
@@ -120,32 +103,6 @@ class Room(val id: String) {
             this.aliases.add(0, alias)
     }
 
-    fun applyState(stateMessage: model.StateMessage) {
-        when (stateMessage.type) {
-            "m.room.member" -> handleMemberStateMessage(stateMessage)
-            "m.room.aliases" -> {
-                val maybealises = stateMessage.content["aliases"]
-                if (maybealises is List<*>) {
-                    val aliases = maybealises.filterIsInstance<String>()
-                            .map { RoomAlias(it) }
-                    this.aliases.setAll(aliases)
-                }
-            }
-            "m.room.canonical_alias" -> {
-                val alias = stateMessage.content["alias"] as String?
-                if (alias != null) setCanonicalAlias(RoomAlias(alias))
-            }
-            "m.room.avatar" -> {
-                val url = stateMessage.content["url"] as String?
-                if (url != null)
-                    iconURL.set(url)
-            }
-            else -> {
-                System.err.println("Unhandled stateMessage type: " + stateMessage.type)
-                System.err.println(Thread.currentThread().getStackTrace().take(2).joinToString("\n"))
-            }
-        }
-    }
 }
 
 enum class RoomVisibility {

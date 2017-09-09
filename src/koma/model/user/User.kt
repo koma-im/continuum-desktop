@@ -1,4 +1,4 @@
-package com.smith.faktor
+package koma.model.user
 
 import javafx.beans.property.*
 import javafx.scene.image.Image

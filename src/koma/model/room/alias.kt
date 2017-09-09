@@ -1,11 +1,11 @@
 package koma.model.room
 
 import koma.matrix.room.naming.RoomAlias
-import koma_app.appState
+import koma.storage.rooms.RoomStore
 
 fun add_aliases_to_room(roomId: String, aliases: List<RoomAlias>) {
 
-    val existingRoomState = appState.getOrCreateRoom(roomId)
+    val existingRoomState = RoomStore.getOrCreate(roomId)
     existingRoomState.aliases.addAll(aliases)
 
 }
