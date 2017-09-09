@@ -1,21 +1,23 @@
 package model
 
-import com.smith.faktor.UserState
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import koma.matrix.UserId
-import koma_app.appState
-import tornadofx.ItemViewModel
+import koma.model.user.UserState
+import koma.storage.users.UserStore
+import tornadofx.*
 import java.text.SimpleDateFormat
 
 data class Message(
-        val age: Long,
+        val age: Long?,
         val event_id: String,
         val origin_server_ts: Long,
-        val room_id: String,
+        val prev_content: Map<String, Any>?,
         val type: String,
         val sender: UserId,
+        val state_key: String?,
+        val txn_id: String?,
         val content: Map<String, Any>) {
 
     fun isChat(): Boolean {
@@ -32,7 +34,7 @@ class MessageItem(val msgjson: Message) {
 
     // these don't work if put in Message as transient fields
     val dateShown = SimpleStringProperty(SimpleDateFormat("HH:mm").format(java.util.Date(msgjson.origin_server_ts)))
-    val sender= SimpleObjectProperty<UserState>(appState.getOrCreateUserId(msgjson.sender))
+    val sender= SimpleObjectProperty<UserState>(UserStore.getOrCreateUserId(msgjson.sender))
     val message = SimpleObjectProperty<MsgType>()
 
     init {
@@ -85,14 +87,3 @@ fun List<Message>.filterChat(): List<Message> {
             .toList()
 }
 
-data class StateMessage(val age: Long,
-                   val event_id: String,
-                   val origin_server_ts: Long,
-                   val room_id: String,
-                   val type: String,
-                   val sender: UserId,
-                   val content: Map<String, Any>,
-                   val state_key: String
-) {
-
-}

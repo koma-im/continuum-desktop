@@ -2,7 +2,6 @@ package controller
 
 import com.smith.faktor.EventService
 import domain.AvatarUrl
-import domain.ClientInitialSyncResult
 import domain.EmptyResult
 import javafx.concurrent.Task
 import javafx.scene.control.*
@@ -11,17 +10,14 @@ import javafx.stage.FileChooser
 import koma.concurrency.runBanRoomMember
 import koma.concurrency.runInviteMember
 import koma.concurrency.run_join_romm
+import koma.controller.events_processing.processEventsResult
 import koma.matrix.room.naming.RoomId
 import koma_app.appState
 import matrix.ApiClient
-import rx.Observable
-import rx.javafx.kt.addTo
-import rx.javafx.kt.observeOnFx
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
 import rx.schedulers.Schedulers
-import tornadofx.FX
-import tornadofx.alert
+import tornadofx.*
 import view.dialog.FindJoinRoomDialog
 import java.util.*
 
@@ -32,21 +28,6 @@ class ChatController(
         val apiClient: ApiClient) {
 
     init{
-        Observable.just("Client syncing").addTo(guiEvents.statusMessage)
-        Observable.just(apiClient)
-                .observeOn(Schedulers.io())
-                .map {
-                    it.initialSync()
-                }.observeOnFx()
-                .subscribe {
-                    val syncResult: ClientInitialSyncResult? = it
-                    if (syncResult == null) {
-                        Observable.just("Sync error").addTo(guiEvents.statusMessage)
-                    } else {
-                        appState.processInitialSync(syncResult)
-                        postSync(syncResult.end)
-                    }
-                }
 
         guiEvents.createRoomRequests.toObservable()
                 .map{ createRoom() }
@@ -170,6 +151,8 @@ class ChatController(
                     apiClient.setRoomAlias(roomid, newname)
                     apiClient.setRoomCanonicalAlias(roomid, newname)
                 }
+
+        startSyncing(null)
     }
 
     private fun sendMessage(msg: String) {
@@ -179,12 +162,12 @@ class ChatController(
             apiClient.sendMessage(mayroom.get().id, msg)
     }
 
-    fun postSync(from: String) {
+    fun startSyncing(from: String?) {
         val eventsService = EventService(apiClient, from)
         eventsService.setOnSucceeded {
             val eventResult = eventsService.value
             if (eventResult != null) {
-                appState.processEventsResult(eventResult, apiClient)
+                processEventsResult(eventResult, apiClient)
             }
         }
 

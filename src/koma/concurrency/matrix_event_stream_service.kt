@@ -1,29 +1,28 @@
 package com.smith.faktor
 
 import controller.guiEvents
-import domain.Chunked
 import javafx.concurrent.ScheduledService
 import javafx.concurrent.Task
+import koma.matrix.sync.SyncResponse
 import matrix.ApiClient
-import model.Message
 import rx.Observable
 import rx.javafx.kt.addTo
 
-class EventService(val apiClient: ApiClient, var from: String) : ScheduledService<Chunked<Message>>() {
+class EventService(val apiClient: ApiClient, var from: String?) : ScheduledService<SyncResponse>() {
     init {
         this.restartOnFailure = true
     }
 
-  override fun createTask(): Task<Chunked<Message>>? {
-    return object : Task<Chunked<Message>>() {
-      override fun call(): Chunked<Message>? {
+    override fun createTask(): Task<SyncResponse> {
+        return object : Task<SyncResponse>() {
+            override fun call(): SyncResponse? {
         val eventResult = apiClient.getEvents(from)
         if (eventResult == null) {
             Observable.just("Events Failed").addTo(guiEvents.statusMessage)
           failed()
           return null
-        } else {
-          from = eventResult.end
+        } else{
+          from = eventResult.next_batch
           return eventResult
         }
       }

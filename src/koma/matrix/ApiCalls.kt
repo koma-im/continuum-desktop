@@ -5,10 +5,10 @@ import domain.*
 import javafx.scene.control.Alert
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
-import koma.matrix.user.identity.UserId_new
+import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
-import model.Message
-import model.RoomInitialSyncResult
+import koma.matrix.sync.SyncResponse
+import koma.matrix.user.identity.UserId_new
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -17,7 +17,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
-import tornadofx.alert
+import tornadofx.*
 import util.saveToken
 import java.io.File
 import java.io.FileInputStream
@@ -91,7 +91,9 @@ interface MatrixAccessApi {
                      @Body roomInfo: RoomInfo): Call<EmptyResult>
 
     @GET("publicRooms")
-    fun publicRooms(): Call<Chunked<DiscoveredRoom>>
+    fun publicRooms(@Query("since") since: String = "",
+                    @Query("limit") limit: Int = 20
+    ): Call<RoomBatch<DiscoveredRoom>>
 
     @POST("rooms/{roomId}/invite")
     fun inviteUser(@Path("roomId") roomId: String,
@@ -130,21 +132,15 @@ interface MatrixAccessApi {
                     @Body alias: Map<String, String>): Call<SendResult>
 
 
-    @GET("events")
-    fun getEvents(@Query("from") from: String = "",
-                  @Query("access_token") token: String)
-            : Call<Chunked<Message>>
+    @GET("sync")
+    fun getEvents(@Query("since") from: String? = null,
+                  @Query("access_token") token: String,
+                  @Query("full_state") full_state: Boolean = false,
+                  @Query("timeout") timeout: Int = 50_000,
+                  @Query("filter") filter: String? = null)
+            : Call<SyncResponse>
 
-    @GET("rooms/{roomId}/initialSync")
-    fun initialSyncRoom(@Path("roomId") roomId: String,
-                        @Query("access_token") token: String
-    ): Call<RoomInitialSyncResult>
-
-    @GET("initialSync")
-    fun initialSyncClient(@Query("access_token") token: String
-    ): Call<ClientInitialSyncResult>
-
-    @PUT("profile/{userId}/avatar_url")
+   @PUT("profile/{userId}/avatar_url")
     fun updateAvatar(@Path("userId") user_id: UserId,
                      @Query("access_token") token: String,
                      @Body avatarUrl: AvatarUrl): Call<UpdateAvatarResult>
@@ -453,50 +449,10 @@ class ApiClient(val baseURL: String, credentials: AuthedUser) {
         }
     }
 
-    // only called when the user joins a new room
-  fun roomInitialSync(roomId: String): RoomInitialSyncResult? {
-        println("initially syncing room $roomId")
-        val call: Call<RoomInitialSyncResult> = service.initialSyncRoom(roomId, token)
-        val resp: Response<RoomInitialSyncResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
-  }
-
-
-    fun initialSync(): ClientInitialSyncResult? {
-        println("doing initial sync")
-        try {
-            val call: Call<ClientInitialSyncResult> = service.initialSyncClient(token)
-            println("have call")
-            val resp: Response<ClientInitialSyncResult>
-            println("have resp")
-            resp = call.execute()
-            if (resp.isSuccessful) {
-                return resp.body()
-            } else{
-                println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-                return null
-            }
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-  }
-
-  fun getEvents(from: String): Chunked<Message>? {
+    fun getEvents(from: String?): SyncResponse? {
       println("getting events since $from")
-      val call: Call<Chunked<Message>> = service.getEvents(from, token)
-      val resp: Response<Chunked<Message>>
+      val call: Call<SyncResponse> = service.getEvents(from, token)
+      val resp: Response<SyncResponse>
       val startime = Instant.now()
       try {
           resp = call.execute()

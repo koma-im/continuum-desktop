@@ -5,6 +5,8 @@ import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
+import javafx.scene.text.Font
+import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 
 /**
@@ -19,9 +21,9 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     if (nameImageCache.images.containsKey(name))
         return nameImageCache.images[name]!!
     val chars = if (name.contains(' ')) {
-        name.take(2) + name.substringAfter(' ').take(2)
+        name.take(1) + name.substringAfter(' ').take(1)
     } else {
-        name.take(4)
+        name.take(2)
     }
     val canva = Canvas(isize, isize)
     val graphc = canva.graphicsContext2D
@@ -32,12 +34,12 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     graphc.setFill(fgcolor)
     graphc.textAlign = TextAlignment.CENTER
     graphc.textBaseline = VPos.CENTER
+    graphc.font = Font.font("serif", FontWeight.BOLD, 20.0)
+    val middle = isize * 0.5
     val mid0 = isize * 0.25
     val mid1 = isize * 0.75
-    graphc.fillText(chars.getStringAtOrSpace(0), mid0,mid0)
-    graphc.fillText(chars.getStringAtOrSpace(1), mid1, mid0)
-    graphc.fillText(chars.getStringAtOrSpace(2), mid0, mid1)
-    graphc.fillText(chars.getStringAtOrSpace(3), mid1, mid1)
+    graphc.fillText(chars.getStringAtOrSpace(0), mid0, middle)
+    graphc.fillText(chars.getStringAtOrSpace(1), mid1, middle)
     val params =SnapshotParameters()
     params.fill = Color.TRANSPARENT
     val im = canva.snapshot(params, null)

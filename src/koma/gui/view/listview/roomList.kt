@@ -6,6 +6,7 @@ import javafx.scene.control.ListView
 import javafx.scene.control.MenuItem
 import javafx.scene.control.SelectionModel
 import javafx.scene.layout.Priority
+import koma.storage.rooms.RoomStore
 import koma_app.appState
 import model.Room
 import rx.javafx.kt.actionEvents
@@ -18,7 +19,7 @@ import view.RoomFragment
 import java.util.*
 
 class RoomListView(): View() {
-    override val root = listview(appState.roomList)
+    override val root = listview(RoomStore.roomList)
 
     init {
         setup(root)
