@@ -450,7 +450,6 @@ class ApiClient(val baseURL: String, credentials: AuthedUser) {
     }
 
     fun getEvents(from: String?): SyncResponse? {
-      println("getting events since $from")
       val call: Call<SyncResponse> = service.getEvents(from, token)
       val resp: Response<SyncResponse>
       val startime = Instant.now()

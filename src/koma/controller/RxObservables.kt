@@ -27,8 +27,6 @@ object guiEvents {
     val sendImageRequests = CompositeObservable<Room>()
 
     val updateAvatar = CompositeObservable<ActionEvent>()
-
-    val statusMessage = CompositeObservable<String>()
 }
 
 data class LoginRequest(

@@ -1,10 +1,14 @@
 package koma.gui.view
 
 import controller.guiEvents
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
+import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
+import koma.concurrency.runTask
 import koma_app.appState
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -12,6 +16,7 @@ import rx.javafx.kt.toObservable
 import tornadofx.*
 import view.MessageFragment
 import view.WidthModel
+import view.popup.EmojiData
 import view.popup.EmojiPanel
 
 class ChatMainView(): View() {
@@ -35,7 +40,8 @@ class ChatMainView(): View() {
 private fun createButtonBar(inputField: TextField): ButtonBar {
     val bbar = ButtonBar()
     bbar.apply {
-        button("Send image") {
+        button {
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO)
             actionEvents()
                     .map {  appState.currRoom.get() }
                     .doOnNext {
@@ -46,7 +52,14 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
                     .map { it.get() }
                     .addTo(guiEvents.sendImageRequests)
         }
-        button("Insert emoji") {
+        button{
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT)
+            runTask({ EmojiData.getSmileEmoji()},
+                    {
+                        val iv = ImageView(it)
+                        iv.fitHeight = 12.0
+                        iv.isPreserveRatio = true
+                        graphic = iv })
             action {
                 val ep = EmojiPanel(inputField)
                 ep.show(this)

@@ -13,6 +13,7 @@ import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomAlias
+import koma.matrix.room.visibility.HistoryVisibility
 import koma.model.user.UserState
 import koma.storage.users.UserStore
 import rx.Observable
@@ -27,6 +28,7 @@ class RoomItemModel(property: ObjectProperty<Room>) : ItemViewModel<Room>(itemPr
     val name = bind {item?.displayName}
     val icon = bind {item?.iconProperty}
     val color = bind {item?.colorProperty}
+    val room = bind { itemProperty }
 }
 
 class Room(val id: String) {
@@ -39,8 +41,10 @@ class Room(val id: String) {
     val chatMessages: ObservableList<MessageItem> = FXCollections.observableArrayList<MessageItem>()
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 
+    // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
-    val joinRule: RoomJoinRules = RoomJoinRules.Invite
+    var joinRule: RoomJoinRules = RoomJoinRules.Invite
+    var histVisibility = HistoryVisibility.Shared
 
     val hasname = false
     val displayName = SimpleStringProperty(id)
@@ -48,6 +52,9 @@ class Room(val id: String) {
     var hasIcon = false
     val iconURL = SimpleStringProperty("");
     val iconProperty = SimpleObjectProperty<Image>(getImageForName(id, color))
+
+    val power_levels = mutableMapOf<String, Int>()
+    val user_powers = mutableMapOf<String, Int>()
 
     private fun aliasesChangeActions(aliases: Observable<ObservableList<RoomAlias>>) {
         aliases.filter { it.size > 0 && !hasname }
@@ -83,8 +90,13 @@ class Room(val id: String) {
     }
 
 
-    fun addMember(us: UserState) {
-        members.add(us)
+    /**
+     * sometimes a join messages just updates an existing user and nothing needs to be done here
+     */
+    @Synchronized
+    fun makeUserJoined(us: UserState) {
+        if (!members.contains(us))
+            members.add(us)
     }
 
     fun removeMember(mid: UserId) {
@@ -103,6 +115,13 @@ class Room(val id: String) {
             this.aliases.add(0, alias)
     }
 
+    fun updatePowerLevels(levels: Map<String, Int>) {
+        power_levels.putAll(levels)
+    }
+
+    fun updateUserLevels(users: Map<String, Int>) {
+        user_powers.putAll(users)
+    }
 }
 
 enum class RoomVisibility {
