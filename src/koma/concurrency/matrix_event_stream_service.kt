@@ -18,7 +18,6 @@ class EventService(val apiClient: ApiClient, var from: String?) : ScheduledServi
             override fun call(): SyncResponse? {
         val eventResult = apiClient.getEvents(from)
         if (eventResult == null) {
-            Observable.just("Events Failed").addTo(guiEvents.statusMessage)
           failed()
           return null
         } else{

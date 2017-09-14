@@ -64,6 +64,17 @@ object EmojiData {
         }
         return categories
     }
+
+    /**
+     * an icon for the emoji input button
+     */
+    fun getSmileEmoji(): javafx.scene.image.Image {
+        val cat0 = categories.get(0)
+        val chars = cat0.second
+        val char0 = chars.get(0)
+        val im = char0.image()
+        return im!!
+    }
 }
 
 class EmojiChar(

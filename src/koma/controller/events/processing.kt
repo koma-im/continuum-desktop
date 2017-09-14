@@ -2,6 +2,7 @@ package koma.controller.events_processing
 
 import koma.matrix.epemeral.GeneralEvent
 import koma.matrix.room.naming.RoomAlias
+import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.storage.rooms.RoomStore
@@ -14,6 +15,7 @@ import matrix.room.JoinedRoom
 import model.Message
 import model.MessageItem
 import model.Room
+import model.RoomJoinRules
 
 fun process_typing_event(msg: GeneralEvent) {
     val userIds = msg.content["user_ids"]
@@ -47,7 +49,7 @@ fun processMemberJoinMessage(room: Room, message: Message) {
     if (avatarURL != null) {
         user.avatarURL.set(avatarURL)
     }
-    room.addMember(user)
+    room.makeUserJoined(user)
 }
 
 fun processMemberLeaveMessage(room: Room, message: Message) {
@@ -88,16 +90,63 @@ private fun handleCanonicalAlias(room: Room, message: Message) {
         room.setCanonicalAlias(RoomAlias(alias))
 }
 
+private fun handlePowerLevels(room: Room, content: Map<String, Any>) {
+    val map = content.toMutableMap()
+    val events = map.remove("events")
+    if (events != null ) {
+        room.updatePowerLevels(events as Map<String, Int>)
+    }
+    val users = map.remove("users")
+    if (users != null ) {
+        room.updateUserLevels(users as Map<String, Int>)
+    }
+    room.updatePowerLevels(map.toMap() as Map<String, Int>)
+}
+private fun handle_join_rules(room: Room, rule: Map<String, Any>) {
+    val join = when (rule["join_rule"]) {
+        "public" -> RoomJoinRules.Public
+        "invite" -> RoomJoinRules.Invite
+        // not used on the matrix network for now
+        "knock" -> RoomJoinRules.Knock
+        "private" -> RoomJoinRules.Private
+        else -> null
+    }
+    if (join != null) {
+        room.joinRule = join
+    } else {
+        println("unknown join rule for room $room: $rule")
+    }
+}
+
+private fun update_history_visibility(room: Room, content: Map<String, Any>) {
+    val vis = when (content["history_visibility"]) {
+        "invited" -> HistoryVisibility.Invited
+        "joined" -> HistoryVisibility.Joined
+        "shared" -> HistoryVisibility.Shared
+        "world_readable" -> HistoryVisibility.WorldReadable
+        else -> null
+    }
+    if (vis != null) {
+        room.histVisibility = vis
+    } else {
+        println("unknown history visibility for room $room: $content")
+    }
+}
+
 private fun handle_room_events(room: Room, events: List<Message>) {
     events.forEach { message ->
         when (message.type) {
+            "m.room.create" -> {} // already handled when processing keys of the map
             "m.room.message" -> processNormalMessage(room, message)
             "m.room.member" -> processMembershipMessage(room, message)
             "m.room.aliases" -> handleAliasesMessage(room, message)
             "m.room.avatar" -> handleAvatarMessage(room, message)
             "m.room.canonical_alias" -> handleCanonicalAlias(room, message)
+            "m.room.power_levels" -> handlePowerLevels(room, message.content)
+            "m.room.join_rules" -> handle_join_rules(room, message.content)
+            "m.room.history_visibility" -> update_history_visibility(room, message.content)
             else -> {
-                println("Unhandled message: " + message)
+                println("Unhandled message: $message")
             }
         }
     }

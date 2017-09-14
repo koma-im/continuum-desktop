@@ -32,7 +32,7 @@ class LoginScreen(): View() {
     var password: PasswordField by singleAssign()
 
     init {
-        title = "Please log in "
+        title = "Koma"
 
         with(root) {
             paddingAll = 5.0

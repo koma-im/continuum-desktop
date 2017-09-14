@@ -1,5 +1,6 @@
 package koma.concurrency
 
+import javafx.application.Platform
 import javafx.concurrent.Task
 import koma.matrix.room.naming.RoomId
 import matrix.ApiClient
@@ -52,6 +53,20 @@ fun runBanRoomMember(apiClient: ApiClient, room: RoomId, memId: String)  {
             } else {
                 return banRoomResult
             }
+        }
+    }
+    Thread(task).start()
+}
+
+fun <T> runTask(func: () -> T, cb: (T) -> Unit) {
+    val task = object : Task<T>() {
+        override fun call(): T {
+            return func()
+        }
+    }
+    task.setOnSucceeded {
+        Platform.runLater {
+            cb(task.value)
         }
     }
     Thread(task).start()

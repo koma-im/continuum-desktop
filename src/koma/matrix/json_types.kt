@@ -2,8 +2,6 @@ package domain
 
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
-import koma.matrix.user.presence.PresenceMessage
-import model.RoomInitialSyncResult
 
 /**
  * Created by developer on 2017/7/8.
@@ -64,13 +62,3 @@ data class RoomInfo(
 
 class EmptyResult()
 
-
-/**
- * Created by developer on 2017/7/5.
- */
-
-data class ClientInitialSyncResult(
-        val end: String,
-        val presence: List<PresenceMessage>,
-        val rooms: List<RoomInitialSyncResult>
-)

@@ -1,13 +1,14 @@
 package view
 
-import controller.guiEvents
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.beans.binding.DoubleBinding
 import javafx.beans.property.Property
 import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.Group
 import javafx.scene.Node
-import javafx.scene.control.SplitPane
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
@@ -15,6 +16,8 @@ import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.view.ChatMainView
 import koma.gui.view.listview.RoomListView
+import koma.gui.view.roomsview.addMenu
+import koma.gui.view.usersview.UsersViewControl
 import koma.model.user.UserItemModel
 import koma.model.user.UserState
 import koma.storage.rooms.RoomStore
@@ -41,33 +44,42 @@ class ChatView(): View() {
     val roomListView: RoomListView by inject()
     val chatMainView: ChatMainView by inject()
 
-    lateinit var spane: SplitPane
     var selected_room_once = false
 
     init {
         with(root) {
 
-            spane = splitpane() {
+            hbox() {
                 vgrow = Priority.ALWAYS
 
-                vbox(spacing = 10.0) {
-                    SplitPane.setResizableWithParent(this@vbox, false)
-                    add(roomListView)
-                }
+                add(roomListView)
 
-                //+chatMainView
                 add(chatMainView)
 
-                //+userListView
-                listview(appState.currUserList) {
-                    SplitPane.setResizableWithParent(this@listview, false)
-                    cellFragment(UserFragment::class)
+                vbox(spacing = 10.0) {
+                    val showavataronly = SimpleBooleanProperty(true)
+                    val expandicon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ANGLE_LEFT)
+                    val collapseicon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ANGLE_RIGHT)
+                    val toggleicon = objectBinding(showavataronly) { if (value) expandicon else collapseicon}
+                    button {
+                        graphicProperty().bind(toggleicon)
+                        action {
+                            showavataronly.set(showavataronly.not().get())
+                        }
+                    }
+                    setInScope(UsersViewControl(showavataronly), scope)
+                    listview(appState.currUserList) {
+                        vgrow = Priority.ALWAYS
+                        minWidth = 50.0
+                        cellFragment(UserFragment::class)
+                        val ulwidth = doubleBinding(showavataronly) {if(value) 50.0 else 138.0}
+                        maxWidthProperty().bind(ulwidth)
+                        prefWidthProperty().bind(ulwidth)
+                    }
                 }
+
             }
 
-            label("standing by") {
-                guiEvents.statusMessage.toObservable().observeOnFx().subscribe { text = it }
-            }
         }
 
         RoomStore.roomList.addListener { observable, oldValue, newValue ->
@@ -84,6 +96,7 @@ class ChatView(): View() {
 class UserFragment : ListCellFragment<UserState>() {
 
     val us = UserItemModel(itemProperty)
+    val controlModel: UsersViewControl by inject()
 
     override val root = hbox(spacing = 10.0) {
         style {
@@ -101,11 +114,10 @@ class UserFragment : ListCellFragment<UserState>() {
         }
 
         vbox(spacing = 2.0) {
+            removeWhen { controlModel.shownoname }
             text(us.name) {
                 this.fillProperty().bind(us.color)
             }
-            //text(us.typing) {
-            //}
         }
 
         alignment = Pos.CENTER_LEFT
@@ -157,10 +169,24 @@ fun renderMessage(msg: Property<MsgType>, width: DoubleBinding): Node {
                 tf.add(t)
                 tf
             }
+            is EmoteMsg -> {
+                val tf = TextFlow()
+                tf.maxWidthProperty().bind(width)
+                val tp = Text(" * ")
+                tf.add(tp)
+                val t = Text(it.text)
+                tf.add(t)
+                tf
+            }
             is ImageMsg -> {
                 val media = getMedia(it.mxcurl)
                 if (media != null) {
-                    val im = Image(ByteArrayInputStream(media), 100.0, 320.0, true, false)
+                    val im = Image(
+                            ByteArrayInputStream(media),
+                            100.0,
+                            320.0,
+                            true,
+                            true)
                     group.tooltip(it.desc)
                     ImageView(im)
                 } else {
@@ -179,6 +205,7 @@ class RoomFragment: ListCellFragment<Room>() {
     val room = RoomItemModel(itemProperty)
 
     override val root = hbox(spacing = 10.0) {
+        addMenu(this, room.room)
         style {
             alignment = Pos.CENTER_LEFT
         }

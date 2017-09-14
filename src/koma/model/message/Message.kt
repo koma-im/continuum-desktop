@@ -61,6 +61,7 @@ class MessageItem(val msgjson: Message) {
         }
         val msg = when (msgtype) {
             "m.text" -> TextMsg(msgjson.content["body"] as String? ?: "(unexpected empty text)")
+            "m.emote" -> EmoteMsg(msgjson.content["body"] as String? ?: "")
             "m.image" -> ImageMsg(desc = msgjson.content["body"] as String? ?: "",
                     mxcurl = msgjson.content["url"] as String? ?: "")
             else -> TextMsg("(unexpected other message type)")
@@ -78,6 +79,7 @@ class MessageItemModel(property: ObjectProperty<MessageItem>) : ItemViewModel<Me
 sealed class MsgType
 
 data class TextMsg(val text: String): MsgType()
+data class EmoteMsg(val text: String): MsgType()
 data class ImageMsg(val desc: String, val mxcurl: String): MsgType()
 
 fun List<Message>.filterChat(): List<Message> {
