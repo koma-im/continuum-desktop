@@ -15,7 +15,6 @@ import rx.javafx.kt.addTo
 import rx.javafx.kt.toObservable
 import tornadofx.*
 import view.MessageFragment
-import view.WidthModel
 import view.popup.EmojiData
 import view.popup.EmojiPanel
 
@@ -42,6 +41,7 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
     bbar.apply {
         button {
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO)
+            tooltip("Send image")
             actionEvents()
                     .map {  appState.currRoom.get() }
                     .doOnNext {
@@ -98,7 +98,6 @@ class MessageListView(): View() {
             hgrow = Priority.ALWAYS
             fixedCellSize = -1.0
             cellFragment(MessageFragment::class)
-            setInScope(WidthModel(this.widthProperty()), scope)
         }
     }
 }

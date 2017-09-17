@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty
 import koma.matrix.UserId
 import koma.model.user.UserState
 import koma.storage.users.UserStore
+import matrix.event.roomevent.RoomEventType
 import tornadofx.*
 import java.text.SimpleDateFormat
 
@@ -14,7 +15,7 @@ data class Message(
         val event_id: String,
         val origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
-        val type: String,
+        val type: RoomEventType,
         val sender: UserId,
         val state_key: String?,
         val txn_id: String?,
@@ -22,9 +23,9 @@ data class Message(
 
     fun isChat(): Boolean {
         return when (this.type) {
-            "m.room.create" -> true
-            "m.room.member" -> true
-            "m.room.message" -> true
+            RoomEventType.Create -> true
+            RoomEventType.Member -> true
+            RoomEventType.Message -> true
             else -> false
         }
     }
@@ -39,13 +40,13 @@ class MessageItem(val msgjson: Message) {
 
     init {
         when (msgjson.type) {
-            "m.room.create" ->
+            RoomEventType.Create ->
                 message.set(TextMsg("Room created"))
-            "m.room.member" -> {
+            RoomEventType.Member -> {
                 val txt = if (msgjson.content["membership"] == "join") "Joined" else "Left"
                 message.set(TextMsg(txt))
             }
-            "m.room.message" -> handleMsgTypes()
+            RoomEventType.Message -> handleMsgTypes()
             else -> {
                 val text = "Unhandled message type: ${msgjson.type}"
                 message.set(TextMsg(text))

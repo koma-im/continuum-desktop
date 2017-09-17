@@ -10,6 +10,7 @@ import koma.storage.users.UserStore
 import koma_app.appState.apiClient
 import koma_app.appState.sortMembersInEachRoom
 import matrix.ApiClient
+import matrix.event.roomevent.RoomEventType
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
 import model.Message
@@ -30,7 +31,7 @@ fun process_typing_event(msg: GeneralEvent) {
 
 fun process_presence(message: PresenceMessage) {
     message.getUserState()?.let {
-        it.present.set(message.content.presence == "online")
+        it.present.set(message.content.presence)
         val laa = message.content.last_active_ago
         if (laa is Number)
             it.lastActiveAgo.set(laa.toLong())
@@ -136,15 +137,15 @@ private fun update_history_visibility(room: Room, content: Map<String, Any>) {
 private fun handle_room_events(room: Room, events: List<Message>) {
     events.forEach { message ->
         when (message.type) {
-            "m.room.create" -> {} // already handled when processing keys of the map
-            "m.room.message" -> processNormalMessage(room, message)
-            "m.room.member" -> processMembershipMessage(room, message)
-            "m.room.aliases" -> handleAliasesMessage(room, message)
-            "m.room.avatar" -> handleAvatarMessage(room, message)
-            "m.room.canonical_alias" -> handleCanonicalAlias(room, message)
-            "m.room.power_levels" -> handlePowerLevels(room, message.content)
-            "m.room.join_rules" -> handle_join_rules(room, message.content)
-            "m.room.history_visibility" -> update_history_visibility(room, message.content)
+            RoomEventType.Create -> {} // already handled when processing keys of the map
+            RoomEventType.Message -> processNormalMessage(room, message)
+            RoomEventType.Member -> processMembershipMessage(room, message)
+            RoomEventType.Aliases -> handleAliasesMessage(room, message)
+            RoomEventType.Avatar -> handleAvatarMessage(room, message)
+            RoomEventType.CanonAlias -> handleCanonicalAlias(room, message)
+            RoomEventType.PowerLevels -> handlePowerLevels(room, message.content)
+            RoomEventType.JoinRule -> handle_join_rules(room, message.content)
+            RoomEventType.HistoryVisibility -> update_history_visibility(room, message.content)
             else -> {
                 println("Unhandled message: $message")
             }
