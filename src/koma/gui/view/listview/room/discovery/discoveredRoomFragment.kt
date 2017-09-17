@@ -120,7 +120,8 @@ class TooltipFragment(room: DiscoveredRoomItemModel) : Fragment() {
                         fontSize = 15.px
                     }
                 }
-                label(stringBinding(room.aliases) {value.drop(1).joinToString("\n")}) {
+                label(stringBinding(room.aliases) {
+                    value?.drop(1)?.joinToString("\n") ?: ""}) {
                     paddingLeft = 5.0
                     style {
                         fontSize = 12.px

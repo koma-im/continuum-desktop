@@ -1,24 +1,27 @@
 package koma.model.user
 
-import javafx.beans.property.*
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleLongProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import koma.graphic.getImageForName
 import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
+import koma.matrix.user.presence.UserPresenceType
 import rx.javafx.kt.observeOnFx
 import rx.javafx.kt.toObservable
 import rx.lang.kotlin.filterNotNull
 import rx.schedulers.Schedulers
-import tornadofx.ItemViewModel
 
 /**
  * Created by developer on 2017/6/25.
  */
 data class UserState(val id: UserId) {
     val typing = SimpleBooleanProperty(false)
-    val present = SimpleBooleanProperty(false)
+    val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
     val displayName = SimpleStringProperty(id.toString())
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
@@ -51,7 +54,6 @@ data class UserState(val id: UserId) {
 
     fun weight(): Int {
         val t = typing.get()
-        val p = present.get()
         val la = lastActiveAgo.get()
         val SECONDS_PER_YEAR = (60L * 60L * 24L * 365L)
         val SECONDS_PER_DECADE = (10L * SECONDS_PER_YEAR)
@@ -60,7 +62,7 @@ data class UserState(val id: UserId) {
         if (t) {
             result *= 2
         }
-        if (p) {
+        if (present.get() == UserPresenceType.Online) {
             result *= 2
         }
         return result
@@ -69,11 +71,3 @@ data class UserState(val id: UserId) {
     override fun toString() = "$id ${typing.get()} ${present.get()} ${weight()}"
 
 }
-
-class UserItemModel(property: ObjectProperty<UserState>) : ItemViewModel<UserState>(itemProperty = property) {
-    val name = bind {item?.displayName}
-    val avatar: ObjectProperty<Image> = bind {item?.avatarImgProperty}
-    val typing = bind {item?.typing}
-    val color = bind {item?.colorProperty}
-}
-

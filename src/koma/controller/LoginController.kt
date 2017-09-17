@@ -7,9 +7,7 @@ import matrix.*
 import rx.javafx.kt.observeOnFx
 import rx.lang.kotlin.filterNotNull
 import rx.schedulers.Schedulers
-import tornadofx.Controller
-import tornadofx.FX
-import tornadofx.alert
+import tornadofx.*
 import util.getToken
 import util.saveLastUsed
 import view.ChatView

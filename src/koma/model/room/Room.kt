@@ -1,5 +1,6 @@
 package model
 
+import com.squareup.moshi.Json
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -130,8 +131,10 @@ enum class RoomVisibility {
 }
 
 enum class RoomJoinRules {
+    @Json(name = "public")
     Public,
     Knock,
+    @Json(name = "invite")
     Invite,
     Private
 }
