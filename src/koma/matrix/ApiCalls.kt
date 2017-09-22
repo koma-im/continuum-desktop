@@ -5,10 +5,12 @@ import domain.*
 import javafx.scene.control.Alert
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
+import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.identity.UserId_new
+import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -94,6 +96,18 @@ interface MatrixAccessApi {
     fun publicRooms(@Query("since") since: String = "",
                     @Query("limit") limit: Int = 20
     ): Call<RoomBatch<DiscoveredRoom>>
+
+
+    @GET("rooms/{roomId}/messages")
+    fun getMessages(
+            @Path("roomId") roomId: String,
+            @Query("access_token") token: String,
+            @Query("from") from: String,
+            @Query("dir") dir: FetchDirection,
+            // optional params
+            @Query("limit") limit: Int = 100,
+            @Query("to") to: String? = null
+    ): Call<Chunked<RoomEvent>>
 
     @POST("rooms/{roomId}/invite")
     fun inviteUser(@Path("roomId") roomId: String,
@@ -184,7 +198,11 @@ class ApiClient(val baseURL: String, credentials: AuthedUser) {
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
-  }
+    }
+
+    fun getRoomMessages(roomId: String, from: String, direction: FetchDirection): Chunked<RoomEvent>? {
+        return service.getMessages(roomId, token, from, direction).execute().body()
+    }
 
   fun joiningRoom(roomid: RoomId): JoinRoomResult? {
       println("trying to join room $roomid")

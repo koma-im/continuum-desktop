@@ -1,9 +1,9 @@
 package koma.gui.view.listview
 
+import javafx.collections.ObservableList
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionModel
 import javafx.scene.layout.Priority
-import koma.storage.rooms.RoomStore
 import koma_app.appState
 import model.Room
 import rx.javafx.kt.toObservable
@@ -12,8 +12,8 @@ import tornadofx.*
 import view.RoomFragment
 import java.util.*
 
-class RoomListView(): View() {
-    override val root = listview(RoomStore.roomList)
+class RoomListView(roomlist: ObservableList<Room>): View() {
+    override val root = listview(roomlist)
 
     init {
         setup(root)

@@ -3,32 +3,36 @@ package koma.gui.view
 import controller.guiEvents
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
+import javafx.collections.ObservableList
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import koma.concurrency.runTask
+import koma.gui.view.messagesview.MessagesScrollListView
+import koma.gui.view.messagesview.fragment.create_message_cell
 import koma_app.appState
+import model.MessageToShow
+import model.Room
+import org.fxmisc.flowless.VirtualFlow
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
-import rx.javafx.kt.toObservable
 import tornadofx.*
-import view.MessageFragment
 import view.popup.EmojiData
 import view.popup.EmojiPanel
 
-class ChatMainView(): View() {
+class ChatRecvSendView(room: Room): View() {
     override val root = vbox(10.0)
 
-    val messageListView: MessageListView by inject()
-    private val messageInput: MessageInputView by inject()
+    val messageListView = MessagesScrollListView(room)
+    private val messageInput = MessageInputView()
 
     init {
         with(root) {
             hgrow = Priority.ALWAYS
             //+messageListView
-            add(messageListView)
+            add(messageListView.root)
             add(createButtonBar(messageInput.root))
 
             add(messageInput)
@@ -86,18 +90,15 @@ class MessageInputView(): View() {
     }
 }
 
-class MessageListView(): View() {
-    override val root = listview(appState.currChatMessageList)
+class MessageListView(msgList: ObservableList<MessageToShow>): View() {
+    override val root = VirtualFlow.createVertical(
+            msgList, {create_message_cell(it)}, VirtualFlow.Gravity.REAR
+    )
 
     init {
         with(root) {
-            itemsProperty().toObservable().subscribe {
-                this.scrollTo(it.size - 1)
-            }
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
-            fixedCellSize = -1.0
-            cellFragment(MessageFragment::class)
         }
     }
 }
