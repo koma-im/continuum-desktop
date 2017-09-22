@@ -167,7 +167,7 @@ class ChatController(
         eventsService.setOnSucceeded {
             val eventResult = eventsService.value
             if (eventResult != null) {
-                processEventsResult(eventResult, apiClient)
+                processEventsResult(eventResult)
             }
         }
 

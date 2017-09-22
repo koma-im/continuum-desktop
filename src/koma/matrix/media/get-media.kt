@@ -19,7 +19,6 @@ fun getMedia(mxc: String): ByteArray? {
     if(file != null && file.exists()) {
             val instream = FileInputStream(file)
             val buf = instream.readBytes()
-            println("cached buf $mxc ${buf.size}")
             return buf
     }
 

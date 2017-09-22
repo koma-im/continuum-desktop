@@ -5,17 +5,13 @@ import koma.matrix.UserId
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import tornadofx.*
+import java.util.concurrent.ConcurrentHashMap
 
 object UserStore {
-    private val store = HashMap<UserId, UserState>()
+    private val store = ConcurrentHashMap<UserId, UserState>()
 
-    @Synchronized
     fun getOrCreateUserId(userId: UserId): UserState {
-        val existingUser = store.get(userId)
-        if (existingUser != null)
-            return existingUser
-        val newUser = UserState(userId)
-        store.put(userId, newUser)
+        val newUser = store.computeIfAbsent(userId, {UserState(it)})
         return newUser
     }
 

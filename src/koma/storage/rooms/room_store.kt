@@ -1,28 +1,18 @@
 package koma.storage.rooms
 
-import javafx.application.Platform
-import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 import model.Room
+import java.util.concurrent.ConcurrentHashMap
 
-object RoomStore {
-    val roomList = SimpleListProperty(FXCollections.observableArrayList<Room>())
+object UserRoomStore {
+    val roomList = FXCollections.observableArrayList<Room>()
 
     @Synchronized
-    fun getOrCreate(roomId: String): Room {
-        val knownRoom = roomList.firstOrNull { it.id == roomId }
-        if (knownRoom != null)
-            return knownRoom
-
-        val newRoom = Room(roomId)
-        Platform.runLater{
-            roomList.add(newRoom)
-        }
-        return newRoom
-    }
-
-    inline fun forEach(action: (Room)-> Unit) {
-        for (element in roomList) action(element)
+    fun add(roomId: String): Room {
+        val room = RoomStore.getOrCreate(roomId)
+        if (!roomList.contains(room))
+            roomList.add(room)
+        return room
     }
 
     @Synchronized
@@ -34,5 +24,15 @@ object RoomStore {
             }
         }
     }
+}
+
+object RoomStore{
+    private val store = ConcurrentHashMap<String, Room>()
+
+    fun getOrCreate(roomId: String): Room {
+        val newRoom = store.computeIfAbsent(roomId, {Room(it)})
+        return newRoom
+    }
+
 }
 

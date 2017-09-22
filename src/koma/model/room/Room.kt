@@ -39,7 +39,8 @@ class Room(val id: String) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    val chatMessages: ObservableList<MessageItem> = FXCollections.observableArrayList<MessageItem>()
+    val chatMessages: ObservableList<MessageToShow> =
+            FXCollections.observableArrayList<MessageToShow>()
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 
     // whether it's listed in the public directory

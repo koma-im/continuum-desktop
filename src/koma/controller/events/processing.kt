@@ -1,20 +1,22 @@
 package koma.controller.events_processing
 
+import koma.concurrency.LoadRoomMessagesService
 import koma.matrix.epemeral.GeneralEvent
+import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.storage.rooms.RoomStore
+import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
 import koma_app.appState.apiClient
 import koma_app.appState.sortMembersInEachRoom
-import matrix.ApiClient
 import matrix.event.roomevent.RoomEventType
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
 import model.Message
-import model.MessageItem
+import model.MessageFromOthers
 import model.Room
 import model.RoomJoinRules
 
@@ -39,7 +41,9 @@ fun process_presence(message: PresenceMessage) {
 }
 
 fun processNormalMessage(knownRoom: Room, message: Message) {
-    knownRoom.chatMessages.add(MessageItem(message))
+    val msg = MessageFromOthers.fromMessage(message)
+    if (msg!= null)
+        knownRoom.chatMessages.add(msg)
 }
 
 fun processMemberJoinMessage(room: Room, message: Message) {
@@ -56,7 +60,7 @@ fun processMemberJoinMessage(room: Room, message: Message) {
 fun processMemberLeaveMessage(room: Room, message: Message) {
     room.removeMember(message.sender)
     if (apiClient?.userId == message.sender) {
-        RoomStore.remove(room.id)
+        UserRoomStore.remove(room.id)
     }
 
 }
@@ -120,13 +124,7 @@ private fun handle_join_rules(room: Room, rule: Map<String, Any>) {
 }
 
 private fun update_history_visibility(room: Room, content: Map<String, Any>) {
-    val vis = when (content["history_visibility"]) {
-        "invited" -> HistoryVisibility.Invited
-        "joined" -> HistoryVisibility.Joined
-        "shared" -> HistoryVisibility.Shared
-        "world_readable" -> HistoryVisibility.WorldReadable
-        else -> null
-    }
+    val vis = HistoryVisibility.fromString(content["history_visibility"] as String)
     if (vis != null) {
         room.histVisibility = vis
     } else {
@@ -162,7 +160,23 @@ private fun handle_room_ephemeral(room: Room, events: List<GeneralEvent>) {
 }
 
 private fun handle_joined_room(roomid: String, data: JoinedRoom) {
-    val room = RoomStore.getOrCreate(roomid)
+    val room = UserRoomStore.add(roomid)
+    if (data.timeline.prev_batch != null) {
+        assert(data.timeline.limited == true)
+        val serv = LoadRoomMessagesService(roomid, data.timeline.prev_batch, FetchDirection.Backward)
+        serv.setOnSucceeded {
+            val prev_events = serv.value
+            if (prev_events != null) {
+                room.chatMessages.addAll(0,
+                        prev_events
+                                .asReversed()
+                                .map { MessageFromOthers.fromMessage(it.toMessage()) }
+                                .filterNotNull()
+                )
+            }
+        }
+        serv.start()
+    }
     handle_room_events(room, data.state.events)
     handle_room_events(room, data.timeline.events)
     handle_room_ephemeral(room, data.ephemeral.events)
@@ -174,7 +188,7 @@ private fun handle_invited_room(roomid: String, data: InvitedRoom) {
     println("TODO: handle room invitation $data")
 }
 
-fun processEventsResult(syncRes: SyncResponse, apiClient: ApiClient) {
+fun processEventsResult(syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
     syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(rid, data)}
