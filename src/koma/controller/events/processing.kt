@@ -161,8 +161,7 @@ private fun handle_room_ephemeral(room: Room, events: List<GeneralEvent>) {
 
 private fun handle_joined_room(roomid: String, data: JoinedRoom) {
     val room = UserRoomStore.add(roomid)
-    if (data.timeline.prev_batch != null) {
-        assert(data.timeline.limited == true)
+    if (data.timeline.limited == true && data.timeline.prev_batch != null) {
         val serv = LoadRoomMessagesService(roomid, data.timeline.prev_batch, FetchDirection.Backward)
         serv.setOnSucceeded {
             val prev_events = serv.value
