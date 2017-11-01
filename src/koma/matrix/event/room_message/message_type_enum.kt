@@ -1,4 +1,4 @@
-package matrix.event.roomevent
+package matrix.event.room_message
 
 import com.squareup.moshi.Json
 

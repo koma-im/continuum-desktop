@@ -11,26 +11,30 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.media.getMxcImagePropery
+import koma.matrix.event.room_message.*
 import koma.model.user.UserState
-import model.*
+import koma.matrix.event.room_message.chat.EmoteMsg
+import koma.matrix.event.room_message.chat.ImageMsg
+import koma.matrix.event.room_message.chat.TextMsg
 import org.fxmisc.flowless.Cell
 import tornadofx.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-fun MessageFromOthers.render_node(): Node {
+fun ChatMessage.render_node(): Node {
     val node = TextFlow()
-    when(this) {
+    val content = this.content
+    when(content) {
         is TextMsg -> {
-            node.add(Text(this.text))
+            node.add(Text(content.text))
         }
         is EmoteMsg -> {
-            node.add(Text(this.text))
+            node.add(Text(content.text))
         }
         is ImageMsg -> {
             val im = ImageView()
-            im.tooltip(this.desc)
-            im.imageProperty().bind(getMxcImagePropery(this.mxcurl, 320.0, 120.0))
+            im.tooltip(content.desc)
+            im.imageProperty().bind(getMxcImagePropery(content.mxcurl, 320.0, 120.0))
             node.add(im)
         }
     }
@@ -65,7 +69,7 @@ private fun showDatetime(node: Node, datetime: Date) {
     }
 }
 
-class MessageCell(val message: MessageToShow): Cell<MessageToShow, Node> {
+class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
     private val _node = StackPane()
 
     init {
@@ -74,7 +78,7 @@ class MessageCell(val message: MessageToShow): Cell<MessageToShow, Node> {
             is MemberJoinMsg -> renderMemberJoin(message)
             is MemberUpdateMsg -> renderMemberChange(message)
             is RoomCreationMsg -> renderRoomCreation(message)
-            is MessageFromOthers -> renderMessageFromUser(message)
+            is ChatMessage -> renderMessageFromUser(message)
         }
     }
 
@@ -154,7 +158,7 @@ class MessageCell(val message: MessageToShow): Cell<MessageToShow, Node> {
         }
     }
 
-    private fun renderMessageFromUser(item: MessageFromOthers){
+    private fun renderMessageFromUser(item: ChatMessage){
         val sender = item.sender.displayName
         val avtar = item.sender.avatarImgProperty
         val color = item.sender.color
@@ -199,6 +203,6 @@ class MessageCell(val message: MessageToShow): Cell<MessageToShow, Node> {
     }
 }
 
-fun create_message_cell(messageItem: MessageToShow): MessageCell {
+fun create_message_cell(messageItem: RoomMessage): MessageCell {
     return MessageCell(messageItem)
 }

@@ -1,6 +1,5 @@
 package model
 
-import com.squareup.moshi.Json
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -13,10 +12,14 @@ import koma.graphic.getImageForName
 import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
+import koma.matrix.event.room_message.RoomPowerLevel
 import koma.matrix.room.naming.RoomAlias
+import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.model.user.UserState
+import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
+import model.room.user.RoomUserMap
 import rx.Observable
 import rx.javafx.kt.observeOnFx
 import rx.javafx.kt.toObservable
@@ -39,9 +42,12 @@ class Room(val id: String) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    val chatMessages: ObservableList<MessageToShow> =
-            FXCollections.observableArrayList<MessageToShow>()
+    val messageManager = MessageManager(id)
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
+    /**
+     * including power levels of members
+     */
+    val userStates = RoomUserMap()
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -56,7 +62,8 @@ class Room(val id: String) {
     val iconProperty = SimpleObjectProperty<Image>(getImageForName(id, color))
 
     val power_levels = mutableMapOf<String, Int>()
-    val user_powers = mutableMapOf<String, Int>()
+
+    val users_typing = SimpleListProperty<String>()
 
     private fun aliasesChangeActions(aliases: Observable<ObservableList<RoomAlias>>) {
         aliases.filter { it.size > 0 && !hasname }
@@ -117,12 +124,10 @@ class Room(val id: String) {
             this.aliases.add(0, alias)
     }
 
-    fun updatePowerLevels(levels: Map<String, Int>) {
-        power_levels.putAll(levels)
-    }
-
-    fun updateUserLevels(users: Map<String, Int>) {
-        user_powers.putAll(users)
+    fun updatePowerLevels(roomPowerLevel: RoomPowerLevel) {
+        power_levels.putAll(roomPowerLevel.powerLevels)
+        for (user in roomPowerLevel.userLevels)
+            userStates.get(user.key).power = user.value
     }
 }
 
@@ -131,11 +136,3 @@ enum class RoomVisibility {
     Private
 }
 
-enum class RoomJoinRules {
-    @Json(name = "public")
-    Public,
-    Knock,
-    @Json(name = "invite")
-    Invite,
-    Private
-}

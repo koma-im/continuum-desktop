@@ -69,14 +69,19 @@
             <version>8.15</version>
         </dependency>
         <dependency>
-            <groupId>org.controlsfx</groupId>
-            <artifactId>controlsfx</artifactId>
-            <version>8.40.13</version>
-        </dependency>
-        <dependency>
             <groupId>org.fxmisc.flowless</groupId>
             <artifactId>flowless</artifactId>
             <version>0.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.koma-im</groupId>
+            <artifactId>emojipanel</artifactId>
+            <version>74198a3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.u1haru</groupId>
+            <artifactId>prettylistview</artifactId>
+            <version>d168d39</version>
         </dependency>
     </dependencies>
     <properties>
@@ -134,5 +139,9 @@
             <name>Bintray</name>
             <url>https://dl.bintray.com/jerady/maven</url>
         </repository>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
     </repositories>
 </project>
