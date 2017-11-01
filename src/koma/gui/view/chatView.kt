@@ -7,25 +7,22 @@ import javafx.collections.ObservableList
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
-import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
-import koma.concurrency.runTask
 import koma.gui.view.messagesview.MessagesScrollListView
 import koma.gui.view.messagesview.fragment.create_message_cell
+import koma.input.emoji.EmojiPanel
 import koma_app.appState
-import model.MessageToShow
+import koma.matrix.event.room_message.RoomMessage
 import model.Room
 import org.fxmisc.flowless.VirtualFlow
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
 import tornadofx.*
-import view.popup.EmojiData
-import view.popup.EmojiPanel
 
 class ChatRecvSendView(room: Room): View() {
     override val root = vbox(10.0)
 
-    val messageListView = MessagesScrollListView(room)
+    val messageListView = MessagesScrollListView(room.messageManager.messages)
     private val messageInput = MessageInputView()
 
     init {
@@ -58,14 +55,9 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
         }
         button{
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT)
-            runTask({ EmojiData.getSmileEmoji()},
-                    {
-                        val iv = ImageView(it)
-                        iv.fitHeight = 12.0
-                        iv.isPreserveRatio = true
-                        graphic = iv })
+            val ep = EmojiPanel()
+            ep.onEmojiChosen = {inputField.text += it.glyph}
             action {
-                val ep = EmojiPanel(inputField)
                 ep.show(this)
             }
         }
@@ -90,7 +82,7 @@ class MessageInputView(): View() {
     }
 }
 
-class MessageListView(msgList: ObservableList<MessageToShow>): View() {
+class MessageListView(msgList: ObservableList<RoomMessage>): View() {
     override val root = VirtualFlow.createVertical(
             msgList, {create_message_cell(it)}, VirtualFlow.Gravity.REAR
     )

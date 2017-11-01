@@ -4,6 +4,9 @@ import javafx.collections.FXCollections
 import model.Room
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * rooms the user actively participate in
+ */
 object UserRoomStore {
     val roomList = FXCollections.observableArrayList<Room>()
 

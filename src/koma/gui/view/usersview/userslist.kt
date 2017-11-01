@@ -2,7 +2,7 @@ package koma.gui.view.usersview
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import gui.view.listview.prettylistview.PrettyListView
+import koma.ui.PrettyListView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority

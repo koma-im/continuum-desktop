@@ -1,6 +1,9 @@
 package koma.matrix.event.message
 
-enum class MessageType{
+/**
+ * chat message types
+ */
+enum class ChatMessageType {
     Text,
     Emote,
     Notice,
@@ -11,7 +14,7 @@ enum class MessageType{
     Audio;
 
     companion object {
-        fun fromString(msgtype: String): MessageType {
+        fun fromString(msgtype: String): ChatMessageType {
             val mtype = when(msgtype) {
                 "m.text" -> Text
                 "m.emote" -> Emote
