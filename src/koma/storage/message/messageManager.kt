@@ -27,15 +27,21 @@ class MessageManager(val roomid: String) {
  */
 fun MessageManager.appendTimeline(timeline: Timeline<RoomMessage>) {
     messages.addAll(timeline.events)
+    val historyNeeded = 200
+    var historyFetched = 0
     if (timeline.limited == true && timeline.prev_batch != null) {
         val serv = LoadRoomMessagesService(roomid, timeline.prev_batch, FetchDirection.Backward)
         serv.setOnSucceeded {
             val prev_events = serv.value
             if (prev_events != null) {
-                this.prependMessages(
-                        prev_events
-                                .map { it.toMessage().parse() }
-                                .asReversed())
+                val parsed_events = prev_events
+                        .map { it.toMessage().parse() }
+                        .asReversed()
+                historyFetched += parsed_events.size
+                if (historyFetched > historyNeeded) {
+                    serv.cancel()
+                }
+                this.prependMessages(parsed_events)
             }
         }
         serv.start()
