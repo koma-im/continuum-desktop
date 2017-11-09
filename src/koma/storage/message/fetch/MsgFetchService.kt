@@ -1,4 +1,4 @@
-package koma.concurrency
+package koma.storage.message.fetch
 
 import javafx.concurrent.ScheduledService
 import javafx.concurrent.Task
