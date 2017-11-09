@@ -2,9 +2,9 @@ package matrix.room
 
 import koma.matrix.UserId
 import koma.matrix.epemeral.EphemeralRawEvent
+import koma.matrix.event.GeneralEvent
 import koma.matrix.sync.Events
 import koma.matrix.sync.RawMessage
-import koma.matrix.event.GeneralEvent
 import matrix.event.room_message.RoomEventType
 
 data class JoinedRoom(

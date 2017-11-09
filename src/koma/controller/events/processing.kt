@@ -1,13 +1,13 @@
 package koma.controller.events_processing
 
-import koma.concurrency.LoadRoomMessagesService
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
 import koma.matrix.epemeral.parse
 import koma.matrix.event.parse
-import koma.matrix.pagination.FetchDirection
+import koma.matrix.event.room_message.timeline.parse
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
+import koma.storage.message.appendTimeline
 import koma.storage.rooms.UserRoomStore
 import koma_app.appState.sortMembersInEachRoom
 import matrix.room.InvitedRoom
@@ -25,23 +25,11 @@ fun process_presence(message: PresenceMessage) {
 
 private fun handle_joined_room(roomid: String, data: JoinedRoom) {
     val room = UserRoomStore.add(roomid)
-    if (data.timeline.limited == true && data.timeline.prev_batch != null) {
-        val serv = LoadRoomMessagesService(roomid, data.timeline.prev_batch, FetchDirection.Backward)
-        serv.setOnSucceeded {
-            val prev_events = serv.value
-            if (prev_events != null) {
-                room.messageManager.prependMessages(
-                        prev_events
-                                .map { it.toMessage().parse() }
-                                .asReversed())
-            }
-        }
-        serv.start()
-    }
+
     data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
-    val timelineMessages = data.timeline.events.map { it.parse() }
-    timelineMessages.forEach { room.applyUpdate(it) }
-    room.messageManager.appendMessages(timelineMessages)
+    val timeline = data.timeline.parse()
+    timeline.events.forEach { room.applyUpdate(it) }
+    room.messageManager.appendTimeline(timeline)
 
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data
