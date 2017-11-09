@@ -85,7 +85,7 @@
        </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>1.1.4</kotlin.version>
+        <kotlin.version>1.1.51</kotlin.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
