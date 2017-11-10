@@ -50,7 +50,6 @@ class NetworkSettingsTab(): View() {
 
     fun load(serverName: String) {
         val conf = get_server_proxy(serverName)
-        if (conf == null) return
         val proxytype = conf.type()
         type.value = proxytype
         val addr = conf.address() as InetSocketAddress?

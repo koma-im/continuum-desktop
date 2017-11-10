@@ -5,17 +5,20 @@ import koma.gui.setSaneStageSize
 import koma_app.appState
 import matrix.*
 import rx.javafx.kt.observeOnFx
-import rx.lang.kotlin.filterNotNull
 import rx.schedulers.Schedulers
 import tornadofx.*
 import util.getToken
 import util.saveLastUsed
 import view.ChatView
 import view.RootLayoutView
+import java.net.Proxy
 
-/**
- * Created by developer on 2017/6/21.
- */
+data class LoginData(
+        val serverAddr: String,
+        val authed: AuthedUser?,
+        val proxy: Proxy
+)
+
 class LoginController: Controller() {
     init {
         guiEvents.loginRequests.toObservable().observeOn(Schedulers.io())
@@ -24,42 +27,43 @@ class LoginController: Controller() {
                         val tol = getToken(it.user)
                         tol
                     } else {
-                        login(it.server, UserPassword(user = it.user.toString(), password = it.password))
+                        login(
+                                it.server,
+                                UserPassword(user = it.user.toString(), password = it.password),
+                                it.proxy)
                     }
-                    Pair(it.server, authed)
+                    LoginData(it.server, authed, it.proxy)
                 }
                 .observeOnFx()
                 .subscribe { postLogin(it) }
         guiEvents.registerRequests.toObservable().observeOn(Schedulers.io())
                 .map {
-                    Pair(it.server, register(it.server, it.usereg))
-                }.filterNotNull()
-                .map {
-                    val registered = it.second
-                    Pair(it.first,
-                            if (registered != null)
-                                AuthedUser(registered.access_token, registered.user_id)
-                            else
-                                null
+                    val user = register(it.server, it.usereg, it.proxy)?.let {
+                        AuthedUser(it.access_token, it.user_id)
+                    }
+                    LoginData(
+                            it.server,
+                            user,
+                            it.proxy
                     )
                 }
                 .observeOnFx()
                 .subscribe { postLogin(it) }
     }
 
-    private fun postLogin(target: Pair<String, AuthedUser?>) {
-        val authed = target.second
+    private fun postLogin(target: LoginData) {
+        val authed = target.authed
         val userid = authed?.user_id
         if (authed == null || userid == null) {
             alert(Alert.AlertType.WARNING, "Invalid user-id/password")
             return
         }
-        val server = target.first
+        val server = target.serverAddr
         saveLastUsed(userid, server)
 
         val serverUrl = server.trimEnd('/') + "/"
 
-        val apiClient = ApiClient(serverUrl, authed)
+        val apiClient = ApiClient(serverUrl, authed, target.proxy)
         appState.apiClient = apiClient
 
         val chatview = ChatView()
