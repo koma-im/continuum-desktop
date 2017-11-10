@@ -18,17 +18,17 @@ fun save_server_proxy(servername: String, proxy: Proxy): Boolean {
     return true
 }
 
-fun get_server_proxy(servername: String): Proxy? {
+fun get_server_proxy(servername: String): Proxy {
     val server_dir = getCreateAppDataDir("auth", servername)
-    if (server_dir == null) return null
+    if (server_dir == null) return Proxy.NO_PROXY
     val file = File(server_dir + File.separator + ".conf.toml")
-    if (!file.isFile) return null
+    if (!file.isFile) return Proxy.NO_PROXY
     try {
         val proxy = file.readText()
-        return parseProxy(proxy)
+        return parseProxy(proxy)?: Proxy.NO_PROXY
     } catch (e: IllegalStateException) {
         println("failed to load proxy of $servername")
-        return null
+        return Proxy.NO_PROXY
     }
 }
 

@@ -13,6 +13,7 @@ import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.loginconf.LoginConfWindow
 import koma.matrix.user.identity.UserId_new
 import koma.storage.Recent
+import koma.storage.config.server.get_server_proxy
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -81,6 +82,7 @@ class LoginScreen(): View() {
                                 } else {
                                     RegisterRequest(
                                             serverCombo.editor.text,
+                                            get_server_proxy(userid.server),
                                             UserRegistering(
                                                     userid.user,
                                                     password.text
@@ -97,7 +99,8 @@ class LoginScreen(): View() {
                         LoginRequest(
                                 it,
                                 serverCombo.editor.text,
-                                if (password.text.isNotEmpty()) password.text else null)
+                                if (password.text.isNotEmpty()) password.text else null,
+                                get_server_proxy(it.server))
                     }.addTo(guiEvents.loginRequests)
                 }
             }
