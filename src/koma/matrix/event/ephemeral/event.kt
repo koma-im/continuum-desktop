@@ -12,7 +12,8 @@ data class EphemeralRawEvent(
 )
 
 enum class EphemeralRawEventType {
-    @Json(name = "m.tying") Typing
+    @Json(name = "m.typing") Typing,
+    @Json(name = "m.receipt") Receipt
 }
 
 sealed class EphemeralEvent()

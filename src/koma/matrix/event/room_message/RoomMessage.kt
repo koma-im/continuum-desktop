@@ -38,6 +38,12 @@ data class MemberBan(
         val datetime: Date
 ): RoomMessage()
 
+
+data class MemberJoin(
+        val sender: UserState,
+        val datetime: Date
+): RoomMessage()
+
 data class RoomCreationMsg(
         val sender: UserState,
         val datetime: Date
@@ -61,6 +67,25 @@ data class RoomAliasUpdate(
 
 data class RoomIconUpdate(
         val url: String
+): RoomMessage()
+
+
+data class RoomNameUpdate(
+        val name: String
+): RoomMessage()
+
+
+data class RoomGuestAccess(
+        val content: Map<String, Any>
+): RoomMessage()
+
+
+data class RoomRedaction(
+        val content: Map<String, Any>
+): RoomMessage()
+
+data class RoomTopic(
+        val content: Map<String, Any>
 ): RoomMessage()
 
 data class RoomPowerLevel(

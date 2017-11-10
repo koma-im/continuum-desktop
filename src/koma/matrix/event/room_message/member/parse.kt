@@ -39,6 +39,8 @@ fun parseMemberChangeMessage(message: RawMessage): RoomMessage {
         return MemberLeave(sender, datetime)
     } else if (membership == "ban") {
         return MemberBan(sender, datetime)
+    } else if (membership == "invite") {
+        return MemberJoin(sender, datetime)
     } else
         throw JsonParseException("Unexpected membership change: $message")
 }

@@ -30,9 +30,10 @@ fun RawMessage.parse(): RoomMessage {
         RoomEventType.JoinRule -> RoomJoinRuleUpdate(RoomJoinRules.fromString(message.content["join_rule"] as String)!!)
         RoomEventType.HistoryVisibility -> RoomHistoryVisibilityUpdate(
                 HistoryVisibility.fromString(content["history_visibility"] as String)!!)
-        else -> {
-            throw JsonDataException("unhandled message type ${message.type}")
-        }
+        RoomEventType.Name -> RoomNameUpdate(content["name"].toString())
+        RoomEventType.GuestAccess -> RoomGuestAccess(content)
+        RoomEventType.Topic -> RoomTopic(content)
+        RoomEventType.Redaction -> RoomRedaction(content)
     }
     return msgShow
 }
