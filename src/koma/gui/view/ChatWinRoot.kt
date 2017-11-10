@@ -2,6 +2,7 @@ package view
 
 import controller.ChatController
 import controller.guiEvents
+import koma.gui.view.window.preferences.PreferenceWindow
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
 import tornadofx.*
@@ -20,6 +21,9 @@ class RootLayoutView(val controller: ChatController): View() {
                             guiEvents.createRoomRequests)
                     item("Join Room").actionEvents().addTo(
                             guiEvents.joinRoomRequests)
+                    item("Preferences").action {
+                        find(PreferenceWindow::class).openModal()
+                    }
                     item("Quit").action {
                         FX.primaryStage.close()
                     }

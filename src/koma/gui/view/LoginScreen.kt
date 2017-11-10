@@ -9,6 +9,8 @@ import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.control.PasswordField
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.VBox
+import koma.gui.view.window.preferences.loginconf.LoginConfWindow
 import koma.matrix.user.identity.UserId_new
 import koma.storage.Recent
 import matrix.UserRegistering
@@ -24,7 +26,7 @@ import util.getRecentUsers
  */
 class LoginScreen(): View() {
 
-    override val root = GridPane()
+    override val root = VBox()
     val controller = LoginController()
 
     var userId: ComboBox<String> by singleAssign()
@@ -34,7 +36,8 @@ class LoginScreen(): View() {
     init {
         title = "Koma"
 
-        with(root) {
+        val grid = GridPane()
+        with(grid) {
             paddingAll = 5.0
             row("Username") {
                 val recentUsers = getRecentUsers().map { it.toString() }
@@ -55,40 +58,47 @@ class LoginScreen(): View() {
                 password = passwordfield() {
                 }
             }
-            row {
-                buttonbar {
-                    button("Register") {
-                        actionEvents()
-                                .map {
-                                    val userid = UserId_new(userId.value)
-                                    if ( userid == null) {
-                                        alert(Alert.AlertType.WARNING, "Invalid user-id")
-                                        null
-                                    } else if (password.text.isBlank()) {
-                                        alert(Alert.AlertType.WARNING, "Invalid password")
-                                        null
-                                    } else {
-                                        RegisterRequest(
-                                                serverCombo.editor.text,
-                                                UserRegistering(
-                                                        userid.user,
-                                                        password.text
-                                                )
-                                        )
-                                    }
+        }
+        with(root) {
+            add(grid)
+
+            val serverName = stringBinding(userId.valueProperty()) { if (value != null && value.isNotBlank()) UserId_new(value)?.server else null }
+            val settings = LoginConfWindow(serverName)
+            button("More Options") {
+                action { settings.openModal() }
+            }
+            buttonbar {
+                button("Register") {
+                    actionEvents()
+                            .map {
+                                val userid = UserId_new(userId.value)
+                                if ( userid == null) {
+                                    alert(Alert.AlertType.WARNING, "Invalid user-id")
+                                    null
+                                } else if (password.text.isBlank()) {
+                                    alert(Alert.AlertType.WARNING, "Invalid password")
+                                    null
+                                } else {
+                                    RegisterRequest(
+                                            serverCombo.editor.text,
+                                            UserRegistering(
+                                                    userid.user,
+                                                    password.text
+                                            )
+                                    )
                                 }
-                                .filterNotNull()
-                                .addTo(guiEvents.registerRequests)
-                    }
-                    button("Login") {
-                        isDefaultButton = true
-                        actionEvents().map { UserId_new(userId.value) }.filterNotNull() .map {
-                            LoginRequest(
-                                    it,
-                                    serverCombo.editor.text,
-                                    if (password.text.isNotEmpty()) password.text else null)
-                        }.addTo(guiEvents.loginRequests)
-                    }
+                            }
+                            .filterNotNull()
+                            .addTo(guiEvents.registerRequests)
+                }
+                button("Login") {
+                    isDefaultButton = true
+                    actionEvents().map { UserId_new(userId.value) }.filterNotNull() .map {
+                        LoginRequest(
+                                it,
+                                serverCombo.editor.text,
+                                if (password.text.isNotEmpty()) password.text else null)
+                    }.addTo(guiEvents.loginRequests)
                 }
             }
         }
