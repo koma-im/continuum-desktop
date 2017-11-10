@@ -63,7 +63,7 @@ class Room(val id: String) {
 
     val power_levels = mutableMapOf<String, Int>()
 
-    val users_typing = SimpleListProperty<String>()
+    val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
 
     private fun aliasesChangeActions(aliases: Observable<ObservableList<RoomAlias>>) {
         aliases.filter { it.size > 0 && !hasname }
