@@ -481,7 +481,7 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
       } catch (e: SocketTimeoutException) {
           val outime = Instant.now()
           val dur: Duration = Duration.between(startime, outime)
-          if (dur.seconds < 8 || dur.seconds > 12)
+          if (dur.seconds < 8 || dur.seconds > 30)
               println("timeout waiting for events: ${e.message}, time ${dur.seconds}")
           return null
       }
