@@ -30,7 +30,7 @@ class MessageManager(val roomid: String) {
                 val last = pieces.lastOrNull()
                 val range_beg = last?.let { it.externIndex + it.messages.size } ?: 0
                 val p = DiscussionPiece(
-                        FXCollections.observableArrayList(timeline.events),
+                        timeline.events.toMutableList(),
                         BatchKeys(prev = timeline.prev_batch!!, next = next_batch),
                         range_beg,
                         Neighbors(prev = last?.let { NeighborLink(it) }, next = null)
