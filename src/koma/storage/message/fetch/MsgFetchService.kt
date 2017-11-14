@@ -1,5 +1,6 @@
 package koma.storage.message.fetch
 
+import domain.Chunked
 import javafx.concurrent.ScheduledService
 import javafx.concurrent.Task
 import javafx.util.Duration
@@ -10,8 +11,9 @@ import matrix.room.RoomEvent
 class LoadRoomMessagesService(
         val roomId: String,
         var since: String,
-        val direction: FetchDirection
-) : ScheduledService<List<RoomEvent>?>() {
+        val direction: FetchDirection,
+        val limit_key: String?
+) : ScheduledService<Chunked<RoomEvent>?>() {
 
     private var last_batch_fetched = false
 
@@ -20,7 +22,7 @@ class LoadRoomMessagesService(
         this.period = Duration.seconds(0.9)
     }
 
-    override fun createTask(): Task<List<RoomEvent>?> {
+    override fun createTask(): Task<Chunked<RoomEvent>?> {
         val task = LoadRoomMessagesTask()
         task.setOnSucceeded {
             if (last_batch_fetched) {
@@ -30,8 +32,8 @@ class LoadRoomMessagesService(
         return task
     }
 
-    private inner class LoadRoomMessagesTask(): Task<List<RoomEvent>?>() {
-        override fun call(): List<RoomEvent>? {
+    private inner class LoadRoomMessagesTask(): Task<Chunked<RoomEvent>?>() {
+        override fun call(): Chunked<RoomEvent>? {
             val service = appState.apiClient
             service?:let {
                 println("no service for loading messages")
@@ -39,7 +41,7 @@ class LoadRoomMessagesService(
                 return null
             }
 
-            val call_res = service.getRoomMessages(roomId, since, direction)
+            val call_res = service.getRoomMessages(roomId, since, direction, limit_key)
             if (call_res == null) {
                 println("failed to get messages")
                 failed()
@@ -53,7 +55,7 @@ class LoadRoomMessagesService(
                 since = next
             }
             succeeded()
-            return call_res.chunk
+            return call_res
         }
     }
 

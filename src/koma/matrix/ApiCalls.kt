@@ -205,8 +205,8 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
     }
 
-    fun getRoomMessages(roomId: String, from: String, direction: FetchDirection): Chunked<RoomEvent>? {
-        return service.getMessages(roomId, token, from, direction).execute().body()
+    fun getRoomMessages(roomId: String, from: String, direction: FetchDirection, to: String?): Chunked<RoomEvent>? {
+        return service.getMessages(roomId, token, from, direction, to=to).execute().body()
     }
 
   fun joiningRoom(roomid: RoomId): JoinRoomResult? {
