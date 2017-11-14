@@ -8,8 +8,6 @@ import koma.matrix.pagination.FetchDirection
 import koma.storage.message.fetch.LoadRoomMessagesService
 import koma.storage.message.piece.BatchKeys
 import koma.storage.message.piece.DiscussionPiece
-import koma.storage.message.piece.NeighborLink
-import koma.storage.message.piece.Neighbors
 import matrix.room.Timeline
 
 class MessageManager(val roomid: String) {
@@ -32,12 +30,15 @@ class MessageManager(val roomid: String) {
                 val p = DiscussionPiece(
                         timeline.events.toMutableList(),
                         BatchKeys(prev = timeline.prev_batch!!, next = next_batch),
-                        range_beg,
-                        Neighbors(prev = last?.let { NeighborLink(it) }, next = null)
+                        range_beg
                 )
                 val previousFetchProgress = last?.batches?.next
                 pieces.add(p)
                 _messages.addAll(range_beg, timeline.events)
+                last?.let {
+                    it.neighbors.next.value = p
+                    p.neighbors.prev.value = it
+                }
                 fetchEarlier(p, previousFetchProgress)
             }
         }

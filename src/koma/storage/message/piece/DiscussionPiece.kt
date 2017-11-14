@@ -14,9 +14,10 @@ class DiscussionPiece(
         /**
          * location in the merged list
          */
-        var externIndex: Int,
-        val neighbors: Neighbors
-        )
+        var externIndex: Int
+) {
+    val neighbors= Neighbors()
+}
 
 data class BatchKeys(
         var prev: String,
@@ -24,11 +25,11 @@ data class BatchKeys(
 )
 
 data class Neighbors(
-        var prev: NeighborLink?,
-        var next: NeighborLink?
+        val prev: NeighborLink= NeighborLink(),
+        val next: NeighborLink= NeighborLink()
 )
 
 data class NeighborLink(
-        var value: DiscussionPiece,
+        var value: DiscussionPiece? = null,
         var hasGap: Boolean = true
 )
