@@ -7,7 +7,6 @@ import koma.matrix.event.parse
 import koma.matrix.event.room_message.timeline.parse
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
-import koma.storage.message.appendTimeline
 import koma.storage.rooms.UserRoomStore
 import koma_app.appState.sortMembersInEachRoom
 import matrix.room.InvitedRoom
@@ -23,13 +22,13 @@ fun process_presence(message: PresenceMessage) {
     }
 }
 
-private fun handle_joined_room(roomid: String, data: JoinedRoom) {
+private fun handle_joined_room(roomid: String, data: JoinedRoom, next_batch: String) {
     val room = UserRoomStore.add(roomid)
 
     data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
     val timeline = data.timeline.parse()
     timeline.events.forEach { room.applyUpdate(it) }
-    room.messageManager.appendTimeline(timeline)
+    room.messageManager.appendTimeline(timeline, next_batch)
 
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data
@@ -42,7 +41,7 @@ private fun handle_invited_room(roomid: String, data: InvitedRoom) {
 fun processEventsResult(syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
-    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(rid, data)}
+    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(rid, data, syncRes.next_batch)}
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data)}
     // there's also left rooms
 

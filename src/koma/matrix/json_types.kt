@@ -9,7 +9,7 @@ import javafx.collections.FXCollections
  */
 data class Chunked<T>(
         val start: String?,
-        val end: String?,
+        val end: String,
         // can be null when the transferring is done
         val chunk: List<T>
 )
