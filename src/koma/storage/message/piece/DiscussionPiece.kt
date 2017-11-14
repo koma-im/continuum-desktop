@@ -1,13 +1,12 @@
 package koma.storage.message.piece
 
-import javafx.collections.ObservableList
 import koma.matrix.event.room_message.RoomMessage
 
 /**
  * collection of continuous messages, without gaps
  */
 class DiscussionPiece(
-        val messages: ObservableList<RoomMessage>,
+        val messages: MutableList<RoomMessage>,
         /**
          * used to fetch earlier messages
          */
