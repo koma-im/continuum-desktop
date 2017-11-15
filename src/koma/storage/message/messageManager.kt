@@ -2,7 +2,6 @@ package koma.storage.message
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import koma.matrix.event.parse
 import koma.matrix.event.room_message.RoomMessage
 import koma.matrix.event.room_message.timeline.FetchedMessages
 import koma.matrix.pagination.FetchDirection
@@ -79,10 +78,10 @@ class MessageManager(val roomid: String) {
     }
 
     private fun shiftForward(piece: DiscussionPiece, len: Int) {
-        var movedpiece = piece.neighbors.next?.value
+        var movedpiece = piece.neighbors.next
         while (movedpiece != null) {
             movedpiece.externIndex += len
-            movedpiece = movedpiece.neighbors.next?.value
+            movedpiece = movedpiece.neighbors.next
         }
     }
 
