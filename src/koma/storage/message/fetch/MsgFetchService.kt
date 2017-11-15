@@ -1,19 +1,19 @@
 package koma.storage.message.fetch
 
-import domain.Chunked
 import javafx.concurrent.ScheduledService
 import javafx.concurrent.Task
 import javafx.util.Duration
+import koma.matrix.event.parse
+import koma.matrix.event.room_message.timeline.FetchedMessages
 import koma.matrix.pagination.FetchDirection
 import koma_app.appState
-import matrix.room.RoomEvent
 
 class LoadRoomMessagesService(
         val roomId: String,
         var since: String,
         val direction: FetchDirection,
         val limit_key: String?
-) : ScheduledService<Chunked<RoomEvent>?>() {
+) : ScheduledService<FetchedMessages?>() {
 
     private var last_batch_fetched = false
 
@@ -22,7 +22,7 @@ class LoadRoomMessagesService(
         this.period = Duration.seconds(0.9)
     }
 
-    override fun createTask(): Task<Chunked<RoomEvent>?> {
+    override fun createTask(): Task<FetchedMessages?> {
         val task = LoadRoomMessagesTask()
         task.setOnSucceeded {
             if (last_batch_fetched) {
@@ -32,8 +32,8 @@ class LoadRoomMessagesService(
         return task
     }
 
-    private inner class LoadRoomMessagesTask(): Task<Chunked<RoomEvent>?>() {
-        override fun call(): Chunked<RoomEvent>? {
+    private inner class LoadRoomMessagesTask(): Task<FetchedMessages?>() {
+        override fun call(): FetchedMessages? {
             val service = appState.apiClient
             service?:let {
                 println("no service for loading messages")
@@ -48,14 +48,22 @@ class LoadRoomMessagesService(
                 return null
             }
             val next = call_res.end
-            if (next == null || next == since) {
+            if (call_res.chunk.size == 0) {
+                println("assume messages loading is done because response is empty")
+                last_batch_fetched = true
+            } else if (next == since) {
                 println("finished loading room messages")
                 last_batch_fetched = true
             } else {
                 since = next
             }
             succeeded()
-            return call_res
+            val ret = FetchedMessages(
+                    end = call_res.end,
+                    finished = last_batch_fetched,
+                    messages = call_res.chunk.map { it.toMessage().parse() }.reversed()
+            )
+            return ret
         }
     }
 
