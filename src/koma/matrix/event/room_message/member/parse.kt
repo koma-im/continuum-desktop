@@ -31,17 +31,17 @@ fun parseMemberChangeMessage(message: RawMessage): RoomMessage {
             val avatar_old = message.prev_content?.get("avatar_url") as String?
             val name_old = message.prev_content?.get("displayname") as String?
 
-            return MemberUpdateMsg(sender, datetime, time,
+            return MemberUpdateMsg(sender, datetime, message,
                     Pair(name_old, name_new), Pair(avatar_old, avatar_new))
         } else {
-            return MemberJoinMsg(sender, datetime, time, name_new, avatar_new)
+            return MemberJoinMsg(sender, datetime, message, name_new, avatar_new)
         }
     } else if (membership == "leave") {
-        return MemberLeave(sender, time, datetime)
+        return MemberLeave(sender, message, datetime)
     } else if (membership == "ban") {
-        return MemberBan(sender, time, datetime)
+        return MemberBan(sender, message, datetime)
     } else if (membership == "invite") {
-        return MemberJoin(sender, time, datetime)
+        return MemberJoin(sender, message, datetime)
     } else
         throw JsonParseException("Unexpected membership change: $message")
 }

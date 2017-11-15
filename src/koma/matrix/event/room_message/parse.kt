@@ -16,23 +16,22 @@ import matrix.event.room_message.RoomEventType
  */
 fun RawMessage.parse(): RoomMessage {
     val message = this
-    val time = message.origin_server_ts
     val sender = UserStore.getOrCreateUserId(message.sender)
     val msgShow = when (message.type) {
         RoomEventType.Create -> RoomCreationMsg.fromMessage(message)
         RoomEventType.Member -> parseMemberChangeMessage(message)
-        RoomEventType.Message -> parseChatMessage(sender, time, message.content)
+        RoomEventType.Message -> parseChatMessage(sender, message, message.content)
         RoomEventType.Aliases -> parseAliasesMessage(message)
-        RoomEventType.Avatar -> RoomIconUpdate(time, message.content["url"] as String)
-        RoomEventType.CanonAlias -> RoomCanonicalAlias(time, RoomAlias(message.content["alias"] as String))
+        RoomEventType.Avatar -> RoomIconUpdate(message, message.content["url"] as String)
+        RoomEventType.CanonAlias -> RoomCanonicalAlias(message, RoomAlias(message.content["alias"] as String))
         RoomEventType.PowerLevels -> parsePowerLevels(message)
-        RoomEventType.JoinRule -> RoomJoinRuleUpdate(time, RoomJoinRules.fromString(message.content["join_rule"] as String)!!)
-        RoomEventType.HistoryVisibility -> RoomHistoryVisibilityUpdate(time,
+        RoomEventType.JoinRule -> RoomJoinRuleUpdate(message, RoomJoinRules.fromString(message.content["join_rule"] as String)!!)
+        RoomEventType.HistoryVisibility -> RoomHistoryVisibilityUpdate(message,
                 HistoryVisibility.fromString(content["history_visibility"] as String)!!)
-        RoomEventType.Name -> RoomNameUpdate(time, content["name"].toString())
-        RoomEventType.GuestAccess -> RoomGuestAccess(time, content)
-        RoomEventType.Topic -> RoomTopic(time, content)
-        RoomEventType.Redaction -> RoomRedaction(time, content)
+        RoomEventType.Name -> RoomNameUpdate(message, content["name"].toString())
+        RoomEventType.GuestAccess -> RoomGuestAccess(message, content)
+        RoomEventType.Topic -> RoomTopic(message, content)
+        RoomEventType.Redaction -> RoomRedaction(message, content)
     }
     return msgShow
 }
@@ -41,13 +40,14 @@ private fun parseAliasesMessage(message: RawMessage): RoomMessage {
     val maybealiases = message.content["aliases"]
     if (maybealiases is List<*>) {
         val aliases = maybealiases.filterIsInstance<String>().map { RoomAlias(it) }
-        return RoomAliasUpdate(message.origin_server_ts, aliases)
+        return RoomAliasUpdate(message, aliases)
     } else {
         throw JsonDataException("failed to get new aliases $message")
     }
 }
 
 private fun parsePowerLevels(message: RawMessage): RoomMessage {
+    val x = message.copy()
     val content = message.content
     val powerLevels = mutableMapOf<String, Int>()
     val userLevels = mutableMapOf<String, Double>()
@@ -62,6 +62,6 @@ private fun parsePowerLevels(message: RawMessage): RoomMessage {
         userLevels.putAll(users as Map<String, Double>)
     }
     powerLevels.putAll(map.toMap() as Map<String, Int>)
-    return RoomPowerLevel(message.origin_server_ts, powerLevels, userLevels)
+    return RoomPowerLevel(message, powerLevels, userLevels)
 }
 
