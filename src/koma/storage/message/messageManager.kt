@@ -71,8 +71,8 @@ class MessageManager(val roomid: String) {
     private fun extendPieceForward(p: DiscussionPiece, messages: List<RoomMessage>, newend: String) {
         synchronized(pieces) {
             p.batches.next = newend
+            this._messages.addAll(p.externIndex + p.messages.size, messages)
             p.messages.addAll(messages)
-            this._messages.addAll(p.externIndex + messages.size, messages)
             shiftForward(p, messages.size)
         }
     }
