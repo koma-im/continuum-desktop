@@ -4,6 +4,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import koma.matrix.event.parse
 import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.timeline.FetchedMessages
 import koma.matrix.pagination.FetchDirection
 import koma.storage.message.fetch.LoadRoomMessagesService
 import koma.storage.message.piece.BatchKeys
@@ -32,13 +33,14 @@ class MessageManager(val roomid: String) {
                         BatchKeys(prev = timeline.prev_batch!!, next = next_batch),
                         range_beg
                 )
-                val previousFetchProgress = last?.batches?.next
+                // about local storage
                 pieces.add(p)
                 _messages.addAll(range_beg, timeline.events)
                 last?.let {
-                    it.neighbors.next.value = p
-                    p.neighbors.prev.value = it
+                    it.neighbors.next = p
+                    p.neighbors.prev = it
                 }
+                val previousFetchProgress = last?.batches?.next
                 fetchEarlier(p, previousFetchProgress)
             }
         }
@@ -49,12 +51,18 @@ class MessageManager(val roomid: String) {
      * use synchronized to be safe
      * TODO deduplication may be needed
      */
-    private fun extendPieceBackward(piece: DiscussionPiece, messages: List<RoomMessage>, newpoint: String) {
+    private fun extendPieceBackward(piece: DiscussionPiece, fetched: FetchedMessages) {
         synchronized(pieces) {
-            piece.batches.prev = newpoint
-            piece.messages.addAll(0, messages)
-            this._messages.addAll(piece.externIndex, messages)
+            piece.batches.prev = fetched.end
+            piece.messages.addAll(0, fetched.messages)
+            this._messages.addAll(piece.externIndex, fetched.messages)
             shiftForward(piece, messages.size)
+            // join when gap closed
+            val prevp = piece.neighbors.prev
+            if (fetched.finished && prevp != null) {
+                piece.comes.after = prevp.batches.next
+                prevp.comes.before = piece.batches.prev
+            }
         }
     }
 
@@ -85,14 +93,11 @@ class MessageManager(val roomid: String) {
         serv.setOnSucceeded {
             val prev_chunk = serv.value
             if (prev_chunk != null) {
-                val parsed_events = prev_chunk.chunk
-                        .map { it.toMessage().parse() }
-                        .asReversed()
-                historyFetched += parsed_events.size
+                historyFetched += prev_chunk.messages.size
                 if (historyFetched > historyNeeded) {
                     serv.cancel()
                 }
-                extendPieceBackward(piece, parsed_events, prev_chunk.end)
+                extendPieceBackward(piece, prev_chunk)
             }
         }
         serv.start()

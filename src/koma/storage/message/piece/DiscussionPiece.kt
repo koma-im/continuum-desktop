@@ -16,7 +16,16 @@ class DiscussionPiece(
          */
         var externIndex: Int
 ) {
-    val neighbors= Neighbors()
+    /**
+     * closest pieces that are available locally
+     * there can be gaps in regard to the complete timeline on the server
+     */
+    val neighbors= NeighborsFetched()
+
+    /**
+     * used to tell whether there are gaps
+     */
+    val comes = FromBatchkeys()
 }
 
 data class BatchKeys(
@@ -24,12 +33,16 @@ data class BatchKeys(
         var next: String
 )
 
-data class Neighbors(
-        val prev: NeighborLink= NeighborLink(),
-        val next: NeighborLink= NeighborLink()
+data class NeighborsFetched(
+        var prev: DiscussionPiece?= null,
+        var next: DiscussionPiece?= null
 )
 
-data class NeighborLink(
-        var value: DiscussionPiece? = null,
-        var hasGap: Boolean = true
+
+data class FromBatchkeys(
+        /**
+         * next_batch of previous piece
+         */
+        var after: String?= null,
+        var before: String?= null
 )
