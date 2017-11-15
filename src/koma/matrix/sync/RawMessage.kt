@@ -1,6 +1,8 @@
 package koma.matrix.sync
 
+import com.squareup.moshi.Moshi
 import koma.matrix.UserId
+import koma.matrix.UserIdAdapter
 import matrix.event.room_message.RoomEventType
 
 /**
@@ -16,4 +18,10 @@ data class RawMessage(
         val state_key: String?,
         val txn_id: String?,
         val content: Map<String, Any>) {
+    companion object {
+        private val adapter = Moshi.Builder().add(UserIdAdapter()).build().adapter(RawMessage::class.java)
+    }
+
+    fun toJson(): String = adapter.toJson(this)
 }
+
