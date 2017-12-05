@@ -428,23 +428,11 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
 
   private var txnIdUnique = AtomicLong()
 
-    fun sendMessage(roomId: String, message: String): SendResult? {
+    fun sendMessage(roomId: String, message: String): Call<SendResult> {
         val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
-        val call: Call<SendResult> = service.sendMessage(roomId, txnId, token, SendMessage(body = message))
-        val resp: Response<SendResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
+        val r = service.sendMessage(roomId, txnId, token, SendMessage(body = message))
+        return r
     }
 
     fun sendImage(roomId: String, imageUrl: String, desc: String): SendResult? {

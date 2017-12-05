@@ -12,7 +12,6 @@ import koma.concurrency.runInviteMember
 import koma.concurrency.run_join_romm
 import koma.controller.events_processing.processEventsResult
 import koma.matrix.room.naming.RoomId
-import koma_app.appState
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
@@ -57,9 +56,6 @@ class ChatController(
                 .subscribeBy(onNext = { inviteMember() })
         guiEvents.banMemberRequests.toObservable()
                 .subscribeBy(onNext = { banMember() })
-        guiEvents.sendMessageRequests.toObservable().observeOn(Schedulers.io()).subscribeBy(
-                onNext = {sendMessage(it)}
-        )
         guiEvents.updateAvatar.toObservable()
                 .map {
                     val dialog = FileChooser()
@@ -153,13 +149,6 @@ class ChatController(
                 }
 
         startSyncing(null)
-    }
-
-    private fun sendMessage(msg: String) {
-        println("sending message $msg on thread ${Thread.currentThread().name}")
-        val mayroom = appState.currRoom.get()
-        if (mayroom.isPresent)
-            apiClient.sendMessage(mayroom.get().id, msg)
     }
 
     fun startSyncing(from: String?) {
