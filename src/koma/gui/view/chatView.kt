@@ -7,6 +7,7 @@ import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
+import koma.controller.requests.sendMessage
 import koma.gui.view.messagesview.fragment.MessageCell
 import koma.gui.view.messagesview.fragment.create_message_cell
 import koma.input.emoji.EmojiPanel
@@ -22,7 +23,7 @@ import tornadofx.*
 class ChatRecvSendView(room: Room): View() {
     override val root = vbox(10.0)
 
-    private val messageInput = MessageInputView()
+    private val messageInput = TextField()
 
     init {
         with(root) {
@@ -38,9 +39,17 @@ class ChatRecvSendView(room: Room): View() {
             virtualizedScrollPane.vgrow = Priority.ALWAYS
             add(virtualizedScrollPane)
 
-            add(createButtonBar(messageInput.root))
-
             add(messageInput)
+        }
+
+        with(messageInput) {
+            hgrow = Priority.ALWAYS
+            action {
+                val msg = text
+                text = ""
+                if (msg.isNotBlank())
+                    sendMessage(room.id, msg)
+            }
         }
     }
 }
@@ -71,22 +80,5 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
         }
     }
     return bbar
-}
-
-class MessageInputView(): View() {
-    override val root = textfield()
-
-    init {
-        with(root) {
-            hgrow = Priority.ALWAYS
-                actionEvents().map{
-                    val msg = text
-                    text = ""
-                    msg
-                }.filter{ it.isNotBlank()
-                }.addTo(guiEvents.sendMessageRequests)
-
-        }
-    }
 }
 

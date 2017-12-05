@@ -24,7 +24,6 @@ object guiEvents {
     val inviteMemberRequests = CompositeObservable<ActionEvent>()
     val banMemberRequests = CompositeObservable<ActionEvent>()
 
-    val sendMessageRequests = CompositeObservable<String>()
     val sendImageRequests = CompositeObservable<Room>()
 
     val updateAvatar = CompositeObservable<ActionEvent>()
