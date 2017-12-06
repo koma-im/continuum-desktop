@@ -1,6 +1,7 @@
 package koma.storage.rooms
 
 import javafx.collections.FXCollections
+import koma.matrix.room.naming.RoomId
 import model.Room
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,7 +20,7 @@ object UserRoomStore {
     }
 
     @Synchronized
-    fun remove(roomId: String) {
+    fun remove(roomId: RoomId) {
         for ((index, value) in roomList.withIndex()) {
             if (value.id == roomId) {
                 roomList.removeAt(index)
@@ -33,7 +34,7 @@ object RoomStore{
     private val store = ConcurrentHashMap<String, Room>()
 
     fun getOrCreate(roomId: String): Room {
-        val newRoom = store.computeIfAbsent(roomId, {Room(it)})
+        val newRoom = store.computeIfAbsent(roomId, {Room(RoomId(roomId))})
         return newRoom
     }
 

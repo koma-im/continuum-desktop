@@ -14,6 +14,7 @@ import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomPowerLevel
 import koma.matrix.room.naming.RoomAlias
+import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.model.user.UserState
@@ -35,7 +36,7 @@ class RoomItemModel(property: ObjectProperty<Room>) : ItemViewModel<Room>(itemPr
     val room = bind { itemProperty }
 }
 
-class Room(val id: String) {
+class Room(val id: RoomId) {
     // aliases have a specific format
     // there can be a canonical alias, but it's not the same as a name
     val aliases = SimpleListProperty<RoomAlias>(FXCollections.observableArrayList())
@@ -55,11 +56,11 @@ class Room(val id: String) {
     var histVisibility = HistoryVisibility.Shared
 
     val hasname = false
-    val displayName = SimpleStringProperty(id)
+    val displayName = SimpleStringProperty(id.toString())
 
     var hasIcon = false
     val iconURL = SimpleStringProperty("");
-    val iconProperty = SimpleObjectProperty<Image>(getImageForName(id, color))
+    val iconProperty = SimpleObjectProperty<Image>(getImageForName(id.toString(), color))
 
     val power_levels = mutableMapOf<String, Int>()
 

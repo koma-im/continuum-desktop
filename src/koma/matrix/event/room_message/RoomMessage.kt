@@ -12,8 +12,19 @@ import java.util.*
 /**
  * i don't want to put all subclasses in this file, but kotlin requires it
  */
-sealed class RoomMessage() {
+sealed class RoomMessage(): Comparable<RoomMessage> {
     abstract val original: RawMessage
+
+    override fun compareTo(other: RoomMessage): Int {
+        return this.original.origin_server_ts.compareTo(other.original.origin_server_ts)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        val om = other as RoomMessage
+        return this.original.event_id == om.original.event_id
+    }
+
+    override fun hashCode() = this.original.event_id.hashCode()
 }
 
 data class MemberJoinMsg(
@@ -22,7 +33,18 @@ data class MemberJoinMsg(
         override val original: RawMessage,
         val name: String?,
         val avatar_url: String?
-): RoomMessage()
+): RoomMessage() {
+    override fun toString(): String {
+        return "<${original.event_id},${original.origin_server_ts},$sender,joins>"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is RoomMessage && other.original.event_id == this.original.event_id
+    }
+    override fun hashCode(): Int {
+        return this.original.event_id.hashCode()
+    }
+}
 
 data class MemberUpdateMsg(
         val sender: UserState,
@@ -127,4 +149,8 @@ class ChatMessage(
         val sender: UserState,
         override val original: RawMessage,
         val datetime: Date,
-        val content: ChatContent): RoomMessage()
+        val content: ChatContent): RoomMessage() {
+    override fun toString(): String {
+        return "<Chat,$datetime,$content>"
+    }
+}

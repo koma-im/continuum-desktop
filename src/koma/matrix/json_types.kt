@@ -2,6 +2,7 @@ package domain
 
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import koma.matrix.room.naming.RoomId
 
 /**
  * Created by developer on 2017/7/8.
@@ -58,7 +59,7 @@ data class UploadResponse(
 )
 
 data class RoomInfo(
-        val room_id: String)
+        val room_id: RoomId)
 
 class EmptyResult()
 

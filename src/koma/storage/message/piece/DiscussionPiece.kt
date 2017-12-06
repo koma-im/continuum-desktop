@@ -6,43 +6,52 @@ import koma.matrix.event.room_message.RoomMessage
  * collection of continuous messages, without gaps
  */
 class DiscussionPiece(
+        /**
+         * must be a sorted list
+         */
         val messages: MutableList<RoomMessage>,
         /**
-         * used to fetch earlier messages
+         * used to sort by time
+         * time of some message contained within
          */
-        val batches: BatchKeys,
-        /**
-         * location in the merged list
-         */
-        var externIndex: Int
-) {
+        val timekey: Long
+): OrderedListPart<Long, RoomMessage> {
     /**
-     * closest pieces that are available locally
-     * there can be gaps in regard to the complete timeline on the server
+     * temporary keys
      */
-    val neighbors= NeighborsFetched()
+    var prev_batch: String? = null
+    var next_batch: String? = null
 
     /**
+     * first event stored in next text file
      * used to tell whether there are gaps
      */
-    val comes = FromBatchkeys()
+    var following_event: String? = null
+
+    var filename: String? = null
+
+    var savedHash: Int? = null
+    fun needSave(): Boolean = savedHash == null || this.contentHash() != savedHash
+
+    fun contentHash(): Int = messages.hashCode() * 31 + (following_event?.hashCode() ?: 0)
+
+    override fun getList(): MutableList<RoomMessage> {
+        return this.messages
+    }
+
+    override fun getKey(): Long = this.timekey
+
+    init {
+
+        Runtime.getRuntime().addShutdownHook(Thread({
+            this.save()
+        }))
+    }
 }
 
-data class BatchKeys(
-        var prev: String,
-        var next: String
-)
-
-data class NeighborsFetched(
-        var prev: DiscussionPiece?= null,
-        var next: DiscussionPiece?= null
-)
+interface OrderedListPart<K, E>{
+    fun getList(): MutableList<E>
+    fun getKey(): K
+}
 
 
-data class FromBatchkeys(
-        /**
-         * next_batch of previous piece
-         */
-        var after: String?= null,
-        var before: String?= null
-)
