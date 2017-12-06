@@ -82,7 +82,7 @@ interface MatrixAccessApi {
             : Call<JoinRoomResult>
 
     @POST("rooms/{roomId}/leave")
-    fun leaveRoom(@Path("roomId") roomId: String,
+    fun leaveRoom(@Path("roomId") roomId: RoomId,
                   @Query("access_token") token: String)
             : Call<LeaveRoomResult>
 
@@ -102,12 +102,12 @@ interface MatrixAccessApi {
 
     @GET("rooms/{roomId}/messages")
     fun getMessages(
-            @Path("roomId") roomId: String,
+            @Path("roomId") roomId: RoomId,
             @Query("access_token") token: String,
             @Query("from") from: String,
             @Query("dir") dir: FetchDirection,
             // optional params
-            @Query("limit") limit: Int = 100,
+            @Query("limit") limit: Int = 3,
             @Query("to") to: String? = null
     ): Call<Chunked<RoomEvent>>
 
@@ -124,26 +124,26 @@ interface MatrixAccessApi {
     ): Call<BanRoomResult>
 
     @PUT("rooms/{roomId}/send/m.room.message/{txnId}")
-    fun sendMessage(@Path("roomId") roomId: String,
+    fun sendMessage(@Path("roomId") roomId: RoomId,
                     @Path("txnId") txnId: Long,
                     @Query("access_token") token: String,
                     @Body sendMessage: SendMessage): Call<SendResult>
 
     @PUT("rooms/{roomId}/send/{eventType}/{txnId}")
     fun sendMessageEvent(
-            @Path("roomId") roomId: String,
+            @Path("roomId") roomId: RoomId,
             @Path("eventType") eventType: String,
             @Path("txnId") txnId: Long,
             @Query("access_token") token: String,
             @Body message: Map<String, String>): Call<SendResult>
 
     @PUT("rooms/{roomId}/state/m.room.avatar")
-    fun setRoomIcon(@Path("roomId") roomId: String,
+    fun setRoomIcon(@Path("roomId") roomId: RoomId,
                     @Query("access_token") token: String,
                     @Body avatar: Map<String, String>): Call<SendResult>
 
     @PUT("rooms/{roomId}/state/m.room.canonical_alias")
-    fun setRoomAlias(@Path("roomId") roomId: String,
+    fun setRoomAlias(@Path("roomId") roomId: RoomId,
                     @Query("access_token") token: String,
                     @Body alias: Map<String, String>): Call<SendResult>
 
@@ -205,8 +205,8 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
     }
 
-    fun getRoomMessages(roomId: String, from: String, direction: FetchDirection, to: String?): Chunked<RoomEvent>? {
-        return service.getMessages(roomId, token, from, direction, to=to).execute().body()
+    fun getRoomMessages(roomId: RoomId, from: String, direction: FetchDirection, to: String?=null): Call<Chunked<RoomEvent>> {
+        return service.getMessages(roomId, token, from, direction, to=to)
     }
 
   fun joiningRoom(roomid: RoomId): JoinRoomResult? {
@@ -313,7 +313,7 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         }
     }
 
-    fun uploadRoomIcon(roomId: String, iconUrl: String): SendResult? {
+    fun uploadRoomIcon(roomId: RoomId, iconUrl: String): SendResult? {
         val call: Call<SendResult> = service.setRoomIcon(roomId, token, mapOf(Pair("url", iconUrl)))
         val resp: Response<SendResult>
         try {
@@ -351,7 +351,7 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
           }
   }
 
-  fun leavingRoom(roomid: String): LeaveRoomResult? {
+  fun leavingRoom(roomid: RoomId): LeaveRoomResult? {
 
       println("leaving room with id $roomid")
       val call = service.leaveRoom(roomid, token)
@@ -370,7 +370,7 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
       }
   }
 
-    fun setRoomAlias(roomid: String, alias: String): EmptyResult? {
+    fun setRoomAlias(roomid: RoomId, alias: String): EmptyResult? {
 
         val call = service.putRoomAlias(alias, token, RoomInfo(roomid))
         val resp: Response<EmptyResult>
@@ -389,7 +389,7 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         }
     }
 
-    fun setRoomCanonicalAlias(roomid: String, alias: String): SendResult? {
+    fun setRoomCanonicalAlias(roomid: RoomId, alias: String): SendResult? {
 
         val call = service.setRoomAlias(roomid, token, mapOf(Pair("alias", alias)))
         val resp: Response<SendResult>
@@ -428,14 +428,14 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
 
   private var txnIdUnique = AtomicLong()
 
-    fun sendMessage(roomId: String, message: String): Call<SendResult> {
+    fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
         val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
         val r = service.sendMessage(roomId, txnId, token, SendMessage(body = message))
         return r
     }
 
-    fun sendImage(roomId: String, imageUrl: String, desc: String): SendResult? {
+    fun sendImage(roomId: RoomId, imageUrl: String, desc: String): SendResult? {
         val txnId = txnIdUnique.addAndGet(1L)
         val msg = mapOf(
                 Pair("msgtype", "m.image"),

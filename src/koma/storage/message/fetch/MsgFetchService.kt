@@ -1,72 +1,52 @@
 package koma.storage.message.fetch
 
-import javafx.concurrent.ScheduledService
-import javafx.concurrent.Task
-import javafx.util.Duration
 import koma.matrix.event.parse
-import koma.matrix.event.room_message.timeline.FetchedMessages
 import koma.matrix.pagination.FetchDirection
+import koma.storage.message.MessageManager
+import koma.storage.message.piece.DiscussionPiece
 import koma_app.appState
+import kotlinx.coroutines.experimental.delay
+import ru.gildor.coroutines.retrofit.Result
+import ru.gildor.coroutines.retrofit.awaitResult
 
-class LoadRoomMessagesService(
-        val roomId: String,
-        var since: String,
-        val direction: FetchDirection,
-        val limit_key: String?
-) : ScheduledService<FetchedMessages?>() {
 
-    private var last_batch_fetched = false
+suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
+    var cur = entry
+    val historyNeeded = 200
+    var historyFetched = 0
+    cur.prev_batch ?: return
 
-    init {
-        this.restartOnFailure = true
-        this.period = Duration.seconds(0.9)
+    val service = appState.apiClient
+    service?:let {
+        println("no service for loading messages")
+        return
     }
 
-    override fun createTask(): Task<FetchedMessages?> {
-        val task = LoadRoomMessagesTask()
-        task.setOnSucceeded {
-            if (last_batch_fetched) {
-                this.cancel()
+    loop@  while (historyFetched < historyNeeded) {
+        val fetchkey = cur.prev_batch
+        fetchkey?: break
+        val call_res = service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).awaitResult()
+        when (call_res) {
+            is Result.Ok -> {
+                val res = call_res.value
+                val next_key = res.end
+                if (res.chunk.size == 0) {
+                    println("assume messages loading is done because response is empty")
+                    break@loop
+                } else if (fetchkey == next_key) {
+                    println("finished loading room messages")
+                    break@loop
+                }
+                cur.prev_batch = next_key
+                val msgs = res.chunk.map { it.toMessage().parse() }.reversed()
+                historyFetched += msgs.size
+                cur = this.stitcher.extendHead(cur.getKey(), msgs)
+            }
+            else -> {
+                delay(1000)
+                continue@loop
             }
         }
-        return task
+        delay(1000)
     }
-
-    private inner class LoadRoomMessagesTask(): Task<FetchedMessages?>() {
-        override fun call(): FetchedMessages? {
-            val service = appState.apiClient
-            service?:let {
-                println("no service for loading messages")
-                failed()
-                return null
-            }
-
-            val call_res = service.getRoomMessages(roomId, since, direction, limit_key)
-            if (call_res == null) {
-                println("failed to get messages")
-                failed()
-                return null
-            }
-            val next = call_res.end
-            if (call_res.chunk.size == 0) {
-                println("assume messages loading is done because response is empty")
-                last_batch_fetched = true
-            } else if (next == since) {
-                println("finished loading room messages")
-                last_batch_fetched = true
-            } else {
-                since = next
-            }
-            succeeded()
-            val ret = FetchedMessages(
-                    end = call_res.end,
-                    finished = last_batch_fetched,
-                    messages = call_res.chunk.map { it.toMessage().parse() }.reversed()
-            )
-            return ret
-        }
-    }
-
 }
-
-

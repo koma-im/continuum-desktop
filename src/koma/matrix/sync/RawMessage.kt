@@ -22,6 +22,12 @@ data class RawMessage(
         private val adapter = Moshi.Builder().add(UserIdAdapter()).build().adapter(RawMessage::class.java)
     }
 
-    fun toJson(): String = adapter.toJson(this)
+    /**
+     * convert to string to storage
+     * omit age, which is temporary
+     */
+    fun toJson(): String{
+        return adapter.toJson(this.copy(age=null))
+    }
 }
 

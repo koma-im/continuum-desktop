@@ -39,6 +39,8 @@ class ChatRecvSendView(room: Room): View() {
             virtualizedScrollPane.vgrow = Priority.ALWAYS
             add(virtualizedScrollPane)
 
+            add(createButtonBar(messageInput))
+
             add(messageInput)
         }
 

@@ -1,6 +1,7 @@
 package koma.controller.requests
 
 import javafx.scene.control.Alert
+import koma.matrix.room.naming.RoomId
 import koma_app.appState.apiClient
 import kotlinx.coroutines.experimental.launch
 import ru.gildor.coroutines.retrofit.Result
@@ -8,7 +9,7 @@ import ru.gildor.coroutines.retrofit.awaitResult
 import tornadofx.*
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
-fun sendMessage(room: String, message: String) {
+fun sendMessage(room: RoomId, message: String) {
     val resultsend = apiClient!!.sendMessage(room, message)
     launch(UI) {
         val result = resultsend.awaitResult()

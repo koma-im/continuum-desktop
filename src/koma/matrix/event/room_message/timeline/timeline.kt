@@ -12,9 +12,3 @@ fun Timeline<RawMessage>.parse(): Timeline<RoomMessage>{
             this.prev_batch
     )
 }
-
-data class FetchedMessages(
-        val end: String,
-        val finished: Boolean,
-        val messages: List<RoomMessage>
-)
