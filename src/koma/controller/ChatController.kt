@@ -1,13 +1,12 @@
 package controller
 
-import com.smith.faktor.EventService
 import domain.AvatarUrl
 import domain.EmptyResult
 import javafx.concurrent.Task
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
-import koma.controller.events_processing.processEventsResult
+import koma.controller.sync.startSyncing
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
@@ -140,17 +139,7 @@ class ChatController(
         startSyncing(null)
     }
 
-    fun startSyncing(from: String?) {
-        val eventsService = EventService(apiClient, from)
-        eventsService.setOnSucceeded {
-            val eventResult = eventsService.value
-            if (eventResult != null) {
-                processEventsResult(eventResult, from != null)
-            }
-        }
 
-        eventsService.start()
-    }
 
     fun updateMyAlias() {
         val dia = TextInputDialog()
