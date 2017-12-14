@@ -2,14 +2,12 @@ package matrix
 
 import com.squareup.moshi.Moshi
 import domain.*
-import javafx.scene.control.Alert
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
-import koma.matrix.user.identity.UserId_new
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -20,7 +18,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
-import tornadofx.*
 import util.saveToken
 import java.io.File
 import java.io.FileInputStream
@@ -308,25 +305,10 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         }
     }
 
-  fun banningMember(
+  fun banMember(
           roomid: RoomId,
-          memId: String
-          ): BanRoomResult? {
-      println("trying to invite $memId to $roomid")
-      val userid = UserId_new(memId)
-        if (userid == null) {
-            alert(Alert.AlertType.WARNING, "Invalid user id")
-            return null
-        }
-          val resp = service.banUser(roomid.id, token, MemberBanishment(userid)).execute()
-          if (resp.isSuccessful) {
-              println("successful response")
-              return resp.body()
-          } else{
-              println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-              return null
-          }
-  }
+          memId: UserId
+          ): Call<BanRoomResult> = service.banUser(roomid.id, token, MemberBanishment(memId))
 
   fun leavingRoom(roomid: RoomId): LeaveRoomResult? {
 
