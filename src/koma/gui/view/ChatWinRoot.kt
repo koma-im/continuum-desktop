@@ -4,6 +4,7 @@ import controller.ChatController
 import controller.guiEvents
 import koma.controller.requests.membership.ask_invite_member
 import koma.controller.requests.membership.ask_join_room
+import koma.controller.requests.membership.runAskBanRoomMember
 import koma.gui.view.window.preferences.PreferenceWindow
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -35,8 +36,9 @@ class RootLayoutView(val controller: ChatController): View() {
                     item("Invite Member"){
                         action { ask_invite_member() }
                     }
-                    item("Ban Member").actionEvents().addTo(
-                            guiEvents.banMemberRequests)
+                    item("Ban Member") {
+                        action { runAskBanRoomMember() }
+                    }
                 }
                 menu("Me") {
                     item("Upload media").actionEvents().addTo(

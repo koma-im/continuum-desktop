@@ -7,9 +7,7 @@ import javafx.concurrent.Task
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
-import koma.concurrency.runBanRoomMember
 import koma.controller.events_processing.processEventsResult
-import koma.matrix.room.naming.RoomId
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
@@ -47,8 +45,6 @@ class ChatController(
                 .subscribeBy(onNext = {
                     apiClient.leavingRoom(it)
                 })
-        guiEvents.banMemberRequests.toObservable()
-                .subscribeBy(onNext = { banMember() })
         guiEvents.updateAvatar.toObservable()
                 .map {
                     val dialog = FileChooser()
@@ -210,52 +206,5 @@ class ChatController(
         return result
     }
 
-    fun banMember() {
-        val dialog: Dialog<Pair<String, String>> = Dialog()
-        dialog.setTitle("Ban Dialog")
-        dialog.setHeaderText("Ban an enemy from a room")
 
-        val inviteButtonType = ButtonType("Ban", ButtonBar.ButtonData.OK_DONE)
-        dialog.getDialogPane().getButtonTypes().addAll(inviteButtonType, ButtonType.CANCEL)
-
-        val grid = GridPane()
-
-        val roomnamef = TextField()
-        roomnamef.setPromptText("Room")
-        val usernamef = TextField()
-        usernamef.promptText = "User"
-
-        grid.add(Label("Room:"), 0, 0)
-        grid.add(roomnamef, 1, 0)
-        grid.add(Label("user:"), 0, 1)
-        grid.add(usernamef, 1, 1)
-
-        val banButton = dialog.getDialogPane().lookupButton(inviteButtonType)
-        banButton.setDisable(true)
-
-        roomnamef.textProperty().addListener({ observable, oldValue, newValue ->
-            banButton.setDisable(newValue.trim().isEmpty()) })
-
-        dialog.getDialogPane().setContent(grid)
-
-        dialog.setResultConverter({ dialogButton ->
-            if (dialogButton === inviteButtonType) {
-                return@setResultConverter Pair(roomnamef.getText(), usernamef.getText())
-            }
-            null
-        })
-
-        val result = dialog.showAndWait()
-
-        if (!result.isPresent) {
-            return
-        }
-
-        val room_user: Pair<String, String> = result.get()
-        val roomid = room_user.first
-        val username = room_user.second
-
-        val banService = runBanRoomMember(apiClient, RoomId(roomid), username)
-        println("Banning $username from $roomid")
-    }
 }
