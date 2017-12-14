@@ -47,6 +47,10 @@ class DiscussionPiece(
             this.save()
         }))
     }
+
+    override fun toString(): String {
+        return "<messages from ${this.timekey}: ... ${this.messages.lastOrNull()?.original?.content}>"
+    }
 }
 
 interface OrderedListPart<K, E>{

@@ -12,7 +12,9 @@ fun DiscussionPiece.save() {
             file.delete()
         return
     }
-    if (!needSave()) return
+    if (!needSave()) {
+        return
+    }
     if (filename == null) {
         println("storage location not set: ${timekey}")
     }

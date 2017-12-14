@@ -195,6 +195,8 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
             .client(client)
             .build().create(MatrixMediaApi::class.java)
 
+    fun shutdown() = client.dispatcher().executorService().shutdown()
+
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
     }

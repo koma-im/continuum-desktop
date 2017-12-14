@@ -7,6 +7,7 @@ import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
 import koma.controller.sync.startSyncing
+import kotlinx.coroutines.experimental.Job
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
@@ -19,6 +20,8 @@ import java.util.*
  */
 class ChatController(
         val apiClient: ApiClient) {
+
+    private val syncJob: Job
 
     init{
 
@@ -136,10 +139,14 @@ class ChatController(
                     apiClient.setRoomCanonicalAlias(roomid, newname)
                 }
 
-        startSyncing(null)
+        syncJob = startSyncing(null)
     }
 
 
+    fun shutdown() {
+        syncJob.cancel()
+        apiClient.shutdown()
+    }
 
     fun updateMyAlias() {
         val dia = TextInputDialog()
