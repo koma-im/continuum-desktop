@@ -15,13 +15,11 @@ object guiEvents {
     val loginRequests = CompositeObservable<LoginRequest>()
 
     val createRoomRequests = CompositeObservable<ActionEvent>()
-    val joinRoomRequests = CompositeObservable<ActionEvent>()
     val leaveRoomRequests = CompositeObservable<Room>()
     val uploadRoomIconRequests = CompositeObservable<Room>()
     val putRoomAliasRequests = CompositeObservable<Room>()
     val renameRoomRequests = CompositeObservable<Room>()
 
-    val inviteMemberRequests = CompositeObservable<ActionEvent>()
     val banMemberRequests = CompositeObservable<ActionEvent>()
 
     val sendImageRequests = CompositeObservable<Room>()

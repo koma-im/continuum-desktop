@@ -2,6 +2,8 @@ package view
 
 import controller.ChatController
 import controller.guiEvents
+import koma.controller.requests.membership.ask_invite_member
+import koma.controller.requests.membership.ask_join_room
 import koma.gui.view.window.preferences.PreferenceWindow
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -19,8 +21,9 @@ class RootLayoutView(val controller: ChatController): View() {
                 menu("File") {
                     item("Create Room").actionEvents().addTo(
                             guiEvents.createRoomRequests)
-                    item("Join Room").actionEvents().addTo(
-                            guiEvents.joinRoomRequests)
+                    item("Join Room") {
+                        action { ask_join_room() }
+                    }
                     item("Preferences").action {
                         find(PreferenceWindow::class).openModal()
                     }
@@ -29,8 +32,9 @@ class RootLayoutView(val controller: ChatController): View() {
                     }
                 }
                 menu("Room") {
-                    item("Invite Member").actionEvents().addTo(
-                            guiEvents.inviteMemberRequests)
+                    item("Invite Member"){
+                        action { ask_invite_member() }
+                    }
                     item("Ban Member").actionEvents().addTo(
                             guiEvents.banMemberRequests)
                 }

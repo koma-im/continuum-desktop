@@ -209,17 +209,9 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         return service.getMessages(roomId, token, from, direction, to=to)
     }
 
-  fun joiningRoom(roomid: RoomId): JoinRoomResult? {
-      println("trying to join room $roomid")
-          val resp = service.joinRoom(roomid.id, token).execute()
-          if (resp.isSuccessful) {
-              println("successful response")
-              return resp.body()
-          } else{
-              println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-              return null
-          }
-  }
+    fun joinRoom(roomid: RoomId): Call<JoinRoomResult> {
+        return service.joinRoom(roomid.id, token)
+    }
 
     fun uploadMedia(file: String): UploadResponse? {
         val instream = FileInputStream(File(file))
@@ -258,23 +250,8 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
 
     fun inviteMember(
           room: RoomId,
-          memId: String): InviteMemResult? {
-        println("trying to invite $memId to $room")
-        val userid = UserId_new(memId)
-        if (userid == null) {
-            alert(Alert.AlertType.WARNING, "Invalid user id")
-            return null
-        } else {
-            val resp = service.inviteUser(room.id, token, InviteUserData(userid)).execute()
-            if (resp.isSuccessful) {
-                println("successful response")
-                return resp.body()
-            } else{
-                println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-                return null
-            }
-        }
-  }
+          memId: UserId): Call<InviteMemResult> =
+            service.inviteUser(room.id, token, InviteUserData(memId))
 
     fun updateAvatar(user_id: UserId, avatarUrl: AvatarUrl): UpdateAvatarResult? {
         println("updating avatar of $user_id to $avatarUrl")

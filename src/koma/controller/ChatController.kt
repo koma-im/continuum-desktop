@@ -8,8 +8,6 @@ import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
 import koma.concurrency.runBanRoomMember
-import koma.concurrency.runInviteMember
-import koma.concurrency.run_join_romm
 import koma.controller.events_processing.processEventsResult
 import koma.matrix.room.naming.RoomId
 import matrix.ApiClient
@@ -17,7 +15,6 @@ import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
 import rx.schedulers.Schedulers
 import tornadofx.*
-import view.dialog.FindJoinRoomDialog
 import java.util.*
 
 /**
@@ -44,16 +41,12 @@ class ChatController(
                         println("created room $result")
                     }
                 }
-        guiEvents.joinRoomRequests.toObservable()
-                .subscribeBy(onNext = { joinRoom() })
         guiEvents.leaveRoomRequests.toObservable()
                 .map { it.id }
                 .observeOn(Schedulers.io())
                 .subscribeBy(onNext = {
                     apiClient.leavingRoom(it)
                 })
-        guiEvents.inviteMemberRequests.toObservable()
-                .subscribeBy(onNext = { inviteMember() })
         guiEvents.banMemberRequests.toObservable()
                 .subscribeBy(onNext = { banMember() })
         guiEvents.updateAvatar.toObservable()
@@ -215,81 +208,6 @@ class ChatController(
         val result = dialog.showAndWait()
 
         return result
-    }
-
-    fun joinRoom() {
-        val dialog = FindJoinRoomDialog()
-
-        val result = dialog.showAndWait()
-
-        if (!result.isPresent()) {
-            println("no room selected to join")
-            return
-        } else {
-            println("now join room ${result.get()}")
-        }
-        val roomid = result.get()
-
-        try {
-            run_join_romm(apiClient, RoomId(roomid))
-        } catch(e: Exception) {
-            e.printStackTrace()
-            alert(Alert.AlertType.WARNING, "Room joining failed; room might be private")
-        }
-    }
-
-    fun inviteMember() {
-        val dialog: Dialog<Pair<String, String>> = Dialog()
-        dialog.setTitle("Invite Dialog")
-        dialog.setHeaderText("Invite a friend to a room")
-
-        val inviteButtonType = ButtonType("Login", ButtonBar.ButtonData.OK_DONE)
-        dialog.getDialogPane().getButtonTypes().addAll(inviteButtonType, ButtonType.CANCEL)
-
-        val grid = GridPane()
-        grid.hgap = 10.0
-        grid.vgap = 10.0
-
-        val roomnamef = TextField()
-        roomnamef.setPromptText("Room")
-        val usernamef = TextField()
-        usernamef.promptText = "User"
-
-        grid.add(Label("Room:"), 0, 0)
-        grid.add(roomnamef, 1, 0)
-        grid.add(Label("user:"), 0, 1)
-        grid.add(usernamef, 1, 1)
-
-        // Enable/Disable invite button depending on whether a username was entered.
-        val inviteButton = dialog.getDialogPane().lookupButton(inviteButtonType)
-        inviteButton.setDisable(true)
-
-        // Do some validation (using the Java 8 lambda syntax).
-        roomnamef.textProperty().addListener({ observable, oldValue, newValue ->
-            inviteButton.setDisable(newValue.trim().isEmpty()) })
-
-        dialog.getDialogPane().setContent(grid)
-
-        // Convert the result to a username-password-pair when the login button is clicked.
-        dialog.setResultConverter({ dialogButton ->
-            if (dialogButton === inviteButtonType) {
-                return@setResultConverter Pair(roomnamef.getText(), usernamef.getText())
-            }
-            null
-        })
-
-        val result = dialog.showAndWait()
-
-        if (!result.isPresent) {
-            return
-        }
-
-        val room_user: Pair<String, String> = result.get()
-        val username = room_user.second
-        val roomid = room_user.first
-
-        val inviteService = runInviteMember(apiClient, RoomId(roomid), username)
-        println("Inviting $username to $roomid")
     }
 
     fun banMember() {
