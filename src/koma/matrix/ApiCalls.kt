@@ -22,9 +22,6 @@ import util.saveToken
 import java.io.File
 import java.io.FileInputStream
 import java.net.Proxy
-import java.net.SocketTimeoutException
-import java.time.Duration
-import java.time.Instant
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -419,30 +416,8 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
         }
     }
 
-    fun getEvents(from: String?): SyncResponse? {
-      val call: Call<SyncResponse> = service.getEvents(from, token)
-      val resp: Response<SyncResponse>
-      val startime = Instant.now()
-      try {
-          resp = call.execute()
-      } catch (e: SocketTimeoutException) {
-          val outime = Instant.now()
-          val dur: Duration = Duration.between(startime, outime)
-          if (dur.seconds < 8 || dur.seconds > 30)
-              println("timeout waiting for events: ${e.message}, time ${dur.seconds}")
-          return null
-      }
-      catch(e: Exception) {
-          e.printStackTrace()
-          return null
-      }
-      if (resp.isSuccessful) {
-          return resp.body()
-      } else{
-          println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-          return null
-      }
-  }
+    fun getEvents(from: String?): Call<SyncResponse>
+            = service.getEvents(from, token)
 
     init {
         token = credentials.access_token
