@@ -9,6 +9,7 @@ import koma.storage.message.piece.DiscussionPiece
 import koma.storage.message.piece.Stitcher
 import koma.storage.message.piece.loadStoredDiscussion
 import koma.storage.message.piece.set_log_path
+import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import matrix.room.Timeline
 
@@ -18,6 +19,8 @@ class MessageManager(val roomid: RoomId) {
      * merged list shown to the user
      */
     val messages: ObservableList<RoomMessage>
+
+    var continued = false
 
     init {
         val _messages: ObservableList<RoomMessage> = FXCollections.observableArrayList<RoomMessage>()
@@ -30,7 +33,7 @@ class MessageManager(val roomid: RoomId) {
 
 
 
-    fun appendTimeline(timeline: Timeline<RoomMessage>, continued: Boolean) {
+    fun appendTimeline(timeline: Timeline<RoomMessage>) {
         val time = timeline.events.firstOrNull()?.original?.origin_server_ts
         time?: return
         synchronized(stitcher) {
@@ -38,15 +41,17 @@ class MessageManager(val roomid: RoomId) {
                     ||timeline.limited == true
                || !this.stitcher.insertIntoLast(timeline.events)) {
 
+                continued = true
                 val p = DiscussionPiece(
                         timeline.events.toMutableList(),
                         time
                 )
                 p.prev_batch = timeline.prev_batch
-                p.set_log_path(time, roomid)
-                this.stitcher.insertPiece(p)
+                if (this.stitcher.insertPiece(p)) {
+                    p.set_log_path(time, roomid)
+                }
 
-                launch {
+                launch(JavaFx) {
                     val last = this@MessageManager.stitcher.lastPiece()
                     last?.let {  fetchEarlier(it)}
                 }

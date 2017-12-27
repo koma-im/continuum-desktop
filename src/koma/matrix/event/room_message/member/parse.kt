@@ -22,10 +22,6 @@ fun parseMemberChangeMessage(message: RawMessage): RoomMessage {
         val avatar_new = message.content.get("avatar_url") as String?
         val name_new = message.content.get("displayname") as String?
 
-        // updating user info while parsing doesn't feel right, how to improve?
-        avatar_new?.let { sender.avatarURL.set(it) }
-        name_new?.let { sender.displayName.set(it) }
-
         val notnew = message.prev_content?.get("membership") == "join"
         if (notnew) {
             val avatar_old = message.prev_content?.get("avatar_url") as String?

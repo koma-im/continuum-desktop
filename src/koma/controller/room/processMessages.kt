@@ -17,7 +17,12 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
 
 fun Room.applyUpdate(update: RoomMessage) {
     when (update) {
-        is MemberJoinMsg -> this.makeUserJoined(update.sender)
+        is MemberJoinMsg -> {
+            val sender = update.sender
+            update.avatar_url?.let { sender.avatarURL.set(it) }
+            update.name?.let { sender.displayName.set(it) }
+            this.makeUserJoined(update.sender)
+        }
         is MemberLeave -> {
             this.removeMember(update.sender.id)
             if (apiClient?.userId == update.sender.id) {
@@ -32,7 +37,11 @@ fun Room.applyUpdate(update: RoomMessage) {
         is RoomHistoryVisibilityUpdate -> this.histVisibility = update.visibility
         is RoomPowerLevel -> this.updatePowerLevels(update)
         // only appears in the timeline, not part of the state of a room
-        is MemberUpdateMsg, // actually, this only seem to be related to users, but
+        is MemberUpdateMsg -> {
+            val sender = update.sender
+            update.avatar_change.second?.let { sender.avatarURL.set(it) }
+            update.name_change.second?.let { sender.displayName.set(it) }
+        }
         is RoomCreationMsg,
         is ChatMessage
         -> {}

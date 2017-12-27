@@ -17,7 +17,7 @@ fun startSyncing(from: String?): Job {
             when (eventResult) {
                 is Result.Ok -> {
                     val r = eventResult.value
-                    processEventsResult(r, since != null)
+                    processEventsResult(r)
                     since = r.next_batch
                 }
                 else -> delay(500)

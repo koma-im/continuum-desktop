@@ -9,9 +9,6 @@ import koma.model.user.UserState
 import koma.storage.users.UserStore
 import java.util.*
 
-/**
- * i don't want to put all subclasses in this file, but kotlin requires it
- */
 sealed class RoomMessage(): Comparable<RoomMessage> {
     abstract val original: RawMessage
 
@@ -27,7 +24,7 @@ sealed class RoomMessage(): Comparable<RoomMessage> {
     override fun hashCode() = this.original.event_id.hashCode()
 }
 
-data class MemberJoinMsg(
+class MemberJoinMsg(
         val sender: UserState,
         val datetime: Date,
         override val original: RawMessage,
@@ -37,16 +34,9 @@ data class MemberJoinMsg(
     override fun toString(): String {
         return "<${original.event_id},${original.origin_server_ts},$sender,joins>"
     }
-
-    override fun equals(other: Any?): Boolean {
-        return other is RoomMessage && other.original.event_id == this.original.event_id
-    }
-    override fun hashCode(): Int {
-        return this.original.event_id.hashCode()
-    }
 }
 
-data class MemberUpdateMsg(
+class MemberUpdateMsg(
         val sender: UserState,
         val datetime: Date,
         override val original: RawMessage,
@@ -54,26 +44,26 @@ data class MemberUpdateMsg(
         val avatar_change: Pair<String?, String?>
 ): RoomMessage()
 
-data class MemberLeave(
+class MemberLeave(
         val sender: UserState,
         override val original: RawMessage,
         val datetime: Date
 ): RoomMessage()
 
-data class MemberBan(
+class MemberBan(
         val sender: UserState,
         override val original: RawMessage,
         val datetime: Date
 ): RoomMessage()
 
 
-data class MemberJoin(
+class MemberJoin(
         val sender: UserState,
         override val original: RawMessage,
         val datetime: Date
 ): RoomMessage()
 
-data class RoomCreationMsg(
+class RoomCreationMsg(
         val sender: UserState,
         override val original: RawMessage,
         val datetime: Date
@@ -91,56 +81,56 @@ data class RoomCreationMsg(
 /**
  * currently only used to update the state of a Room
  */
-data class RoomAliasUpdate(
+class RoomAliasUpdate(
         override val original: RawMessage,
         val aliases: List<RoomAlias>
 ): RoomMessage()
 
-data class RoomIconUpdate(
+class RoomIconUpdate(
         override val original: RawMessage,
         val url: String
 ): RoomMessage()
 
 
-data class RoomNameUpdate(
+class RoomNameUpdate(
         override val original: RawMessage,
         val name: String
 ): RoomMessage()
 
 
-data class RoomGuestAccess(
+class RoomGuestAccess(
         override val original: RawMessage,
         val content: Map<String, Any>
 ): RoomMessage()
 
 
-data class RoomRedaction(
+class RoomRedaction(
         override val original: RawMessage,
         val content: Map<String, Any>
 ): RoomMessage()
 
-data class RoomTopic(
+class RoomTopic(
         override val original: RawMessage,
         val content: Map<String, Any>
 ): RoomMessage()
 
-data class RoomPowerLevel(
+class RoomPowerLevel(
         override val original: RawMessage,
         val powerLevels: Map<String, Int>,
         val userLevels: Map<String, Double>
 ): RoomMessage()
 
-data class RoomJoinRuleUpdate(
+class RoomJoinRuleUpdate(
         override val original: RawMessage,
         val rule: RoomJoinRules
 ): RoomMessage()
 
-data class RoomHistoryVisibilityUpdate(
+class RoomHistoryVisibilityUpdate(
         override val original: RawMessage,
         val visibility: HistoryVisibility
 ): RoomMessage()
 
-data class RoomCanonicalAlias(
+class RoomCanonicalAlias(
         override val original: RawMessage,
         val canonicalAlias: RoomAlias
 ): RoomMessage()

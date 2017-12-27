@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import domain.*
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
+import koma.matrix.event.context.ContextResponse
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
@@ -101,7 +102,7 @@ interface MatrixAccessApi {
             @Query("from") from: String,
             @Query("dir") dir: FetchDirection,
             // optional params
-            @Query("limit") limit: Int = 3,
+            @Query("limit") limit: Int = 100,
             @Query("to") to: String? = null
     ): Call<Chunked<RoomEvent>>
 
@@ -140,6 +141,13 @@ interface MatrixAccessApi {
     fun setRoomAlias(@Path("roomId") roomId: RoomId,
                     @Query("access_token") token: String,
                     @Body alias: Map<String, String>): Call<SendResult>
+
+    @GET("rooms/{roomId}/context/{eventId}")
+    fun getEventContext(@Path("roomId") roomId: RoomId,
+                 @Path("eventId") eventId: String,
+                        @Query("limit") limit: Int = 2,
+                 @Query("access_token") token: String
+    ): Call<ContextResponse>
 
 
     @GET("sync")
@@ -207,6 +215,10 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
 
     fun joinRoom(roomid: RoomId): Call<JoinRoomResult> {
         return service.joinRoom(roomid.id, token)
+    }
+
+    fun getEventContext(roomid: RoomId, eventId: String): Call<ContextResponse> {
+        return service.getEventContext(roomid, eventId,token= token)
     }
 
     fun uploadMedia(file: String): UploadResponse? {
