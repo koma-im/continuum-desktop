@@ -16,7 +16,8 @@ fun DiscussionPiece.save() {
         return
     }
     if (filename == null) {
-        println("storage location not set: ${timekey}")
+        println("storage location not set:  ${timekey} ${this.messages}")
+        return
     }
     if (this.messages.isEmpty()) {
         println("tried to save empty messages to ${filename}")

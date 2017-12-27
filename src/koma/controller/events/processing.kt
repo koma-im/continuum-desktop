@@ -22,13 +22,13 @@ fun process_presence(message: PresenceMessage) {
     }
 }
 
-private fun handle_joined_room(roomid: String, data: JoinedRoom, continued: Boolean) {
+private fun handle_joined_room(roomid: String, data: JoinedRoom) {
     val room = UserRoomStore.add(roomid)
 
     data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
     val timeline = data.timeline.parse()
     timeline.events.forEach { room.applyUpdate(it) }
-    room.messageManager.appendTimeline(timeline, continued)
+    room.messageManager.appendTimeline(timeline)
 
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data
@@ -38,10 +38,10 @@ private fun handle_invited_room(roomid: String, data: InvitedRoom) {
     println("TODO: handle room invitation $data")
 }
 
-fun processEventsResult(syncRes: SyncResponse, continued: Boolean) {
+fun processEventsResult(syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
-    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(rid, data, continued)}
+    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(rid, data)}
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data)}
     // there's also left rooms
 

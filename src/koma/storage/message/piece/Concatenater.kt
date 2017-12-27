@@ -22,7 +22,7 @@ open class Concatenater<K, E: Comparable<E>, P: OrderedListPart<K,E>>(val list: 
     }
 
     @Synchronized
-    fun insertPiece(piece: P) {
+    fun insertPiece(piece: P): Boolean {
         val key = piece.getKey()
         val newlist = piece.getList()
 
@@ -55,7 +55,7 @@ open class Concatenater<K, E: Comparable<E>, P: OrderedListPart<K,E>>(val list: 
             val existing = this.pieces.get(key)!!.item.getList()
             val ne = newlist.filter { !existing.contains(it) }
             insertOrderlyInto(key, ne)
-            return
+            return false
         }
 
         if (newlist.size > 0) {
@@ -64,7 +64,9 @@ open class Concatenater<K, E: Comparable<E>, P: OrderedListPart<K,E>>(val list: 
             this.pieces.put(key, Positioned(piece, pos))
             this.list.addAll(pos, newlist)
             shiftForward(this.pieces.higherKey(key), newlist.size)
+            return true
         }
+        return false
     }
 
     protected fun shiftForward(key: K?, shift: Int) {
