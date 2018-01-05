@@ -4,8 +4,8 @@ import com.moandjiezana.toml.Toml
 import com.moandjiezana.toml.TomlWriter
 import koma.matrix.UserId
 import koma.matrix.user.identity.UserId_new
+import koma.storage.config.config_paths
 import koma.storage.save_server_address
-import koma_app.appState
 import matrix.AuthedUser
 import java.io.File
 import java.io.IOException
@@ -15,7 +15,7 @@ import java.io.IOException
  */
 fun getRecentUsers(): List<UserId> {
     val users: MutableList<UserId> = mutableListOf()
-    val authdir = getCreateAppDataDir("auth", create = false)
+    val authdir = config_paths.profile_dir
     if (authdir == null) {
         return listOf()
     }
@@ -32,7 +32,7 @@ fun getRecentUsers(): List<UserId> {
 
 
 fun saveLastUsed(user: UserId, server: String) {
-    val authdir = getCreateAppDataDir("auth")
+    val authdir = config_paths.profile_dir
     println("saving lastest profile $user, $server in $authdir")
     if (authdir != null) {
         val users = mutableListOf(user)
@@ -62,10 +62,9 @@ fun saveLastUsed(user: UserId, server: String) {
 
 fun saveToken(creds: AuthedUser) {
     val userid = creds.user_id
-    val servername = userid.server
     val token = creds.access_token
     val data = mapOf(Pair("userid", userid.toString()), Pair("token", token))
-    val authdir = getCreateAppDataDir("auth", servername, create = true)
+    val authdir = config_paths.profile_dir
     if (authdir == null) {
         println("failed to create authdir")
         return
@@ -93,27 +92,9 @@ fun getConfigDir(): String {
     return config_dir
 }
 
-fun getCreateAppDataDir(vararg paths: String, create: Boolean = true): String? {
-    var curdir = appState.config_dir
-    for (p in paths) {
-        curdir += File.separator + p
-        val dir = File(curdir)
-        if (!dir.exists()) {
-            if (create) {
-                val result = dir.mkdir()
-                if (!result) {
-                    println("failed to create $dir")
-                    return null
-                }
-            } else
-                return null
-        }
-    }
-    return curdir
-}
 
 fun getToken(userId: UserId): AuthedUser? {
-    val file = getCreateAppDataDir("auth", userId.server, create = false)
+    val file = config_paths.getCreateProfileDir( userId.server, create = false)
             ?.let { File(it) }
             ?.let { it.resolve("${userId.user}.toml") }
     if (file == null || (!file.isFile())) {

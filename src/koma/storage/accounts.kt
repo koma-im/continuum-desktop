@@ -2,7 +2,7 @@ package koma.storage
 
 import com.moandjiezana.toml.Toml
 import com.moandjiezana.toml.TomlWriter
-import util.getCreateAppDataDir
+import koma.storage.config.config_paths
 import java.io.File
 import java.io.IOException
 
@@ -15,7 +15,7 @@ object Recent {
 
     private fun load_recent_servers(): Map<String, List<String>> {
         var addrs = mutableMapOf<String, List<String>>()
-        val auth_dir = getCreateAppDataDir("auth")?.let { File(it) }
+        val auth_dir = config_paths.profile_dir?.let { File(it) }
         if (auth_dir == null) {
             return addrs
         }
@@ -33,7 +33,7 @@ object Recent {
 
 fun save_server_address(name: String, address: String) {
     println("saving address $address of server $name")
-    val server_dir = getCreateAppDataDir("auth", name)
+    val server_dir = config_paths.getOrCreate(name, base = config_paths.profile_dir)
     if (server_dir != null) {
         val addrs = mutableListOf<String>(address)
 

@@ -1,13 +1,13 @@
 package koma.storage.config.server
 
-import util.getCreateAppDataDir
+import koma.storage.config.config_paths
 import java.io.File
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Proxy
 
 fun save_server_proxy(servername: String, proxy: Proxy): Boolean {
-    val server_dir = getCreateAppDataDir("auth", servername)
+    val server_dir = config_paths.getCreateProfileDir( servername)
     if (server_dir == null) return false
     val file = File(server_dir + File.separator + ".conf.toml")
     try {
@@ -19,7 +19,7 @@ fun save_server_proxy(servername: String, proxy: Proxy): Boolean {
 }
 
 fun get_server_proxy(servername: String): Proxy {
-    val server_dir = getCreateAppDataDir("auth", servername)
+    val server_dir = config_paths.getCreateProfileDir( servername)
     if (server_dir == null) return Proxy.NO_PROXY
     val file = File(server_dir + File.separator + ".conf.toml")
     if (!file.isFile) return Proxy.NO_PROXY

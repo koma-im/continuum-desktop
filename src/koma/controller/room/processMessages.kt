@@ -30,7 +30,10 @@ fun Room.applyUpdate(update: RoomMessage) {
             }
         }
         is MemberBan -> this.removeMember(update.sender.id)
-        is RoomAliasUpdate -> this.aliases.addAll(update.aliases)
+        is RoomAliasUpdate -> {
+            val exist = this.aliases.get()
+            this.aliases.addAll(update.aliases.filter { !exist.contains(it) })
+        }
         is RoomIconUpdate -> this.iconURL.set(update.url)
         is RoomCanonicalAlias -> this.setCanonicalAlias(update.canonicalAlias)
         is RoomJoinRuleUpdate -> this.joinRule = update.rule

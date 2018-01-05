@@ -17,6 +17,7 @@ import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
+import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
@@ -62,7 +63,7 @@ class Room(val id: RoomId) {
     val iconURL = SimpleStringProperty("");
     val iconProperty = SimpleObjectProperty<Image>(getImageForName(id.toString(), color))
 
-    val power_levels = mutableMapOf<String, Int>()
+    val power_levels = mutableMapOf<String, Double>()
 
     val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
 
@@ -126,9 +127,9 @@ class Room(val id: RoomId) {
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevel) {
-        power_levels.putAll(roomPowerLevel.powerLevels)
+        power_levels.putAll(roomPowerLevel.powerLevels.mapValues { it.value.toDouble() })
         for (user in roomPowerLevel.userLevels)
-            userStates.get(user.key).power = user.value
+            userStates.get(UserId_new(user.key)!!).power = user.value
     }
 }
 

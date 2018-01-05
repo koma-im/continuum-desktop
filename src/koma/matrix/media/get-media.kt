@@ -1,7 +1,7 @@
 package service
 
+import koma.storage.config.config_paths
 import koma_app.appState
-import util.getCreateAppDataDir
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -14,7 +14,7 @@ fun getMedia(mxc: String): ByteArray? {
     val parts = mxc.substringAfter("mxc://")
     val server = parts.substringBefore('/')
     val media = parts.substringAfter('/')
-    val dir = getCreateAppDataDir("cache", "media", server, media)
+    val dir = config_paths.getOrCreate("cache", "media", server, media)
     val file = if (dir != null) File(dir + File.separator + "file.bin") else null
     if(file != null && file.exists()) {
             val instream = FileInputStream(file)
