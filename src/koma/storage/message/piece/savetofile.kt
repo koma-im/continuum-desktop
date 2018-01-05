@@ -1,7 +1,6 @@
 package koma.storage.message.piece
 
 import koma.matrix.room.naming.RoomId
-import util.getCreateAppDataDir
 import java.io.File
 import java.util.*
 
@@ -43,8 +42,7 @@ fun DiscussionPiece.set_log_path(time: Long, roomId: RoomId) {
     val year = "%04d".format(datetime.year + 1900)
     val month = "%02d".format(datetime.month)
     val day = "%02d".format(datetime.day)
-    val dir = getCreateAppDataDir(
-            "discussion",
+    val dir = disc_save_path(
             roomId.servername,
             roomId.localstr,
             year, month, day)
