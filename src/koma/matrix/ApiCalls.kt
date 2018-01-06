@@ -1,5 +1,6 @@
 package matrix
 
+import com.serjltt.moshi.adapters.FallbackEnum
 import com.squareup.moshi.Moshi
 import domain.*
 import koma.matrix.UserId
@@ -189,7 +190,10 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
     val token: String
     val userId: UserId
 
-    val moshi = Moshi.Builder().add(UserIdAdapter()).build()
+    val moshi = Moshi.Builder()
+            .add(UserIdAdapter())
+            .add(FallbackEnum.ADAPTER_FACTORY)
+            .build()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(apiURL)

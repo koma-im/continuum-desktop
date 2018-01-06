@@ -98,6 +98,11 @@
             <artifactId>kotlin-coroutines-retrofit</artifactId>
             <version>0.8.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.serjltt.moshi</groupId>
+            <artifactId>moshi-lazy-adapters</artifactId>
+            <version>2.1</version>
+        </dependency>
     </dependencies>
     <properties>
         <kotlin.version>1.2.10</kotlin.version>

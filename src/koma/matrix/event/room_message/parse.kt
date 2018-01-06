@@ -32,6 +32,10 @@ fun RawMessage.parse(): RoomMessage {
         RoomEventType.GuestAccess -> RoomGuestAccess(message, content)
         RoomEventType.Topic -> RoomTopic(message, content)
         RoomEventType.Redaction -> RoomRedaction(message, content)
+        RoomEventType.Unrecognized -> {
+            println("new type of message $message")
+            UnrecognizedMessage(message)
+        }
     }
     return msgShow
 }

@@ -20,7 +20,16 @@ fun startSyncing(from: String?): Job {
                     processEventsResult(r)
                     since = r.next_batch
                 }
-                else -> delay(500)
+                is Result.Error -> {
+                    val error = "http error ${eventResult.exception.code()}: ${eventResult.exception.message()}"
+                    println("syncing $error")
+                    delay(500)
+                }
+                is Result.Exception -> {
+                    val error = eventResult.exception.localizedMessage
+                    println("syncing exception $error")
+                    delay(500)
+                }
             }
         }
     }
