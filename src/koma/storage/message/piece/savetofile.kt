@@ -2,7 +2,8 @@ package koma.storage.message.piece
 
 import koma.matrix.room.naming.RoomId
 import java.io.File
-import java.util.*
+import java.time.Instant
+import java.time.ZoneOffset
 
 fun DiscussionPiece.save() {
     if (messages.size == 0 && filename != null) {
@@ -38,10 +39,10 @@ fun DiscussionPiece.save() {
 
 @Synchronized
 fun DiscussionPiece.set_log_path(time: Long, roomId: RoomId) {
-    val datetime = Date(time)
-    val year = "%04d".format(datetime.year + 1900)
-    val month = "%02d".format(datetime.month)
-    val day = "%02d".format(datetime.day)
+    val date = Instant.ofEpochMilli(time).atOffset(ZoneOffset.UTC).toLocalDate()
+    val year = "%04d".format(date.year)
+    val month = "%02d".format(date.monthValue)
+    val day = "%02d".format(date.dayOfMonth)
     val dir = disc_save_path(
             roomId.servername,
             roomId.localstr,
