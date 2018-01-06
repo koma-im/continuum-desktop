@@ -144,3 +144,7 @@ class ChatMessage(
         return "<Chat,$datetime,$content>"
     }
 }
+
+class UnrecognizedMessage(
+        override val original: RawMessage
+): RoomMessage()

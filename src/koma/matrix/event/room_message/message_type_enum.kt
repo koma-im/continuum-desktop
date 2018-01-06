@@ -1,7 +1,9 @@
 package matrix.event.room_message
 
+import com.serjltt.moshi.adapters.FallbackEnum
 import com.squareup.moshi.Json
 
+@FallbackEnum(name = "Unrecognized")
 enum class RoomEventType{
     @Json(name = "m.room.aliases") Aliases,
     @Json(name = "m.room.canonical_alias") CanonAlias,
@@ -19,4 +21,5 @@ enum class RoomEventType{
     @Json(name = "m.room.history_visibility") HistoryVisibility,
 
     @Json(name = "m.room.guest_access") GuestAccess,
+    Unrecognized,
 }
