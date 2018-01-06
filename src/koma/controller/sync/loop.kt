@@ -8,11 +8,12 @@ import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
+import java.net.SocketTimeoutException
 
 fun startSyncing(from: String?): Job {
     var since = from
     return launch(JavaFx) {
-        while (true) {
+         sync@ while (true) {
             val eventResult = apiClient!!.getEvents(since).awaitResult()
             when (eventResult) {
                 is Result.Ok -> {
@@ -26,8 +27,9 @@ fun startSyncing(from: String?): Job {
                     delay(500)
                 }
                 is Result.Exception -> {
-                    val error = eventResult.exception.localizedMessage
-                    println("syncing exception $error")
+                    val ex = eventResult.exception
+                    if (ex is SocketTimeoutException) continue@sync
+                    println("syncing $ex, ${ex.cause}")
                     delay(500)
                 }
             }
