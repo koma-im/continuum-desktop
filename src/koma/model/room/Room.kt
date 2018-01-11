@@ -21,6 +21,8 @@ import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
+import kotlinx.coroutines.experimental.javafx.JavaFx
+import kotlinx.coroutines.experimental.launch
 import model.room.user.RoomUserMap
 import rx.Observable
 import rx.javafx.kt.observeOnFx
@@ -61,7 +63,7 @@ class Room(val id: RoomId) {
 
     var hasIcon = false
     val iconURL = SimpleStringProperty("");
-    val iconProperty = SimpleObjectProperty<Image>(getImageForName(id.toString(), color))
+    val iconProperty = SimpleObjectProperty<Image>(null)
 
     val power_levels = mutableMapOf<String, Double>()
 
@@ -70,6 +72,7 @@ class Room(val id: RoomId) {
     private fun aliasesChangeActions(aliases: Observable<ObservableList<RoomAlias>>) {
         aliases.filter { it.size > 0 && !hasname }
                 .map { it.get(0) }
+                .observeOnFx()
                 .subscribe {
                     displayName.set(it.full)
                     if (!hasIcon)
@@ -82,11 +85,18 @@ class Room(val id: RoomId) {
     }
 
     init {
+        launch(JavaFx) {
+            val i = getImageForName(id.toString(), color)
+            iconProperty.set(i)
+
+            displayName.toObservable().filter { it.isNotBlank() && !hasIcon }
+                    .observeOnFx()
+                    .subscribe {
+                        iconProperty.set(getImageForName(it, Color.GREEN))
+                    }
+        }
         aliasesChangeActions(aliases.toObservable())
-        displayName.toObservable().filter { it.isNotBlank() && !hasIcon }
-                .subscribe {
-                    iconProperty.set(getImageForName(it, Color.GREEN))
-                }
+
         iconURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
                     println("Room $this has new icon url $it")

@@ -11,7 +11,8 @@ enum class ChatMessageType {
     File,
     Location,
     Video,
-    Audio;
+    Audio,
+    Other;
 
     companion object {
         fun fromString(msgtype: String): ChatMessageType {
@@ -24,7 +25,9 @@ enum class ChatMessageType {
                 "m.location" -> Location
                 "m.video" -> Video
                 "m.audio" -> Audio
-                else -> throw IllegalArgumentException("unknown kind of message: $msgtype")
+                else -> {
+                    Other
+                }
             }
             return mtype
         }

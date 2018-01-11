@@ -2,12 +2,15 @@ package controller
 
 import javafx.scene.control.Alert
 import koma.gui.setSaneStageSize
+import koma.storage.config.profile.Profile
 import koma_app.appState
-import matrix.*
+import matrix.ApiClient
+import matrix.UserPassword
+import matrix.login
+import matrix.register
 import rx.javafx.kt.observeOnFx
 import rx.schedulers.Schedulers
 import tornadofx.*
-import util.getToken
 import util.saveLastUsed
 import view.ChatView
 import view.RootLayoutView
@@ -15,7 +18,7 @@ import java.net.Proxy
 
 data class LoginData(
         val serverAddr: String,
-        val authed: AuthedUser?,
+        val profile: Profile?,
         val proxy: Proxy
 )
 
@@ -24,8 +27,7 @@ class LoginController: Controller() {
         guiEvents.loginRequests.toObservable().observeOn(Schedulers.io())
                 .map {
                     val authed = if (it.password == null) {
-                        val tol = getToken(it.user)
-                        tol
+                        Profile.new(it.user)
                     } else {
                         login(
                                 it.server,
@@ -39,7 +41,7 @@ class LoginController: Controller() {
         guiEvents.registerRequests.toObservable().observeOn(Schedulers.io())
                 .map {
                     val user = register(it.server, it.usereg, it.proxy)?.let {
-                        AuthedUser(it.access_token, it.user_id)
+                        Profile(it.user_id, it.access_token)
                     }
                     LoginData(
                             it.server,
@@ -52,8 +54,8 @@ class LoginController: Controller() {
     }
 
     private fun postLogin(target: LoginData) {
-        val authed = target.authed
-        val userid = authed?.user_id
+        val authed = target.profile
+        val userid = authed?.userId
         if (authed == null || userid == null) {
             alert(Alert.AlertType.WARNING, "Invalid user-id/password")
             return
@@ -66,7 +68,7 @@ class LoginController: Controller() {
         val apiClient = ApiClient(serverUrl, authed, target.proxy)
         appState.apiClient = apiClient
 
-        val chatview = ChatView()
+        val chatview = ChatView(authed)
         val chatctrl = ChatController(apiClient)
         appState.chatController = chatctrl
         val rootView = RootLayoutView(chatctrl)

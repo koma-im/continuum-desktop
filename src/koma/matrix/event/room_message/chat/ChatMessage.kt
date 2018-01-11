@@ -15,3 +15,8 @@ data class EmoteMsg(
 data class ImageMsg(
         val desc: String,
         val mxcurl: String): ChatContent()
+
+data class NoticeMsg(
+        val formattedBody: String
+): ChatContent()
+

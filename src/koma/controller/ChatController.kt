@@ -139,7 +139,8 @@ class ChatController(
                     apiClient.setRoomCanonicalAlias(roomid, newname)
                 }
 
-        syncJob = startSyncing(null)
+        val start = if (apiClient.profile.hasRooms) apiClient.next_batch else null
+        syncJob = startSyncing(start)
     }
 
 

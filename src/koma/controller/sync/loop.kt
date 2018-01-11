@@ -12,14 +12,16 @@ import java.net.SocketTimeoutException
 
 fun startSyncing(from: String?): Job {
     var since = from
+    val client = apiClient!!
     return launch(JavaFx) {
          sync@ while (true) {
-            val eventResult = apiClient!!.getEvents(since).awaitResult()
+            val eventResult = client.getEvents(since).awaitResult()
             when (eventResult) {
                 is Result.Ok -> {
                     val r = eventResult.value
                     processEventsResult(r)
                     since = r.next_batch
+                    client.next_batch = since
                 }
                 is Result.Error -> {
                     val error = "http error ${eventResult.exception.code()}: ${eventResult.exception.message()}"
