@@ -10,6 +10,9 @@ import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
+import koma.storage.config.profile.Profile
+import koma.storage.config.profile.loadSyncBatchToken
+import koma.storage.config.profile.saveSyncBatchToken
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -20,7 +23,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
-import util.saveToken
 import java.io.File
 import java.io.FileInputStream
 import java.net.Proxy
@@ -184,11 +186,13 @@ interface MatrixMediaApi {
     ): Call<ResponseBody>
 }
 
-class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
+class ApiClient(val baseURL: String, val profile: Profile, proxy: Proxy) {
     val apiURL: String = baseURL + "_matrix/client/r0/"
 
     val token: String
     val userId: UserId
+
+    var next_batch: String? = null
 
     val moshi = Moshi.Builder()
             .add(UserIdAdapter())
@@ -438,8 +442,14 @@ class ApiClient(val baseURL: String, credentials: AuthedUser, proxy: Proxy) {
             = service.getEvents(from, token)
 
     init {
-        token = credentials.access_token
-        userId = credentials.user_id
+        token = profile.access_token
+        userId = profile.userId
+
+        next_batch = loadSyncBatchToken(userId)
+        Runtime.getRuntime().addShutdownHook(Thread({
+            val nb = next_batch
+            nb?.let { saveSyncBatchToken(userId, it) }
+        }))
     }
 }
 
@@ -460,7 +470,7 @@ interface MatrixLoginApi {
 }
 
 fun login(serverUrl: String, userpass: UserPassword, proxy: Proxy):
-        AuthedUser? {
+        Profile? {
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
@@ -474,8 +484,9 @@ fun login(serverUrl: String, userpass: UserPassword, proxy: Proxy):
     if (authed.isSuccessful) {
         println("successful login")
         val user: AuthedUser? = authed.body()
-        if (user != null) saveToken(user)
-        return user
+        user?: return null
+        val prof = Profile(user.user_id, user.access_token)
+        return prof
     } else{
         println("error code ${authed.code()}," +
                 "error message ${authed.message()}," +
@@ -521,9 +532,6 @@ fun register(serverUrl: String, userregi: UserRegistering, proxy: Proxy):
     if (authed.isSuccessful) {
         println("successful registeration")
         val user: RegisterdUser? = authed.body()
-        if (user != null) saveToken(
-                AuthedUser(user.access_token, user.user_id)
-                )
         return user
     } else{
         println("error code ${authed.code()}," +

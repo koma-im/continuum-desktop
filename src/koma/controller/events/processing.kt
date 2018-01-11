@@ -8,7 +8,7 @@ import koma.matrix.event.room_message.timeline.parse
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
-import koma.storage.rooms.UserRoomStore
+import koma_app.appState
 import koma_app.appState.sortMembersInEachRoom
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
@@ -24,7 +24,8 @@ fun process_presence(message: PresenceMessage) {
 }
 
 private fun handle_joined_room(roomid: RoomId, data: JoinedRoom) {
-    val room = UserRoomStore.add(roomid)
+    val roomStore= appState.apiClient?.profile?.roomStore!!
+    val room = roomStore.add(roomid)
 
     data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
     val timeline = data.timeline.parse()

@@ -10,6 +10,8 @@ import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
+import kotlinx.coroutines.experimental.javafx.JavaFx
+import kotlinx.coroutines.experimental.launch
 import rx.javafx.kt.observeOnFx
 import rx.javafx.kt.toObservable
 import rx.lang.kotlin.filterNotNull
@@ -19,20 +21,46 @@ import rx.schedulers.Schedulers
  * Created by developer on 2017/6/25.
  */
 data class UserState(val id: UserId) {
+    var modified = true
+        private set(value) {field = value}
+
     val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
+
+    var name: String
+        set(value) {
+            this.modified = true
+            this.displayName.set(value)
+        }
+        get() = this.displayName.get()
     val displayName = SimpleStringProperty(id.toString())
+
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
+
+    var avatar: String
+        set(value) {
+            this.modified = true
+            this.avatarURL.set(value)
+        }
+        get() = this.avatarURL.get()
     val avatarURL = SimpleStringProperty("");
+
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
     var has_avatar = false
-    val avatarImgProperty = SimpleObjectProperty<Image>(getImageForName(id.user, color))
+    val avatarImgProperty = SimpleObjectProperty<Image>(null)
     var avatar_img: Image
-        set(value) {this.avatarImgProperty.set(value)}
+        set(value) {
+            this.modified = true
+            this.avatarImgProperty.set(value)
+        }
         get() = this.avatarImgProperty.get()
 
     init {
+        launch(JavaFx) {
+            val i = getImageForName(id.user, color)
+            avatarImgProperty.set(i)
+        }
         avatarURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
                     println("User $this has new avatar url $it")
@@ -46,6 +74,7 @@ data class UserState(val id: UserId) {
                 }
         val nameobserv = displayName.toObservable()
         nameobserv.filter{ it.isNotBlank() && !has_avatar}
+                .observeOnFx()
                 .map { getImageForName(it, color) }
                 .subscribe { avatarImgProperty.set(it) }
     }

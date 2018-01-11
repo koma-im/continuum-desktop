@@ -60,16 +60,9 @@ fun saveLastUsed(user: UserId, server: String) {
     save_server_address(user.server, server)
 }
 
-fun saveToken(creds: AuthedUser) {
-    val userid = creds.user_id
-    val token = creds.access_token
+fun saveToken(userid: UserId, token: String, dir: String) {
     val data = mapOf(Pair("userid", userid.toString()), Pair("token", token))
-    val authdir = config_paths.profile_dir
-    if (authdir == null) {
-        println("failed to create authdir")
-        return
-    }
-    val tokenpath = authdir + File.separator + "${userid.user}.toml"
+    val tokenpath = dir + File.separator + "${userid.user}.toml"
     try {
         val tokenfile = File(tokenpath)
         val tomlWriter = TomlWriter()
@@ -93,11 +86,9 @@ fun getConfigDir(): String {
 }
 
 
-fun getToken(userId: UserId): AuthedUser? {
-    val file = config_paths.getCreateProfileDir( userId.server, create = false)
-            ?.let { File(it) }
-            ?.let { it.resolve("${userId.user}.toml") }
-    if (file == null || (!file.isFile())) {
+fun getToken(userId: UserId, dir: String): AuthedUser? {
+    val file = File(dir).resolve("${userId.user}.toml")
+    if (!file.isFile()) {
         return null
     }
     val toml = Toml().read(file)

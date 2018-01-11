@@ -5,7 +5,7 @@ import javafx.scene.layout.Priority
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.roomsview.addMenu
-import koma.storage.rooms.UserRoomStore
+import koma.storage.config.profile.Profile
 import model.Room
 import model.RoomItemModel
 import tornadofx.*
@@ -15,7 +15,7 @@ import tornadofx.*
  * Created by developer on 2017/6/21.
  */
 
-class ChatView(): View() {
+class ChatView(profile: Profile): View() {
 
     override val root = vbox (spacing = 5.0)
 
@@ -25,7 +25,7 @@ class ChatView(): View() {
     var selected_room_once = false
 
     init {
-        val roomList = UserRoomStore.roomList
+        val roomList = profile.getRoomList()
         roomListView = RoomListView(roomList)
 
         with(root) {

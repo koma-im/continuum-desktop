@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * rooms the user actively participate in
  */
-object UserRoomStore {
+class UserRoomStore {
     val roomList = FXCollections.observableArrayList<Room>()
 
     @Synchronized

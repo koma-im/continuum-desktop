@@ -3,7 +3,7 @@ package koma.controller.room
 import koma.matrix.epemeral.EphemeralEvent
 import koma.matrix.epemeral.TypingEvent
 import koma.matrix.event.room_message.*
-import koma.storage.rooms.UserRoomStore
+import koma_app.appState
 import koma_app.appState.apiClient
 import model.Room
 
@@ -19,14 +19,15 @@ fun Room.applyUpdate(update: RoomMessage) {
     when (update) {
         is MemberJoinMsg -> {
             val sender = update.sender
-            update.avatar_url?.let { sender.avatarURL.set(it) }
-            update.name?.let { sender.displayName.set(it) }
+            update.avatar_url?.let { sender.avatar = it }
+            update.name?.let { sender.name=it }
             this.makeUserJoined(update.sender)
         }
         is MemberLeave -> {
             this.removeMember(update.sender.id)
             if (apiClient?.userId == update.sender.id) {
-                UserRoomStore.remove(this.id)
+                val roomStore = appState.apiClient?.profile?.roomStore
+                roomStore?.remove(this.id)
             }
         }
         is MemberBan -> this.removeMember(update.sender.id)
@@ -42,8 +43,8 @@ fun Room.applyUpdate(update: RoomMessage) {
         // only appears in the timeline, not part of the state of a room
         is MemberUpdateMsg -> {
             val sender = update.sender
-            update.avatar_change.second?.let { sender.avatarURL.set(it) }
-            update.name_change.second?.let { sender.displayName.set(it) }
+            update.avatar_change.second?.let { sender.avatar=it }
+            update.name_change.second?.let { sender.name=it }
         }
         is RoomCreationMsg,
         is ChatMessage
