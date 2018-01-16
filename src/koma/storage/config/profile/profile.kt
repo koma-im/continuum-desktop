@@ -7,8 +7,6 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.RoomIdAdapter
 import koma.storage.rooms.UserRoomStore
 import model.Room
-import util.getToken
-import util.saveToken
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -44,7 +42,7 @@ class Profile(
 
     companion object {
         fun new(userId: UserId): Profile?{
-            val token = userProfileDir(userId)?.let {  getToken(userId, it)}
+            val token = getToken(userId)
             return token?.access_token?.let { Profile(userId, it) }
         }
     }
@@ -77,7 +75,7 @@ private fun loadUserState(userId: UserId): SavedUserState? {
 fun Profile.save() {
     val dir = userProfileDir(userId)
     dir?: return
-    saveToken(userId, access_token, dir)
+    saveToken(userId, access_token)
     val data = SavedUserState(
             joinedRooms = getRoomList().map { it.id }
     )

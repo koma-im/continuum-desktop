@@ -6,8 +6,8 @@ import koma.matrix.UserIdAdapter
 import koma.storage.config.config_paths
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.server.saveAddress
-import util.getRecentUsers
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 
 val filename = "last_used.json"
@@ -32,6 +32,26 @@ fun saveLastUsed(userId: UserId, server: String) {
 
     val serverConf = loadServerConf(userId.server)
     serverConf.saveAddress(server)
+}
+
+fun getRecentUsers(): List<UserId> {
+    val dir = config_paths.profile_dir
+    dir?:return listOf()
+    val file = File(dir).resolve(filename)
+    val jsonAdapter = Moshi.Builder()
+            .add(UserIdAdapter())
+            .build()
+            .adapter(LastUsed::class.java)
+    val lastUsed = try {
+        jsonAdapter.fromJson(file.readText())
+    } catch (e: FileNotFoundException) {
+        println("$file not found")
+        null
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
+    }
+    return lastUsed?.last_used_users ?: listOf()
 }
 
 class LastUsed (

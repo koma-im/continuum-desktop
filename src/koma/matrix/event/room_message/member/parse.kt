@@ -1,6 +1,6 @@
 package koma.matrix.event.room_message.member
 
-import com.google.gson.JsonParseException
+import com.squareup.moshi.JsonDataException
 import koma.matrix.event.room_message.*
 import koma.matrix.sync.RawMessage
 import koma.storage.users.UserStore
@@ -38,6 +38,7 @@ fun parseMemberChangeMessage(message: RawMessage): RoomMessage {
         return MemberBan(sender, message, datetime)
     } else if (membership == "invite") {
         return MemberJoin(sender, message, datetime)
-    } else
-        throw JsonParseException("Unexpected membership change: $message")
+    } else {
+        throw JsonDataException("Unexpected membership change: $message")
+    }
 }
