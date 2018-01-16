@@ -12,8 +12,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.loginconf.LoginConfWindow
 import koma.matrix.user.identity.UserId_new
-import koma.storage.Recent
-import koma.storage.config.server.get_server_proxy
+import koma.storage.config.server.loadServerConf
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -82,7 +81,7 @@ class LoginScreen(): View() {
                                 } else {
                                     RegisterRequest(
                                             serverCombo.editor.text,
-                                            get_server_proxy(userid.server),
+                                            loadServerConf(userid.server).proxies[0],
                                             UserRegistering(
                                                     userid.user,
                                                     password.text
@@ -100,7 +99,7 @@ class LoginScreen(): View() {
                                 it,
                                 serverCombo.editor.text,
                                 if (password.text.isNotEmpty()) password.text else null,
-                                get_server_proxy(it.server))
+                                loadServerConf(it.server).proxies[0])
                     }.addTo(guiEvents.loginRequests)
                 }
             }
@@ -113,7 +112,7 @@ class LoginScreen(): View() {
         userId.selectionModel.selectedItemProperty().toObservableNonNull()
                             .map{ UserId_new(it) }
                             .filterNotNull()
-                            .map { Recent.server_addrs.get(it.server)}
+                            .map { loadServerConf(it.server).addresses }
                             .filterNotNull()
                             .subscribe {
                                 serverCombo.items = FXCollections.observableArrayList(it)

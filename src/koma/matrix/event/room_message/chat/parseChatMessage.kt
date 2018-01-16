@@ -13,7 +13,6 @@ fun parseChatMessage(sender: UserState, message: RawMessage, content: Map<String
         val t = ChatMessageType.fromString(msgtype)
         t
     } else {
-        println("message type unavailable $message")
         null
     }
     val date = Date(message.origin_server_ts)
@@ -31,7 +30,6 @@ fun parseChatMessage(sender: UserState, message: RawMessage, content: Map<String
             ChatMessage(sender,message, date, TextMsg("<unexpected null kind of chat message>"))
         }
         else -> {
-            println("message type not recognized $message")
             val text = content["body"] as String? ?:"<unexpected other kind of chat message>"
             ChatMessage(sender, message, date, TextMsg(text))
         }

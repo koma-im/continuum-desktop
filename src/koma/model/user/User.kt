@@ -22,7 +22,6 @@ import rx.schedulers.Schedulers
  */
 data class UserState(val id: UserId) {
     var modified = true
-        private set(value) {field = value}
 
     val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
 
@@ -63,7 +62,6 @@ data class UserState(val id: UserId) {
         }
         avatarURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
-                    println("User $this has new avatar url $it")
                     getResizedImage(it, 32.0, 32.0)
                 }
                 .filterNotNull()

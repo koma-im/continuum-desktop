@@ -37,7 +37,8 @@ fun DiscoveredRoom.avatarProperty(): SimpleObjectProperty<Image> {
 }
 
 fun DiscoveredRoom.hasSeveralAliases(): SimpleBooleanProperty {
-    return SimpleBooleanProperty(this.aliases.size > 1)
+    val b= this.aliases?.isNotEmpty() ?: false
+    return SimpleBooleanProperty(b)
 }
 
 

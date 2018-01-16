@@ -3,6 +3,7 @@ package controller
 import javafx.scene.control.Alert
 import koma.gui.setSaneStageSize
 import koma.storage.config.profile.Profile
+import koma.storage.config.profile.saveLastUsed
 import koma_app.appState
 import matrix.ApiClient
 import matrix.UserPassword
@@ -11,7 +12,6 @@ import matrix.register
 import rx.javafx.kt.observeOnFx
 import rx.schedulers.Schedulers
 import tornadofx.*
-import util.saveLastUsed
 import view.ChatView
 import view.RootLayoutView
 import java.net.Proxy

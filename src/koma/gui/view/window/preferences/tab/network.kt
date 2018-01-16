@@ -5,8 +5,9 @@ import javafx.collections.FXCollections
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
-import koma.storage.config.server.get_server_proxy
-import koma.storage.config.server.save_server_proxy
+import koma.storage.config.server.ServerConf
+import koma.storage.config.server.loadServerConf
+import koma.storage.config.server.saveProxy
 import tornadofx.*
 import java.net.InetSocketAddress
 import java.net.Proxy
@@ -19,6 +20,8 @@ class NetworkSettingsTab(): View() {
     private val type = ComboBox<Proxy.Type>()
     private val host = TextField()
     private val port = TextField()
+
+    private var serverConf: ServerConf? = null
 
     init {
         with(root) {
@@ -37,22 +40,28 @@ class NetworkSettingsTab(): View() {
                 }
             }
         }
-        serverNameProperty.onChange { if (it != null && it.isNotBlank()) load(it) }
+        serverNameProperty.onChange {
+            println("sn $it")
+            if (it != null && it.isNotBlank()) load(it)
+        }
     }
 
     fun save() {
         val conf = getConf()
         if (conf != null)
-         save_server_proxy(serverNameProperty.get(), conf)
+            serverConf?.saveProxy(conf)
         else
             println("null conf")
     }
 
     fun load(serverName: String) {
-        val conf = get_server_proxy(serverName)
-        val proxytype = conf.type()
+        val conf = loadServerConf(serverName)
+        serverConf = conf
+        val proxy = conf.proxies.getOrNull(0)
+        proxy?: return
+        val proxytype = proxy.type()
         type.value = proxytype
-        val addr = conf.address() as InetSocketAddress?
+        val addr = proxy.address() as InetSocketAddress?
         addr?.let {
             host.text = it.hostString
             port.text = it.port.toString()
