@@ -2,10 +2,10 @@ package controller
 
 import javafx.event.ActionEvent
 import koma.matrix.UserId
+import koma.storage.config.server.ServerConf
 import matrix.UserRegistering
 import model.Room
 import rx.javafx.sources.CompositeObservable
-import java.net.Proxy
 
 /**
  * Created by developer on 2017/7/6.
@@ -27,13 +27,11 @@ object guiEvents {
 
 data class LoginRequest(
         val user: UserId,
-        val server: String,
         val password: String?,
-        val proxy: Proxy
+        val serverConf: ServerConf
 )
 
 data class RegisterRequest(
-        val server: String,
-        val proxy: Proxy,
-        val usereg: UserRegistering
+        val usereg: UserRegistering,
+        val serverConf: ServerConf
 )

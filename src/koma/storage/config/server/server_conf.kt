@@ -27,6 +27,22 @@ fun ServerConf.saveProxy(proxy: Proxy) {
     this.save()
 }
 
+/**
+ * get preferred proxy
+ */
+fun ServerConf.getProxy(): Proxy {
+    return this.proxies.getOrNull(0)?: Proxy.NO_PROXY
+}
+
+/**
+ * get preferred web address
+ */
+fun ServerConf.getAddress(): String {
+    val addr = this.addresses.get(0)
+    val slash = if (addr.endsWith('/')) addr else { addr.trimEnd('/') + "/" }
+    return slash
+}
+
 fun ServerConf.saveAddress(addr: String) {
     this.addresses.remove(addr)
     this.addresses.add(0, addr)

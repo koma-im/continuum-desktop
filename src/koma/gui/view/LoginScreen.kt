@@ -80,12 +80,11 @@ class LoginScreen(): View() {
                                     null
                                 } else {
                                     RegisterRequest(
-                                            serverCombo.editor.text,
-                                            loadServerConf(userid.server).proxies[0],
                                             UserRegistering(
                                                     userid.user,
                                                     password.text
-                                            )
+                                            ),
+                                            loadServerConf(userid.server)
                                     )
                                 }
                             }
@@ -97,9 +96,8 @@ class LoginScreen(): View() {
                     actionEvents().map { UserId_new(userId.value) }.filterNotNull() .map {
                         LoginRequest(
                                 it,
-                                serverCombo.editor.text,
                                 if (password.text.isNotEmpty()) password.text else null,
-                                loadServerConf(it.server).proxies[0])
+                                loadServerConf(it.server))
                     }.addTo(guiEvents.loginRequests)
                 }
             }

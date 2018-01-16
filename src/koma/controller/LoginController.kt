@@ -4,6 +4,8 @@ import javafx.scene.control.Alert
 import koma.gui.setSaneStageSize
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
+import koma.storage.config.server.ServerConf
+import koma.storage.config.server.getAddress
 import koma_app.appState
 import matrix.ApiClient
 import matrix.UserPassword
@@ -14,12 +16,10 @@ import rx.schedulers.Schedulers
 import tornadofx.*
 import view.ChatView
 import view.RootLayoutView
-import java.net.Proxy
 
 data class LoginData(
-        val serverAddr: String,
         val profile: Profile?,
-        val proxy: Proxy
+        val serverConf: ServerConf
 )
 
 class LoginController: Controller() {
@@ -30,23 +30,22 @@ class LoginController: Controller() {
                         Profile.new(it.user)
                     } else {
                         login(
-                                it.server,
                                 UserPassword(user = it.user.toString(), password = it.password),
-                                it.proxy)
+                                it.serverConf
+                                )
                     }
-                    LoginData(it.server, authed, it.proxy)
+                    LoginData(authed, it.serverConf)
                 }
                 .observeOnFx()
                 .subscribe { postLogin(it) }
         guiEvents.registerRequests.toObservable().observeOn(Schedulers.io())
                 .map {
-                    val user = register(it.server, it.usereg, it.proxy)?.let {
+                    val user = register(it.usereg, it.serverConf)?.let {
                         Profile(it.user_id, it.access_token)
                     }
                     LoginData(
-                            it.server,
                             user,
-                            it.proxy
+                            it.serverConf
                     )
                 }
                 .observeOnFx()
@@ -60,12 +59,10 @@ class LoginController: Controller() {
             alert(Alert.AlertType.WARNING, "Invalid user-id/password")
             return
         }
-        val server = target.serverAddr
+        val server = target.serverConf.getAddress()
         saveLastUsed(userid, server)
 
-        val serverUrl = server.trimEnd('/') + "/"
-
-        val apiClient = ApiClient(serverUrl, authed, target.proxy)
+        val apiClient = ApiClient(authed, target.serverConf)
         appState.apiClient = apiClient
 
         val chatview = ChatView(authed)
