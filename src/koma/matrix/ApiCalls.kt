@@ -13,6 +13,9 @@ import koma.matrix.sync.SyncResponse
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
+import koma.storage.config.server.ServerConf
+import koma.storage.config.server.getAddress
+import koma.storage.config.server.getProxy
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -25,7 +28,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 import java.io.File
 import java.io.FileInputStream
-import java.net.Proxy
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -186,8 +188,8 @@ interface MatrixMediaApi {
     ): Call<ResponseBody>
 }
 
-class ApiClient(val baseURL: String, val profile: Profile, proxy: Proxy) {
-    val apiURL: String = baseURL + "_matrix/client/r0/"
+class ApiClient(val profile: Profile, serverConf: ServerConf) {
+    val apiURL: String = serverConf.getAddress() + serverConf.apiPath
 
     val token: String
     val userId: UserId
@@ -198,7 +200,7 @@ class ApiClient(val baseURL: String, val profile: Profile, proxy: Proxy) {
             .add(UserIdAdapter())
             .add(FallbackEnum.ADAPTER_FACTORY)
             .build()
-    val client = OkHttpClient.Builder().proxy(proxy).build()
+    val client = OkHttpClient.Builder().proxy(serverConf.getProxy()).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(apiURL)
             .client(client)
@@ -206,7 +208,7 @@ class ApiClient(val baseURL: String, val profile: Profile, proxy: Proxy) {
             .build()
     val service = retrofit.create(MatrixAccessApi::class.java)
 
-    val mediaService = Retrofit.Builder().baseUrl(baseURL + "_matrix/media/r0/")
+    val mediaService = Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
             .addConverterFactory(MoshiConverterFactory.create())
             .client(client)
             .build().create(MatrixMediaApi::class.java)
@@ -469,12 +471,13 @@ interface MatrixLoginApi {
     fun login(@Body userpass: UserPassword): Call<AuthedUser>
 }
 
-fun login(serverUrl: String, userpass: UserPassword, proxy: Proxy):
+fun login(userpass: UserPassword, serverConf: ServerConf):
         Profile? {
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
+    val proxy = serverConf.getProxy()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
-            .baseUrl(serverUrl)
+            .baseUrl(serverConf.getAddress())
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
@@ -516,13 +519,13 @@ interface MatrixRegisterApi {
     fun register(@Body userreg: UserRegistering): Call<RegisterdUser>
 }
 
-fun register(serverUrl: String, userregi: UserRegistering, proxy: Proxy):
+fun register(userregi: UserRegistering, serverConf: ServerConf):
         RegisterdUser? {
-    println("register user $userregi on $serverUrl")
+    println("register user $userregi on ${serverConf.servername}")
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val client = OkHttpClient.Builder().proxy(proxy).build()
+    val client = OkHttpClient.Builder().proxy(serverConf.getProxy()).build()
     val retrofit = Retrofit.Builder()
-            .baseUrl(serverUrl)
+            .baseUrl(serverConf.getAddress())
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
