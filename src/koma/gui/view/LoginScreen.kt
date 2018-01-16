@@ -12,6 +12,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.loginconf.LoginConfWindow
 import koma.matrix.user.identity.UserId_new
+import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
@@ -19,7 +20,6 @@ import rx.javafx.kt.addTo
 import rx.javafx.kt.toObservableNonNull
 import rx.lang.kotlin.filterNotNull
 import tornadofx.*
-import util.getRecentUsers
 
 /**
  * Created by developer on 2017/6/21.
