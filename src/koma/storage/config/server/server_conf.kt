@@ -2,11 +2,15 @@ package koma.storage.config.server
 
 import com.squareup.moshi.Moshi
 import koma.storage.config.config_paths
+import koma.storage.config.server.cert_trust.CompositeX509TrustManager
+import koma.storage.config.server.cert_trust.loadContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.net.Proxy
 import java.util.concurrent.ConcurrentHashMap
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
 
 class ServerConf(
         val servername: String,
@@ -47,6 +51,12 @@ fun ServerConf.saveAddress(addr: String) {
     this.addresses.remove(addr)
     this.addresses.add(0, addr)
     this.save()
+}
+
+fun ServerConf.loadCert(): Pair<SSLContext, CompositeX509TrustManager>? {
+     val dir = server_save_path(
+            this.servername)
+    return dir?.let { loadContext(it) }
 }
 
 fun ServerConf.save() {

@@ -16,6 +16,7 @@ import koma.storage.config.profile.saveSyncBatchToken
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
 import koma.storage.config.server.getProxy
+import koma.storage.config.server.loadCert
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -196,22 +197,10 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     var next_batch: String? = null
 
-    val moshi = Moshi.Builder()
-            .add(UserIdAdapter())
-            .add(FallbackEnum.ADAPTER_FACTORY)
-            .build()
-    val client = OkHttpClient.Builder().proxy(serverConf.getProxy()).build()
-    val retrofit = Retrofit.Builder()
-            .baseUrl(apiURL)
-            .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-    val service = retrofit.create(MatrixAccessApi::class.java)
 
-    val mediaService = Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
-            .addConverterFactory(MoshiConverterFactory.create())
-            .client(client)
-            .build().create(MatrixMediaApi::class.java)
+    val client: OkHttpClient
+    val service: MatrixAccessApi
+    val mediaService: MatrixMediaApi
 
     fun shutdown() = client.dispatcher().executorService().shutdown()
 
@@ -446,6 +435,31 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     init {
         token = profile.access_token
         userId = profile.userId
+
+        val clientbuildproxy = OkHttpClient.Builder().proxy(serverConf.getProxy())
+
+        val addtrust = serverConf.loadCert()
+        val clientbuildcert = if (addtrust!= null) {
+            clientbuildproxy.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
+        } else clientbuildproxy
+        client = clientbuildcert.build()
+
+        val moshi = Moshi.Builder()
+                .add(UserIdAdapter())
+                .add(FallbackEnum.ADAPTER_FACTORY)
+                .build()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(apiURL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .build()
+        service = retrofit.create(MatrixAccessApi::class.java)
+
+        mediaService = Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
+                .addConverterFactory(MoshiConverterFactory.create())
+                .client(client)
+                .build().create(MatrixMediaApi::class.java)
+
 
         next_batch = loadSyncBatchToken(userId)
         Runtime.getRuntime().addShutdownHook(Thread({
