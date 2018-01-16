@@ -16,7 +16,7 @@ data class Chunked<T>(
 )
 
 data class DiscoveredRoom(
-        val aliases: List<String>,
+        val aliases: List<String>?,
         val avatar_url: String?,
         val guest_can_join: Boolean,
         val name: String?,
@@ -28,24 +28,15 @@ data class DiscoveredRoom(
     fun dispName(): String {
         val dispname = if (name != null)
             name
-        else if (aliases.size >0 )
-            aliases[0]
-        else
-            room_id
+        else {
+            aliases?.getOrNull(0)?:room_id
+        }
         return dispname
     }
 
-    fun remainingAliasesProp(): SimpleListProperty<String> {
-        val rem_aliases = if (name != null)
-            aliases
-        else {
-            aliases.drop(1)
-        }
-        return SimpleListProperty( FXCollections.observableArrayList(rem_aliases))
-    }
-
     fun aliasesProperty(): SimpleListProperty<String> {
-        return SimpleListProperty(FXCollections.observableArrayList(aliases))
+        val l = aliases ?: listOf()
+        return SimpleListProperty(FXCollections.observableArrayList(l))
     }
 }
 

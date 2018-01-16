@@ -26,6 +26,7 @@ fun load_user(userId: UserId): UserState {
     savedUser?: return us
     us.avatar = savedUser.avatarUrl
     us.name = savedUser.name
+    us.modified = false
 
     return us
 }

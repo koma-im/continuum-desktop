@@ -15,7 +15,7 @@ import ru.gildor.coroutines.retrofit.awaitResult
 
 suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
     var cur = entry
-    val historyNeeded = 200
+    val historyNeeded = 400
     var historyFetched = 0
 
 
