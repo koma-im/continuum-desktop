@@ -5,7 +5,6 @@ import koma.gui.setSaneStageSize
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
-import koma.storage.config.server.getAddress
 import koma_app.appState
 import matrix.ApiClient
 import matrix.UserPassword
@@ -59,8 +58,7 @@ class LoginController: Controller() {
             alert(Alert.AlertType.WARNING, "Invalid user-id/password")
             return
         }
-        val server = target.serverConf.getAddress()
-        saveLastUsed(userid, server)
+        saveLastUsed(userid)
 
         val apiClient = ApiClient(authed, target.serverConf)
         appState.apiClient = apiClient

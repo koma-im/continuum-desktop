@@ -10,7 +10,6 @@ import java.io.IOException
 import java.net.Proxy
 import java.util.concurrent.ConcurrentHashMap
 import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
 
 class ServerConf(
         val servername: String,
@@ -115,4 +114,10 @@ private object ServerConfiguration {
 
 fun loadServerConf(servername: String): ServerConf{
     return ServerConfiguration.getServerConf(servername)
+}
+
+fun serverConfWithAddr(servername: String, addr: String): ServerConf{
+    val conf = ServerConfiguration.getServerConf(servername)
+    conf.saveAddress(addr)
+    return conf
 }
