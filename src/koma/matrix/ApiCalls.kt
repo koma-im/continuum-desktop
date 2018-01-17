@@ -29,6 +29,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 import java.io.File
 import java.io.FileInputStream
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
 
@@ -442,7 +443,9 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         val clientbuildcert = if (addtrust!= null) {
             clientbuildproxy.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
         } else clientbuildproxy
-        client = clientbuildcert.build()
+        client = clientbuildcert
+                .readTimeout(60, TimeUnit.SECONDS)
+                .build()
 
         val moshi = Moshi.Builder()
                 .add(UserIdAdapter())
