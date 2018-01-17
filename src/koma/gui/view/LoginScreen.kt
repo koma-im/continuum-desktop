@@ -14,6 +14,7 @@ import koma.gui.view.window.preferences.loginconf.LoginConfWindow
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
+import koma.storage.config.server.serverConfWithAddr
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -84,7 +85,7 @@ class LoginScreen(): View() {
                                                     userid.user,
                                                     password.text
                                             ),
-                                            loadServerConf(userid.server)
+                                            serverConfWithAddr(userid.server, serverCombo.editor.text)
                                     )
                                 }
                             }
@@ -97,7 +98,7 @@ class LoginScreen(): View() {
                         LoginRequest(
                                 it,
                                 if (password.text.isNotEmpty()) password.text else null,
-                                loadServerConf(it.server))
+                                serverConfWithAddr(it.server, serverCombo.editor.text))
                     }.addTo(guiEvents.loginRequests)
                 }
             }

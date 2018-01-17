@@ -4,15 +4,13 @@ import com.squareup.moshi.Moshi
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.storage.config.config_paths
-import koma.storage.config.server.loadServerConf
-import koma.storage.config.server.saveAddress
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
 val filename = "last_used.json"
 
-fun saveLastUsed(userId: UserId, server: String) {
+fun saveLastUsed(userId: UserId) {
     val dir = config_paths.profile_dir
     dir?: return
     val users = getRecentUsers().toMutableList()
@@ -29,9 +27,6 @@ fun saveLastUsed(userId: UserId, server: String) {
         file.writeText(json)
     } catch (e: IOException) {
     }
-
-    val serverConf = loadServerConf(userId.server)
-    serverConf.saveAddress(server)
 }
 
 fun getRecentUsers(): List<UserId> {
