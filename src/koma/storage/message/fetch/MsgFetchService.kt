@@ -1,5 +1,7 @@
 package koma.storage.message.fetch
 
+import domain.Chunked
+import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.parse
 import koma.matrix.event.room_message.RoomMessage
 import koma.matrix.pagination.FetchDirection
@@ -9,8 +11,9 @@ import koma.storage.message.piece.DiscussionPiece
 import koma.storage.message.piece.first_event_id
 import koma_app.appState
 import kotlinx.coroutines.experimental.delay
-import ru.gildor.coroutines.retrofit.Result
-import ru.gildor.coroutines.retrofit.awaitResult
+import matrix.room.RoomEvent
+import retrofit2.HttpException
+import ru.gildor.coroutines.retrofit.await
 
 
 suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
@@ -21,11 +24,26 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
 
     loop@  while (historyFetched < historyNeeded) {
         val fetchkey = cur.prev_batch
-        val res = koma.storage.message.fetch.doFetch(cur, roomid)
-        if (res == null) {
+        val res = try {
+            koma.storage.message.fetch.doFetch(cur, roomid)
+        } catch (he: HttpException) {
+            if (he.code() == 404) {
+                println("stopping fetching history because of 404 at: ${entry.first_event_id()}")
+                break@loop
+            } else {
+                delay(1000)
+                continue@loop
+            }
+        } catch (te: Throwable) {
+            te.printStackTrace()
             delay(1000)
             continue@loop
         }
+        if (res == null) {
+            println("stopping fetching history because of null at: ${entry.first_event_id()}")
+            break@loop
+        }
+
         val (messages, next_key) = res
 
         if (messages.size == 0) {
@@ -53,18 +71,30 @@ private suspend fun doFetch(piece: DiscussionPiece, roomid: RoomId): Pair<List<R
     return if (fetchkey == null) {
         val eventid = piece.first_event_id()
         eventid?: return null
-        val call_res = service.getEventContext(roomid, eventid).awaitResult()
-        if (call_res is Result.Ok) {
-            val res = call_res.value
-            val msgs = res.events_before.map { it.toMessage().parse() }.reversed()
-            Pair(msgs, res.start)
-        } else null
+        val res = service.getEventContext(roomid, eventid).await()
+        val msgs = res.messagesInChrono()
+        Pair(msgs, res.earlierKey())
     } else {
-        val call_res = service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).awaitResult()
-        if (call_res is Result.Ok) {
-            val res = call_res.value
-            val msgs = res.chunk.map { it.toMessage().parse() }.reversed()
-            Pair(msgs, res.end)
-        } else null
+        val res = service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).await()
+        val msgs = res.messagesInChrono()
+        Pair(msgs, res.earlierKey())
     }
 }
+
+fun Chunked<RoomEvent>.messagesInChrono(): List<RoomMessage> {
+    return this.chunk.map { it.toMessage().parse() }.reversed()
+}
+
+fun Chunked<RoomEvent>.earlierKey(): String {
+    return this.end
+}
+
+fun ContextResponse.messagesInChrono(): List<RoomMessage> {
+    return this.events_before.map { it.toMessage().parse() }.reversed()
+}
+
+fun ContextResponse.earlierKey(): String {
+    return this.start
+}
+
+
