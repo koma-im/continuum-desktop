@@ -199,11 +199,12 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     var next_batch: String? = null
 
 
-    val client: OkHttpClient
+    private val longPollClient: OkHttpClient
     val service: MatrixAccessApi
+    val longPollService: MatrixAccessApi
     val mediaService: MatrixMediaApi
 
-    fun shutdown() = client.dispatcher().executorService().shutdown()
+    fun shutdown() = longPollClient.dispatcher().executorService().shutdown()
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
@@ -431,7 +432,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     }
 
     fun getEvents(from: String?): Call<SyncResponse>
-            = service.getEvents(from, token)
+            = longPollService.getEvents(from, token)
 
     init {
         token = profile.access_token
@@ -443,7 +444,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         val clientbuildcert = if (addtrust!= null) {
             clientbuildproxy.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
         } else clientbuildproxy
-        client = clientbuildcert
+        val client = clientbuildcert.build()
+        longPollClient = clientbuildcert
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build()
 
@@ -451,12 +453,15 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
                 .add(UserIdAdapter())
                 .add(FallbackEnum.ADAPTER_FACTORY)
                 .build()
-        val retrofit = Retrofit.Builder()
-            .baseUrl(apiURL)
-            .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
+        val retrofitbuild = Retrofit.Builder()
+                .baseUrl(apiURL)
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+        val retrofit = retrofitbuild
+                .client(client)
                 .build()
+        val retrofitLongPoll = retrofitbuild.client(longPollClient).build()
         service = retrofit.create(MatrixAccessApi::class.java)
+        longPollService = retrofitLongPoll.create(MatrixAccessApi::class.java)
 
         mediaService = Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
                 .addConverterFactory(MoshiConverterFactory.create())
