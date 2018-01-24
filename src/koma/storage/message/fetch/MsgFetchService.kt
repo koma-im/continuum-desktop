@@ -28,7 +28,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
             koma.storage.message.fetch.doFetch(cur, roomid)
         } catch (he: HttpException) {
             if (he.code() == 404) {
-                println("stopping fetching history because of 404 at: ${entry.first_event_id()}")
+                println("stopping fetching history because of 404 at: ${cur.first_event_id()}")
                 break@loop
             } else {
                 delay(1000)
@@ -40,7 +40,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
             continue@loop
         }
         if (res == null) {
-            println("stopping fetching history because of null at: ${entry.first_event_id()}")
+            println("stopping fetching history because of null at: ${cur.first_event_id()}")
             break@loop
         }
 
