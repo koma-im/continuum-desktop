@@ -46,6 +46,8 @@ Notifications
 
 Tab completion for nicks
 
+Internationalization, support multiple languages
+
 Remember all positions where the user finished reading previously, to make it easy to read all history messages, without manually finding previous unread messages.
 
 Support more types of messages, such as audio and video
@@ -57,4 +59,20 @@ Advanced filtering operations based on any combination of keyword, chatroom, use
 Smart notification based on big data and artificial intelligence
 
 Support for blockchains
+
+If you find any of the above a bad idea, or if you would like to suggest new ideas, feel free to open an issue.
+
+# Contributing
+
+## Try it
+
+Just try it and when you find anything unhandy, tell us about it.
+Your idea will help to focus on the most needed features, and a handy client for Matrix will be a reality sooner.  
+
+If you know someone who might be interested in open-source communication, star or share the project, more usage and feedback will always be helpful.
+
+## Source
+
+If you are interested in or have experience with Kotlin or Matrix, feel free to click "Fork" and experiment with the source.
+There are a lot of ways to make improvements.
 
