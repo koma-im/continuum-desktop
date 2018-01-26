@@ -15,6 +15,7 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.server.serverConfWithAddr
+import koma.storage.config.settings.AppSettings
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -61,6 +62,9 @@ class LoginScreen(): View() {
             }
         }
         with(root) {
+            style {
+                fontSize=AppSettings.settings.fontSize.em
+            }
             add(grid)
 
             val serverName = stringBinding(userId.valueProperty()) { if (value != null && value.isNotBlank()) UserId_new(value)?.server else null }
