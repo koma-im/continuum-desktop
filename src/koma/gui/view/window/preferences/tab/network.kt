@@ -12,7 +12,7 @@ import tornadofx.*
 import java.net.InetSocketAddress
 import java.net.Proxy
 
-class NetworkSettingsTab(): View() {
+class NetworkSettingsTab(parent: View): View() {
     override val root: Parent = Fieldset()
 
     val serverNameProperty = SimpleStringProperty()
@@ -39,9 +39,16 @@ class NetworkSettingsTab(): View() {
                     }
                 }
             }
+            buttonbar {
+                button("Ok") {
+                    action {
+                        save()
+                        parent.close()
+                    }
+                }
+            }
         }
         serverNameProperty.onChange {
-            println("sn $it")
             if (it != null && it.isNotBlank()) load(it)
         }
     }

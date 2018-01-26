@@ -6,6 +6,7 @@ import koma.controller.requests.membership.ask_invite_member
 import koma.controller.requests.membership.ask_join_room
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.gui.view.window.preferences.PreferenceWindow
+import koma.storage.config.settings.AppSettings
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
 import tornadofx.*
@@ -18,6 +19,9 @@ class RootLayoutView(val controller: ChatController): View() {
 
     init {
         with(root) {
+            style {
+                fontSize= AppSettings.settings.fontSize.em
+            }
             top = menubar {
                 menu("File") {
                     item("Create Room").actionEvents().addTo(
