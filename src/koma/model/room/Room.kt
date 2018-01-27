@@ -19,6 +19,7 @@ import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
+import koma.storage.config.settings.AppSettings
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
 import kotlinx.coroutines.experimental.javafx.JavaFx
@@ -97,10 +98,12 @@ class Room(val id: RoomId) {
         }
         aliasesChangeActions(aliases.toObservable())
 
+        val scale = AppSettings.settings.scaling
+        val iconsize = scale * 32.0
         iconURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
                     println("Room $this has new icon url $it")
-                    getResizedImage(it, 32.0, 32.0)
+                    getResizedImage(it, iconsize, iconsize)
                 }
                 .filterNotNull()
                 .observeOnFx()

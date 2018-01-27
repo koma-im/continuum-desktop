@@ -1,14 +1,16 @@
 package koma.gui.view.window.preferences
 
+import javafx.beans.binding.StringBinding
 import javafx.geometry.Side
 import javafx.scene.control.TabPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.tab.AppearanceTab
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
+import koma.storage.config.settings.AppSettings
 import koma_app.appState
 import tornadofx.*
 
-class PreferenceWindow(): View() {
+class PreferenceWindow(server: StringBinding?=null): View() {
     override val root = VBox()
 
     private val nettab = NetworkSettingsTab(this)
@@ -26,9 +28,16 @@ class PreferenceWindow(): View() {
             }
         }
         with(root) {
+            style {
+                fontSize= AppSettings.settings.scaling.em
+            }
             add(tabs)
         }
-        appState.apiClient?.userId?.server?.let { nettab.serverNameProperty.set(it) }
+        if (server != null) {
+            nettab.serverNameProperty.bind(server)
+        } else {
+            appState.apiClient?.userId?.server?.let { nettab.serverNameProperty.set(it) }
+        }
     }
 
 }

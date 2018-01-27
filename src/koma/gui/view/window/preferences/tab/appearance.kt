@@ -11,11 +11,14 @@ class AppearanceTab(parent: View): View() {
     val scalingSetting: ComboBox<String>
 
     init {
-        val scales = listOf("1.0", "2.0")
+        val scales = listOf(AppSettings.settings.scaling, 1.0, 2.0)
+                .map {
+                    String.format("%.2f", it)
+                }
+                .distinct()
         scalingSetting = combobox(values = scales) {
             isEditable = true
             selectionModel.select(0)
-            editor.text = "${AppSettings.settings.fontSize}"
         }
         val valid = booleanBinding(scalingSetting.valueProperty()) {
             value?.toFloat()?.let { it > 0.5 && it < 2.5 } ?: false
@@ -44,7 +47,7 @@ class AppearanceTab(parent: View): View() {
 
     private fun save() {
         scalingSetting.value?.toFloat()?.let {
-            AppSettings.settings.fontSize = it
+            AppSettings.settings.scaling = it
             AppSettings.save()
         }
     }

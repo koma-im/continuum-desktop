@@ -10,6 +10,7 @@ import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
+import koma.storage.config.settings.AppSettings
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import rx.javafx.kt.observeOnFx
@@ -56,13 +57,15 @@ data class UserState(val id: UserId) {
         get() = this.avatarImgProperty.get()
 
     init {
+        val scale = AppSettings.settings.scaling
+        val avsize = scale * 32.0
         launch(JavaFx) {
             val i = getImageForName(id.user, color)
             avatarImgProperty.set(i)
         }
         avatarURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
-                    getResizedImage(it, 32.0, 32.0)
+                    getResizedImage(it, avsize, avsize)
                 }
                 .filterNotNull()
                 .observeOnFx()

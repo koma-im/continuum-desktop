@@ -26,6 +26,6 @@ object AppSettings{
 }
 
 class AppSettingsData(
-        var fontSize: Float = 2.0f
+        var scaling: Float = 1.0f
 )
 

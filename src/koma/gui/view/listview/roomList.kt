@@ -4,6 +4,7 @@ import javafx.collections.ObservableList
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionModel
 import javafx.scene.layout.Priority
+import koma.storage.config.settings.AppSettings
 import koma_app.appState
 import model.Room
 import rx.javafx.kt.toObservable
@@ -20,8 +21,12 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
     }
 
     private fun setup(node: ListView<Room>) {
-        node.minWidth = 48.0
-        node.maxWidth = 178.0
+        val scale = AppSettings.settings.scaling
+        node.style {
+            fontSize= scale.em
+        }
+        node.minWidth = 48.0 * scale
+        node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
         node.cellFragment(RoomFragment::class)
         val selectionModel = node.selectionModel
