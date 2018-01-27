@@ -9,6 +9,7 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.util.Callback
 import koma.model.user.UserState
+import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
 fun get_cell_property(noname: SimpleBooleanProperty): ObjectBinding<Callback<ListView<UserState>, ListCell<UserState>>?> {
@@ -50,17 +51,22 @@ private fun get_node(item: UserState?, showName: Boolean): Node {
     val root = HBox( 5.0)
     if (item == null)
         return root
+    val scale = AppSettings.settings.scaling
     root.apply {
         minWidth = 1.0
         prefWidth = 1.0
-        style { alignment = Pos.CENTER_LEFT }
+        style {
+            alignment = Pos.CENTER_LEFT
+            fontSize= scale.em
+        }
         stackpane {
             imageview {
                 this.imageProperty().bind(item.avatarImgProperty)
                 isCache = true
                 isPreserveRatio = true
             }
-            minHeight = 32.0
+            minHeight = 32.0 * scale
+            minWidth = 32.0 * scale
         }
         if (showName) {
             label(item.displayName) {

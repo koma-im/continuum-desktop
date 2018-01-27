@@ -12,6 +12,7 @@ import koma.gui.view.messagesview.fragment.MessageCell
 import koma.gui.view.messagesview.fragment.create_message_cell
 import koma.input.emoji.EmojiPanel
 import koma.matrix.event.room_message.RoomMessage
+import koma.storage.config.settings.AppSettings
 import koma_app.appState
 import model.Room
 import org.fxmisc.flowless.VirtualFlow
@@ -19,6 +20,7 @@ import org.fxmisc.flowless.VirtualizedScrollPane
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
 import tornadofx.*
+import kotlin.math.roundToInt
 
 class ChatRecvSendView(room: Room): View() {
     override val root = vbox(10.0)
@@ -58,9 +60,14 @@ class ChatRecvSendView(room: Room): View() {
 
 private fun createButtonBar(inputField: TextField): ButtonBar {
     val bbar = ButtonBar()
+    val scale = AppSettings.settings.scaling
+    val size = "${scale.roundToInt()}.em"
     bbar.apply {
+        style {
+            fontSize = scale.em
+        }
         button {
-            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO)
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO, size)
             tooltip("Send image")
             actionEvents()
                     .map {  appState.currRoom.get() }
@@ -73,7 +80,7 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
                     .addTo(guiEvents.sendImageRequests)
         }
         button{
-            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT)
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT, size)
             val ep = EmojiPanel()
             ep.onEmojiChosen = {inputField.text += it.glyph}
             action {

@@ -20,7 +20,7 @@ class RootLayoutView(val controller: ChatController): View() {
     init {
         with(root) {
             style {
-                fontSize= AppSettings.settings.fontSize.em
+                fontSize= AppSettings.settings.scaling.em
             }
             top = menubar {
                 menu("File") {
