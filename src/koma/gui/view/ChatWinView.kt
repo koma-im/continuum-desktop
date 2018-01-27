@@ -23,8 +23,6 @@ class ChatView(profile: Profile): View() {
     val roomListView: RoomListView
     val switchableRoomView: SwitchableRoomView by inject()
 
-    var selected_room_once = false
-
     init {
         val roomList = profile.getRoomList()
         roomListView = RoomListView(roomList)
@@ -41,12 +39,7 @@ class ChatView(profile: Profile): View() {
 
         }
 
-        roomList.onChange {
-            if ( !selected_room_once && roomList.isNotEmpty()) {
-                roomListView.root.selectionModel.selectFirst()
-                selected_room_once = true
-            }
-        }
+
     }
 
 }

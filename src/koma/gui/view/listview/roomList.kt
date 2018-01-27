@@ -1,6 +1,7 @@
 package koma.gui.view.listview
 
 import javafx.collections.ObservableList
+import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.control.SelectionModel
 import javafx.scene.layout.Priority
@@ -17,7 +18,12 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
     override val root = listview(roomlist)
 
     init {
+        root.placeholder = Label("Join a room to start")
         setup(root)
+
+        if (roomlist.isNotEmpty()) {
+            root.selectionModel.selectFirst()
+        }
     }
 
     private fun setup(node: ListView<Room>) {

@@ -20,7 +20,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
     init {
         with(root) {
             val scale = AppSettings.settings.scaling
-            val size: String = "${scale.roundToInt()}.em"
+            val size: String = "${scale.roundToInt()}em"
             style {
                 fontSize= scale.em
             }
