@@ -61,7 +61,7 @@ class ChatRecvSendView(room: Room): View() {
 private fun createButtonBar(inputField: TextField): ButtonBar {
     val bbar = ButtonBar()
     val scale = AppSettings.settings.scaling
-    val size = "${scale.roundToInt()}.em"
+    val size = "${scale.roundToInt()}em"
     bbar.apply {
         style {
             fontSize = scale.em

@@ -20,8 +20,9 @@ class AppearanceTab(parent: View): View() {
             isEditable = true
             selectionModel.select(0)
         }
-        val valid = booleanBinding(scalingSetting.valueProperty()) {
-            value?.toFloat()?.let { it > 0.5 && it < 2.5 } ?: false
+
+        val valid = booleanBinding(scalingSetting.editor.textProperty()) {
+            value?.toFloatOrNull()?.let { it > 0.5 && it < 2.5 } ?: false
         }
         with(root){
             form {

@@ -36,7 +36,7 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     graphc.setFill(fgcolor)
     graphc.textAlign = TextAlignment.CENTER
     graphc.textBaseline = VPos.CENTER
-    graphc.font = Font.font("serif", FontWeight.BOLD, 20.0)
+    graphc.font = Font.font("serif", FontWeight.BOLD, 20.0 * scale)
     val middle = isize * 0.5
     val mid0 = isize * 0.25
     val mid1 = isize * 0.75

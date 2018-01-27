@@ -26,6 +26,11 @@ class SwitchableRoomView(): View() {
             }
         }
         roomProperty.bind(appState.currRoom)
+        with(root) {
+            label("Select a room to start chatting") {
+                removeWhen { roomProperty.isNotNull }
+            }
+        }
     }
 }
 

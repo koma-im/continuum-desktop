@@ -5,6 +5,7 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
+import javafx.scene.input.Clipboard
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
@@ -12,10 +13,10 @@ import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.media.getMxcImagePropery
 import koma.matrix.event.room_message.*
-import koma.model.user.UserState
 import koma.matrix.event.room_message.chat.EmoteMsg
 import koma.matrix.event.room_message.chat.ImageMsg
 import koma.matrix.event.room_message.chat.TextMsg
+import koma.model.user.UserState
 import org.fxmisc.flowless.Cell
 import tornadofx.*
 import java.text.SimpleDateFormat
@@ -26,7 +27,8 @@ fun ChatMessage.render_node(): Node {
     val content = this.content
     when(content) {
         is TextMsg -> {
-            node.add(Text(content.text))
+            val text = Text(content.text)
+            node.add(text)
         }
         is EmoteMsg -> {
             node.add(Text(content.text))
@@ -180,6 +182,12 @@ class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
                 }
 
                 vbox(spacing = 2.0) {
+                    lazyContextmenu {
+                        item("Copy text").action {
+                            val text = item.content.textContent()
+                            Clipboard.getSystemClipboard().putString(text)
+                        }
+                    }
                     hgrow = Priority.ALWAYS
                     hbox(spacing = 10.0) {
                         hgrow = Priority.ALWAYS

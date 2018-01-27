@@ -1,13 +1,21 @@
 package koma.matrix.event.room_message.chat
 
-sealed class ChatContent()
-
-class TextMsg(
-        val text: String): ChatContent() {
-    override fun toString(): String {
-        return text
+sealed class ChatContent() {
+    /**
+     * text for copying to clipboard
+     */
+    fun textContent(): String {
+        return when(this) {
+            is TextMsg -> this.text
+            is EmoteMsg -> this.text
+            is ImageMsg -> this.mxcurl
+            is NoticeMsg -> this.formattedBody
+        }
     }
 }
+
+class TextMsg(
+        val text: String): ChatContent()
 
 data class EmoteMsg(
         val text: String): ChatContent()
