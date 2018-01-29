@@ -34,7 +34,7 @@ class ProxyAdapter {
         val host = proxyconf[1]
         val port = proxyconf[2].toIntOrNull()
         if (port == null) return Proxy.NO_PROXY
-        val sa = InetSocketAddress(host, port)
+        val sa = InetSocketAddress.createUnresolved(host, port)
         return Proxy(type, sa)
     }
 }
