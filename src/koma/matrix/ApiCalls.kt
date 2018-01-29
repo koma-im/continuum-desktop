@@ -3,6 +3,7 @@ package matrix
 import com.serjltt.moshi.adapters.FallbackEnum
 import com.squareup.moshi.Moshi
 import domain.*
+import koma.controller.sync.longPollTimeout
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
@@ -161,7 +162,7 @@ interface MatrixAccessApi {
     fun getEvents(@Query("since") from: String? = null,
                   @Query("access_token") token: String,
                   @Query("full_state") full_state: Boolean = false,
-                  @Query("timeout") timeout: Int = 50_000,
+                  @Query("timeout") timeout: Int = longPollTimeout * 1000,
                   @Query("filter") filter: String? = null)
             : Call<SyncResponse>
 
@@ -447,7 +448,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         } else clientbuildproxy
         val client = clientbuildcert.build()
         longPollClient = clientbuildcert
-                .readTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS)
                 .build()
 
         val moshi = Moshi.Builder()
