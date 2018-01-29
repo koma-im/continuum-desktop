@@ -68,7 +68,7 @@ class LoginScreen(): View() {
             add(grid)
 
             val serverName = stringBinding(userId.valueProperty()) { if (value != null && value.isNotBlank()) UserId_new(value)?.server else null }
-            val settings = PreferenceWindow(serverName)
+            val settings = PreferenceWindow()
             button("More Options") {
                 action { settings.openModal() }
             }

@@ -15,8 +15,8 @@ import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
-import koma.storage.config.server.getProxy
 import koma.storage.config.server.loadCert
+import koma.storage.config.settings.AppSettings
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -438,7 +438,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         token = profile.access_token
         userId = profile.userId
 
-        val clientbuildproxy = OkHttpClient.Builder().proxy(serverConf.getProxy())
+        val proxy = AppSettings.getProxy()
+        val clientbuildproxy = OkHttpClient.Builder().proxy(proxy)
 
         val addtrust = serverConf.loadCert()
         val clientbuildcert = if (addtrust!= null) {
@@ -496,7 +497,7 @@ interface MatrixLoginApi {
 fun login(userpass: UserPassword, serverConf: ServerConf):
         Profile? {
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val proxy = serverConf.getProxy()
+    val proxy = AppSettings.getProxy()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
@@ -545,7 +546,8 @@ fun register(userregi: UserRegistering, serverConf: ServerConf):
         RegisterdUser? {
     println("register user $userregi on ${serverConf.servername}")
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val client = OkHttpClient.Builder().proxy(serverConf.getProxy()).build()
+    val proxy = AppSettings.getProxy()
+    val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
             .client(client)
