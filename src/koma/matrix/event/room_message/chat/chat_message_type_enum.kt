@@ -1,17 +1,19 @@
 package koma.matrix.event.message
 
+import com.squareup.moshi.Json
+
 /**
  * chat message types
  */
 enum class ChatMessageType {
-    Text,
-    Emote,
-    Notice,
-    Image,
-    File,
-    Location,
-    Video,
-    Audio,
+    @Json(name="m.text") Text,
+    @Json(name="m.emote") Emote,
+    @Json(name="m.notice") Notice,
+    @Json(name="m.image") Image,
+    @Json(name="m.file") File,
+    @Json(name="m.location") Location,
+    @Json(name="m.video") Video,
+    @Json(name="m.audio") Audio,
     Other;
 
     companion object {

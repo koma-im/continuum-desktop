@@ -1,5 +1,8 @@
 package koma.matrix.event.room_message.chat
 
+/**
+ * manually parsed contents
+ */
 sealed class ChatContent() {
     /**
      * text for copying to clipboard

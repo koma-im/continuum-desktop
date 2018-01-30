@@ -21,5 +21,24 @@ enum class RoomEventType{
     @Json(name = "m.room.history_visibility") HistoryVisibility,
 
     @Json(name = "m.room.guest_access") GuestAccess,
-    Unrecognized,
+    Unrecognized;
+
+    override fun toString(): String {
+        return when(this) {
+            Aliases -> "m.room.aliases"
+            CanonAlias ->         "m.room.canonical_alias"
+            Create ->             "m.room.create"
+            JoinRule ->           "m.room.join_rules"
+            PowerLevels ->        "m.room.power_levels"
+            Member ->             "m.room.member"
+            Message ->            "m.room.message"
+            Redaction ->          "m.room.redaction"
+            Name ->               "m.room.name"
+            Topic ->              "m.room.topic"
+            Avatar ->             "m.room.avatar"
+            HistoryVisibility ->  "m.room.history_visibility"
+            GuestAccess ->        "m.room.guest_access"
+            Unrecognized -> "err_not_a_kind_of_event"
+        }
+    }
 }
