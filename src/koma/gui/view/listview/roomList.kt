@@ -18,6 +18,7 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
     override val root = listview(roomlist)
 
     init {
+        root.isFocusTraversable = false
         root.placeholder = Label("Join a room to start")
         setup(root)
 

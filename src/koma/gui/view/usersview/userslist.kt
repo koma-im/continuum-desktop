@@ -36,6 +36,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
             }
             val userlist = PrettyListView<UserState>()
             userlist.apply {
+                isFocusTraversable = false
                 items = memList
                 vgrow = Priority.ALWAYS
                 minWidth = 50.0 * scale

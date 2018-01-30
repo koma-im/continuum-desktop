@@ -6,6 +6,8 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.controller.requests.sendMessage
 import koma.gui.view.messagesview.fragment.MessageCell
@@ -28,17 +30,29 @@ class ChatRecvSendView(room: Room): View() {
     private val messageInput = TextField()
 
     init {
+        val msgList = room.messageManager.messages
+        val virtualList =  VirtualFlow.createVertical(
+                msgList, {create_message_cell(it)}, VirtualFlow.Gravity.REAR
+        )
+        virtualList.vgrow = Priority.ALWAYS
+        virtualList.hgrow = Priority.ALWAYS
+        val virtualizedScrollPane = VirtualizedScrollPane<VirtualFlow<RoomMessage, MessageCell>>(virtualList)
+        virtualizedScrollPane.vgrow = Priority.ALWAYS
+
+        root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
+            val h = if (e.code == KeyCode.PAGE_DOWN) {
+                virtualList.height * 0.8
+            } else if (e.code == KeyCode.PAGE_UP) {
+                -virtualList.height * 0.8
+            } else {
+                return@addEventFilter
+            }
+            virtualList.scrollYBy(h)
+        })
+
         with(root) {
             hgrow = Priority.ALWAYS
 
-            val msgList = room.messageManager.messages
-            val virtualList =  VirtualFlow.createVertical(
-                    msgList, {create_message_cell(it)}, VirtualFlow.Gravity.REAR
-            )
-            virtualList.vgrow = Priority.ALWAYS
-            virtualList.hgrow = Priority.ALWAYS
-            val virtualizedScrollPane = VirtualizedScrollPane<VirtualFlow<RoomMessage, MessageCell>>(virtualList)
-            virtualizedScrollPane.vgrow = Priority.ALWAYS
             add(virtualizedScrollPane)
 
             add(createButtonBar(messageInput))
