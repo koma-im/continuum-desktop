@@ -28,7 +28,6 @@ class ChatView(profile: Profile): View() {
         roomListView = RoomListView(roomList)
 
         with(root) {
-
             hbox() {
                 vgrow = Priority.ALWAYS
 
