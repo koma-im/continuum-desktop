@@ -7,6 +7,8 @@ import koma.controller.sync.longPollTimeout
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
+import koma.matrix.event.room_message.chat.FileMessage
+import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomId
@@ -18,6 +20,7 @@ import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
 import koma.storage.config.server.loadCert
 import koma.storage.config.settings.AppSettings
+import matrix.event.room_message.RoomEventType
 import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -135,10 +138,10 @@ interface MatrixAccessApi {
     @PUT("rooms/{roomId}/send/{eventType}/{txnId}")
     fun sendMessageEvent(
             @Path("roomId") roomId: RoomId,
-            @Path("eventType") eventType: String,
+            @Path("eventType") eventType: RoomEventType,
             @Path("txnId") txnId: Long,
             @Query("access_token") token: String,
-            @Body message: Map<String, String>): Call<SendResult>
+            @Body message: Any): Call<SendResult>
 
     @PUT("rooms/{roomId}/state/m.room.avatar")
     fun setRoomIcon(@Path("roomId") roomId: RoomId,
@@ -205,6 +208,10 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     val longPollService: MatrixAccessApi
     val mediaService: MatrixMediaApi
 
+    private val txnIdUnique = AtomicLong()
+
+    fun getTxnId() = txnIdUnique.getAndAdd(1)
+
     fun shutdown() = longPollClient.dispatcher().executorService().shutdown()
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
@@ -221,6 +228,11 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     fun getEventContext(roomid: RoomId, eventId: String): Call<ContextResponse> {
         return service.getEventContext(roomid, eventId,token= token)
+    }
+
+    fun uploadFile(file: File, contentType: MediaType): Call<UploadResponse> {
+        val req = RequestBody.create(contentType, file)
+        return mediaService.uploadMedia(contentType.toString(), token, req)
     }
 
     fun uploadMedia(file: String): UploadResponse? {
@@ -398,8 +410,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-  private var txnIdUnique = AtomicLong()
-
     fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
         val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
@@ -407,14 +417,15 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         return r
     }
 
+    fun sendFile(roomId: RoomId, name: String, url: String): Call<SendResult> {
+        val msg = FileMessage(name, url)
+        return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, msg)
+    }
+
     fun sendImage(roomId: RoomId, imageUrl: String, desc: String): SendResult? {
         val txnId = txnIdUnique.addAndGet(1L)
-        val msg = mapOf(
-                Pair("msgtype", "m.image"),
-                Pair("url", imageUrl),
-                Pair("body", desc)
-        )
-        val call: Call<SendResult> = service.sendMessageEvent(roomId, "m.room.message", txnId, token,
+        val msg = ImageMessage(desc, imageUrl)
+        val call: Call<SendResult> = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token,
                 msg)
         val resp: Response<SendResult>
         try {

@@ -3,19 +3,18 @@ package koma.gui.view
 import controller.guiEvents
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendMessage
 import koma.gui.view.messagesview.fragment.MessageCell
 import koma.gui.view.messagesview.fragment.create_message_cell
 import koma.input.emoji.EmojiPanel
 import koma.matrix.event.room_message.RoomMessage
 import koma.storage.config.settings.AppSettings
-import koma_app.appState
 import model.Room
 import org.fxmisc.flowless.VirtualFlow
 import org.fxmisc.flowless.VirtualizedScrollPane
@@ -55,7 +54,7 @@ class ChatRecvSendView(room: Room): View() {
 
             add(virtualizedScrollPane)
 
-            add(createButtonBar(messageInput))
+            add(createButtonBar(messageInput, room))
 
             add(messageInput)
         }
@@ -72,7 +71,7 @@ class ChatRecvSendView(room: Room): View() {
     }
 }
 
-private fun createButtonBar(inputField: TextField): ButtonBar {
+private fun createButtonBar(inputField: TextField, room: Room): ButtonBar {
     val bbar = ButtonBar()
     val scale = AppSettings.settings.scaling
     val size = "${scale.roundToInt()}em"
@@ -81,16 +80,15 @@ private fun createButtonBar(inputField: TextField): ButtonBar {
             fontSize = scale.em
         }
         button {
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE, size)
+            tooltip("Send File")
+            action { sendFileMessage(room = room.id) }
+        }
+        button {
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO, size)
             tooltip("Send image")
             actionEvents()
-                    .map {  appState.currRoom.get() }
-                    .doOnNext {
-                        if (!it.isPresent)
-                            alert(Alert.AlertType.WARNING, "No room selected")
-                    }
-                    .filter{ it.isPresent }
-                    .map { it.get() }
+                    .map { room }
                     .addTo(guiEvents.sendImageRequests)
         }
         button{
