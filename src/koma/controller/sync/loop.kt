@@ -3,11 +3,8 @@ package koma.controller.sync
 import koma.controller.events_processing.processEventsResult
 import koma.matrix.sync.SyncResponse
 import koma_app.appState.apiClient
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.selects.select
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
@@ -34,17 +31,28 @@ fun detectTimeLeap() = async {
     }
 }
 
+
 fun startSyncing(from: String?): Job {
     var since = from
     val client = apiClient!!
-    return launch(JavaFx) {
-         sync@ while (true) {
-             val ar = async {  client.getEvents(since).awaitResult() }
-             val tl = detectTimeLeap()
-             val resultOr = select<Result<SyncResponse>?> {
-                 ar.onAwait { sr -> sr }
-                 tl.onAwait { null }
-             }
+    var syncDeferred: Deferred<Result<SyncResponse>>? = null
+    return launch(JavaFx + CoroutineExceptionHandler { coroutineContext, throwable ->
+        if (throwable is CancellationException) {
+            println("stop syncing")
+            syncDeferred?.cancel()
+            return@CoroutineExceptionHandler
+        }
+        throw throwable
+    }) {
+        sync@ while (true) {
+            val ar = async {  client.getEvents(since).awaitResult() }
+            syncDeferred = ar
+            val tl = detectTimeLeap()
+
+            val resultOr = select<Result<SyncResponse>?> {
+                ar.onAwait { it }
+                tl.onAwait { null }
+            }
              val eventResult = if (resultOr == null) {
                  println("restart sync")
                  ar.cancel()
