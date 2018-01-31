@@ -1,6 +1,7 @@
 package koma.matrix.event.context
 
-import matrix.room.RoomEvent
+import koma.matrix.event.room_message.RoomEvent
+
 
 data class ContextResponse(
         /**

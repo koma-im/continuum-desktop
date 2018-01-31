@@ -1,9 +1,12 @@
 package koma.storage.rooms.state
 
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.RoomIdAdapter
+import koma.matrix.room.visibility.HistoryVisibilityCaseInsensitiveAdapter
+import koma.matrix.room.visibility.RoomVisibilityCaseInsensitiveAdapter
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.config_paths
 import koma.storage.users.UserStore
@@ -36,12 +39,17 @@ fun load_room(roomId: RoomId, path: File): Room? {
     val jsonAdapter = Moshi.Builder()
             .add(RoomIdAdapter())
             .add(RoomAliasAdapter())
+            .add(HistoryVisibilityCaseInsensitiveAdapter())
+            .add(RoomVisibilityCaseInsensitiveAdapter())
             .build()
             .adapter(SavedRoomState::class.java)
     val savedRoomState = try {
         jsonAdapter.fromJson(sf.readText())
     } catch (e: IOException) {
         e.printStackTrace()
+        return null
+    } catch (de: JsonDataException) {
+        de.printStackTrace()
         return null
     }
     savedRoomState?: return null
@@ -66,10 +74,10 @@ fun load_room(roomId: RoomId, path: File): Room? {
     return room
 }
 
-fun load_members(file: File): Stream<Pair<String, Double?>>
+fun load_members(file: File): Stream<Pair<String, Float?>>
         = file.bufferedReader().lines().map {
         val l = it.split(' ', limit = 2)
         val user = l[0]
-        val lvl = l.getOrNull(1)?.toDoubleOrNull()
+        val lvl = l.getOrNull(1)?.toFloatOrNull()
         user to lvl
     }

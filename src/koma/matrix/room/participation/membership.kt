@@ -1,10 +1,10 @@
 package koma.matrix.room.participation
 
 enum class Membership {
-    Invite,
-    Join,
+    invite,
+    join,
     Knock,
-    Leave,
-    Ban
+    leave,
+    ban
 }
 

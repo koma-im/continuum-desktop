@@ -11,9 +11,8 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendMessage
 import koma.gui.view.messagesview.fragment.MessageCell
-import koma.gui.view.messagesview.fragment.create_message_cell
 import koma.input.emoji.EmojiPanel
-import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.RoomEvent
 import koma.storage.config.settings.AppSettings
 import model.Room
 import org.fxmisc.flowless.VirtualFlow
@@ -31,11 +30,12 @@ class ChatRecvSendView(room: Room): View() {
     init {
         val msgList = room.messageManager.messages
         val virtualList =  VirtualFlow.createVertical(
-                msgList, {create_message_cell(it)}, VirtualFlow.Gravity.REAR
+                msgList, {MessageCell(it)}, VirtualFlow.Gravity.REAR
         )
+
         virtualList.vgrow = Priority.ALWAYS
         virtualList.hgrow = Priority.ALWAYS
-        val virtualizedScrollPane = VirtualizedScrollPane<VirtualFlow<RoomMessage, MessageCell>>(virtualList)
+        val virtualizedScrollPane = VirtualizedScrollPane<VirtualFlow<RoomEvent, MessageCell>>(virtualList)
         virtualizedScrollPane.vgrow = Priority.ALWAYS
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->

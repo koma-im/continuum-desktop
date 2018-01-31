@@ -13,25 +13,18 @@ enum class ChatMessageType {
     @Json(name="m.file") File,
     @Json(name="m.location") Location,
     @Json(name="m.video") Video,
-    @Json(name="m.audio") Audio,
-    Other;
+    @Json(name="m.audio") Audio;
 
-    companion object {
-        fun fromString(msgtype: String): ChatMessageType {
-            val mtype = when(msgtype) {
-                "m.text" -> Text
-                "m.emote" -> Emote
-                "m.notice" -> Notice
-                "m.image" -> Image
-                "m.file" -> File
-                "m.location" -> Location
-                "m.video" -> Video
-                "m.audio" -> Audio
-                else -> {
-                    Other
-                }
-            }
-            return mtype
+    override fun toString(): String {
+        return when(this) {
+            Text -> "m.text"
+            Emote -> "m.emote"
+            Notice -> "m.notice"
+            Image -> "m.image"
+            File -> "m.file"
+            Location -> "m.location"
+            Video -> "m.video"
+            Audio -> "m.audio"
         }
     }
 }

@@ -7,10 +7,15 @@ import koma.controller.sync.longPollTimeout
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
+import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
+import koma.matrix.event.room_message.chat.TextMessage
+import koma.matrix.event.room_message.chat.getPolyMessageAdapter
+import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
+import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.storage.config.profile.Profile
@@ -21,7 +26,6 @@ import koma.storage.config.server.getAddress
 import koma.storage.config.server.loadCert
 import koma.storage.config.settings.AppSettings
 import matrix.event.room_message.RoomEventType
-import matrix.room.RoomEvent
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -62,11 +66,6 @@ class BanRoomResult()
 data class ResolveRoomAliasResult(
         val room_id: String,
         val servers: List<String>
-)
-
-data class SendMessage(
-        val msgtype: String = "m.text",
-        val body: String
 )
 
 data class SendResult(
@@ -128,12 +127,6 @@ interface MatrixAccessApi {
                 @Query("access_token") token: String,
                 @Body banishment: MemberBanishment
     ): Call<BanRoomResult>
-
-    @PUT("rooms/{roomId}/send/m.room.message/{txnId}")
-    fun sendMessage(@Path("roomId") roomId: RoomId,
-                    @Path("txnId") txnId: Long,
-                    @Query("access_token") token: String,
-                    @Body sendMessage: SendMessage): Call<SendResult>
 
     @PUT("rooms/{roomId}/send/{eventType}/{txnId}")
     fun sendMessageEvent(
@@ -413,7 +406,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
         val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
-        val r = service.sendMessage(roomId, txnId, token, SendMessage(body = message))
+        val r = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token, TextMessage(body = message))
         return r
     }
 
@@ -464,6 +457,9 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
         val moshi = Moshi.Builder()
                 .add(UserIdAdapter())
+                .add(RoomAliasAdapter())
+                .add(getPolyMessageAdapter())
+                .add(getPolyRoomEventAdapter())
                 .add(FallbackEnum.ADAPTER_FACTORY)
                 .build()
         val retrofitbuild = Retrofit.Builder()

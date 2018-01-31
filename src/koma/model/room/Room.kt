@@ -12,11 +12,12 @@ import koma.graphic.getImageForName
 import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
-import koma.matrix.event.room_message.RoomPowerLevel
+import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
+import koma.matrix.room.visibility.RoomVisibility
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import koma.storage.config.settings.AppSettings
@@ -138,15 +139,11 @@ class Room(val id: RoomId) {
             this.aliases.add(0, alias)
     }
 
-    fun updatePowerLevels(roomPowerLevel: RoomPowerLevel) {
-        power_levels.putAll(roomPowerLevel.powerLevels.mapValues { it.value.toDouble() })
-        for (user in roomPowerLevel.userLevels)
-            userStates.get(UserId_new(user.key)!!).power = user.value
+    fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
+        power_levels.putAll(roomPowerLevel.events.mapValues { it.value.toDouble() })
+        for (user in roomPowerLevel.users)
+            userStates.get(UserId_new(user.key)).power = user.value
     }
 }
 
-enum class RoomVisibility {
-    Public,
-    Private
-}
 

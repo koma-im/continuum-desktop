@@ -2,48 +2,50 @@ package koma.matrix.event.room_message.chat
 
 import koma.matrix.event.message.ChatMessageType
 
-/**
- * m.room.message messages
- * used only for sending because of moshi's limitations
- */
-interface M_Message {
-}
+open class M_Message (
+    val body: String,
+    val msgtype: ChatMessageType
+)
 
 class TextMessage(
-        val msgtype: ChatMessageType = ChatMessageType.Text,
-        val body: String
-): M_Message
+        body: String
+): M_Message(body, ChatMessageType.Text)
+
+class EmoteMessage(
+        body: String
+): M_Message(body, ChatMessageType.Emote)
+
+
+class NoticeMessage(
+        body: String
+): M_Message(body, ChatMessageType.Notice)
+
+class VideoMessage(
+        body: String,
+        val url: String,
+        val info: VideoInfo?=null
+) : M_Message(body, ChatMessageType.Video)
+
+class AudioMessage(
+        body: String,
+        val url: String,
+        val info: VideoInfo?=null
+) : M_Message(body, ChatMessageType.Audio)
 
 class ImageMessage(
-        val body: String, val url: String, val info: ImageInfo?=null,
-        val msgtype:ChatMessageType = ChatMessageType.Image
-) : M_Message
+        body: String,
+        val url: String,
+        val info: ImageInfo?=null
+) : M_Message(body, ChatMessageType.Image)
+
+class LocationMessage(
+        val geo_uri: String,
+        val info: LocationInfo?,
+        body: String
+): M_Message(body, ChatMessageType.Location)
 
 class FileMessage(
         val filename: String, val url: String, val info: FileInfo? = null,
-        val msgtype: ChatMessageType = ChatMessageType.File,
-        val body: String = filename
-): M_Message
+        body: String = filename
+): M_Message(body, ChatMessageType.File)
 
-class ImageInfo(
-        val h:Int,
-        val w: Int,
-        val mimetype: String,
-        val size: Int,
-        val thumbnail_url: String?,
-        val thumbnail_info: ThumbnailInfo?
-)
-
-class FileInfo(
-        val mimetype: String,
-        val size: Int,
-        val thumbnail_url: String?,
-        val thumbnail_info: ThumbnailInfo?
-)
-
-class ThumbnailInfo(
-        val h: Int,
-        val w: Int,
-        val mimetype: String,
-        val size: Int
-)

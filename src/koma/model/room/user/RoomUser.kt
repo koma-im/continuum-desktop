@@ -7,7 +7,7 @@ import koma.matrix.UserId
  * for example, whether a user is typing a message in a room
  */
 class RoomUserState{
-    var power: Double? = null
+    var power: Float? = null
 }
 
 class RoomUserMap {
