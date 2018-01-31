@@ -27,7 +27,7 @@ fun DiscussionPiece.save() {
     file.writeText("")
     val writer = file.bufferedWriter()
     for (mesg in this.messages) {
-        val line = mesg.original.toJson()
+        val line = mesg.toJson()
         writer.append(line)
         writer.append('\n')
     }
@@ -52,4 +52,4 @@ fun DiscussionPiece.set_log_path(time: Long, roomId: RoomId) {
 }
 
 fun DiscussionPiece.first_event_id(): String? =
-        this.messages.firstOrNull()?.original?.event_id
+        this.messages.firstOrNull()?.event_id

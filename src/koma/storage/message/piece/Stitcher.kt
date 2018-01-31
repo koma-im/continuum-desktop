@@ -1,9 +1,9 @@
 package koma.storage.message.piece
 
-import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.RoomEvent
 
-class Stitcher(list: MutableList<RoomMessage>)
-    : Concatenater<Long, RoomMessage, DiscussionPiece>(list) {
+class Stitcher(list: MutableList<RoomEvent>)
+    : Concatenater<Long, RoomEvent, DiscussionPiece>(list) {
 
     init {
     }
@@ -12,7 +12,7 @@ class Stitcher(list: MutableList<RoomMessage>)
      * toward the past
      */
     @Synchronized
-    fun extendHead(key: Long, fetchedmessages: List<RoomMessage>): DiscussionPiece{
+    fun extendHead(key: Long, fetchedmessages: List<RoomEvent>): DiscussionPiece{
         val messages = fetchedmessages.toMutableList()
 
         val prev = this.lowerEntryValue(key)

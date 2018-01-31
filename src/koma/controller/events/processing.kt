@@ -27,8 +27,8 @@ private fun handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     val roomStore= appState.apiClient?.profile?.roomStore!!
     val room = roomStore.add(roomid)
 
-    data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
-    val timeline = data.timeline.parse()
+    data.state.events.forEach { room.applyUpdate(it) }
+    val timeline = data.timeline
     timeline.events.forEach { room.applyUpdate(it) }
     room.messageManager.appendTimeline(timeline)
 

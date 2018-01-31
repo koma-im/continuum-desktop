@@ -2,7 +2,10 @@ package koma.controller.room
 
 import koma.matrix.epemeral.EphemeralEvent
 import koma.matrix.epemeral.TypingEvent
-import koma.matrix.event.room_message.*
+import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.event.room_message.state.*
+import koma.matrix.room.participation.Membership
+import koma.storage.users.UserStore
 import koma_app.appState
 import koma_app.appState.apiClient
 import model.Room
@@ -15,40 +18,49 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     }
 }
 
-fun Room.applyUpdate(update: RoomMessage) {
+fun Room.applyUpdate(update: RoomEvent) {
+    if (update !is RoomStateEvent) return
     when (update) {
-        is MemberJoinMsg -> {
-            val sender = update.sender
-            update.avatar_url?.let { sender.avatar = it }
-            update.name?.let { sender.name=it }
-            this.makeUserJoined(update.sender)
+        is MRoomMember -> this.updateMember(update)
+        is MRoomAliases -> {
+            val exist = this.aliases.get()
+            this.aliases.addAll(update.content.aliases.filter { !exist.contains(it) })
         }
-        is MemberLeave -> {
-            this.removeMember(update.sender.id)
-            if (apiClient?.userId == update.sender.id) {
+        is MRoomAvatar -> this.iconURL.set(update.content.url)
+        is MRoomCanonAlias -> this.setCanonicalAlias(update.content.alias)
+        is MRoomJoinRule -> this.joinRule = update.content.join_rule
+        is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility
+        is MRoomPowerLevels -> this.updatePowerLevels(update.content)
+        is MRoomCreate -> { }
+        is MRoomPinnedEvents -> {}
+        is MRoomTopic -> {}
+        is MRoomName -> {}
+        is MRoomGuestAccess -> {}
+    }
+}
+
+
+fun Room.updateMember(update: MRoomMember) {
+    when(update.content.membership)  {
+        Membership.join -> {
+            val senderid = update.sender
+            val user = UserStore.getOrCreateUserId(senderid)
+            update.content.avatar_url?.let { user.avatar = it }
+            update.content.displayname?.let { user.name=it }
+            this.makeUserJoined(user)
+        }
+        Membership.leave -> {
+            this.removeMember(update.sender)
+            if (apiClient?.userId == update.sender) {
                 val roomStore = appState.apiClient?.profile?.roomStore
                 roomStore?.remove(this.id)
             }
         }
-        is MemberBan -> this.removeMember(update.sender.id)
-        is RoomAliasUpdate -> {
-            val exist = this.aliases.get()
-            this.aliases.addAll(update.aliases.filter { !exist.contains(it) })
+        Membership.ban -> {
+            this.removeMember(update.sender)
         }
-        is RoomIconUpdate -> this.iconURL.set(update.url)
-        is RoomCanonicalAlias -> this.setCanonicalAlias(update.canonicalAlias)
-        is RoomJoinRuleUpdate -> this.joinRule = update.rule
-        is RoomHistoryVisibilityUpdate -> this.histVisibility = update.visibility
-        is RoomPowerLevel -> this.updatePowerLevels(update)
-        // only appears in the timeline, not part of the state of a room
-        is MemberUpdateMsg -> {
-            val sender = update.sender
-            update.avatar_change.second?.let { sender.avatar=it }
-            update.name_change.second?.let { sender.name=it }
+        else -> {
+            println("todo: handle membership ${update.content}")
         }
-        is RoomCreationMsg,
-        is ChatMessage
-        -> {}
     }
 }
-
