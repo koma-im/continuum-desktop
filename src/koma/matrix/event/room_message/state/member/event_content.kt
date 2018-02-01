@@ -1,5 +1,6 @@
 package koma.matrix.event.room_message.state.member
 
+import koma.matrix.UserId
 import koma.matrix.room.participation.Membership
 
 class RoomMemberContent(
@@ -12,7 +13,15 @@ class RoomMemberContent(
 
 class PrevContent(
         val avatar_url: String?,
+        val membership: Membership?,
         val displayname: String?
+)
+
+class RoomMemberUnsigned(
+        val age: Int,
+        val prev_content: PrevContent?,
+        val prev_sender: UserId?,
+        val replaces_state: String?
 )
 
 class Invite(

@@ -4,6 +4,9 @@ import koma.matrix.event.message.ChatMessageType
 
 open class M_Message (
     val body: String,
+    /**
+     * msgtype needed for sending messages
+     */
     val msgtype: ChatMessageType
 )
 
@@ -48,4 +51,8 @@ class FileMessage(
         val filename: String, val url: String, val info: FileInfo? = null,
         body: String = filename
 ): M_Message(body, ChatMessageType.File)
+
+class UnrecognizedMessage(
+        body: String
+): M_Message(body, ChatMessageType.Unrecognized)
 

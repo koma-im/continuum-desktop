@@ -4,6 +4,7 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.member.PrevContent
 import koma.matrix.event.room_message.state.member.RoomMemberContent
+import koma.matrix.event.room_message.state.member.RoomMemberUnsigned
 import koma.matrix.event.room_message.state.member.StrippedState
 
 sealed class RoomStateEvent(event_id: String, origin_server_ts: Long): RoomEvent(event_id, origin_server_ts)
@@ -53,6 +54,8 @@ class MRoomMember(
         origin_server_ts: Long,
         val prev_content: PrevContent?,
         val sender: UserId,
+        val unsigned: RoomMemberUnsigned?,
+        val replaces_state: String?,
         val state_key: String?,
         val invite_room_state: List<StrippedState>?,
         val content: RoomMemberContent): RoomStateEvent(event_id, origin_server_ts)
@@ -64,7 +67,6 @@ class MRoomPowerLevels(
         val prev_content: Map<String, Any>?,
         val sender: UserId,
         val state_key: String?,
-        val txn_id: String?,
         val content: RoomPowerLevelsContent): RoomStateEvent(event_id, origin_server_ts)
 
 class MRoomPinnedEvents(

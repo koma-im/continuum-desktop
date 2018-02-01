@@ -20,5 +20,6 @@ fun getPolyRoomEventAdapter(): JsonAdapter.Factory {
     factory.registerSubtype(MRoomPowerLevels::class.java, RoomEventType.PowerLevels.toString())
     factory.registerSubtype(MRoomRedaction::class.java, RoomEventType.Redaction   .toString())
     factory.registerSubtype(MRoomTopic::class.java, RoomEventType.Topic .toString())
+    factory.registerDefaultType(MRoomUnrecognized::class.java)
     return factory
 }

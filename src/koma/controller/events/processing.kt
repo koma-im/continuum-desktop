@@ -3,8 +3,6 @@ package koma.controller.events_processing
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
 import koma.matrix.epemeral.parse
-import koma.matrix.event.parse
-import koma.matrix.event.room_message.timeline.parse
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage

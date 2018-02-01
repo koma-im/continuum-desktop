@@ -192,8 +192,9 @@ class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
                 vbox(spacing = 2.0) {
                     lazyContextmenu {
                         item("Copy text").action {
-                            val text = item.content.body
-                            Clipboard.getSystemClipboard().putString(text)
+                            item.content?.body?.let {
+                                Clipboard.getSystemClipboard().putString(it)
+                            }
                         }
                     }
                     hgrow = Priority.ALWAYS
