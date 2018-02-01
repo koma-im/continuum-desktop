@@ -21,6 +21,7 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
     private final Map<Class<?>, String> subtypeToLabel = new LinkedHashMap<>();
     private final Class<?> baseType;
     private final String labelKey;
+    private Class<?> defaultType;
 
     public RuntimeJsonAdapterFactory(Class<?> baseType, String labelKey) {
         if (baseType == null) {
@@ -31,6 +32,17 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
         }
         this.baseType = baseType;
         this.labelKey = labelKey;
+    }
+
+    public RuntimeJsonAdapterFactory registerDefaultType(Class<?> defaultType) {
+        if (defaultType == null) {
+            throw new NullPointerException("defaulttype == null");
+        }
+        if (!baseType.isAssignableFrom(defaultType)) {
+            throw new IllegalArgumentException(defaultType + " must be a " + baseType);
+        }
+        this.defaultType = defaultType;
+        return this;
     }
 
     public RuntimeJsonAdapterFactory registerSubtype(Class<?> subtype, String label) {
@@ -63,10 +75,16 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
             labelToDelegate.put(value, delegate);
             subtypeToDelegate.put(key, delegate);
         }
+        JsonAdapter<?> delegateDefault;
+        if(defaultType != null) {
+            delegateDefault = moshi.adapter(defaultType, annotations);
+        } else {
+            delegateDefault = null;
+        }
         JsonAdapter<Map<String, Object>> toJsonDelegate =
                 moshi.adapter(Types.newParameterizedType(Map.class, String.class, Object.class));
         return new RuntimeJsonAdapter(labelKey, labelToDelegate, subtypeToDelegate, subtypeToLabel,
-                toJsonDelegate);
+                toJsonDelegate, delegateDefault);
     }
 
     private static final class RuntimeJsonAdapter extends JsonAdapter<Object> {
@@ -75,15 +93,18 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
         private final Map<Class<?>, JsonAdapter<?>> subtypeToDelegate;
         private final Map<Class<?>, String> subtypeToLabel;
         private final JsonAdapter<Map<String, Object>> toJsonDelegate;
+        private final JsonAdapter<?> defaultDelegate;
 
         RuntimeJsonAdapter(String labelKey, Map<String, JsonAdapter<?>> labelToDelegate,
                            Map<Class<?>, JsonAdapter<?>> subtypeToDelegate, Map<Class<?>, String> subtypeToLabel,
-                           JsonAdapter<Map<String, Object>> toJsonDelegate) {
+                           JsonAdapter<Map<String, Object>> toJsonDelegate,
+                           JsonAdapter<?> defaultDelegate) {
             this.labelKey = labelKey;
             this.labelToDelegate = labelToDelegate;
             this.subtypeToDelegate = subtypeToDelegate;
             this.subtypeToLabel = subtypeToLabel;
             this.toJsonDelegate = toJsonDelegate;
+            this.defaultDelegate = defaultDelegate;
         }
 
         @Override
@@ -97,7 +118,7 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
                     Map<String, Object> value = (Map<String, Object>) raw;
             Object label = value.remove(labelKey);
             if (label == null) {
-                throw new JsonDataException("Missing label for " + labelKey);
+                throw new JsonDataException("Missing label for " + labelKey + " in " + value.toString());
             }
             if (!(label instanceof String)) {
                 throw new JsonDataException("Label for "
@@ -109,7 +130,13 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
             }
             JsonAdapter<?> delegate = labelToDelegate.get(label);
             if (delegate == null) {
-                throw new JsonDataException("Type not registered for label: " + label);
+                if (defaultDelegate != null) {
+                    System.err.println("using default delegate for label " + label + " value " + value.toString());
+                    delegate = defaultDelegate;
+                } else {
+                    System.err.println("no fallback delegate found for label " + label + " value " + value.toString());
+                    throw new JsonDataException("Type not registered for label: " + label);
+                }
             }
             return delegate.fromJsonValue(value);
         }

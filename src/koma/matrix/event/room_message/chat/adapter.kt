@@ -11,5 +11,6 @@ fun getPolyMessageAdapter(): JsonAdapter.Factory {
     factory.registerSubtype(EmoteMessage::class.java, ChatMessageType.Emote .toString())
     factory.registerSubtype(ImageMessage::class.java, ChatMessageType.Image .toString())
     factory.registerSubtype(FileMessage::class.java, ChatMessageType.File .toString())
+    factory.registerDefaultType(UnrecognizedMessage::class.java)
     return factory
 }

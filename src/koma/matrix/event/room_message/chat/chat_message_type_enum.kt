@@ -1,6 +1,7 @@
 package koma.matrix.event.message
 
 import com.squareup.moshi.Json
+import com.squareup.moshi.JsonDataException
 
 /**
  * chat message types
@@ -13,7 +14,8 @@ enum class ChatMessageType {
     @Json(name="m.file") File,
     @Json(name="m.location") Location,
     @Json(name="m.video") Video,
-    @Json(name="m.audio") Audio;
+    @Json(name="m.audio") Audio,
+    Unrecognized;
 
     override fun toString(): String {
         return when(this) {
@@ -25,6 +27,7 @@ enum class ChatMessageType {
             Location -> "m.location"
             Video -> "m.video"
             Audio -> "m.audio"
+            Unrecognized -> throw JsonDataException("$this should not be encoded")
         }
     }
 }

@@ -49,7 +49,10 @@ class MRoomMessage(
         val prev_content: Map<String, Any>?,
         val sender: UserId,
         val unsigned: MessageUnsigned?,
-        val content: M_Message): RoomEvent(event_id, origin_server_ts)
+        /**
+         * sometimes content can be as empty as {}
+         */
+        val content: M_Message?): RoomEvent(event_id, origin_server_ts)
 
 class MRoomRedaction(
         //val age: Long?,
@@ -61,4 +64,13 @@ class MRoomRedaction(
         val redacts: String,
         val content: RoomRedactContent): RoomEvent(event_id, origin_server_ts)
 
+class MRoomUnrecognized(
+        //val age: Long?,
+        event_id: String,
+        origin_server_ts: Long,
+        val prev_content: Map<String, Any>?,
+        val sender: UserId?,
+        val state_key: String?,
+        val unsigned: MessageUnsigned?,
+        val content: Map<String, Any>?): RoomEvent(event_id, origin_server_ts)
 

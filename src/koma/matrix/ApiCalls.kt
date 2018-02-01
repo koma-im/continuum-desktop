@@ -1,6 +1,5 @@
 package matrix
 
-import com.serjltt.moshi.adapters.FallbackEnum
 import com.squareup.moshi.Moshi
 import domain.*
 import koma.controller.sync.longPollTimeout
@@ -460,7 +459,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
                 .add(RoomAliasAdapter())
                 .add(getPolyMessageAdapter())
                 .add(getPolyRoomEventAdapter())
-                .add(FallbackEnum.ADAPTER_FACTORY)
                 .build()
         val retrofitbuild = Retrofit.Builder()
                 .baseUrl(apiURL)
