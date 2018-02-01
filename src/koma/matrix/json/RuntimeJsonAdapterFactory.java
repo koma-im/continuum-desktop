@@ -116,6 +116,7 @@ public final class RuntimeJsonAdapterFactory implements JsonAdapter.Factory {
             }
             @SuppressWarnings("unchecked") // This is a JSON object.
                     Map<String, Object> value = (Map<String, Object>) raw;
+            if (value.isEmpty()) return null;
             Object label = value.remove(labelKey);
             if (label == null) {
                 throw new JsonDataException("Missing label for " + labelKey + " in " + value.toString());

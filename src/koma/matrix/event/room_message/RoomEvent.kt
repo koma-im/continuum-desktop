@@ -5,6 +5,7 @@ import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.MessageUnsigned
+import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.state.RoomRedactContent
 import koma.matrix.room.naming.RoomAliasAdapter
 
@@ -30,15 +31,13 @@ abstract class RoomEvent(
                 .add(UserIdAdapter())
                 .add(RoomAliasAdapter())
                 .add(getPolyRoomEventAdapter())
+                .add(getPolyMessageAdapter())
                 .build().adapter(RoomEvent::class.java)
     }
 
-    /**
-     * convert to string to storage
-     * omit age, which is temporary
-     */
     fun toJson(): String{
-        return adapter.toJson(this)
+        val json = adapter.toJson(this)
+        return json
     }
 }
 
