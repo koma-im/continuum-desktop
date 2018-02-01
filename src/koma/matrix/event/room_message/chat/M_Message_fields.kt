@@ -46,6 +46,9 @@ class ThumbnailInfo(
 )
 
 class MessageUnsigned(
-        val age: Int?,
+        /**
+         * not used and it keeps changing
+         */
+        //val age: Int?,
         val transactionId: String?
 )
