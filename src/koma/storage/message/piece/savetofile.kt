@@ -1,5 +1,6 @@
 package koma.storage.message.piece
 
+import com.squareup.moshi.JsonDataException
 import koma.matrix.room.naming.RoomId
 import java.io.File
 import java.time.Instant
@@ -27,9 +28,13 @@ fun DiscussionPiece.save() {
     file.writeText("")
     val writer = file.bufferedWriter()
     for (mesg in this.messages) {
-        val line = mesg.toJson()
-        writer.append(line)
-        writer.append('\n')
+        try {
+            val line = mesg.toJson()
+            writer.append(line)
+            writer.append('\n')
+        } catch (e: JsonDataException) {
+            System.err.println("failed to encode line $mesg: $e")
+        }
     }
     this.following_event?.let { writer.append("# following_event " + it + "\n") }
     writer.close()

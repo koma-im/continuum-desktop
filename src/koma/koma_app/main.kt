@@ -12,7 +12,7 @@ import view.LoginScreen
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
 fun main(args: Array<String>) {
-  Application.launch(KomaApp::class.java, *args)
+    Application.launch(KomaApp::class.java, *args)
     appState.chatController.shutdown()
 }
 

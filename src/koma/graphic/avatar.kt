@@ -8,6 +8,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
+import koma.gui.element.icon.user.extract_key_chars
 import koma.storage.config.settings.AppSettings
 
 /**
@@ -22,11 +23,6 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     val isize = 32.0 * scale
     if (nameImageCache.images.containsKey(name))
         return nameImageCache.images[name]!!
-    val chars = if (name.contains(' ')) {
-        name.take(1) + name.substringAfter(' ').take(1)
-    } else {
-        name.take(2)
-    }
     val canva = Canvas(isize, isize)
     val graphc = canva.graphicsContext2D
     val fgcolor = Color.WHITE
@@ -40,8 +36,9 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     val middle = isize * 0.5
     val mid0 = isize * 0.25
     val mid1 = isize * 0.75
-    graphc.fillText(chars.getStringAtOrSpace(0), mid0, middle)
-    graphc.fillText(chars.getStringAtOrSpace(1), mid1, middle)
+    val keychars = extract_key_chars(name)
+    graphc.fillText(keychars.first.toString(), mid0, middle)
+    graphc.fillText(keychars.second.toString(), mid1, middle)
     val params =SnapshotParameters()
     params.fill = Color.TRANSPARENT
     val im = canva.snapshot(params, null)
@@ -49,9 +46,6 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     return im
 }
 
-fun String.getStringAtOrSpace(ind: Int): String {
-    return this.getOrNull(ind)?.toString() ?: " "
-}
 
 /* get a color that's not too bright
  */
