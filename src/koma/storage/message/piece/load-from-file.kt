@@ -1,7 +1,5 @@
 package koma.storage.message.piece
 
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.JsonEncodingException
 import com.squareup.moshi.Moshi
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.room_message.RoomEvent
@@ -46,10 +44,8 @@ private fun File.loadDiscussion(): DiscussionPiece? {
         } else {
             try {
                 adapter.fromJson(it)
-            } catch (e: JsonEncodingException) {
-                println("failed to load line $it")
-                return@mapNotNull null
-            } catch (e: JsonDataException) {
+            } catch (e: Exception) {
+                println("failed to load line $it: $e")
                 return@mapNotNull null
             }
         }

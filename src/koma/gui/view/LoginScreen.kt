@@ -8,6 +8,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.control.PasswordField
+import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.PreferenceWindow
@@ -37,6 +38,9 @@ class LoginScreen(): View() {
 
     init {
         title = "Koma"
+
+        val iconstream = javaClass.getResourceAsStream("/icon/koma.png");
+        FX.primaryStage.icons.add(Image(iconstream))
 
         val grid = GridPane()
         with(grid) {
