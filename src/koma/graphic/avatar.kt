@@ -8,6 +8,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
+import koma.storage.config.settings.AppSettings
 
 /**
  * Created by developer on 2017/7/15.
@@ -17,7 +18,8 @@ private object nameImageCache {
 }
 
 fun getImageForName(name: String, bgcolor: Color): Image {
-    val isize = 32.0
+    val scale = AppSettings.settings.scaling
+    val isize = 32.0 * scale
     if (nameImageCache.images.containsKey(name))
         return nameImageCache.images[name]!!
     val chars = if (name.contains(' ')) {
@@ -34,7 +36,7 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     graphc.setFill(fgcolor)
     graphc.textAlign = TextAlignment.CENTER
     graphc.textBaseline = VPos.CENTER
-    graphc.font = Font.font("serif", FontWeight.BOLD, 20.0)
+    graphc.font = Font.font("serif", FontWeight.BOLD, 20.0 * scale)
     val middle = isize * 0.5
     val mid0 = isize * 0.25
     val mid1 = isize * 0.75

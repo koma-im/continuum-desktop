@@ -4,7 +4,7 @@
     <groupId>com.smith.koma</groupId>
     <artifactId>koma</artifactId>
     <packaging>jar</packaging>
-    <version>0.6</version>
+    <version>0.6.1</version>
     <name>koma</name>
     <dependencies>
         <dependency>
@@ -92,11 +92,6 @@
             <groupId>ru.gildor.coroutines</groupId>
             <artifactId>kotlin-coroutines-retrofit</artifactId>
             <version>0.8.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.serjltt.moshi</groupId>
-            <artifactId>moshi-lazy-adapters</artifactId>
-            <version>2.1</version>
         </dependency>
     </dependencies>
     <properties>

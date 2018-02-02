@@ -7,14 +7,12 @@ import koma.storage.config.server.cert_trust.loadContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.net.Proxy
 import java.util.concurrent.ConcurrentHashMap
 import javax.net.ssl.SSLContext
 
 class ServerConf(
         val servername: String,
         var addresses: MutableList<String>,
-        var proxies: MutableList<Proxy> = mutableListOf(Proxy.NO_PROXY),
         val apiPath: String = "_matrix/client/r0/"
 )
 
@@ -23,19 +21,6 @@ fun server_save_path(servername: String): String? {
 }
 
 val conf_file_name = "server_conf.json"
-
-fun ServerConf.saveProxy(proxy: Proxy) {
-    this.proxies.remove(proxy)
-    this.proxies.add(0, proxy)
-    this.save()
-}
-
-/**
- * get preferred proxy
- */
-fun ServerConf.getProxy(): Proxy {
-    return this.proxies.getOrNull(0)?: Proxy.NO_PROXY
-}
 
 /**
  * get preferred web address
@@ -63,7 +48,6 @@ fun ServerConf.save() {
             this.servername)
     dir?: return
     val moshi = Moshi.Builder()
-            .add(ProxyAdapter())
             .build()
     val jsonAdapter = moshi.adapter(ServerConf::class.java).indent("    ")
     val json = try {
@@ -89,7 +73,6 @@ private fun computeServerConf(servername: String): ServerConf {
     dir?: return serverConf
     val sf = File(dir).resolve(conf_file_name)
     val jsonAdapter = Moshi.Builder()
-            .add(ProxyAdapter())
             .build()
             .adapter(ServerConf::class.java)
     val loadedConf = try {

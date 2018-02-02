@@ -1,35 +1,33 @@
 package koma.matrix.event.message
 
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonDataException
+
 /**
  * chat message types
  */
 enum class ChatMessageType {
-    Text,
-    Emote,
-    Notice,
-    Image,
-    File,
-    Location,
-    Video,
-    Audio,
-    Other;
+    @Json(name="m.text") Text,
+    @Json(name="m.emote") Emote,
+    @Json(name="m.notice") Notice,
+    @Json(name="m.image") Image,
+    @Json(name="m.file") File,
+    @Json(name="m.location") Location,
+    @Json(name="m.video") Video,
+    @Json(name="m.audio") Audio,
+    Unrecognized;
 
-    companion object {
-        fun fromString(msgtype: String): ChatMessageType {
-            val mtype = when(msgtype) {
-                "m.text" -> Text
-                "m.emote" -> Emote
-                "m.notice" -> Notice
-                "m.image" -> Image
-                "m.file" -> File
-                "m.location" -> Location
-                "m.video" -> Video
-                "m.audio" -> Audio
-                else -> {
-                    Other
-                }
-            }
-            return mtype
+    override fun toString(): String {
+        return when(this) {
+            Text -> "m.text"
+            Emote -> "m.emote"
+            Notice -> "m.notice"
+            Image -> "m.image"
+            File -> "m.file"
+            Location -> "m.location"
+            Video -> "m.video"
+            Audio -> "m.audio"
+            Unrecognized -> throw JsonDataException("$this should not be encoded")
         }
     }
 }

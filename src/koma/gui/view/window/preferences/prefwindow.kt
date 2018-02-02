@@ -3,38 +3,34 @@ package koma.gui.view.window.preferences
 import javafx.geometry.Side
 import javafx.scene.control.TabPane
 import javafx.scene.layout.VBox
+import koma.gui.view.window.preferences.tab.AppearanceTab
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
-import koma_app.appState
+import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
 class PreferenceWindow(): View() {
     override val root = VBox()
 
-    private val nettab = NetworkSettingsTab()
+    private val nettab = NetworkSettingsTab(this)
 
     init {
         val tabs = TabPane()
         with(tabs) {
+            this.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
             this.side  = Side.LEFT
             tab("Network") {
                 add(nettab)
             }
-        }
-        with(root) {
-            add(tabs)
-            buttonbar {
-                button("Ok") {
-                    action {
-                        save()
-                        this@PreferenceWindow.close()
-                    }
-                }
+            tab("Appearance") {
+                add(AppearanceTab(this@PreferenceWindow))
             }
         }
-        appState.apiClient?.userId?.server?.let { nettab.serverNameProperty.set(it) }
+        with(root) {
+            style {
+                fontSize= AppSettings.settings.scaling.em
+            }
+            add(tabs)
+        }
     }
 
-    private fun save() {
-        nettab.save()
-    }
 }

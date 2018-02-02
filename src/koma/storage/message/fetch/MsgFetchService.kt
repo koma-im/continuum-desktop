@@ -2,8 +2,7 @@ package koma.storage.message.fetch
 
 import domain.Chunked
 import koma.matrix.event.context.ContextResponse
-import koma.matrix.event.parse
-import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.storage.message.MessageManager
@@ -11,7 +10,6 @@ import koma.storage.message.piece.DiscussionPiece
 import koma.storage.message.piece.first_event_id
 import koma_app.appState
 import kotlinx.coroutines.experimental.delay
-import matrix.room.RoomEvent
 import retrofit2.HttpException
 import ru.gildor.coroutines.retrofit.await
 
@@ -28,7 +26,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
             koma.storage.message.fetch.doFetch(cur, roomid)
         } catch (he: HttpException) {
             if (he.code() == 404) {
-                println("stopping fetching history because of 404 at: ${entry.first_event_id()}")
+                println("stopping fetching history because of 404 at: ${cur.first_event_id()}")
                 break@loop
             } else {
                 delay(1000)
@@ -40,7 +38,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
             continue@loop
         }
         if (res == null) {
-            println("stopping fetching history because of null at: ${entry.first_event_id()}")
+            println("stopping fetching history because of null at: ${cur.first_event_id()}")
             break@loop
         }
 
@@ -61,7 +59,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
     }
 }
 
-private suspend fun doFetch(piece: DiscussionPiece, roomid: RoomId): Pair<List<RoomMessage>, String>? {
+private suspend fun doFetch(piece: DiscussionPiece, roomid: RoomId): Pair<List<RoomEvent>, String>? {
     val service = appState.apiClient
     if (service == null) {
         println("no service for loading messages")
@@ -81,16 +79,16 @@ private suspend fun doFetch(piece: DiscussionPiece, roomid: RoomId): Pair<List<R
     }
 }
 
-fun Chunked<RoomEvent>.messagesInChrono(): List<RoomMessage> {
-    return this.chunk.map { it.toMessage().parse() }.reversed()
+fun Chunked<RoomEvent>.messagesInChrono(): List<RoomEvent> {
+    return this.chunk.reversed()
 }
 
 fun Chunked<RoomEvent>.earlierKey(): String {
     return this.end
 }
 
-fun ContextResponse.messagesInChrono(): List<RoomMessage> {
-    return this.events_before.map { it.toMessage().parse() }.reversed()
+fun ContextResponse.messagesInChrono(): List<RoomEvent> {
+    return this.events_before.reversed()
 }
 
 fun ContextResponse.earlierKey(): String {

@@ -20,6 +20,7 @@ fun main(args: Array<String>) {
 class KomaApp : App(LoginScreen::class, TooltipStyle::class) {
 
     init {
+        Thread.setDefaultUncaughtExceptionHandler(NoAlertErrorHandler())
         reloadStylesheetsOnFocus()
     }
 

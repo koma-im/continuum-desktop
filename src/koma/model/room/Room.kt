@@ -12,13 +12,15 @@ import koma.graphic.getImageForName
 import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
-import koma.matrix.event.room_message.RoomPowerLevel
+import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
+import koma.matrix.room.visibility.RoomVisibility
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
+import koma.storage.config.settings.AppSettings
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
 import kotlinx.coroutines.experimental.javafx.JavaFx
@@ -97,10 +99,12 @@ class Room(val id: RoomId) {
         }
         aliasesChangeActions(aliases.toObservable())
 
+        val scale = AppSettings.settings.scaling
+        val iconsize = scale * 32.0
         iconURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
                 .map {
                     println("Room $this has new icon url $it")
-                    getResizedImage(it, 32.0, 32.0)
+                    getResizedImage(it, iconsize, iconsize)
                 }
                 .filterNotNull()
                 .observeOnFx()
@@ -135,15 +139,11 @@ class Room(val id: RoomId) {
             this.aliases.add(0, alias)
     }
 
-    fun updatePowerLevels(roomPowerLevel: RoomPowerLevel) {
-        power_levels.putAll(roomPowerLevel.powerLevels.mapValues { it.value.toDouble() })
-        for (user in roomPowerLevel.userLevels)
-            userStates.get(UserId_new(user.key)!!).power = user.value
+    fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
+        power_levels.putAll(roomPowerLevel.events.mapValues { it.value.toDouble() })
+        for (user in roomPowerLevel.users)
+            userStates.get(UserId_new(user.key)).power = user.value
     }
 }
 
-enum class RoomVisibility {
-    Public,
-    Private
-}
 

@@ -1,13 +1,20 @@
 package matrix
 
-import com.serjltt.moshi.adapters.FallbackEnum
 import com.squareup.moshi.Moshi
 import domain.*
+import koma.controller.sync.longPollTimeout
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
+import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.event.room_message.chat.FileMessage
+import koma.matrix.event.room_message.chat.ImageMessage
+import koma.matrix.event.room_message.chat.TextMessage
+import koma.matrix.event.room_message.chat.getPolyMessageAdapter
+import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
+import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.storage.config.profile.Profile
@@ -15,9 +22,9 @@ import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
-import koma.storage.config.server.getProxy
 import koma.storage.config.server.loadCert
-import matrix.room.RoomEvent
+import koma.storage.config.settings.AppSettings
+import matrix.event.room_message.RoomEventType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -58,11 +65,6 @@ class BanRoomResult()
 data class ResolveRoomAliasResult(
         val room_id: String,
         val servers: List<String>
-)
-
-data class SendMessage(
-        val msgtype: String = "m.text",
-        val body: String
 )
 
 data class SendResult(
@@ -125,19 +127,13 @@ interface MatrixAccessApi {
                 @Body banishment: MemberBanishment
     ): Call<BanRoomResult>
 
-    @PUT("rooms/{roomId}/send/m.room.message/{txnId}")
-    fun sendMessage(@Path("roomId") roomId: RoomId,
-                    @Path("txnId") txnId: Long,
-                    @Query("access_token") token: String,
-                    @Body sendMessage: SendMessage): Call<SendResult>
-
     @PUT("rooms/{roomId}/send/{eventType}/{txnId}")
     fun sendMessageEvent(
             @Path("roomId") roomId: RoomId,
-            @Path("eventType") eventType: String,
+            @Path("eventType") eventType: RoomEventType,
             @Path("txnId") txnId: Long,
             @Query("access_token") token: String,
-            @Body message: Map<String, String>): Call<SendResult>
+            @Body message: Any): Call<SendResult>
 
     @PUT("rooms/{roomId}/state/m.room.avatar")
     fun setRoomIcon(@Path("roomId") roomId: RoomId,
@@ -161,7 +157,7 @@ interface MatrixAccessApi {
     fun getEvents(@Query("since") from: String? = null,
                   @Query("access_token") token: String,
                   @Query("full_state") full_state: Boolean = false,
-                  @Query("timeout") timeout: Int = 50_000,
+                  @Query("timeout") timeout: Int = longPollTimeout * 1000,
                   @Query("filter") filter: String? = null)
             : Call<SyncResponse>
 
@@ -204,6 +200,10 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     val longPollService: MatrixAccessApi
     val mediaService: MatrixMediaApi
 
+    private val txnIdUnique = AtomicLong()
+
+    fun getTxnId() = txnIdUnique.getAndAdd(1)
+
     fun shutdown() = longPollClient.dispatcher().executorService().shutdown()
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
@@ -220,6 +220,11 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     fun getEventContext(roomid: RoomId, eventId: String): Call<ContextResponse> {
         return service.getEventContext(roomid, eventId,token= token)
+    }
+
+    fun uploadFile(file: File, contentType: MediaType): Call<UploadResponse> {
+        val req = RequestBody.create(contentType, file)
+        return mediaService.uploadMedia(contentType.toString(), token, req)
     }
 
     fun uploadMedia(file: String): UploadResponse? {
@@ -397,23 +402,22 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-  private var txnIdUnique = AtomicLong()
-
     fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
         val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
-        val r = service.sendMessage(roomId, txnId, token, SendMessage(body = message))
+        val r = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token, TextMessage(body = message))
         return r
+    }
+
+    fun sendFile(roomId: RoomId, name: String, url: String): Call<SendResult> {
+        val msg = FileMessage(name, url)
+        return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, msg)
     }
 
     fun sendImage(roomId: RoomId, imageUrl: String, desc: String): SendResult? {
         val txnId = txnIdUnique.addAndGet(1L)
-        val msg = mapOf(
-                Pair("msgtype", "m.image"),
-                Pair("url", imageUrl),
-                Pair("body", desc)
-        )
-        val call: Call<SendResult> = service.sendMessageEvent(roomId, "m.room.message", txnId, token,
+        val msg = ImageMessage(desc, imageUrl)
+        val call: Call<SendResult> = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token,
                 msg)
         val resp: Response<SendResult>
         try {
@@ -438,7 +442,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         token = profile.access_token
         userId = profile.userId
 
-        val clientbuildproxy = OkHttpClient.Builder().proxy(serverConf.getProxy())
+        val proxy = AppSettings.getProxy()
+        val clientbuildproxy = OkHttpClient.Builder().proxy(proxy)
 
         val addtrust = serverConf.loadCert()
         val clientbuildcert = if (addtrust!= null) {
@@ -446,12 +451,14 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         } else clientbuildproxy
         val client = clientbuildcert.build()
         longPollClient = clientbuildcert
-                .readTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS)
                 .build()
 
         val moshi = Moshi.Builder()
                 .add(UserIdAdapter())
-                .add(FallbackEnum.ADAPTER_FACTORY)
+                .add(RoomAliasAdapter())
+                .add(getPolyMessageAdapter())
+                .add(getPolyRoomEventAdapter())
                 .build()
         val retrofitbuild = Retrofit.Builder()
                 .baseUrl(apiURL)
@@ -496,7 +503,7 @@ interface MatrixLoginApi {
 fun login(userpass: UserPassword, serverConf: ServerConf):
         Profile? {
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val proxy = serverConf.getProxy()
+    val proxy = AppSettings.getProxy()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
@@ -545,7 +552,8 @@ fun register(userregi: UserRegistering, serverConf: ServerConf):
         RegisterdUser? {
     println("register user $userregi on ${serverConf.servername}")
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val client = OkHttpClient.Builder().proxy(serverConf.getProxy()).build()
+    val proxy = AppSettings.getProxy()
+    val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
             .client(client)

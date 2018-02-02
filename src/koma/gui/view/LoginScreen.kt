@@ -10,11 +10,12 @@ import javafx.scene.control.ComboBox
 import javafx.scene.control.PasswordField
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
-import koma.gui.view.window.preferences.loginconf.LoginConfWindow
+import koma.gui.view.window.preferences.PreferenceWindow
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.server.serverConfWithAddr
+import koma.storage.config.settings.AppSettings
 import matrix.UserRegistering
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -61,10 +62,13 @@ class LoginScreen(): View() {
             }
         }
         with(root) {
+            style {
+                fontSize=AppSettings.settings.scaling.em
+            }
             add(grid)
 
             val serverName = stringBinding(userId.valueProperty()) { if (value != null && value.isNotBlank()) UserId_new(value)?.server else null }
-            val settings = LoginConfWindow(serverName)
+            val settings = PreferenceWindow()
             button("More Options") {
                 action { settings.openModal() }
             }

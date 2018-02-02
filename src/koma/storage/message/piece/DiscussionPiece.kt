@@ -1,6 +1,6 @@
 package koma.storage.message.piece
 
-import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.RoomEvent
 
 /**
  * collection of continuous messages, without gaps
@@ -9,13 +9,13 @@ class DiscussionPiece(
         /**
          * must be a sorted list
          */
-        val messages: MutableList<RoomMessage>,
+        val messages: MutableList<RoomEvent>,
         /**
          * used to sort by time
          * time of some message contained within
          */
         val timekey: Long
-): OrderedListPart<Long, RoomMessage> {
+): OrderedListPart<Long, RoomEvent> {
     /**
      * temporary keys
      */
@@ -35,7 +35,7 @@ class DiscussionPiece(
 
     fun contentHash(): Int = messages.hashCode() * 31 + (following_event?.hashCode() ?: 0)
 
-    override fun getList(): MutableList<RoomMessage> {
+    override fun getList(): MutableList<RoomEvent> {
         return this.messages
     }
 
@@ -49,7 +49,7 @@ class DiscussionPiece(
     }
 
     override fun toString(): String {
-        return "<messages from ${this.timekey}: ... ${this.messages.lastOrNull()?.original?.content}>"
+        return "<messages from ${this.timekey}: ... ${this.messages.lastOrNull()}>"
     }
 }
 

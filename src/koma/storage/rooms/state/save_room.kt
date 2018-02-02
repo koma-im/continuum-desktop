@@ -6,10 +6,10 @@ import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomIdAdapter
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
+import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.config.config_paths
 import model.Room
-import model.RoomVisibility
 import model.room.user.RoomUserMap
 import java.io.File
 import java.io.IOException

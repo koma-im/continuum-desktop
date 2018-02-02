@@ -2,7 +2,7 @@ package koma.storage.message
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import koma.matrix.event.room_message.RoomMessage
+import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.room.naming.RoomId
 import koma.storage.message.fetch.fetchEarlier
 import koma.storage.message.piece.DiscussionPiece
@@ -18,23 +18,23 @@ class MessageManager(val roomid: RoomId) {
     /**
      * merged list shown to the user
      */
-    val messages: ObservableList<RoomMessage>
+    val messages: ObservableList<RoomEvent>
 
     var continued = false
 
     init {
-        val _messages: ObservableList<RoomMessage> = FXCollections.observableArrayList<RoomMessage>()
+        val _messages: ObservableList<RoomEvent> = FXCollections.observableArrayList<RoomEvent>()
         stitcher = Stitcher(_messages)
         messages = FXCollections.unmodifiableObservableList(_messages)
 
         val stored = loadStoredDiscussion(roomid)
-        stored.forEach { this.stitcher.insertPiece(it) }
+        stored.filter { it.getList().isNotEmpty() }.forEach { this.stitcher.insertPiece(it) }
     }
 
 
 
-    fun appendTimeline(timeline: Timeline<RoomMessage>) {
-        val time = timeline.events.firstOrNull()?.original?.origin_server_ts
+    fun appendTimeline(timeline: Timeline<RoomEvent>) {
+        val time = timeline.events.firstOrNull()?.origin_server_ts
         time?: return
         synchronized(stitcher) {
             if (!continued

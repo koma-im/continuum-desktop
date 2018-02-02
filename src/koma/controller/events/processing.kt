@@ -3,8 +3,6 @@ package koma.controller.events_processing
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
 import koma.matrix.epemeral.parse
-import koma.matrix.event.parse
-import koma.matrix.event.room_message.timeline.parse
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
@@ -27,8 +25,8 @@ private fun handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     val roomStore= appState.apiClient?.profile?.roomStore!!
     val room = roomStore.add(roomid)
 
-    data.state.events.map { it.parse() }.forEach { room.applyUpdate(it) }
-    val timeline = data.timeline.parse()
+    data.state.events.forEach { room.applyUpdate(it) }
+    val timeline = data.timeline
     timeline.events.forEach { room.applyUpdate(it) }
     room.messageManager.appendTimeline(timeline)
 

@@ -5,43 +5,51 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.ImageView
+import javafx.scene.input.Clipboard
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.media.getMxcImagePropery
-import koma.matrix.event.room_message.*
-import koma.model.user.UserState
-import koma.matrix.event.room_message.chat.EmoteMsg
-import koma.matrix.event.room_message.chat.ImageMsg
-import koma.matrix.event.room_message.chat.TextMsg
+import koma.matrix.UserId
+import koma.matrix.event.room_message.MRoomMessage
+import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.event.room_message.chat.EmoteMessage
+import koma.matrix.event.room_message.chat.ImageMessage
+import koma.matrix.event.room_message.chat.TextMessage
+import koma.matrix.event.room_message.state.MRoomCreate
+import koma.matrix.event.room_message.state.MRoomMember
+import koma.matrix.room.participation.Membership
+import koma.storage.users.UserStore
 import org.fxmisc.flowless.Cell
 import tornadofx.*
 import java.text.SimpleDateFormat
 import java.util.*
 
-fun ChatMessage.render_node(): Node {
+fun MRoomMessage.render_node(): Node {
     val node = TextFlow()
     val content = this.content
     when(content) {
-        is TextMsg -> {
-            node.add(Text(content.text))
+        is TextMessage -> {
+            val text = Text(content.body)
+            node.add(text)
         }
-        is EmoteMsg -> {
-            node.add(Text(content.text))
+        is EmoteMessage-> {
+            node.add(Text(content.body))
         }
-        is ImageMsg -> {
+        is ImageMessage-> {
             val im = ImageView()
-            im.tooltip(content.desc)
-            im.imageProperty().bind(getMxcImagePropery(content.mxcurl, 320.0, 120.0))
+            im.tooltip(content.body)
+            im.imageProperty().bind(getMxcImagePropery(content.url, 320.0, 120.0))
             node.add(im)
         }
     }
     return node
 }
 
-private fun showUser(node: Node, user: UserState) {
+private fun showUser(node: Node, userId: UserId) {
+    val user = UserStore.getOrCreateUserId(userId)
     node.apply {
         hbox(spacing = 5.0) {
             imageview(user.avatarImgProperty)
@@ -57,7 +65,8 @@ private fun showUser(node: Node, user: UserState) {
     }
 }
 
-private fun showDatetime(node: Node, datetime: Date) {
+private fun showDatetime(node: Node, ts: Long) {
+    val datetime= Date(ts)
     node.apply {
         hbox {
             hgrow = Priority.ALWAYS
@@ -69,20 +78,19 @@ private fun showDatetime(node: Node, datetime: Date) {
     }
 }
 
-class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
+class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
     private val _node = StackPane()
 
     init {
         _node.paddingAll = 2.0
         when(message) {
-            is MemberJoinMsg -> renderMemberJoin(message)
-            is MemberUpdateMsg -> renderMemberChange(message)
-            is RoomCreationMsg -> renderRoomCreation(message)
-            is ChatMessage -> renderMessageFromUser(message)
+            is MRoomMember -> renderMemberChange(message)
+            is MRoomCreate -> renderRoomCreation(message)
+            is MRoomMessage -> renderMessageFromUser(message)
         }
     }
 
-    private fun renderRoomCreation(message: RoomCreationMsg) {
+    private fun renderRoomCreation(message: MRoomCreate) {
         _node.apply {
             hbox(spacing = 5.0) {
                 alignment = Pos.CENTER
@@ -91,77 +99,79 @@ class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
                 }
                 showUser(this, message.sender)
             }
-            showDatetime(this, message.datetime)
+            showDatetime(this, message.origin_server_ts)
         }
     }
 
-    private fun renderMemberJoin(message: MemberJoinMsg) {
-        _node.apply {
-            hbox(spacing = 5.0) {
-                alignment = Pos.CENTER
-                showUser(this, message.sender)
-                text("joined this room.")
+    private fun renderMemberChange(message: MRoomMember) {
+        val content = message.content
+        if (content.membership != Membership.join) return
+        val pc = message.prev_content
+        if (pc == null) {
+            _node.apply {
+                hbox(spacing = 5.0) {
+                    alignment = Pos.CENTER
+                    showUser(this, message.sender)
+                    text("joined this room.")
+                }
+                showDatetime(this, message.origin_server_ts)
             }
-            showDatetime(this, message.datetime)
-        }
-    }
-
-    private fun renderMemberChange(message: MemberUpdateMsg) {
-        _node.apply {
+        } else {
+         _node.apply {
             hbox(spacing = 5.0) {
                 alignment = Pos.CENTER
                 showUser(this, message.sender)
                 vbox {
                     alignment = Pos.CENTER
-                    val ac = message.avatar_change
-                    if (ac.first != ac.second) {
+                    if (pc.avatar_url != content.avatar_url) {
                         hbox(spacing = 5.0) {
                             alignment = Pos.CENTER
                             text("updated avatar") {
                                 opacity = 0.5
                             }
                             stackpane {
-                                ac.first?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
+                                pc.avatar_url?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
                                 minWidth = 40.0
                             }
                             val arrowico = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_RIGHT)
                             arrowico.opacity = 0.3
                             add(arrowico)
                             stackpane {
-                                ac.second?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
+                                content.avatar_url?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
                                 minWidth = 40.0
                             }
                         }
                     }
-                    val nc = message.name_change
-                    if (nc.first != nc.second) {
+                    if (pc.displayname != content.displayname) {
                         hbox(spacing = 5.0) {
                             text("updated name") {
                                 opacity = 0.5
                             }
                             stackpane {
                                 minWidth = 50.0
-                                text(nc.first)
+                                text(pc.displayname)
                             }
                             val arrowico = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_RIGHT)
                             arrowico.opacity = 0.3
                             add(arrowico)
                             stackpane{
-                                text(nc.second)
+                                text(content.displayname)
                                 minWidth = 50.0
                             }
                         }
                     }
                 }
             }
-            showDatetime(this, message.datetime)
+            showDatetime(this, message.origin_server_ts)
+        }
         }
     }
 
-    private fun renderMessageFromUser(item: ChatMessage){
-        val sender = item.sender.displayName
-        val avtar = item.sender.avatarImgProperty
-        val color = item.sender.color
+    private fun renderMessageFromUser(item: MRoomMessage){
+        val sus = UserStore.getOrCreateUserId(item.sender)
+        val sender = sus.displayName
+        val avtar = sus.avatarImgProperty
+        val color = sus.color
 
         _node.apply {
             hbox {
@@ -180,6 +190,13 @@ class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
                 }
 
                 vbox(spacing = 2.0) {
+                    lazyContextmenu {
+                        item("Copy text").action {
+                            item.content?.body?.let {
+                                Clipboard.getSystemClipboard().putString(it)
+                            }
+                        }
+                    }
                     hgrow = Priority.ALWAYS
                     hbox(spacing = 10.0) {
                         hgrow = Priority.ALWAYS
@@ -187,7 +204,7 @@ class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
                             fill = color
                         }
 
-                        showDatetime(this, item.datetime)
+                        showDatetime(this, item.origin_server_ts)
                     }
                     hbox(spacing = 5.0) {
                         val n = item.render_node()
@@ -203,6 +220,3 @@ class MessageCell(val message: RoomMessage): Cell<RoomMessage, Node> {
     }
 }
 
-fun create_message_cell(messageItem: RoomMessage): MessageCell {
-    return MessageCell(messageItem)
-}
