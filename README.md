@@ -20,7 +20,7 @@ Java runtime version 8, with JavaFx. You may need to install openjfx if you are 
 
 ## Get a compiled package
 
-[Click to download](https://jitpack.io/com/github/koma-im/koma/8e4ad9d/koma-8e4ad9d-jar-with-dependencies.jar)
+[Click to download](https://jitpack.io/com/github/koma-im/koma/5d85f72/koma-5d85f72-jar-with-dependencies.jar)
 
 ## Alternatively, use the source
 
