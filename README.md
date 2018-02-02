@@ -76,3 +76,4 @@ If you know someone who might be interested in open-source communication, star o
 If you are interested in or have experience with Kotlin or Matrix, feel free to click "Fork" and experiment with the source.
 There are a lot of ways to make improvements.
 
+It's a good idea to open an issue before you start working, in order to coordinate work and avoid duplicate work.
