@@ -144,6 +144,10 @@ class Room(val id: RoomId) {
         for (user in roomPowerLevel.users)
             userStates.get(UserId_new(user.key)).power = user.value
     }
+
+    override fun toString(): String {
+        return this.displayName.get()
+    }
 }
 
 

@@ -2,7 +2,7 @@ package koma.gui.view.chatview
 
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import koma.gui.view.ChatRecvSendView
+import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.usersview.RoomMemberListView
 import model.Room
 import tornadofx.*

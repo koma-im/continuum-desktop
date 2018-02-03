@@ -58,6 +58,11 @@
             <artifactId>fontawesomefx-fontawesome</artifactId>
             <version>4.7.0-5</version>
         </dependency>
+       <dependency>
+           <groupId>de.jensd</groupId>
+           <artifactId>fontawesomefx-materialicons</artifactId>
+           <version>2.2.0-5</version>
+       </dependency>
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx-commons</artifactId>
