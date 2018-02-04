@@ -8,7 +8,7 @@ import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.FileMessage
-import koma.matrix.event.room_message.chat.ImageMessage
+import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.TextMessage
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
@@ -403,36 +403,18 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     }
 
     fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
-        val txnId = txnIdUnique.addAndGet(1L)
         println("sending message $message to room $roomId ")
-        val r = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token, TextMessage(body = message))
-        return r
+        val msg = TextMessage(body = message)
+        return sendRoomMessage(roomId, msg)
     }
 
     fun sendFile(roomId: RoomId, name: String, url: String): Call<SendResult> {
         val msg = FileMessage(name, url)
-        return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, msg)
+        return sendRoomMessage(roomId, msg)
     }
 
-    fun sendImage(roomId: RoomId, imageUrl: String, desc: String): SendResult? {
-        val txnId = txnIdUnique.addAndGet(1L)
-        val msg = ImageMessage(desc, imageUrl)
-        val call: Call<SendResult> = service.sendMessageEvent(roomId, RoomEventType.Message, txnId, token,
-                msg)
-        val resp: Response<SendResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            println("sent image $imageUrl to room $roomId ")
-            return resp.body()
-        } else {
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
+    fun sendRoomMessage(roomId: RoomId, message: M_Message): Call<SendResult> {
+        return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, message)
     }
 
     fun getEvents(from: String?): Call<SyncResponse>

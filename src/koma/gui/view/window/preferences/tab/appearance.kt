@@ -22,7 +22,7 @@ class AppearanceTab(parent: View): View() {
         }
 
         val valid = booleanBinding(scalingSetting.editor.textProperty()) {
-            value?.toFloatOrNull()?.let { it > 0.5 && it < 2.5 } ?: false
+            value?.toFloatOrNull()?.let { it > 0.5 && it < 4.0 } ?: false
         }
         with(root){
             form {
