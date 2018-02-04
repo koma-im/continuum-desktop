@@ -20,8 +20,6 @@ object guiEvents {
     val putRoomAliasRequests = CompositeObservable<Room>()
     val renameRoomRequests = CompositeObservable<Room>()
 
-    val sendImageRequests = CompositeObservable<Room>()
-
     val updateAvatar = CompositeObservable<ActionEvent>()
 }
 

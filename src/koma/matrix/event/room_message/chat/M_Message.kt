@@ -11,7 +11,9 @@ open class M_Message (
 )
 
 class TextMessage(
-        body: String
+        body: String,
+        formatted_body: String?=null,
+        format: String?=null
 ): M_Message(body, ChatMessageType.Text)
 
 class EmoteMessage(

@@ -3,7 +3,10 @@ package koma.controller.requests
 import domain.UploadResponse
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
+import koma.controller.requests.media.uploadFile
+import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.room.naming.RoomId
+import koma.util.file.guessMediaType
 import koma_app.appState.apiClient
 import kotlinx.coroutines.experimental.launch
 import okhttp3.MediaType
@@ -33,34 +36,40 @@ fun sendMessage(room: RoomId, message: String) {
 fun sendFileMessage(room: RoomId) {
     val dialog = FileChooser()
     dialog.title = "Find a file to send"
-    val file = dialog.showOpenDialog(FX.primaryStage)
 
-    if (file == null) {
-        return
-    }
-    val type = MediaType.parse("application/octet-stream")!!
+    val file = dialog.showOpenDialog(FX.primaryStage)
+    file?:return
+
+    val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
     val api = apiClient
     api?:return
     launch {
-        val uploadResult = api.uploadFile(file, type).awaitResult()
-        if (uploadResult is Result.Error) {
-            val error = "during upload: http error ${uploadResult.exception.code()}: ${uploadResult.exception.message()}"
-            launch(kotlinx.coroutines.experimental.javafx.JavaFx) {
-                alert(Alert.AlertType.ERROR, error)
-            }
-            return@launch
-        }
-        if (uploadResult is Result.Exception) {
-            val ex = uploadResult.exception
-            launch(kotlinx.coroutines.experimental.javafx.JavaFx) {
-                alert(Alert.AlertType.ERROR, "during upload exception $ex, ${ex.cause}")
-            }
-            return@launch
-        }
+        val uploadResult = uploadFile(api, file, type)
         if (uploadResult is Result.Ok) {
             val up: UploadResponse = uploadResult.value
             println("sending $file ${up.content_uri}")
             api.sendFile(room, file.name, up.content_uri).awaitResult()
+        }
+    }
+}
+
+fun sendImageMessage(room: RoomId) {
+    val dialog = FileChooser()
+    dialog.title = "Find an image to send"
+
+    val file = dialog.showOpenDialog(FX.primaryStage)
+    file?:return
+
+    val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
+    val api = apiClient
+    api?:return
+    launch {
+        val uploadResult = uploadFile(api, file, type)
+        if (uploadResult is Result.Ok) {
+            val up: UploadResponse = uploadResult.value
+            println("sending image $file ${up.content_uri}")
+            val msg = ImageMessage(file.name, up.content_uri)
+            api.sendRoomMessage(room, msg).awaitResult()
         }
     }
 }

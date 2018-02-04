@@ -124,7 +124,7 @@ class MessagesListScrollPane(room: Room): View() {
                     if (added.size > 9) {
                         //added too much
                         followingLatest.set(false)
-                    } else if (!showing.value) {
+                    } else if (!showing.getOrElse(false)) {
                         //new message in a not selected room
                         followingLatest.set(false)
                     } else {

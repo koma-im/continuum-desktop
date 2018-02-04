@@ -83,24 +83,6 @@ class ChatController(
                             apiClient.uploadRoomIcon(room.id, result.content_uri)
                     }
                 }
-        guiEvents.sendImageRequests.toObservable()
-                .map {
-                    val dialog = FileChooser()
-                    dialog.title = "Send an image"
-
-                    val file = dialog.showOpenDialog(FX.primaryStage)
-                    Pair(it, file)
-                }
-                .observeOn(Schedulers.io())
-                .subscribe {
-                    val room = it.first
-                    val file = it.second
-                    if (file != null && file.absolutePath != null) {
-                        val result = apiClient.uploadMedia(file.absolutePath)
-                        if (result != null)
-                            apiClient.sendImage(room.id, result.content_uri, file.name)
-                    }
-                }
         guiEvents.putRoomAliasRequests.toObservable()
                 .map {
                     val dia = TextInputDialog()
