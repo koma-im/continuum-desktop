@@ -33,9 +33,9 @@ class VideoInfo(
 
 class FileInfo(
         val mimetype: String,
-        val size: Int,
-        val thumbnail_url: String?,
-        val thumbnail_info: ThumbnailInfo?
+        val size: Long,
+        val thumbnail_url: String?=null,
+        val thumbnail_info: ThumbnailInfo?=null
 )
 
 class ThumbnailInfo(

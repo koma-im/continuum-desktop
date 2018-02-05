@@ -6,6 +6,7 @@ import koma.storage.config.persist.save_json
 import koma.storage.config.server.ProxyAdapter
 import java.io.File
 import java.net.Proxy
+import kotlin.math.roundToInt
 
 /**
  * settings for the whole app, not specific to a account
@@ -32,6 +33,11 @@ object AppSettings{
         save_json(file, settings, AppSettingsData::class.java,
                 listOf(ProxyAdapter()))
     }
+
+    val scaling
+        get() = settings.scaling
+
+    fun scale_em(num: Float) = "${(num * settings.scaling).roundToInt()}em"
 
     /**
      * get preferred proxy

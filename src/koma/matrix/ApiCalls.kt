@@ -7,7 +7,6 @@ import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
-import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.TextMessage
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
@@ -405,11 +404,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
         println("sending message $message to room $roomId ")
         val msg = TextMessage(body = message)
-        return sendRoomMessage(roomId, msg)
-    }
-
-    fun sendFile(roomId: RoomId, name: String, url: String): Call<SendResult> {
-        val msg = FileMessage(name, url)
         return sendRoomMessage(roomId, msg)
     }
 

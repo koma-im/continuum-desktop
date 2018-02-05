@@ -5,6 +5,7 @@ import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.EmoteMessage
+import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.event.room_message.chat.TextMessage
 import tornadofx.*
@@ -21,6 +22,7 @@ fun MRoomMessage.render_node(): Node {
             node.add(Text(content.body))
         }
         is ImageMessage -> return m_image(content)
+        is FileMessage -> return m_file(content)
     }
     return node
 }
