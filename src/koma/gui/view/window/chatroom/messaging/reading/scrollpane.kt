@@ -9,7 +9,7 @@ import javafx.scene.Scene
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.stage.Window
-import koma.gui.view.messagesview.fragment.MessageCell
+import koma.gui.view.window.chatroom.messaging.reading.display.MessageCell
 import koma.matrix.event.room_message.RoomEvent
 import koma.storage.config.settings.AppSettings
 import model.Room
