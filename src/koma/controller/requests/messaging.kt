@@ -4,6 +4,8 @@ import domain.UploadResponse
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
+import koma.matrix.event.room_message.chat.FileInfo
+import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.file.guessMediaType
@@ -48,7 +50,9 @@ fun sendFileMessage(room: RoomId) {
         if (uploadResult is Result.Ok) {
             val up: UploadResponse = uploadResult.value
             println("sending $file ${up.content_uri}")
-            api.sendFile(room, file.name, up.content_uri).awaitResult()
+            val fileinfo = FileInfo(type.toString(), file.length())
+            val message = FileMessage(file.name, up.content_uri, fileinfo)
+            api.sendRoomMessage(room, message).awaitResult()
         }
     }
 }

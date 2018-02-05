@@ -31,7 +31,7 @@ fun m_image(content: ImageMessage): ImageView{
                 if (file == null)
                     alert(Alert.AlertType.ERROR, "Image file unavailable")
                 else {
-                    saveImageAs(file!!, content.body)
+                    saveFileAs(file!!, content.body)
                 }
             }
         }
@@ -47,7 +47,7 @@ fun m_image(content: ImageMessage): ImageView{
     return imageView
 }
 
-fun saveImageAs(image: File, name: String) {
+fun saveFileAs(image: File, name: String) {
     val dialog = FileChooser()
     dialog.title = "Save image as"
     dialog.initialFileName = name
