@@ -2,9 +2,11 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Alert
+import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.stage.FileChooser
+import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.network.media.getFileByMxc
 import koma.storage.config.settings.AppSettings
@@ -12,39 +14,47 @@ import kotlinx.coroutines.experimental.launch
 import tornadofx.*
 import java.io.File
 
-fun m_image(content: ImageMessage): ImageView{
-    val imageView = ImageView()
+class MImageViewNode(val content: ImageMessage): ViewNode {
+    override val node = ImageView()
+    override val menuItems: List<MenuItem>
 
-    imageView.isPreserveRatio = true
-    imageView.tooltip(content.body)
-    val scale = AppSettings.settings.scaling
-    imageView.fitWidth = 320.0 * scale
-    imageView.fitHeight = 320.0 * scale
-    imageView.isSmooth = true
-
-    val imageAvailable = SimpleBooleanProperty(false)
     var file: File? = null
-    imageView.lazyContextmenu {
-        item("Save Image"){
+
+    init {
+        val imageView = node
+        imageView.isPreserveRatio = true
+        imageView.tooltip(content.body)
+        val scale = AppSettings.settings.scaling
+        imageView.fitWidth = 320.0 * scale
+        imageView.fitHeight = 320.0 * scale
+        imageView.isSmooth = true
+
+        val imageAvailable = SimpleBooleanProperty(false)
+
+        val tm = MenuItem("Save Image")
+        with(tm) {
             disableWhen { !imageAvailable }
-            action {
-                if (file == null)
-                    alert(Alert.AlertType.ERROR, "Image file unavailable")
-                else {
-                    saveFileAs(file!!, content.body)
-                }
+            action { save() }
+        }
+        menuItems = listOf(tm)
+
+        launch {
+            val f = getFileByMxc(content.url)
+            if (f != null) {
+                file = f
+                imageAvailable.set(true)
+                imageView.image = Image(f.inputStream())
             }
         }
     }
-    launch {
-        val f = getFileByMxc(content.url)
-        if (f != null) {
-            file = f
-            imageAvailable.set(true)
-            imageView.image = Image(f.inputStream())
+
+    fun save() {
+        if (file == null)
+            alert(Alert.AlertType.ERROR, "Image file unavailable")
+        else {
+            saveFileAs(file!!, content.body)
         }
     }
-    return imageView
 }
 
 fun saveFileAs(image: File, name: String) {

@@ -27,15 +27,18 @@ abstract class RoomEvent(
     override fun hashCode() = this.event_id.hashCode()
 
     companion object {
-        private val adapter = Moshi.Builder()
+        private val adapterOneline = Moshi.Builder()
                 .add(UserIdAdapter())
                 .add(RoomAliasAdapter())
                 .add(getPolyRoomEventAdapter())
                 .add(getPolyMessageAdapter())
                 .build().adapter(RoomEvent::class.java)
+
+        private val adapterIndented = adapterOneline.indent("    ")
     }
 
-    fun toJson(): String{
+    fun toJson(indent: Boolean = false): String{
+        val adapter = if (indent) adapterIndented else adapterOneline
         val json = adapter.toJson(this)
         return json
     }
