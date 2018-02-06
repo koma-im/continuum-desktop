@@ -2,7 +2,6 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.scene.control.Alert
 import javafx.scene.control.Hyperlink
-import javafx.scene.input.Clipboard
 import javafx.scene.input.MouseButton
 import tornadofx.*
 import java.awt.Desktop
@@ -14,10 +13,6 @@ fun hyperlinkNode(text: String): Hyperlink {
     val node = Hyperlink(text)
     node.setOnMouseClicked { e ->
         if (e.button == MouseButton.PRIMARY) openInBrowser(text)
-    }
-    node.lazyContextmenu {
-        item("Copy URL").action { Clipboard.getSystemClipboard().putString(text) }
-        item("Open in Browser").action { openInBrowser(text) }
     }
     return node
 }
