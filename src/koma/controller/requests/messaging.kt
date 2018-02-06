@@ -7,6 +7,7 @@ import koma.controller.requests.media.uploadFile
 import koma.matrix.event.room_message.chat.FileInfo
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
+import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.file.guessMediaType
 import koma_app.appState.apiClient
@@ -18,7 +19,8 @@ import tornadofx.*
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
 fun sendMessage(room: RoomId, message: String) {
-    val resultsend = apiClient!!.sendMessage(room, message)
+    val msg = textToMessage(message)
+    val resultsend = apiClient!!.sendRoomMessage(room, msg)
     launch(UI) {
         val result = resultsend.awaitResult()
         when (result) {

@@ -1,7 +1,6 @@
 package koma.matrix.event.message
 
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonDataException
 
 /**
  * chat message types
@@ -27,7 +26,7 @@ enum class ChatMessageType {
             Location -> "m.location"
             Video -> "m.video"
             Audio -> "m.audio"
-            Unrecognized -> throw JsonDataException("$this should not be encoded")
+            Unrecognized -> "${this}_should_not_be_encoded"
         }
     }
 }

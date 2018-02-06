@@ -8,7 +8,11 @@ open class M_Message (
      * msgtype needed for sending messages
      */
     val msgtype: ChatMessageType
-)
+) {
+    override fun toString(): String {
+        return "[$msgtype message: $body]"
+    }
+}
 
 class TextMessage(
         body: String,

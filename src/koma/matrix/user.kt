@@ -4,6 +4,7 @@ import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.ToJson
 import koma.matrix.user.identity.UserId_new
+import koma.storage.users.UserStore
 
 data class UserId(
         val user: String,
@@ -12,6 +13,8 @@ data class UserId(
     override fun toString(): String {
         return "@$user:$server"
     }
+
+    fun getState() = UserStore.getOrCreateUserId(this)
 }
 
 class UserIdAdapter {
