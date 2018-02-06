@@ -11,7 +11,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.graphic.getImageForName
 import koma.graphic.hashStringColorDark
-import koma.gui.media.getMxcImagePropery
+import koma.gui.element.icon.avatar.AvatarProvider
 import tornadofx.*
 
 class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
@@ -28,8 +28,8 @@ class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
 }
 
 fun DiscoveredRoom.avatarProperty(): SimpleObjectProperty<Image> {
-    if (this.avatar_url != null)
-        return getMxcImagePropery(this.avatar_url, 32.0, 32.0)
+    val avProp = this.avatar_url?.let {  AvatarProvider.getAvatar(it) }
+    if (avProp != null) return avProp
     else {
         val im = getImageForName(this.dispName(), hashStringColorDark(this.room_id))
         return SimpleObjectProperty(im)

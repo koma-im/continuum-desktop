@@ -13,7 +13,8 @@ import javax.net.ssl.SSLContext
 class ServerConf(
         val servername: String,
         var addresses: MutableList<String>,
-        val apiPath: String = "_matrix/client/r0/"
+        val apiPath: String = "_matrix/client/r0/",
+        val mediaPath: String = "_matrix/media/r0/download"
 )
 
 fun server_save_path(servername: String): String? {
@@ -30,6 +31,12 @@ fun ServerConf.getAddress(): String {
     val slash = if (addr.endsWith('/')) addr else { addr.trimEnd('/') + "/" }
     return slash
 }
+
+/**
+ * in practice null can happen
+ */
+fun ServerConf.getMediaPath()
+        = mediaPath?:"_matrix/media/r0/download"
 
 fun ServerConf.saveAddress(addr: String) {
     this.addresses.remove(addr)

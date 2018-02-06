@@ -3,12 +3,11 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.stage.FileChooser
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.matrix.event.room_message.chat.ImageMessage
-import koma.network.media.getFileByMxc
+import koma.network.media.downloadImageUri
 import koma.storage.config.settings.AppSettings
 import kotlinx.coroutines.experimental.launch
 import tornadofx.*
@@ -39,11 +38,10 @@ class MImageViewNode(val content: ImageMessage): ViewNode {
         menuItems = listOf(tm)
 
         launch {
-            val f = getFileByMxc(content.url)
+            val f = downloadImageUri(content.url)
             if (f != null) {
-                file = f
                 imageAvailable.set(true)
-                imageView.image = Image(f.inputStream())
+                imageView.image = f
             }
         }
     }

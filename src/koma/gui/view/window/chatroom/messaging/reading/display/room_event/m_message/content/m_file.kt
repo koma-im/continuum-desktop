@@ -2,16 +2,13 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.matrix.event.room_message.chat.FileMessage
-import koma.network.media.getFileByMxc
 import koma.storage.config.settings.AppSettings
-import kotlinx.coroutines.experimental.launch
 import tornadofx.*
 import java.io.File
 
@@ -25,8 +22,6 @@ class MFileViewNode(val content: FileMessage): ViewNode {
         val faicon = guessIconForMime(content.info?.mimetype)
         val icon_node = FontAwesomeIconFactory.get().createIcon(faicon, AppSettings.scale_em(2.0f))
 
-        val fileAvailable = SimpleBooleanProperty(false)
-
         with(node) {
             add(icon_node)
             label(content.filename)
@@ -37,18 +32,9 @@ class MFileViewNode(val content: FileMessage): ViewNode {
 
         val mi = MenuItem("Save File")
         with(mi){
-            disableWhen { !fileAvailable }
             action { save() }
         }
         menuItems = listOf(mi)
-
-        launch {
-            val f = getFileByMxc(content.url)
-            if (f != null) {
-                file = f
-                fileAvailable.set(true)
-            }
-        }
     }
 
     fun save() {

@@ -3,20 +3,10 @@ package koma.model.user
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import koma.graphic.getImageForName
-import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
-import koma.storage.config.settings.AppSettings
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
-import rx.javafx.kt.observeOnFx
-import rx.javafx.kt.toObservable
-import rx.lang.kotlin.filterNotNull
-import rx.schedulers.Schedulers
 
 /**
  * Created by developer on 2017/6/25.
@@ -48,36 +38,8 @@ data class UserState(val id: UserId) {
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
     var has_avatar = false
-    val avatarImgProperty = SimpleObjectProperty<Image>(null)
-    var avatar_img: Image
-        set(value) {
-            this.modified = true
-            this.avatarImgProperty.set(value)
-        }
-        get() = this.avatarImgProperty.get()
 
     init {
-        val scale = AppSettings.settings.scaling
-        val avsize = scale * 32.0
-        launch(JavaFx) {
-            val i = getImageForName(id.user, color)
-            avatarImgProperty.set(i)
-        }
-        avatarURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
-                .map {
-                    getResizedImage(it, avsize, avsize)
-                }
-                .filterNotNull()
-                .observeOnFx()
-                .subscribe {
-                    avatar_img = it
-                    has_avatar = true
-                }
-        val nameobserv = displayName.toObservable()
-        nameobserv.filter{ it.isNotBlank() && !has_avatar}
-                .observeOnFx()
-                .map { getImageForName(it, color) }
-                .subscribe { avatarImgProperty.set(it) }
     }
 
     fun weight(): Int {

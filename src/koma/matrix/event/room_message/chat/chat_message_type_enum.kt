@@ -26,7 +26,7 @@ enum class ChatMessageType {
             Location -> "m.location"
             Video -> "m.video"
             Audio -> "m.audio"
-            Unrecognized -> "${this}_should_not_be_encoded"
+            Unrecognized -> "unrecognized_message_kind_should_not_be_encoded"
         }
     }
 }

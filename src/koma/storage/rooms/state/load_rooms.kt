@@ -56,7 +56,7 @@ fun load_room(roomId: RoomId, path: File): Room? {
     val room = Room(roomId)
     room.aliases.setAll(savedRoomState.aliases)
     room.displayName.set(savedRoomState.name)
-    room.iconURL.set(savedRoomState.icon_Url)
+    room.iconURL=savedRoomState.icon_Url
     room.histVisibility = savedRoomState.history_visibility
     room.joinRule = savedRoomState.join_rule
     room.visibility = savedRoomState.visibility

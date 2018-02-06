@@ -32,7 +32,7 @@ fun Room.save() {
             this.joinRule,
             this.histVisibility,
             this.displayName.get(),
-            this.iconURL.get(),
+            this.iconURL,
             this.power_levels
     )
     val moshi = Moshi.Builder()
