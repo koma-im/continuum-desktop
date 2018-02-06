@@ -62,6 +62,7 @@ class LoginController: Controller() {
 
         val apiClient = ApiClient(authed, target.serverConf)
         appState.apiClient = apiClient
+        appState.serverConf = target.serverConf
 
         val chatview = ChatView(authed)
         val chatctrl = ChatController(apiClient)

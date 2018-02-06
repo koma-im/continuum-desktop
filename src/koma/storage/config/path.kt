@@ -29,6 +29,18 @@ object config_paths {
         }
         return curdir
     }
+
+    fun getCreateDir(vararg paths: String): File? {
+        val ss = listOf(config_home, *paths)
+        val path = ss.joinToString(File.separator)
+        val file =File(path)
+        return if (file.exists()) {
+            if (file.isDirectory) file
+            else null
+        } else if(file.mkdirs()) {
+            file
+        } else null
+    }
 }
 
 

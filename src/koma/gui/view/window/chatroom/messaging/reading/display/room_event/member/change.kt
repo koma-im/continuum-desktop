@@ -2,15 +2,16 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.membe
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
+import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.StackPane
-import koma.gui.media.getMxcImagePropery
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showDatetime
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showUser
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
+import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
 class MRoomMemberViewNode(message: MRoomMember): ViewNode {
@@ -47,17 +48,9 @@ class MRoomMemberViewNode(message: MRoomMember): ViewNode {
                                 text("updated avatar") {
                                     opacity = 0.5
                                 }
-                                stackpane {
-                                    pc.avatar_url?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
-                                    minWidth = 40.0
-                                }
-                                val arrowico = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_RIGHT)
-                                arrowico.opacity = 0.3
-                                add(arrowico)
-                                stackpane {
-                                    content.avatar_url?.let { imageview(getMxcImagePropery(it, 32.0, 32.0)) }
-                                    minWidth = 40.0
-                                }
+                                addAvatar(pc.avatar_url)
+                                addArrowIcon()
+                                addAvatar(content.avatar_url)
                             }
                         }
                         if (pc.displayname != content.displayname) {
@@ -69,9 +62,7 @@ class MRoomMemberViewNode(message: MRoomMember): ViewNode {
                                     minWidth = 50.0
                                     text(pc.displayname)
                                 }
-                                val arrowico = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.ARROW_RIGHT)
-                                arrowico.opacity = 0.3
-                                add(arrowico)
+                                addArrowIcon()
                                 stackpane {
                                     text(content.displayname)
                                     minWidth = 50.0
@@ -83,5 +74,23 @@ class MRoomMemberViewNode(message: MRoomMember): ViewNode {
                 showDatetime(this, message.origin_server_ts)
             }
         }
+    }
+}
+
+private fun EventTarget.addArrowIcon() {
+    val arrowico = FontAwesomeIconFactory.get().createIcon(
+            FontAwesomeIcon.ARROW_RIGHT,
+            AppSettings.scale_em(1f))
+    arrowico.opacity = 0.3
+    this.add(arrowico)
+}
+
+private fun EventTarget.addAvatar(url: String?) {
+    val avatarsize = AppSettings.scaling * 32.0
+    val minWid = AppSettings.scaling * 40.0
+    this.stackpane {
+        url?.let { add(koma.gui.element.icon.avatar.AvatarView(it)) }
+        minHeight = avatarsize
+        minWidth = minWid
     }
 }

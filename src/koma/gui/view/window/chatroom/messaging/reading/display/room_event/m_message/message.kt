@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
+import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.render_node
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showDatetime
@@ -22,7 +23,6 @@ class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
 
         val sus = UserStore.getOrCreateUserId(item.sender)
         val sender = sus.displayName
-        val avtar = sus.avatarImgProperty
         val color = sus.color
 
         val mcontent = item.render_node()
@@ -43,12 +43,7 @@ class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
                     paddingAll = 2.0
                     backgroundColor = multi(Color.WHITE)
                 }
-                vbox {
-                    imageview(avtar) {
-                        isCache = true
-                        isPreserveRatio = true
-                    }
-                }
+                add(AvatarAlways(sus.avatarURL, sus.displayName, sus.color))
 
                 vbox(spacing = 2.0) {
                     hgrow = Priority.ALWAYS
@@ -75,5 +70,4 @@ class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
         }
     }
 }
-
 

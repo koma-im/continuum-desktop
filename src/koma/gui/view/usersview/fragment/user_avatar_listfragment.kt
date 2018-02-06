@@ -8,6 +8,7 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.util.Callback
+import koma.gui.element.icon.AvatarAlways
 import koma.model.user.UserState
 import koma.storage.config.settings.AppSettings
 import tornadofx.*
@@ -48,6 +49,7 @@ class UserFullCell : ListCell<UserState>() {
 }
 
 private fun get_node(item: UserState?, showName: Boolean): Node {
+    val avsize = AppSettings.scaling * 32.0
     val root = HBox( 5.0)
     if (item == null)
         return root
@@ -60,13 +62,9 @@ private fun get_node(item: UserState?, showName: Boolean): Node {
             fontSize= scale.em
         }
         stackpane {
-            imageview {
-                this.imageProperty().bind(item.avatarImgProperty)
-                isCache = true
-                isPreserveRatio = true
-            }
-            minHeight = 32.0 * scale
-            minWidth = 32.0 * scale
+            add(AvatarAlways(item.avatarURL, item.displayName, item.color))
+            minHeight = avsize
+            minWidth = avsize
         }
         if (showName) {
             label(item.displayName) {

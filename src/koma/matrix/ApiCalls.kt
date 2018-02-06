@@ -15,6 +15,8 @@ import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
+import koma.network.client.okhttp.AppHttpClient
+import koma.network.client.okhttp.tryAddAppCache
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
@@ -26,7 +28,6 @@ import matrix.event.room_message.RoomEventType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -177,11 +178,6 @@ interface MatrixMediaApi {
                     @Query("access_token") token: String,
                     @Body content: RequestBody
     ): Call<UploadResponse>
-
-    @GET("download/{serverName}/{mediaId}")
-    fun downloadMedia(@Path("serverName") serverName: String,
-                      @Path("mediaId") mediaId: String
-    ): Call<ResponseBody>
 }
 
 class ApiClient(val profile: Profile, serverConf: ServerConf) {
@@ -234,28 +230,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
             return res.body()
         else {
             println("error uploading $file code ${res.code()}, ${res.errorBody()}, ${res.body()}")
-            return null
-        }
-    }
-
-    fun downloadMedia(url: String): ByteArray? {
-        val parts = url.substringAfter("mxc://")
-        val server = parts.substringBefore('/')
-        val media = parts.substringAfter('/')
-        val res = try {
-            mediaService.downloadMedia(
-                    server, media)
-                    .execute()
-        } catch (err: java.net.SocketTimeoutException) {
-            println("timeout getting $url, with error $err")
-            return null
-        }
-        if (res.isSuccessful) {
-            val reb: ResponseBody? = res.body()
-            return reb?.bytes()
-        }
-        else {
-            println("error code ${res.code()}, ${res.errorBody()}, ${res.body()}")
             return null
         }
     }
@@ -412,18 +386,43 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         token = profile.access_token
         userId = profile.userId
 
+        val cb = createClientBuilder(serverConf)
+        val rb = createRetrofitBuilder()
+
+        service = rb.client(cb.tryAddAppCache("matrix-access", 5*1024*1024).build()).build().create(MatrixAccessApi::class.java)
+
+        // no point caching the sync
+        longPollClient = cb.readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS).build()
+        longPollService = rb.client(longPollClient).build().create(MatrixAccessApi::class.java)
+
+        mediaService = createMediaService(serverConf, AppHttpClient.client)
+
+        next_batch = loadSyncBatchToken(userId)
+        Runtime.getRuntime().addShutdownHook(Thread({
+            val nb = next_batch
+            nb?.let { saveSyncBatchToken(userId, it) }
+        }))
+    }
+
+
+    /**
+     * add proxy and optionally additional trust
+     */
+    private fun createClientBuilder(serverConf: ServerConf): OkHttpClient.Builder {
         val proxy = AppSettings.getProxy()
-        val clientbuildproxy = OkHttpClient.Builder().proxy(proxy)
+        var cb = OkHttpClient.Builder().proxy(proxy)
 
         val addtrust = serverConf.loadCert()
-        val clientbuildcert = if (addtrust!= null) {
-            clientbuildproxy.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
-        } else clientbuildproxy
-        val client = clientbuildcert.build()
-        longPollClient = clientbuildcert
-                .readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS)
-                .build()
+        if (addtrust != null) {
+            cb = cb.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
+        }
+        return cb
+    }
 
+    /**
+     * add adapters to moshi and then add moshi to retrofit
+     */
+    private fun createRetrofitBuilder(): Retrofit.Builder {
         val moshi = Moshi.Builder()
                 .add(UserIdAdapter())
                 .add(RoomAliasAdapter())
@@ -433,24 +432,14 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         val retrofitbuild = Retrofit.Builder()
                 .baseUrl(apiURL)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
-        val retrofit = retrofitbuild
-                .client(client)
-                .build()
-        val retrofitLongPoll = retrofitbuild.client(longPollClient).build()
-        service = retrofit.create(MatrixAccessApi::class.java)
-        longPollService = retrofitLongPoll.create(MatrixAccessApi::class.java)
+        return retrofitbuild
+    }
 
-        mediaService = Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
+    private fun createMediaService(serverConf: ServerConf, client: OkHttpClient): MatrixMediaApi {
+        return Retrofit.Builder().baseUrl(serverConf.getAddress() + "_matrix/media/r0/")
                 .addConverterFactory(MoshiConverterFactory.create())
                 .client(client)
                 .build().create(MatrixMediaApi::class.java)
-
-
-        next_batch = loadSyncBatchToken(userId)
-        Runtime.getRuntime().addShutdownHook(Thread({
-            val nb = next_batch
-            nb?.let { saveSyncBatchToken(userId, it) }
-        }))
     }
 }
 

@@ -26,7 +26,7 @@ fun Room.applyUpdate(update: RoomEvent) {
             val exist = this.aliases.get()
             this.aliases.addAll(update.content.aliases.filter { !exist.contains(it) })
         }
-        is MRoomAvatar -> this.iconURL.set(update.content.url)
+        is MRoomAvatar -> this.iconURL=update.content.url
         is MRoomCanonAlias -> this.setCanonicalAlias(update.content.alias)
         is MRoomJoinRule -> this.joinRule = update.content.join_rule
         is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility

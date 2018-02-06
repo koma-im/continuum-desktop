@@ -6,10 +6,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import koma.graphic.getImageForName
-import koma.graphic.getResizedImage
 import koma.graphic.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.event.room_message.state.RoomPowerLevelsContent
@@ -20,23 +17,15 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
-import koma.storage.config.settings.AppSettings
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
 import model.room.user.RoomUserMap
-import rx.Observable
-import rx.javafx.kt.observeOnFx
-import rx.javafx.kt.toObservable
-import rx.lang.kotlin.filterNotNull
-import rx.schedulers.Schedulers
 import tornadofx.*
 
 
 class RoomItemModel(property: ObjectProperty<Room>) : ItemViewModel<Room>(itemProperty = property) {
     val name = bind {item?.displayName}
-    val icon = bind {item?.iconProperty}
+    val iconUrl = bind {item?.iconURLProperty }
     val color = bind {item?.colorProperty}
     val room = bind { itemProperty }
 }
@@ -60,60 +49,25 @@ class Room(val id: RoomId) {
     var joinRule: RoomJoinRules = RoomJoinRules.Invite
     var histVisibility = HistoryVisibility.Shared
 
-    val hasname = false
     val displayName = SimpleStringProperty(id.toString())
 
-    var hasIcon = false
-    val iconURL = SimpleStringProperty("");
-    val iconProperty = SimpleObjectProperty<Image>(null)
+    val iconURLProperty = SimpleStringProperty("")
+    var iconURL: String
+        get() = iconURLProperty.get()
+        set(value) {
+            iconURLProperty.set(value)
+        }
 
     val power_levels = mutableMapOf<String, Double>()
 
     val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
-
-    private fun aliasesChangeActions(aliases: Observable<ObservableList<RoomAlias>>) {
-        aliases.filter { it.size > 0 && !hasname }
-                .map { it.get(0) }
-                .observeOnFx()
-                .subscribe {
-                    displayName.set(it.full)
-                    if (!hasIcon)
-                        iconProperty.set(getImageForName(it.alias, color))
-                }
-    }
 
     fun sortMembers(){
         FXCollections.sort(members, { a, b -> b.weight() - a.weight() })
     }
 
     init {
-        launch(JavaFx) {
-            val i = getImageForName(id.toString(), color)
-            iconProperty.set(i)
-
-            displayName.toObservable().filter { it.isNotBlank() && !hasIcon }
-                    .observeOnFx()
-                    .subscribe {
-                        iconProperty.set(getImageForName(it, Color.GREEN))
-                    }
-        }
-        aliasesChangeActions(aliases.toObservable())
-
-        val scale = AppSettings.settings.scaling
-        val iconsize = scale * 32.0
-        iconURL.toObservable().filter { it.isNotBlank() }.observeOn(Schedulers.io())
-                .map {
-                    println("Room $this has new icon url $it")
-                    getResizedImage(it, iconsize, iconsize)
-                }
-                .filterNotNull()
-                .observeOnFx()
-                .subscribe {
-                    hasIcon = true
-                    iconProperty.set(it)
-                }
     }
-
 
     /**
      * sometimes a join messages just updates an existing user and nothing needs to be done here

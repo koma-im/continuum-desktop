@@ -2,6 +2,7 @@ package view
 
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.roomsview.addMenu
@@ -46,6 +47,7 @@ class ChatView(profile: Profile): View() {
 class RoomFragment: ListCellFragment<Room>() {
 
     val room = RoomItemModel(itemProperty)
+    val iconUrl = room.select { it.iconURLProperty }
 
     override val root = hbox(spacing = 10.0) {
         val scale = AppSettings.settings.scaling
@@ -55,10 +57,7 @@ class RoomFragment: ListCellFragment<Room>() {
         addMenu(this, room.room)
         val iconsize = scale * 32.0
         stackpane {
-            imageview(room.icon) {
-                isCache = true
-                isPreserveRatio = true
-            }
+            add(AvatarAlways(iconUrl, room.name, room.color))
             minHeight = iconsize
             minWidth = iconsize
         }
