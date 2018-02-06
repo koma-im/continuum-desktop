@@ -11,7 +11,7 @@ fun MRoomMessage.render_node(): ViewNode? {
     val content = this.content
     return when(content) {
         is TextMessage -> MTextViewNode(content)
-        is EmoteMessage -> MEmoteViewNode(content)
+        is EmoteMessage -> MEmoteViewNode(content, this)
         is ImageMessage -> MImageViewNode(content)
         is FileMessage -> MFileViewNode(content)
         else -> null

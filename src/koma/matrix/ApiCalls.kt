@@ -8,7 +8,6 @@ import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.M_Message
-import koma.matrix.event.room_message.chat.TextMessage
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.pagination.FetchDirection
@@ -401,13 +400,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-    fun sendMessage(roomId: RoomId, message: String): Call<SendResult> {
-        println("sending message $message to room $roomId ")
-        val msg = TextMessage(body = message)
-        return sendRoomMessage(roomId, msg)
-    }
-
     fun sendRoomMessage(roomId: RoomId, message: M_Message): Call<SendResult> {
+        println("sending message $message to room $roomId ")
         return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, message)
     }
 
