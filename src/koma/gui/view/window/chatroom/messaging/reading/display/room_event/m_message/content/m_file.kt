@@ -3,7 +3,6 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.scene.Parent
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseButton
@@ -17,8 +16,7 @@ import tornadofx.*
 import java.io.File
 
 class MFileViewNode(val content: FileMessage): ViewNode {
-    override val node: Parent
-        get() = HBox(5.0)
+    override val node = HBox(5.0)
     override val menuItems: List<MenuItem>
 
     var file: File? = null
