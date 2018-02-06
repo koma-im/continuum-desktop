@@ -1,9 +1,11 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content
 
+import javafx.scene.Node
 import javafx.scene.control.MenuItem
-import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.StringElementTokenizer
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.toNode
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.EmoteMessage
 import koma.matrix.event.room_message.chat.NoticeMessage
@@ -15,7 +17,7 @@ class MTextViewNode(val content: TextMessage): ViewNode {
     override val menuItems: List<MenuItem> = listOf()
 
     init {
-        node.add(Text(content.body))
+        node.addStringWithElements(content.body)
     }
 }
 
@@ -24,9 +26,7 @@ class MNoticeViewNode(val content: NoticeMessage): ViewNode {
     override val menuItems: List<MenuItem> = listOf()
 
     init {
-        with(node) {
-            text(content.body)
-        }
+        node.addStringWithElements(content.body)
     }
 }
 
@@ -43,7 +43,16 @@ class MEmoteViewNode(val content: EmoteMessage, val event: MRoomMessage): ViewNo
                 textFill = user.color
             }
             text(" ")
-            text(content.body)
+            node.addStringWithElements(content.body)
         }
     }
+}
+
+fun TextFlow.addStringWithElements(str: String) {
+    val elements =  StringElementTokenizer(str).elements
+    this.addNodes(elements.map { it.toNode() })
+}
+
+fun TextFlow.addNodes(nodes: List<Node>) {
+    nodes.forEach {  this.add(it) }
 }
