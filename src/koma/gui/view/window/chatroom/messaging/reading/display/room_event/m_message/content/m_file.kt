@@ -2,21 +2,20 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
+import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.matrix.event.room_message.chat.FileMessage
+import koma.network.matrix.media.makeAnyUrlHttp
 import koma.storage.config.settings.AppSettings
 import tornadofx.*
-import java.io.File
 
 class MFileViewNode(val content: FileMessage): ViewNode {
     override val node = HBox(5.0)
     override val menuItems: List<MenuItem>
-
-    var file: File? = null
+    private val url = makeAnyUrlHttp(content.url)
 
     init {
         val faicon = guessIconForMime(content.info?.mimetype)
@@ -31,17 +30,14 @@ class MFileViewNode(val content: FileMessage): ViewNode {
         }
 
         val mi = MenuItem("Save File")
-        with(mi){
-            action { save() }
-        }
+        mi.isDisable = url == null
+        mi.action { save() }
         menuItems = listOf(mi)
     }
 
-    fun save() {
-        if (file == null)
-            alert(Alert.AlertType.ERROR, "File unavailable")
-        else {
-            saveFileAs(file!!, content.filename)
+    private fun save() {
+        url?.let {
+            downloadFileAs(url, filename = content.filename, title = "Save File As")
         }
     }
 }
