@@ -1,17 +1,27 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.github
 
 import javafx.scene.control.MenuItem
-import javafx.scene.text.TextFlow
+import javafx.scene.layout.VBox
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import okhttp3.HttpUrl
 import tornadofx.*
 
-class GithubView(link: String): ViewNode {
-    override val node = TextFlow()
+fun createGithubView(link: String): GithubView? {
+    val url = HttpUrl.parse(link) ?: return null
+    val ps = url.pathSegments()
+    val owner = ps.getOrNull(0) ?: return null
+    val repo = ps.getOrNull(1) ?: return null
+    return GithubView(url, owner, repo)
+}
+
+class GithubView(url: HttpUrl, owner: String, repo: String): ViewNode {
+    override val node = VBox()
     override val menuItems: List<MenuItem>
 
     init {
         with(node) {
-            text("Github ")
+            text("Github repo $repo")
+            text("by $owner")
             text("preview coming soon")
         }
 
