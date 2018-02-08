@@ -19,6 +19,7 @@ object AppHttpClient {
         val ob = OkHttpClient.Builder()
                 .proxy(proxy)
                 .tryAddAppCache("http", 80*1024*1024)
+                .tryAddAppCert()
         return ob.build()
     }
 }

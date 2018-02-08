@@ -7,8 +7,8 @@ import javax.net.ssl.SSLContext
 
 val certFileName = "self-cert.crt"
 
-fun loadContext(dir: String): Pair<SSLContext, CompositeX509TrustManager>? {
-    val sf = File(dir).resolve(certFileName)
+fun loadContext(dir: File): Pair<SSLContext, CompositeX509TrustManager>? {
+    val sf = dir.resolve(certFileName)
     if (!sf.isFile) return null
     val certStream = try {
         sf.inputStream()
