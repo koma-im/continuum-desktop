@@ -1,13 +1,17 @@
 package koma.gui.element.icon
 
 import javafx.beans.value.ObservableValue
-import javafx.scene.Group
+import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import koma.gui.element.icon.avatar.AvatarView
 import koma.gui.element.icon.placeholder.AvatarPlaceholder
+import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
-class AvatarAlways private constructor(ai: AvatarView, ap: AvatarPlaceholder): Group() {
+
+val avatarSize = AppSettings.scaling * 32.0
+
+class AvatarAlways private constructor(ai: AvatarView, ap: AvatarPlaceholder): StackPane() {
     constructor(
             urlV: ObservableValue<String>,
             nameV: ObservableValue<String>,
@@ -28,5 +32,8 @@ class AvatarAlways private constructor(ai: AvatarView, ap: AvatarPlaceholder): G
         ap.removeWhen { ai.imageAvailable }
         this.add(ap)
         this.add(ai)
+
+        this.minHeight = avatarSize
+        this.minWidth = avatarSize
     }
 }

@@ -1,12 +1,11 @@
 package koma.gui.element.icon.avatar.processing
 
 import javafx.scene.image.Image
-import koma.storage.config.settings.AppSettings
+import koma.gui.element.icon.avatarSize
 import java.io.InputStream
 
-private val avsize = AppSettings.scaling * 32.0
 
 fun processAvatar(bytes: InputStream): Image {
-    val im = Image(bytes, avsize, avsize, true , true)
+    val im = Image(bytes, avatarSize, avatarSize, true , true)
     return im
 }
