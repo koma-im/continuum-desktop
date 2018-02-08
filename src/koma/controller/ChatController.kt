@@ -7,6 +7,7 @@ import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
 import koma.controller.sync.startSyncing
+import koma.network.client.okhttp.AppHttpClient
 import kotlinx.coroutines.experimental.Job
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
@@ -129,6 +130,11 @@ class ChatController(
     fun shutdown() {
         syncJob.cancel()
         apiClient.shutdown()
+        with(AppHttpClient.client) {
+            dispatcher().executorService().shutdown()
+            connectionPool().evictAll()
+            cache().close()
+        }
     }
 
     fun updateMyAlias() {
