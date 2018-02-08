@@ -1,4 +1,4 @@
-package koma.graphic
+package koma.gui.element.icon.placeholder.generator
 
 import javafx.geometry.VPos
 import javafx.scene.SnapshotParameters
@@ -11,18 +11,9 @@ import javafx.scene.text.TextAlignment
 import koma.gui.element.icon.user.extract_key_chars
 import koma.storage.config.settings.AppSettings
 
-/**
- * Created by developer on 2017/7/15.
- */
-private object nameImageCache {
-    val images = HashMap<String, Image>()
-}
-
 fun getImageForName(name: String, bgcolor: Color): Image {
     val scale = AppSettings.settings.scaling
     val isize = 32.0 * scale
-    if (nameImageCache.images.containsKey(name))
-        return nameImageCache.images[name]!!
     val canva = Canvas(isize, isize)
     val graphc = canva.graphicsContext2D
     val fgcolor = Color.WHITE
@@ -42,7 +33,6 @@ fun getImageForName(name: String, bgcolor: Color): Image {
     val params =SnapshotParameters()
     params.fill = Color.TRANSPARENT
     val im = canva.snapshot(params, null)
-    nameImageCache.images[name] = im
     return im
 }
 

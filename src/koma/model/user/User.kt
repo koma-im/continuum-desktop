@@ -4,7 +4,7 @@ import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Color
-import koma.graphic.hashStringColorDark
+import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 
