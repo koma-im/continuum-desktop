@@ -2,6 +2,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.scene.control.MenuItem
 import javafx.scene.image.ImageView
+import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.network.media.downloadImageHttp
@@ -11,15 +12,16 @@ import okhttp3.HttpUrl
 import tornadofx.*
 
 class ImageElement(val url: HttpUrl): ViewNode {
-    override val node = ImageView()
+    override val node = StackPane()
     override val menuItems: List<MenuItem>
 
     init {
-        val imageView = node
+        val imageView = ImageView()
+        node.add(imageView)
         imageView.isPreserveRatio = true
         val scale = AppSettings.settings.scaling
-        imageView.fitWidth = 320.0 * scale
-        imageView.fitHeight = 320.0 * scale
+        imageView.fitWidth = 200.0 * scale
+        imageView.fitHeight = 200.0 * scale
         imageView.isSmooth = true
 
         menuItems = menuItems()

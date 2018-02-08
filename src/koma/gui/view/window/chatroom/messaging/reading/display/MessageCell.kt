@@ -46,7 +46,7 @@ class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
 }
 
 interface ViewNode {
-    val node: Node
+    val node: Region
     val menuItems: List<MenuItem>
 }
 
