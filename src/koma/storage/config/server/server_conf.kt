@@ -17,8 +17,8 @@ class ServerConf(
         val mediaPath: String = "_matrix/media/r0/download"
 )
 
-fun server_save_path(servername: String): String? {
-    return config_paths.getOrCreate("settings", "homeserver", servername)
+fun server_save_path(servername: String): File? {
+    return config_paths.getCreateDir("settings", "homeserver", servername)
 }
 
 val conf_file_name = "server_conf.json"
@@ -64,7 +64,7 @@ fun ServerConf.save() {
         return
     }
     try {
-        val file = File(dir).resolve(conf_file_name)
+        val file = dir.resolve(conf_file_name)
         file.writeText(json)
     } catch (e: IOException) {
     }
@@ -78,7 +78,7 @@ private fun computeServerConf(servername: String): ServerConf {
     val dir = server_save_path(
             servername)
     dir?: return serverConf
-    val sf = File(dir).resolve(conf_file_name)
+    val sf = dir.resolve(conf_file_name)
     val jsonAdapter = Moshi.Builder()
             .build()
             .adapter(ServerConf::class.java)
