@@ -4,7 +4,9 @@ import javafx.beans.Observable
 import javafx.beans.value.ObservableValue
 import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
-import koma.graphic.getImageForName
+import koma.gui.element.icon.placeholder.generator.AvatarGeneratorCache
+import koma.gui.element.icon.placeholder.generator.ColoredName
+import koma.gui.element.icon.placeholder.generator.getImageForName
 import tornadofx.*
 
 class AvatarPlaceholder private constructor(): ImageView() {
@@ -26,7 +28,7 @@ class AvatarPlaceholder private constructor(): ImageView() {
     private fun redraw(name: String?, color: Color?) {
         name ?: return
         color ?: return
-        val im = getImageForName(name, color)
+        val im = AvatarGeneratorCache.generateAvatar(ColoredName(color, name))
         this.image = im
     }
 }

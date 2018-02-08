@@ -9,8 +9,8 @@ import javafx.scene.image.Image
 import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.graphic.getImageForName
-import koma.graphic.hashStringColorDark
+import koma.gui.element.icon.placeholder.generator.getImageForName
+import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.gui.element.icon.avatar.AvatarProvider
 import tornadofx.*
 

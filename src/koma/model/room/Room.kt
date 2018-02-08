@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.paint.Color
-import koma.graphic.hashStringColorDark
+import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.room.naming.RoomAlias
