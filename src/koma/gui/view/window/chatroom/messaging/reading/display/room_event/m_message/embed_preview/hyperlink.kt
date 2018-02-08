@@ -2,7 +2,10 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.scene.control.Alert
 import javafx.scene.control.Hyperlink
+import javafx.scene.control.Tooltip
 import javafx.scene.input.MouseButton
+import javafx.scene.text.Font
+import koma.storage.config.settings.AppSettings
 import tornadofx.*
 import java.awt.Desktop
 import java.io.IOException
@@ -11,6 +14,9 @@ import java.net.URI
 
 fun hyperlinkNode(text: String): Hyperlink {
     val node = Hyperlink(text)
+    val tip = Tooltip(text)
+    tip.font = Font.font(AppSettings.fontSize)
+    node.tooltip = tip
     node.setOnMouseClicked { e ->
         if (e.button == MouseButton.PRIMARY) openInBrowser(text)
     }

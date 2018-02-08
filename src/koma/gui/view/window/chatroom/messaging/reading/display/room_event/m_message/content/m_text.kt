@@ -1,11 +1,9 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content
 
-import javafx.scene.Node
 import javafx.scene.control.MenuItem
 import javafx.scene.text.TextFlow
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.StringElementTokenizer
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.toNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.addStringWithElements
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.EmoteMessage
 import koma.matrix.event.room_message.chat.NoticeMessage
@@ -48,11 +46,4 @@ class MEmoteViewNode(val content: EmoteMessage, val event: MRoomMessage): ViewNo
     }
 }
 
-fun TextFlow.addStringWithElements(str: String) {
-    val elements =  StringElementTokenizer(str).elements
-    this.addNodes(elements.map { it.toNode() })
-}
 
-fun TextFlow.addNodes(nodes: List<Node>) {
-    nodes.forEach {  this.add(it) }
-}

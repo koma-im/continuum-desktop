@@ -17,7 +17,7 @@ class AvatarView private constructor(): ImageView() {
         urlProperty.addListener{observable: Observable ->
             val a = urlProperty.value?.let {AvatarProvider.getAvatar(it) }
             a ?: return@addListener
-            this.imageProperty().bind(a)
+            this.imageProperty().cleanBind(a)
         }
     }
 }

@@ -1,7 +1,7 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
 class StringElementTokenizer(private val text: String) {
-    val elements = mutableListOf<TextElement>()
+    val elements = mutableListOf<TextSegment>()
 
     private var start = 0
 
@@ -9,19 +9,19 @@ class StringElementTokenizer(private val text: String) {
         while (start < text.length) {
             val nls = nextLinkStart()
             if (nls == null) {
-                elements.add(TextElement(TextElementKind.Plain, text.substring(start)))
+                elements.add(TextSegment(TextSegmentKind.Plain, text.substring(start)))
                 break
             } else {
                 if (nls != start) {
-                    elements.add(TextElement(TextElementKind.Plain, text.substring(start, nls)))
+                    elements.add(TextSegment(TextSegmentKind.Plain, text.substring(start, nls)))
                 }
                 start = nls
                 val nw = nextWhilespace()
                 if (nw == null) {
-                    elements.add(TextElement(TextElementKind.Link, text.substring(start)))
+                    elements.add(TextSegment(TextSegmentKind.Link, text.substring(start)))
                     break
                 } else {
-                    elements.add(TextElement(TextElementKind.Link, text.substring(start, nw)))
+                    elements.add(TextSegment(TextSegmentKind.Link, text.substring(start, nw)))
                     start = nw
                 }
             }
@@ -44,8 +44,8 @@ class StringElementTokenizer(private val text: String) {
     }
 }
 
-class TextElement(
-        val kind: TextElementKind,
+class TextSegment(
+        val kind: TextSegmentKind,
         val text: String
 ) {
     override fun toString(): String {
@@ -53,7 +53,7 @@ class TextElement(
     }
 }
 
-enum class TextElementKind{
+enum class TextSegmentKind {
         Plain,
         Link,
 }

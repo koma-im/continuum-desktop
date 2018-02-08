@@ -1,5 +1,6 @@
 package koma.storage.config.settings
 
+import javafx.scene.text.Font
 import koma.storage.config.config_paths
 import koma.storage.config.persist.load_json
 import koma.storage.config.persist.save_json
@@ -38,6 +39,9 @@ object AppSettings{
         get() = settings.scaling
 
     fun scale_em(num: Float) = "${(num * settings.scaling).roundToInt()}em"
+
+    val defaultFontSize = Font.getDefault().size
+    val fontSize = defaultFontSize * scaling
 
     /**
      * get preferred proxy
