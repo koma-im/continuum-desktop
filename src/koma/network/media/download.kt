@@ -1,6 +1,5 @@
 package koma.network.media
 
-import javafx.scene.image.Image
 import koma.network.client.okhttp.AppHttpClient
 import koma.util.coroutine.adapter.okhttp.awaitResult
 import koma.util.result.http.HttpResult
@@ -9,11 +8,6 @@ import koma.util.result.http.body.bodyResult
 import okhttp3.HttpUrl
 import okhttp3.Request
 import okhttp3.ResponseBody
-
-
-suspend fun downloadImageHttp(url: HttpUrl): Image? {
-    return downloadMedia(url)?.let { Image(it.inputStream()) }
-}
 
 suspend fun getResponse(url: HttpUrl): ResponseBody? {
     val req = Request.Builder().url(url).build()
