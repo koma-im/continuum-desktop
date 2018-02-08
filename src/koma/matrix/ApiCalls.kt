@@ -198,7 +198,11 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     fun getTxnId() = txnIdUnique.getAndAdd(1)
 
-    fun shutdown() = longPollClient.dispatcher().executorService().shutdown()
+    fun shutdown() {
+        longPollClient.dispatcher().executorService().shutdown()
+        longPollClient.connectionPool().evictAll()
+        longPollClient.cache().close()
+    }
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
