@@ -27,8 +27,13 @@ class ImageElement(val url: HttpUrl): ViewNode {
 
         launch {
             val res = getResponse(url) ?: return@launch
-            val image = Image(res.byteStream(), imageSize, imageSize, true, true)
-            image.widthProperty()
+            val image = Image(res.bytes().inputStream())
+            if (image.width > imageSize) {
+                imageView.fitHeight = imageSize
+                imageView.fitWidth = imageSize
+                imageView.isPreserveRatio = true
+                imageView.isSmooth = true
+            }
             imageView.image = image
         }
     }

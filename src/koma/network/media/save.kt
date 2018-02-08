@@ -12,5 +12,6 @@ suspend fun saveUrlToFile(url: HttpUrl, file: File): Boolean {
     val bs = Okio.buffer(sink)
     bs.writeAll(body.source())
     bs.close()
+    body.close()
     return true
 }
