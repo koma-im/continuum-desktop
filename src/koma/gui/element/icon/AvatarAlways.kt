@@ -1,6 +1,8 @@
 package koma.gui.element.icon
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
@@ -32,7 +34,10 @@ class AvatarAlways private constructor(urlV: ObservableValue<String>, ap: Avatar
     private val imageView = ImageView()
 
     init {
+        val imageAvl = booleanBinding(imageView.imageProperty()) { value != null }
         this.add(ap)
+        ap.removeWhen { imageAvl }
+        this.add(imageView)
 
         this.minHeight = avatarSize
         this.minWidth = avatarSize
@@ -42,20 +47,9 @@ class AvatarAlways private constructor(urlV: ObservableValue<String>, ap: Avatar
 
 
     private fun updateImage(urlV: ObservableValue<String>) {
-        val url = urlV.value
-        if (url != null) {
-            val i = AvatarProvider.getAvatar(url)
-            if (i != null) {
-                imageView.imageProperty().bind(i)
-                this.children.setAll(imageView)
-            }
+        val imp =  urlV.select { url ->
+            AvatarProvider.getAvatar(url) ?: SimpleObjectProperty<Image>()
         }
-        urlV.addListener { _, _, newValue ->
-            newValue ?: return@addListener
-            val imgPrp = AvatarProvider.getAvatar(newValue)
-            imgPrp ?: return@addListener
-            imageView.imageProperty().cleanBind(imgPrp)
-            this.children.setAll(imageView)
-        }
+        this.imageView.imageProperty().bind(imp)
     }
 }
