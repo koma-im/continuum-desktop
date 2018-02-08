@@ -37,14 +37,15 @@ class WebContentNode(private val link: String): FlowElement() {
 
     init {
         val linknode = hyperlinkNode(link)
-        linknode.prefWidth = 160.0 * AppSettings.scaling
         node.add(linknode)
 
         val preview = findPreview()
         if (preview != null) {
             multiLine = true
+            linknode.prefWidth = 160.0 * AppSettings.scaling
             setUpPrevie(preview)
         } else {
+            linknode.maxWidth = 200.0 * AppSettings.scaling
             multiLine = false
         }
 
