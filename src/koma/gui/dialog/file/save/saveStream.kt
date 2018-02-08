@@ -8,7 +8,7 @@ import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import tornadofx.*
 
-fun downloadFileAs(url: HttpUrl, filename: String, title: String = "Save file as") {
+fun downloadFileAs(url: HttpUrl, filename: String = url.guessFileName(), title: String = "Save file as") {
     val dialog = FileChooser()
     dialog.title = title
     dialog.initialFileName = filename
@@ -24,4 +24,10 @@ fun downloadFileAs(url: HttpUrl, filename: String, title: String = "Save file as
                         "Source: $url\nDestination: $file")
             }
     }
+}
+
+fun HttpUrl.guessFileName(): String {
+    val ps = this.encodedPathSegments()
+    val ls = ps.getOrNull(ps.lastIndex)
+    return ls ?: ""
 }

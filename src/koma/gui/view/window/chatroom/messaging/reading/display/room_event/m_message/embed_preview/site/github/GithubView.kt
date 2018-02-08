@@ -12,7 +12,7 @@ class GithubView(link: String): ViewNode {
     init {
         with(node) {
             text("Github ")
-            hyperlink(link)
+            text("preview coming soon")
         }
 
         val mi = MenuItem("sample menu item")
