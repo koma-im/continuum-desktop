@@ -82,7 +82,7 @@ class Room(val id: RoomId) {
         val us = UserStore.getOrCreateUserId(mid)
         if (members.remove(us)) {
         } else {
-            println("Failed to remove $mid from ${this.displayName}")
+            println("Failed to remove $mid from ${this}")
         }
     }
 
