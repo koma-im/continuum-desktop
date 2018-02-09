@@ -5,8 +5,10 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.koma_app.SaveJobs
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
+import koma.storage.users.state.save
 
 /**
  * Created by developer on 2017/6/25.
@@ -37,9 +39,8 @@ data class UserState(val id: UserId) {
 
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
-    var has_avatar = false
-
     init {
+        SaveJobs.addJob { if (this.modified) this.save() }
     }
 
     fun weight(): Int {

@@ -5,7 +5,6 @@ import koma.matrix.UserId
 import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import koma.storage.users.state.load_user
-import koma.storage.users.state.save
 import tornadofx.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,13 +23,6 @@ object UserStore {
             return null
         } else
             return getOrCreateUserId(userid)
-    }
-
-    init {
-
-        Runtime.getRuntime().addShutdownHook(Thread({
-            this.store.forEach { _, u: UserState -> u.save() }
-        }))
     }
 }
 

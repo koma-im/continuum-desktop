@@ -3,6 +3,7 @@ package matrix
 import com.squareup.moshi.Moshi
 import domain.*
 import koma.controller.sync.longPollTimeout
+import koma.koma_app.SaveJobs
 import koma.matrix.UserId
 import koma.matrix.UserIdAdapter
 import koma.matrix.event.context.ContextResponse
@@ -394,10 +395,10 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         mediaService = createMediaService(serverConf, AppHttpClient.client)
 
         next_batch = loadSyncBatchToken(userId)
-        Runtime.getRuntime().addShutdownHook(Thread({
+        SaveJobs.addJob {
             val nb = next_batch
             nb?.let { saveSyncBatchToken(userId, it) }
-        }))
+        }
     }
 
 

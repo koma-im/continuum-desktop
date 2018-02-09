@@ -12,6 +12,10 @@ fun user_save_path(userId: UserId): String? {
 }
 
 fun UserState.save() {
+    synchronized(this) { this.saveUnsync() }
+}
+
+fun UserState.saveUnsync() {
     if (!this.modified) return
     val dir = user_save_path(id)
     dir?: return

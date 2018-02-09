@@ -1,6 +1,7 @@
 package koma.storage.rooms
 
 import javafx.collections.FXCollections
+import koma.koma_app.SaveJobs
 import koma.matrix.room.naming.RoomId
 import koma.storage.rooms.state.load_rooms
 import koma.storage.rooms.state.save
@@ -45,9 +46,9 @@ object RoomStore{
             store.put(r.id, r)
         }
 
-        Runtime.getRuntime().addShutdownHook(Thread({
+        SaveJobs.addJob {
             this.store.forEach { _, u: Room -> u.save() }
-        }))
+        }
     }
 }
 
