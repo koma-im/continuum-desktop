@@ -1,5 +1,6 @@
 package koma.storage.message.piece
 
+import koma.koma_app.SaveJobs
 import koma.matrix.event.room_message.RoomEvent
 
 /**
@@ -43,9 +44,9 @@ class DiscussionPiece(
 
     init {
 
-        Runtime.getRuntime().addShutdownHook(Thread({
+        SaveJobs.addJob {
             this.save()
-        }))
+        }
     }
 
     override fun toString(): String {

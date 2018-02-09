@@ -12,6 +12,7 @@ import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
 fun main(args: Array<String>) {
     Application.launch(KomaApp::class.java, *args)
+    SaveJobs.finishUp()
 }
 
 

@@ -7,6 +7,10 @@ import java.time.Instant
 import java.time.ZoneOffset
 
 fun DiscussionPiece.save() {
+    synchronized(this) { this.saveUnsync() }
+}
+
+private fun DiscussionPiece.saveUnsync() {
     if (messages.size == 0 && filename != null) {
         val file = File(filename)
         if (file.exists())

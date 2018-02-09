@@ -22,6 +22,10 @@ fun state_save_path(vararg paths: String): String? {
 }
 
 fun Room.save() {
+    synchronized(this) { this.saveUnsync() }
+}
+
+private fun Room.saveUnsync(){
     val dir = state_save_path(
             this.id.servername,
             this.id.localstr)

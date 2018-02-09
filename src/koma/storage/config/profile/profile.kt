@@ -2,6 +2,7 @@ package koma.storage.config.profile
 
 import com.squareup.moshi.Moshi
 import javafx.collections.ObservableList
+import koma.koma_app.SaveJobs
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.RoomIdAdapter
@@ -17,7 +18,6 @@ class Profile(
         val userId: UserId,
         val access_token: String
 ) {
-
     val roomStore = UserRoomStore()
 
     val hasRooms: Boolean
@@ -35,9 +35,9 @@ class Profile(
             hasRooms = false
         }
 
-        Runtime.getRuntime().addShutdownHook(Thread({
-            this.save()
-        }))
+        SaveJobs.addJob {
+            synchronized(this) {this.save() }
+        }
     }
 
     companion object {
