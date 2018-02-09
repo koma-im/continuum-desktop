@@ -37,7 +37,6 @@ private fun DiscussionPiece.saveUnsync() {
             writer.append(line)
             writer.append('\n')
         } catch (e: JsonDataException) {
-            System.err.println("failed to encode line $mesg: $e")
         }
     }
     this.following_event?.let { writer.append("# following_event " + it + "\n") }
