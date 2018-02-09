@@ -26,16 +26,15 @@ fun detectTimeLeap(): Channel<Unit> {
             if (now - prev > 2) {
                 println("detected time leap from $prev to $now")
                 timeleapSignal.send(Unit)
-            } else {
-                prev = now
             }
+            prev = now
         }
     }
     return timeleapSignal
 }
 
 
-fun startSyncing(from: String?): Channel<SyncResponse> {
+fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncResponse> {
     // maybe a little faster with buffer?
     val sresChannel = Channel<SyncResponse>(3)
 
@@ -48,6 +47,7 @@ fun startSyncing(from: String?): Channel<SyncResponse> {
             val ar = async {  client.getEvents(since).awaitResult() }
 
             val ss = select<SyncStatus> {
+                shutdownChan.onReceive { SyncStatus.Shutdown() }
                 timeCheck.onReceive { SyncStatus.Resync() }
                 ar.onAwait { it.inspect() }
             }
@@ -56,6 +56,7 @@ fun startSyncing(from: String?): Channel<SyncResponse> {
                     println("shutting down sync")
                     ar.cancel()
                     sresChannel.close()
+                    shutdownChan.send(Unit)
                 }
                 is SyncStatus.TransientFailure -> {
                     System.err.println("restarting sync after ${ss.delay} because ${ss.message}")
