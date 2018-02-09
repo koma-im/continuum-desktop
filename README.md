@@ -2,15 +2,23 @@
 
 # Features
 
-Display avatars and images
+* designed to bridge existing chat apps, so you can switch to an open platform _at now_, thanks to the [Matrix](https://matrix.org/) project:
+  * matrix.org provides bridge for Gitter, Slack, the whole freenode IRC network
+  * There are projects providing support for almost all platforms such as xmpp and [Telegram](https://github.com/tulir/mautrix-telegram)
+  * bridges are well-integrated, users on other platforms appear as individual users with avatar here
+* Multimedia capability
+  * Links in plaintext messages are identified and preview is shown whenever applicable
+  * Known services are treated in the most reasonable way, for a Github repo, this could be the number of stars, forks, the README.md
+  * Known media type are auto-loaded, image links are converted to images
+  * Koma is going to save you quite a few clicks
 
-Built-in virtual emoji keyboard
+* Built-in virtual [emoji keyboard](https://github.com/koma-im/emojipanel)
 
-Fetch chat history to allow you to read early messages
+* Fetch chat history to allow you to read early messages
 
-Store all data to disk. So it starts very fast and previous chats appear instantly. Incremental sync puts less stree on servers and also make sync much faster
+* Store all data to disk. So it starts very fast and previous chats appear instantly. Incremental sync puts less stress on servers and also make sync much faster
 
-GUI created using JavaFx, uses much less resouces than packaged html and js, also looks better than traditional AWT or Swing
+* GUI created using [tornadofx](https://github.com/edvin/tornadofx), uses much less resouces than packaged html and js
 
 # Getting the application
 
@@ -67,7 +75,7 @@ If you find any of the above a bad idea, or if you would like to suggest new ide
 ## Try it
 
 Just try it and when you find anything unhandy, tell us about it.
-Your idea will help to focus on the most needed features, and a handy client for Matrix will be a reality sooner.  
+Your idea will help to focus on the most needed features, and a handy client for Matrix will be a reality sooner.
 
 If you know someone who might be interested in open-source communication, star or share the project, more usage and feedback will always be helpful.
 
