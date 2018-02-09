@@ -3,6 +3,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.scene.control.MenuItem
+import javafx.scene.input.Clipboard
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
 import koma.gui.dialog.file.save.downloadFileAs
@@ -29,10 +30,20 @@ class MFileViewNode(val content: FileMessage): ViewNode {
             }
         }
 
+        menuItems = createMenuItems()
+    }
+
+    private fun createMenuItems(): List<MenuItem> {
+
         val mi = MenuItem("Save File")
         mi.isDisable = url == null
         mi.action { save() }
-        menuItems = listOf(mi)
+
+        val copyUrl = MenuItem("Copy File Address")
+        copyUrl.isDisable = url == null
+        copyUrl.action { Clipboard.getSystemClipboard().putString(url.toString()) }
+
+        return listOf(mi, copyUrl)
     }
 
     private fun save() {

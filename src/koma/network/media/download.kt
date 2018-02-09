@@ -28,6 +28,7 @@ suspend fun downloadMedia(url: HttpUrl): ByteArray? {
                 is BodyResult.Ok -> br.body.bytes()
                 is BodyResult.Error -> {
                     System.err.println("http error getting $url: ${br.error.message}")
+                    br.error.response.close()
                     null
                 }
             }
