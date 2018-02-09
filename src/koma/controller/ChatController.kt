@@ -6,9 +6,10 @@ import javafx.concurrent.Task
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
+import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.startSyncing
-import koma.network.client.okhttp.AppHttpClient
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.javafx.JavaFx
+import kotlinx.coroutines.experimental.launch
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.lang.kotlin.subscribeBy
@@ -21,8 +22,6 @@ import java.util.*
  */
 class ChatController(
         val apiClient: ApiClient) {
-
-    private val syncJob: Job
 
     init{
 
@@ -121,19 +120,15 @@ class ChatController(
                     apiClient.setRoomAlias(roomid, newname)
                     apiClient.setRoomCanonicalAlias(roomid, newname)
                 }
-
-        val start = if (apiClient.profile.hasRooms) apiClient.next_batch else null
-        syncJob = startSyncing(start)
     }
 
-
-    fun shutdown() {
-        syncJob.cancel()
-        apiClient.shutdown()
-        with(AppHttpClient.client) {
-            dispatcher().executorService().shutdown()
-            connectionPool().evictAll()
-            cache().close()
+    fun start() {
+        val start = if (apiClient.profile.hasRooms) apiClient.next_batch else null
+        val syncEventChannel = startSyncing(start)
+        launch(JavaFx) {
+            for (s in syncEventChannel) {
+                processEventsResult(s)
+            }
         }
     }
 

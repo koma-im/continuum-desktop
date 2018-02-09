@@ -188,8 +188,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     var next_batch: String? = null
 
-
-    private val longPollClient: OkHttpClient
     val service: MatrixAccessApi
     val longPollService: MatrixAccessApi
     val mediaService: MatrixMediaApi
@@ -197,12 +195,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     private val txnIdUnique = AtomicLong()
 
     fun getTxnId() = txnIdUnique.getAndAdd(1)
-
-    fun shutdown() {
-        longPollClient.dispatcher().executorService().shutdown()
-        longPollClient.connectionPool().evictAll()
-        longPollClient.cache().close()
-    }
 
     fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
         return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
@@ -396,7 +388,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         service = rb.client(cb.tryAddAppCache("matrix-access", 5*1024*1024).build()).build().create(MatrixAccessApi::class.java)
 
         // no point caching the sync
-        longPollClient = cb.readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS).build()
+        val longPollClient = cb.readTimeout(longPollTimeout.toLong() + 10, TimeUnit.SECONDS).build()
         longPollService = rb.client(longPollClient).build().create(MatrixAccessApi::class.java)
 
         mediaService = createMediaService(serverConf, AppHttpClient.client)

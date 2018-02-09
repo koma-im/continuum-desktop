@@ -74,5 +74,7 @@ class LoginController: Controller() {
         setSaneStageSize(stage)
         stage.hide()
         stage.show()
+
+        chatctrl.start()
     }
 }
