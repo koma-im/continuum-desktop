@@ -17,7 +17,7 @@ val longPollTimeout = 50
  * if time flows at unusual rates, connection is unlikely to survive
  */
 fun detectTimeLeap(): Channel<Unit> {
-    val timeleapSignal = Channel<Unit>()
+    val timeleapSignal = Channel<Unit>(Channel.CONFLATED)
     var prev = Instant.now().epochSecond
     launch {
         while (true) {
