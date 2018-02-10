@@ -11,10 +11,10 @@ fun createGithubView(link: String): GithubView? {
     val ps = url.pathSegments()
     val owner = ps.getOrNull(0) ?: return null
     val repo = ps.getOrNull(1) ?: return null
-    return GithubView(url, owner, repo)
+    return GithubView(owner, repo)
 }
 
-class GithubView(url: HttpUrl, owner: String, repo: String): ViewNode {
+class GithubView(owner: String, repo: String): ViewNode {
     override val node = VBox()
     override val menuItems: List<MenuItem>
 

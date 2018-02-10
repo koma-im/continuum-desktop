@@ -64,7 +64,7 @@ fun load_room(roomId: RoomId, path: File): Room? {
 
     val members = load_members(path.resolve(usersfilename))
     for (m in members) {
-        val u = UserId_new(m.first)!!
+        val u = UserId_new(m.first)
         room.members.add(UserStore.getOrCreateUserId(u))
         val l = m.second
         if (l != null) {

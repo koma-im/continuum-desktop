@@ -24,10 +24,6 @@ fun ask_invite_member() {
     val roomid = room_user.first
 
     val userid = UserId_new(username)
-    if (userid == null) {
-        alert(Alert.AlertType.ERROR, "invalid user id", username)
-        return
-    }
     launch(JavaFx) {
         val result = apiClient!!.inviteMember(RoomId(roomid), userid).awaitResult()
         when (result) {
@@ -72,7 +68,7 @@ private fun dialog_get_member(): Optional<Pair<String, String>> {
     inviteButton.setDisable(true)
 
     // Do some validation (using the Java 8 lambda syntax).
-    roomnamef.textProperty().addListener({ observable, oldValue, newValue ->
+    roomnamef.textProperty().addListener({ _, _, newValue ->
         inviteButton.setDisable(newValue.trim().isEmpty()) })
 
     dialog.getDialogPane().setContent(grid)

@@ -71,7 +71,7 @@ open class Concatenater<K, E: Comparable<E>, P: OrderedListPart<K,E>>(val list: 
 
     protected fun shiftForward(key: K?, shift: Int) {
         key ?: return
-        this.pieces.tailMap(key).forEach { k,u -> u.pos += shift }
+        this.pieces.tailMap(key).forEach { _, u -> u.pos += shift }
     }
 
     @Synchronized

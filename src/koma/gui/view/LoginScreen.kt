@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.matrix.user.identity.UserId_new
+import koma.matrix.user.identity.isUserIdValid
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.server.serverConfWithAddr
@@ -71,7 +72,6 @@ class LoginScreen(): View() {
             }
             add(grid)
 
-            val serverName = stringBinding(userId.valueProperty()) { if (value != null && value.isNotBlank()) UserId_new(value)?.server else null }
             val settings = PreferenceWindow()
             button("More Options") {
                 action { settings.openModal() }
@@ -80,14 +80,14 @@ class LoginScreen(): View() {
                 button("Register") {
                     actionEvents()
                             .map {
-                                val userid = UserId_new(userId.value)
-                                if ( userid == null) {
+                                if (!isUserIdValid(userId.value)) {
                                     alert(Alert.AlertType.WARNING, "Invalid user-id")
                                     null
                                 } else if (password.text.isBlank()) {
                                     alert(Alert.AlertType.WARNING, "Invalid password")
                                     null
                                 } else {
+                                    val userid = UserId_new(userId.value)
                                     RegisterRequest(
                                             UserRegistering(
                                                     userid.user,

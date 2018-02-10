@@ -22,10 +22,6 @@ fun runAskBanRoomMember()  {
     val roomid = room_user.first
     val username = room_user.second
     val userid = UserId_new(username)
-    if (userid == null) {
-        alert(Alert.AlertType.ERROR, "invalid user id", username)
-        return
-    }
     launch(JavaFx) {
         val result = apiClient!!.banMember(RoomId(roomid), userid).awaitResult()
         when (result) {
@@ -66,7 +62,7 @@ private fun getBanningMember(): Optional<Pair<String, String>> {
     val banButton = dialog.getDialogPane().lookupButton(inviteButtonType)
     banButton.setDisable(true)
 
-    roomnamef.textProperty().addListener({ observable, oldValue, newValue ->
+    roomnamef.textProperty().addListener({ _, _, newValue ->
         banButton.setDisable(newValue.trim().isEmpty()) })
 
     dialog.getDialogPane().setContent(grid)
