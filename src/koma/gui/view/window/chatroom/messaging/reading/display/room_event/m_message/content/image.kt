@@ -33,7 +33,7 @@ class MImageViewNode(val content: ImageMessage): ViewNode {
 
     private fun createMenuItems(url: HttpUrl, filename: String): List<MenuItem> {
         val tm = MenuItem("Save Image")
-        tm.action { downloadFileAs(url, filename = content.body, title = "Save Image As") }
+        tm.action { downloadFileAs(url, filename = filename, title = "Save Image As") }
 
         val copyUrl = MenuItem("Copy Image Address")
         copyUrl.action { Clipboard.getSystemClipboard().putString(url.toString()) }

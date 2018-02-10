@@ -26,7 +26,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>, val jo
                 label("Room")
                 textfield() {
                     roomfield = textProperty()
-                    textProperty().addListener({ observable, oldValue, newValue ->
+                    textProperty().addListener({ _, _, newValue ->
                         joinButton.setDisable(newValue.trim().isEmpty())
                     })
                 }

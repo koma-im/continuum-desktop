@@ -21,8 +21,8 @@ class AvatarPlaceholder private constructor(): ImageView() {
     }
 
     constructor(nameV: ObservableValue<String>, color: ObservableValue<Color>): this() {
-        nameV.addListener { o: Observable -> redraw(nameV.value, color.value) }
-        color.addListener { o: Observable -> redraw(nameV.value, color.value) }
+        nameV.addListener { _: Observable -> redraw(nameV.value, color.value) }
+        color.addListener { _: Observable -> redraw(nameV.value, color.value) }
     }
 
     private fun redraw(name: String?, color: Color?) {

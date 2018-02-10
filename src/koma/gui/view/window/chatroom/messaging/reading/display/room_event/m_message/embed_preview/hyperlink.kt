@@ -61,7 +61,7 @@ fun tryExecBrowsers(url: String): Boolean {
         try {
             val procb = ProcessBuilder(browserExe, url)
             // TODO stdout and stderr of sub process should be discarded
-            val proc = procb.start()
+            procb.start()
             return true
         } catch (e: IOException) {
             System.err.println("failed to launch browser $browserExe $url")

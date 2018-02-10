@@ -128,6 +128,11 @@
                         <goals> <goal>test-compile</goal> </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <args>
+                        <arg>-Xcoroutines=enable</arg>
+                    </args>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>

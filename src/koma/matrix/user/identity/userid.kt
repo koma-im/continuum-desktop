@@ -8,3 +8,9 @@ fun UserId_new(str: String): UserId {
     }
     return UserId(user, server)
 }
+
+fun isUserIdValid(input: String): Boolean {
+    if (input.isNotBlank())
+        return true
+    return false
+}

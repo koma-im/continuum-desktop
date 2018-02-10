@@ -103,7 +103,7 @@ class ChatController(
                 .subscribe {
                     val roomid = it.first.id
                     val newname = it.second as String
-                    val roomAlias = apiClient.setRoomAlias(roomid, newname)
+                    apiClient.setRoomAlias(roomid, newname)
                 }
         guiEvents.renameRoomRequests.toObservable()
                 .map {
@@ -180,7 +180,7 @@ class ChatController(
         val creationButton = dialog.getDialogPane().lookupButton(createButtonType)
         creationButton.setDisable(true)
 
-        roomnamef.textProperty().addListener({ observable, oldValue, newValue ->
+        roomnamef.textProperty().addListener({ _, _, newValue ->
             creationButton.setDisable(newValue.trim().isEmpty()) })
 
         dialog.getDialogPane().setContent(grid)

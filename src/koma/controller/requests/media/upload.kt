@@ -28,6 +28,7 @@ suspend fun uploadFile(api: ApiClient, file: File, type: MediaType): Result<Uplo
                 alert(Alert.AlertType.ERROR, "during upload exception $ex, ${ex.cause}")
             }
         }
+        is Result.Ok -> {}
     }
     return uploadResult
 }

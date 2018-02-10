@@ -8,17 +8,12 @@ import java.util.*
 /**
  * https://github.com/square/moshi/commit/924a2490beabc7fe511d75fe9ed34b743e9265e4
  */
-class RuntimeJsonAdapterFactory(private val baseType: Class<*>, private val labelKey: String) : JsonAdapter.Factory {
+class RuntimeJsonAdapterFactory(
+        private val baseType: Class<*>,
+        private val labelKey: String,
+        private val defaultType: Class<*>
+) : JsonAdapter.Factory {
     private val subtypeToLabel = LinkedHashMap<Class<*>, String>()
-    private var defaultType: Class<*>? = null
-
-    fun registerDefaultType(defaultType: Class<*>): RuntimeJsonAdapterFactory {
-        if (!baseType.isAssignableFrom(defaultType)) {
-            throw IllegalArgumentException(defaultType.toString() + " must be a " + baseType)
-        }
-        this.defaultType = defaultType
-        return this
-    }
 
     fun registerSubtype(subtype: Class<*>?, label: String?): RuntimeJsonAdapterFactory {
         if (subtype == null) {
@@ -47,12 +42,7 @@ class RuntimeJsonAdapterFactory(private val baseType: Class<*>, private val labe
             labelToDelegate.put(value, delegate)
             subtypeToDelegate.put(key, delegate)
         }
-        val delegateDefault: JsonAdapter<*>?
-        if (defaultType != null) {
-            delegateDefault = moshi.adapter<Any>(defaultType, annotations)
-        } else {
-            delegateDefault = null
-        }
+        val delegateDefault = moshi.adapter<Any>(defaultType, annotations)
         val toJsonDelegate = moshi.adapter<Map<String, Any>>(Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java))
         return RuntimeJsonAdapter(labelKey, labelToDelegate, subtypeToDelegate, subtypeToLabel,
                 toJsonDelegate, delegateDefault)
@@ -81,7 +71,7 @@ class RuntimeJsonAdapterFactory(private val baseType: Class<*>, private val labe
                         + " must be a string but had a value of "
                         + label
                         + " of type "
-                        + label!!.javaClass)
+                        + label.javaClass)
             }
             var delegate: JsonAdapter<*>? = labelToDelegate[label]
             if (delegate == null) {
@@ -90,7 +80,7 @@ class RuntimeJsonAdapterFactory(private val baseType: Class<*>, private val labe
                     delegate = defaultDelegate
                 } else {
                     System.err.println("no fallback delegate found for label " + label + " value " + value.toString())
-                    throw JsonDataException("Type not registered for label: " + label!!)
+                    throw JsonDataException("Type not registered for label: " + label)
                 }
             }
             return delegate.fromJsonValue(value)

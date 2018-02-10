@@ -14,7 +14,7 @@ class ServerConf(
         val servername: String,
         var addresses: MutableList<String>,
         val apiPath: String = "_matrix/client/r0/",
-        val mediaPath: String = "_matrix/media/r0/download"
+        val mediaPath: String? = "_matrix/media/r0/download"
 )
 
 fun server_save_path(servername: String): File? {
