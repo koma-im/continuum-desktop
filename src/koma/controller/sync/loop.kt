@@ -57,11 +57,11 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
                     ar.cancel()
                     sresChannel.close()
                     shutdownChan.send(Unit)
+                    break@sync
                 }
                 is SyncStatus.TransientFailure -> {
                     System.err.println("restarting sync after ${ss.delay} because ${ss.message}")
                     delay(ss.delay)
-                    continue@sync
                 }
                 is SyncStatus.Response -> {
                     val r = ss.response
@@ -72,7 +72,6 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
                 is SyncStatus.Resync -> {
                     System.err.println("restarting sync now because of time leap")
                     ar.cancel()
-                    continue@sync
                 }
             }
         }
