@@ -78,9 +78,9 @@
             <version>0.6</version>
         </dependency>
         <dependency>
-            <groupId>com.github.koma-im</groupId>
-            <artifactId>emojipanel</artifactId>
-            <version>74198a3</version>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>8.40.14</version>
         </dependency>
         <dependency>
             <groupId>com.github.u1haru</groupId>
