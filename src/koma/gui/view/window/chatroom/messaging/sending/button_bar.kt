@@ -6,7 +6,7 @@ import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
 import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendImageMessage
-import koma.input.emoji.EmojiPanel
+import koma.gui.element.emoji.keyboard.EmojiKeyboard
 import koma.storage.config.settings.AppSettings
 import model.Room
 import tornadofx.*
@@ -32,9 +32,9 @@ fun createButtonBar(inputField: TextField, room: Room): ButtonBar {
         }
         button{
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT, size)
-            val ep = EmojiPanel()
-            ep.onEmojiChosen = {inputField.text += it.glyph}
             action {
+                val ep = EmojiKeyboard
+                ep.onEmojiChosen = {inputField.text += it.glyph}
                 ep.show(this)
             }
         }

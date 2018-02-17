@@ -25,13 +25,13 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
         cache = createCache()
     }
 
-    fun getProcImg(url: HttpUrl): ImageProperty
-            = cache.computeIfAbsent(url, { createImageProperty(url) })
+    fun getProcImg(url: HttpUrl, cacheDays: Int? = null): ImageProperty
+            = cache.computeIfAbsent(url, { createImageProperty(url, cacheDays) })
 
-    private fun createImageProperty(url: HttpUrl): ImageProperty{
+    private fun createImageProperty(url: HttpUrl, cacheDays: Int?): ImageProperty{
         val prop = ImageProperty()
         launch {
-            val bs = downloadMedia(url)
+            val bs = downloadMedia(url, cacheDays)
             bs ?: return@launch
             val img = processing(bs.inputStream())
             launch(JavaFx) { prop.set(img) }
