@@ -1,106 +1,106 @@
 package koma.gui.element.emoji.category;
 
 val Food = listOf(
-        EmojiSymbol("🍇", "1f347", "grapes"),
-        EmojiSymbol("🍈", "1f348", "melon"),
-        EmojiSymbol("🍉", "1f349", "watermelon"),
-        EmojiSymbol("🍊", "1f34a", "tangerine"),
-        EmojiSymbol("🍋", "1f34b", "lemon"),
-        EmojiSymbol("🍌", "1f34c", "banana"),
-        EmojiSymbol("🍍", "1f34d", "pineapple"),
-        EmojiSymbol("🍎", "1f34e", "red apple"),
-        EmojiSymbol("🍏", "1f34f", "green apple"),
-        EmojiSymbol("🍐", "1f350", "pear"),
-        EmojiSymbol("🍑", "1f351", "peach"),
-        EmojiSymbol("🍒", "1f352", "cherries"),
-        EmojiSymbol("🍓", "1f353", "strawberry"),
-        EmojiSymbol("🥝", "1f95d", "kiwi fruit"),
-        EmojiSymbol("🍅", "1f345", "tomato"),
-        EmojiSymbol("🥥", "1f965", "coconut"),
-        EmojiSymbol("🥑", "1f951", "avocado"),
-        EmojiSymbol("🍆", "1f346", "eggplant"),
-        EmojiSymbol("🥔", "1f954", "potato"),
-        EmojiSymbol("🥕", "1f955", "carrot"),
-        EmojiSymbol("🌽", "1f33d", "ear of corn"),
-        EmojiSymbol("🌶", "1f336", "hot pepper"),
-        EmojiSymbol("🥒", "1f952", "cucumber"),
-        EmojiSymbol("🥦", "1f966", "broccoli"),
-        EmojiSymbol("🍄", "1f344", "mushroom"),
-        EmojiSymbol("🥜", "1f95c", "peanuts"),
-        EmojiSymbol("🌰", "1f330", "chestnut"),
-        EmojiSymbol("🍞", "1f35e", "bread"),
-        EmojiSymbol("🥐", "1f950", "croissant"),
-        EmojiSymbol("🥖", "1f956", "baguette bread"),
-        EmojiSymbol("🥨", "1f968", "pretzel"),
-        EmojiSymbol("🥞", "1f95e", "pancakes"),
-        EmojiSymbol("🧀", "1f9c0", "cheese wedge"),
-        EmojiSymbol("🍖", "1f356", "meat on bone"),
-        EmojiSymbol("🍗", "1f357", "poultry leg"),
-        EmojiSymbol("🥩", "1f969", "cut of meat"),
-        EmojiSymbol("🥓", "1f953", "bacon"),
-        EmojiSymbol("🍔", "1f354", "hamburger"),
-        EmojiSymbol("🍟", "1f35f", "french fries"),
-        EmojiSymbol("🍕", "1f355", "pizza"),
-        EmojiSymbol("🌭", "1f32d", "hot dog"),
-        EmojiSymbol("🥪", "1f96a", "sandwich"),
-        EmojiSymbol("🌮", "1f32e", "taco"),
-        EmojiSymbol("🌯", "1f32f", "burrito"),
-        EmojiSymbol("🥙", "1f959", "stuffed flatbread"),
-        EmojiSymbol("🥚", "1f95a", "egg"),
-        EmojiSymbol("🍳", "1f373", "cooking"),
-        EmojiSymbol("🥘", "1f958", "shallow pan of food"),
-        EmojiSymbol("🍲", "1f372", "pot of food"),
-        EmojiSymbol("🥣", "1f963", "bowl with spoon"),
-        EmojiSymbol("🥗", "1f957", "green salad"),
-        EmojiSymbol("🍿", "1f37f", "popcorn"),
-        EmojiSymbol("🥫", "1f96b", "canned food"),
-        EmojiSymbol("🍱", "1f371", "bento box"),
-        EmojiSymbol("🍘", "1f358", "rice cracker"),
-        EmojiSymbol("🍙", "1f359", "rice ball"),
-        EmojiSymbol("🍚", "1f35a", "cooked rice"),
-        EmojiSymbol("🍛", "1f35b", "curry rice"),
-        EmojiSymbol("🍜", "1f35c", "steaming bowl"),
-        EmojiSymbol("🍝", "1f35d", "spaghetti"),
-        EmojiSymbol("🍠", "1f360", "roasted sweet potato"),
-        EmojiSymbol("🍢", "1f362", "oden"),
-        EmojiSymbol("🍣", "1f363", "sushi"),
-        EmojiSymbol("🍤", "1f364", "fried shrimp"),
-        EmojiSymbol("🍥", "1f365", "fish cake with swirl"),
-        EmojiSymbol("🍡", "1f361", "dango"),
-        EmojiSymbol("🥟", "1f95f", "dumpling"),
-        EmojiSymbol("🥠", "1f960", "fortune cookie"),
-        EmojiSymbol("🥡", "1f961", "takeout box"),
-        EmojiSymbol("🍦", "1f366", "soft ice cream"),
-        EmojiSymbol("🍧", "1f367", "shaved ice"),
-        EmojiSymbol("🍨", "1f368", "ice cream"),
-        EmojiSymbol("🍩", "1f369", "doughnut"),
-        EmojiSymbol("🍪", "1f36a", "cookie"),
-        EmojiSymbol("🎂", "1f382", "birthday cake"),
-        EmojiSymbol("🍰", "1f370", "shortcake"),
-        EmojiSymbol("🥧", "1f967", "pie"),
-        EmojiSymbol("🍫", "1f36b", "chocolate bar"),
-        EmojiSymbol("🍬", "1f36c", "candy"),
-        EmojiSymbol("🍭", "1f36d", "lollipop"),
-        EmojiSymbol("🍮", "1f36e", "custard"),
-        EmojiSymbol("🍯", "1f36f", "honey pot"),
-        EmojiSymbol("🍼", "1f37c", "baby bottle"),
-        EmojiSymbol("🥛", "1f95b", "glass of milk"),
-        EmojiSymbol("☕", "2615", "hot beverage"),
-        EmojiSymbol("🍵", "1f375", "teacup without handle"),
-        EmojiSymbol("🍶", "1f376", "sake"),
-        EmojiSymbol("🍾", "1f37e", "bottle with popping cork"),
-        EmojiSymbol("🍷", "1f377", "wine glass"),
-        EmojiSymbol("🍸", "1f378", "cocktail glass"),
-        EmojiSymbol("🍹", "1f379", "tropical drink"),
-        EmojiSymbol("🍺", "1f37a", "beer mug"),
-        EmojiSymbol("🍻", "1f37b", "clinking beer mugs"),
-        EmojiSymbol("🥂", "1f942", "clinking glasses"),
-        EmojiSymbol("🥃", "1f943", "tumbler glass"),
-        EmojiSymbol("🥤", "1f964", "cup with straw"),
-        EmojiSymbol("🥢", "1f962", "chopsticks"),
-        EmojiSymbol("🍽", "1f37d", "fork and knife with plate"),
-        EmojiSymbol("🍴", "1f374", "fork and knife"),
-        EmojiSymbol("🥄", "1f944", "spoon"),
-        EmojiSymbol("🔪", "1f52a", "kitchen knife"),
-        EmojiSymbol("🏺", "1f3fa", "amphora")
+        "🍇", //grapes, 1f347
+        "🍈", //melon, 1f348
+        "🍉", //watermelon, 1f349
+        "🍊", //tangerine, 1f34a
+        "🍋", //lemon, 1f34b
+        "🍌", //banana, 1f34c
+        "🍍", //pineapple, 1f34d
+        "🍎", //red apple, 1f34e
+        "🍏", //green apple, 1f34f
+        "🍐", //pear, 1f350
+        "🍑", //peach, 1f351
+        "🍒", //cherries, 1f352
+        "🍓", //strawberry, 1f353
+        "🥝", //kiwi fruit, 1f95d
+        "🍅", //tomato, 1f345
+        "🥥", //coconut, 1f965
+        "🥑", //avocado, 1f951
+        "🍆", //eggplant, 1f346
+        "🥔", //potato, 1f954
+        "🥕", //carrot, 1f955
+        "🌽", //ear of corn, 1f33d
+        "🌶", //hot pepper, 1f336
+        "🥒", //cucumber, 1f952
+        "🥦", //broccoli, 1f966
+        "🍄", //mushroom, 1f344
+        "🥜", //peanuts, 1f95c
+        "🌰", //chestnut, 1f330
+        "🍞", //bread, 1f35e
+        "🥐", //croissant, 1f950
+        "🥖", //baguette bread, 1f956
+        "🥨", //pretzel, 1f968
+        "🥞", //pancakes, 1f95e
+        "🧀", //cheese wedge, 1f9c0
+        "🍖", //meat on bone, 1f356
+        "🍗", //poultry leg, 1f357
+        "🥩", //cut of meat, 1f969
+        "🥓", //bacon, 1f953
+        "🍔", //hamburger, 1f354
+        "🍟", //french fries, 1f35f
+        "🍕", //pizza, 1f355
+        "🌭", //hot dog, 1f32d
+        "🥪", //sandwich, 1f96a
+        "🌮", //taco, 1f32e
+        "🌯", //burrito, 1f32f
+        "🥙", //stuffed flatbread, 1f959
+        "🥚", //egg, 1f95a
+        "🍳", //cooking, 1f373
+        "🥘", //shallow pan of food, 1f958
+        "🍲", //pot of food, 1f372
+        "🥣", //bowl with spoon, 1f963
+        "🥗", //green salad, 1f957
+        "🍿", //popcorn, 1f37f
+        "🥫", //canned food, 1f96b
+        "🍱", //bento box, 1f371
+        "🍘", //rice cracker, 1f358
+        "🍙", //rice ball, 1f359
+        "🍚", //cooked rice, 1f35a
+        "🍛", //curry rice, 1f35b
+        "🍜", //steaming bowl, 1f35c
+        "🍝", //spaghetti, 1f35d
+        "🍠", //roasted sweet potato, 1f360
+        "🍢", //oden, 1f362
+        "🍣", //sushi, 1f363
+        "🍤", //fried shrimp, 1f364
+        "🍥", //fish cake with swirl, 1f365
+        "🍡", //dango, 1f361
+        "🥟", //dumpling, 1f95f
+        "🥠", //fortune cookie, 1f960
+        "🥡", //takeout box, 1f961
+        "🍦", //soft ice cream, 1f366
+        "🍧", //shaved ice, 1f367
+        "🍨", //ice cream, 1f368
+        "🍩", //doughnut, 1f369
+        "🍪", //cookie, 1f36a
+        "🎂", //birthday cake, 1f382
+        "🍰", //shortcake, 1f370
+        "🥧", //pie, 1f967
+        "🍫", //chocolate bar, 1f36b
+        "🍬", //candy, 1f36c
+        "🍭", //lollipop, 1f36d
+        "🍮", //custard, 1f36e
+        "🍯", //honey pot, 1f36f
+        "🍼", //baby bottle, 1f37c
+        "🥛", //glass of milk, 1f95b
+        "☕", //hot beverage, 2615
+        "🍵", //teacup without handle, 1f375
+        "🍶", //sake, 1f376
+        "🍾", //bottle with popping cork, 1f37e
+        "🍷", //wine glass, 1f377
+        "🍸", //cocktail glass, 1f378
+        "🍹", //tropical drink, 1f379
+        "🍺", //beer mug, 1f37a
+        "🍻", //clinking beer mugs, 1f37b
+        "🥂", //clinking glasses, 1f942
+        "🥃", //tumbler glass, 1f943
+        "🥤", //cup with straw, 1f964
+        "🥢", //chopsticks, 1f962
+        "🍽", //fork and knife with plate, 1f37d
+        "🍴", //fork and knife, 1f374
+        "🥄", //spoon, 1f944
+        "🔪", //kitchen knife, 1f52a
+        "🏺" //amphora, 1f3fa
 )

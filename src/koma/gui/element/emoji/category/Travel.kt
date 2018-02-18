@@ -1,211 +1,211 @@
 package koma.gui.element.emoji.category;
 
 val Travel = listOf(
-        EmojiSymbol("🌍", "1f30d", "globe showing Europe-Africa"),
-        EmojiSymbol("🌎", "1f30e", "globe showing Americas"),
-        EmojiSymbol("🌏", "1f30f", "globe showing Asia-Australia"),
-        EmojiSymbol("🌐", "1f310", "globe with meridians"),
-        EmojiSymbol("🗺", "1f5fa", "world map"),
-        EmojiSymbol("🗾", "1f5fe", "map of Japan"),
-        EmojiSymbol("🏔", "1f3d4", "snow-capped mountain"),
-        EmojiSymbol("⛰", "26f0", "mountain"),
-        EmojiSymbol("🌋", "1f30b", "volcano"),
-        EmojiSymbol("🗻", "1f5fb", "mount fuji"),
-        EmojiSymbol("🏕", "1f3d5", "camping"),
-        EmojiSymbol("🏖", "1f3d6", "beach with umbrella"),
-        EmojiSymbol("🏜", "1f3dc", "desert"),
-        EmojiSymbol("🏝", "1f3dd", "desert island"),
-        EmojiSymbol("🏞", "1f3de", "national park"),
-        EmojiSymbol("🏟", "1f3df", "stadium"),
-        EmojiSymbol("🏛", "1f3db", "classical building"),
-        EmojiSymbol("🏗", "1f3d7", "building construction"),
-        EmojiSymbol("🏘", "1f3d8", "houses"),
-        EmojiSymbol("🏙", "1f3d9", "cityscape"),
-        EmojiSymbol("🏚", "1f3da", "derelict house"),
-        EmojiSymbol("🏠", "1f3e0", "house"),
-        EmojiSymbol("🏡", "1f3e1", "house with garden"),
-        EmojiSymbol("🏢", "1f3e2", "office building"),
-        EmojiSymbol("🏣", "1f3e3", "Japanese post office"),
-        EmojiSymbol("🏤", "1f3e4", "post office"),
-        EmojiSymbol("🏥", "1f3e5", "hospital"),
-        EmojiSymbol("🏦", "1f3e6", "bank"),
-        EmojiSymbol("🏨", "1f3e8", "hotel"),
-        EmojiSymbol("🏩", "1f3e9", "love hotel"),
-        EmojiSymbol("🏪", "1f3ea", "convenience store"),
-        EmojiSymbol("🏫", "1f3eb", "school"),
-        EmojiSymbol("🏬", "1f3ec", "department store"),
-        EmojiSymbol("🏭", "1f3ed", "factory"),
-        EmojiSymbol("🏯", "1f3ef", "Japanese castle"),
-        EmojiSymbol("🏰", "1f3f0", "castle"),
-        EmojiSymbol("💒", "1f492", "wedding"),
-        EmojiSymbol("🗼", "1f5fc", "Tokyo tower"),
-        EmojiSymbol("🗽", "1f5fd", "Statue of Liberty"),
-        EmojiSymbol("⛪", "26ea", "church"),
-        EmojiSymbol("🕌", "1f54c", "mosque"),
-        EmojiSymbol("🕍", "1f54d", "synagogue"),
-        EmojiSymbol("⛩", "26e9", "shinto shrine"),
-        EmojiSymbol("🕋", "1f54b", "kaaba"),
-        EmojiSymbol("⛲", "26f2", "fountain"),
-        EmojiSymbol("⛺", "26fa", "tent"),
-        EmojiSymbol("🌁", "1f301", "foggy"),
-        EmojiSymbol("🌃", "1f303", "night with stars"),
-        EmojiSymbol("🌄", "1f304", "sunrise over mountains"),
-        EmojiSymbol("🌅", "1f305", "sunrise"),
-        EmojiSymbol("🌆", "1f306", "cityscape at dusk"),
-        EmojiSymbol("🌇", "1f307", "sunset"),
-        EmojiSymbol("🌉", "1f309", "bridge at night"),
-        EmojiSymbol("♨", "2668", "hot springs"),
-        EmojiSymbol("🌌", "1f30c", "milky way"),
-        EmojiSymbol("🎠", "1f3a0", "carousel horse"),
-        EmojiSymbol("🎡", "1f3a1", "ferris wheel"),
-        EmojiSymbol("🎢", "1f3a2", "roller coaster"),
-        EmojiSymbol("💈", "1f488", "barber pole"),
-        EmojiSymbol("🎪", "1f3aa", "circus tent"),
-        EmojiSymbol("🎭", "1f3ad", "performing arts"),
-        EmojiSymbol("🖼", "1f5bc", "framed picture"),
-        EmojiSymbol("🎨", "1f3a8", "artist palette"),
-        EmojiSymbol("🎰", "1f3b0", "slot machine"),
-        EmojiSymbol("🚂", "1f682", "locomotive"),
-        EmojiSymbol("🚃", "1f683", "railway car"),
-        EmojiSymbol("🚄", "1f684", "high-speed train"),
-        EmojiSymbol("🚅", "1f685", "bullet train"),
-        EmojiSymbol("🚆", "1f686", "train"),
-        EmojiSymbol("🚇", "1f687", "metro"),
-        EmojiSymbol("🚈", "1f688", "light rail"),
-        EmojiSymbol("🚉", "1f689", "station"),
-        EmojiSymbol("🚊", "1f68a", "tram"),
-        EmojiSymbol("🚝", "1f69d", "monorail"),
-        EmojiSymbol("🚞", "1f69e", "mountain railway"),
-        EmojiSymbol("🚋", "1f68b", "tram car"),
-        EmojiSymbol("🚌", "1f68c", "bus"),
-        EmojiSymbol("🚍", "1f68d", "oncoming bus"),
-        EmojiSymbol("🚎", "1f68e", "trolleybus"),
-        EmojiSymbol("🚐", "1f690", "minibus"),
-        EmojiSymbol("🚑", "1f691", "ambulance"),
-        EmojiSymbol("🚒", "1f692", "fire engine"),
-        EmojiSymbol("🚓", "1f693", "police car"),
-        EmojiSymbol("🚔", "1f694", "oncoming police car"),
-        EmojiSymbol("🚕", "1f695", "taxi"),
-        EmojiSymbol("🚖", "1f696", "oncoming taxi"),
-        EmojiSymbol("🚗", "1f697", "automobile"),
-        EmojiSymbol("🚘", "1f698", "oncoming automobile"),
-        EmojiSymbol("🚙", "1f699", "sport utility vehicle"),
-        EmojiSymbol("🚚", "1f69a", "delivery truck"),
-        EmojiSymbol("🚛", "1f69b", "articulated lorry"),
-        EmojiSymbol("🚜", "1f69c", "tractor"),
-        EmojiSymbol("🚲", "1f6b2", "bicycle"),
-        EmojiSymbol("🛴", "1f6f4", "kick scooter"),
-        EmojiSymbol("🛵", "1f6f5", "motor scooter"),
-        EmojiSymbol("🚏", "1f68f", "bus stop"),
-        EmojiSymbol("🛣", "1f6e3", "motorway"),
-        EmojiSymbol("🛤", "1f6e4", "railway track"),
-        EmojiSymbol("⛽", "26fd", "fuel pump"),
-        EmojiSymbol("🚨", "1f6a8", "police car light"),
-        EmojiSymbol("🚥", "1f6a5", "horizontal traffic light"),
-        EmojiSymbol("🚦", "1f6a6", "vertical traffic light"),
-        EmojiSymbol("🚧", "1f6a7", "construction"),
-        EmojiSymbol("🛑", "1f6d1", "stop sign"),
-        EmojiSymbol("⚓", "2693", "anchor"),
-        EmojiSymbol("⛵", "26f5", "sailboat"),
-        EmojiSymbol("🛶", "1f6f6", "canoe"),
-        EmojiSymbol("🚤", "1f6a4", "speedboat"),
-        EmojiSymbol("🛳", "1f6f3", "passenger ship"),
-        EmojiSymbol("⛴", "26f4", "ferry"),
-        EmojiSymbol("🛥", "1f6e5", "motor boat"),
-        EmojiSymbol("🚢", "1f6a2", "ship"),
-        EmojiSymbol("✈", "2708", "airplane"),
-        EmojiSymbol("🛩", "1f6e9", "small airplane"),
-        EmojiSymbol("🛫", "1f6eb", "airplane departure"),
-        EmojiSymbol("🛬", "1f6ec", "airplane arrival"),
-        EmojiSymbol("💺", "1f4ba", "seat"),
-        EmojiSymbol("🚁", "1f681", "helicopter"),
-        EmojiSymbol("🚟", "1f69f", "suspension railway"),
-        EmojiSymbol("🚠", "1f6a0", "mountain cableway"),
-        EmojiSymbol("🚡", "1f6a1", "aerial tramway"),
-        EmojiSymbol("🛰", "1f6f0", "satellite"),
-        EmojiSymbol("🚀", "1f680", "rocket"),
-        EmojiSymbol("🛸", "1f6f8", "flying saucer"),
-        EmojiSymbol("🛎", "1f6ce", "bellhop bell"),
-        EmojiSymbol("🚪", "1f6aa", "door"),
-        EmojiSymbol("🛏", "1f6cf", "bed"),
-        EmojiSymbol("🛋", "1f6cb", "couch and lamp"),
-        EmojiSymbol("🚽", "1f6bd", "toilet"),
-        EmojiSymbol("🚿", "1f6bf", "shower"),
-        EmojiSymbol("🛁", "1f6c1", "bathtub"),
-        EmojiSymbol("⌛", "231b", "hourglass done"),
-        EmojiSymbol("⏳", "23f3", "hourglass not done"),
-        EmojiSymbol("⌚", "231a", "watch"),
-        EmojiSymbol("⏰", "23f0", "alarm clock"),
-        EmojiSymbol("⏱", "23f1", "stopwatch"),
-        EmojiSymbol("⏲", "23f2", "timer clock"),
-        EmojiSymbol("🕰", "1f570", "mantelpiece clock"),
-        EmojiSymbol("🕛", "1f55b", "twelve o’clock"),
-        EmojiSymbol("🕧", "1f567", "twelve-thirty"),
-        EmojiSymbol("🕐", "1f550", "one o’clock"),
-        EmojiSymbol("🕜", "1f55c", "one-thirty"),
-        EmojiSymbol("🕑", "1f551", "two o’clock"),
-        EmojiSymbol("🕝", "1f55d", "two-thirty"),
-        EmojiSymbol("🕒", "1f552", "three o’clock"),
-        EmojiSymbol("🕞", "1f55e", "three-thirty"),
-        EmojiSymbol("🕓", "1f553", "four o’clock"),
-        EmojiSymbol("🕟", "1f55f", "four-thirty"),
-        EmojiSymbol("🕔", "1f554", "five o’clock"),
-        EmojiSymbol("🕠", "1f560", "five-thirty"),
-        EmojiSymbol("🕕", "1f555", "six o’clock"),
-        EmojiSymbol("🕡", "1f561", "six-thirty"),
-        EmojiSymbol("🕖", "1f556", "seven o’clock"),
-        EmojiSymbol("🕢", "1f562", "seven-thirty"),
-        EmojiSymbol("🕗", "1f557", "eight o’clock"),
-        EmojiSymbol("🕣", "1f563", "eight-thirty"),
-        EmojiSymbol("🕘", "1f558", "nine o’clock"),
-        EmojiSymbol("🕤", "1f564", "nine-thirty"),
-        EmojiSymbol("🕙", "1f559", "ten o’clock"),
-        EmojiSymbol("🕥", "1f565", "ten-thirty"),
-        EmojiSymbol("🕚", "1f55a", "eleven o’clock"),
-        EmojiSymbol("🕦", "1f566", "eleven-thirty"),
-        EmojiSymbol("🌑", "1f311", "new moon"),
-        EmojiSymbol("🌒", "1f312", "waxing crescent moon"),
-        EmojiSymbol("🌓", "1f313", "first quarter moon"),
-        EmojiSymbol("🌔", "1f314", "waxing gibbous moon"),
-        EmojiSymbol("🌕", "1f315", "full moon"),
-        EmojiSymbol("🌖", "1f316", "waning gibbous moon"),
-        EmojiSymbol("🌗", "1f317", "last quarter moon"),
-        EmojiSymbol("🌘", "1f318", "waning crescent moon"),
-        EmojiSymbol("🌙", "1f319", "crescent moon"),
-        EmojiSymbol("🌚", "1f31a", "new moon face"),
-        EmojiSymbol("🌛", "1f31b", "first quarter moon face"),
-        EmojiSymbol("🌜", "1f31c", "last quarter moon face"),
-        EmojiSymbol("🌡", "1f321", "thermometer"),
-        EmojiSymbol("☀", "2600", "sun"),
-        EmojiSymbol("🌝", "1f31d", "full moon face"),
-        EmojiSymbol("🌞", "1f31e", "sun with face"),
-        EmojiSymbol("⭐", "2b50", "white medium star"),
-        EmojiSymbol("🌟", "1f31f", "glowing star"),
-        EmojiSymbol("🌠", "1f320", "shooting star"),
-        EmojiSymbol("☁", "2601", "cloud"),
-        EmojiSymbol("⛅", "26c5", "sun behind cloud"),
-        EmojiSymbol("⛈", "26c8", "cloud with lightning and rain"),
-        EmojiSymbol("🌤", "1f324", "sun behind small cloud"),
-        EmojiSymbol("🌥", "1f325", "sun behind large cloud"),
-        EmojiSymbol("🌦", "1f326", "sun behind rain cloud"),
-        EmojiSymbol("🌧", "1f327", "cloud with rain"),
-        EmojiSymbol("🌨", "1f328", "cloud with snow"),
-        EmojiSymbol("🌩", "1f329", "cloud with lightning"),
-        EmojiSymbol("🌪", "1f32a", "tornado"),
-        EmojiSymbol("🌫", "1f32b", "fog"),
-        EmojiSymbol("🌬", "1f32c", "wind face"),
-        EmojiSymbol("🌀", "1f300", "cyclone"),
-        EmojiSymbol("🌈", "1f308", "rainbow"),
-        EmojiSymbol("🌂", "1f302", "closed umbrella"),
-        EmojiSymbol("☂", "2602", "umbrella"),
-        EmojiSymbol("☔", "2614", "umbrella with rain drops"),
-        EmojiSymbol("⛱", "26f1", "umbrella on ground"),
-        EmojiSymbol("⚡", "26a1", "high voltage"),
-        EmojiSymbol("❄", "2744", "snowflake"),
-        EmojiSymbol("☃", "2603", "snowman"),
-        EmojiSymbol("⛄", "26c4", "snowman without snow"),
-        EmojiSymbol("☄", "2604", "comet"),
-        EmojiSymbol("🔥", "1f525", "fire"),
-        EmojiSymbol("💧", "1f4a7", "droplet"),
-        EmojiSymbol("🌊", "1f30a", "water wave")
+        "🌍", //globe showing Europe-Africa, 1f30d
+        "🌎", //globe showing Americas, 1f30e
+        "🌏", //globe showing Asia-Australia, 1f30f
+        "🌐", //globe with meridians, 1f310
+        "🗺", //world map, 1f5fa
+        "🗾", //map of Japan, 1f5fe
+        "🏔", //snow-capped mountain, 1f3d4
+        "⛰", //mountain, 26f0
+        "🌋", //volcano, 1f30b
+        "🗻", //mount fuji, 1f5fb
+        "🏕", //camping, 1f3d5
+        "🏖", //beach with umbrella, 1f3d6
+        "🏜", //desert, 1f3dc
+        "🏝", //desert island, 1f3dd
+        "🏞", //national park, 1f3de
+        "🏟", //stadium, 1f3df
+        "🏛", //classical building, 1f3db
+        "🏗", //building construction, 1f3d7
+        "🏘", //houses, 1f3d8
+        "🏙", //cityscape, 1f3d9
+        "🏚", //derelict house, 1f3da
+        "🏠", //house, 1f3e0
+        "🏡", //house with garden, 1f3e1
+        "🏢", //office building, 1f3e2
+        "🏣", //Japanese post office, 1f3e3
+        "🏤", //post office, 1f3e4
+        "🏥", //hospital, 1f3e5
+        "🏦", //bank, 1f3e6
+        "🏨", //hotel, 1f3e8
+        "🏩", //love hotel, 1f3e9
+        "🏪", //convenience store, 1f3ea
+        "🏫", //school, 1f3eb
+        "🏬", //department store, 1f3ec
+        "🏭", //factory, 1f3ed
+        "🏯", //Japanese castle, 1f3ef
+        "🏰", //castle, 1f3f0
+        "💒", //wedding, 1f492
+        "🗼", //Tokyo tower, 1f5fc
+        "🗽", //Statue of Liberty, 1f5fd
+        "⛪", //church, 26ea
+        "🕌", //mosque, 1f54c
+        "🕍", //synagogue, 1f54d
+        "⛩", //shinto shrine, 26e9
+        "🕋", //kaaba, 1f54b
+        "⛲", //fountain, 26f2
+        "⛺", //tent, 26fa
+        "🌁", //foggy, 1f301
+        "🌃", //night with stars, 1f303
+        "🌄", //sunrise over mountains, 1f304
+        "🌅", //sunrise, 1f305
+        "🌆", //cityscape at dusk, 1f306
+        "🌇", //sunset, 1f307
+        "🌉", //bridge at night, 1f309
+        "♨", //hot springs, 2668
+        "🌌", //milky way, 1f30c
+        "🎠", //carousel horse, 1f3a0
+        "🎡", //ferris wheel, 1f3a1
+        "🎢", //roller coaster, 1f3a2
+        "💈", //barber pole, 1f488
+        "🎪", //circus tent, 1f3aa
+        "🎭", //performing arts, 1f3ad
+        "🖼", //framed picture, 1f5bc
+        "🎨", //artist palette, 1f3a8
+        "🎰", //slot machine, 1f3b0
+        "🚂", //locomotive, 1f682
+        "🚃", //railway car, 1f683
+        "🚄", //high-speed train, 1f684
+        "🚅", //bullet train, 1f685
+        "🚆", //train, 1f686
+        "🚇", //metro, 1f687
+        "🚈", //light rail, 1f688
+        "🚉", //station, 1f689
+        "🚊", //tram, 1f68a
+        "🚝", //monorail, 1f69d
+        "🚞", //mountain railway, 1f69e
+        "🚋", //tram car, 1f68b
+        "🚌", //bus, 1f68c
+        "🚍", //oncoming bus, 1f68d
+        "🚎", //trolleybus, 1f68e
+        "🚐", //minibus, 1f690
+        "🚑", //ambulance, 1f691
+        "🚒", //fire engine, 1f692
+        "🚓", //police car, 1f693
+        "🚔", //oncoming police car, 1f694
+        "🚕", //taxi, 1f695
+        "🚖", //oncoming taxi, 1f696
+        "🚗", //automobile, 1f697
+        "🚘", //oncoming automobile, 1f698
+        "🚙", //sport utility vehicle, 1f699
+        "🚚", //delivery truck, 1f69a
+        "🚛", //articulated lorry, 1f69b
+        "🚜", //tractor, 1f69c
+        "🚲", //bicycle, 1f6b2
+        "🛴", //kick scooter, 1f6f4
+        "🛵", //motor scooter, 1f6f5
+        "🚏", //bus stop, 1f68f
+        "🛣", //motorway, 1f6e3
+        "🛤", //railway track, 1f6e4
+        "⛽", //fuel pump, 26fd
+        "🚨", //police car light, 1f6a8
+        "🚥", //horizontal traffic light, 1f6a5
+        "🚦", //vertical traffic light, 1f6a6
+        "🚧", //construction, 1f6a7
+        "🛑", //stop sign, 1f6d1
+        "⚓", //anchor, 2693
+        "⛵", //sailboat, 26f5
+        "🛶", //canoe, 1f6f6
+        "🚤", //speedboat, 1f6a4
+        "🛳", //passenger ship, 1f6f3
+        "⛴", //ferry, 26f4
+        "🛥", //motor boat, 1f6e5
+        "🚢", //ship, 1f6a2
+        "✈", //airplane, 2708
+        "🛩", //small airplane, 1f6e9
+        "🛫", //airplane departure, 1f6eb
+        "🛬", //airplane arrival, 1f6ec
+        "💺", //seat, 1f4ba
+        "🚁", //helicopter, 1f681
+        "🚟", //suspension railway, 1f69f
+        "🚠", //mountain cableway, 1f6a0
+        "🚡", //aerial tramway, 1f6a1
+        "🛰", //satellite, 1f6f0
+        "🚀", //rocket, 1f680
+        "🛸", //flying saucer, 1f6f8
+        "🛎", //bellhop bell, 1f6ce
+        "🚪", //door, 1f6aa
+        "🛏", //bed, 1f6cf
+        "🛋", //couch and lamp, 1f6cb
+        "🚽", //toilet, 1f6bd
+        "🚿", //shower, 1f6bf
+        "🛁", //bathtub, 1f6c1
+        "⌛", //hourglass done, 231b
+        "⏳", //hourglass not done, 23f3
+        "⌚", //watch, 231a
+        "⏰", //alarm clock, 23f0
+        "⏱", //stopwatch, 23f1
+        "⏲", //timer clock, 23f2
+        "🕰", //mantelpiece clock, 1f570
+        "🕛", //twelve o’clock, 1f55b
+        "🕧", //twelve-thirty, 1f567
+        "🕐", //one o’clock, 1f550
+        "🕜", //one-thirty, 1f55c
+        "🕑", //two o’clock, 1f551
+        "🕝", //two-thirty, 1f55d
+        "🕒", //three o’clock, 1f552
+        "🕞", //three-thirty, 1f55e
+        "🕓", //four o’clock, 1f553
+        "🕟", //four-thirty, 1f55f
+        "🕔", //five o’clock, 1f554
+        "🕠", //five-thirty, 1f560
+        "🕕", //six o’clock, 1f555
+        "🕡", //six-thirty, 1f561
+        "🕖", //seven o’clock, 1f556
+        "🕢", //seven-thirty, 1f562
+        "🕗", //eight o’clock, 1f557
+        "🕣", //eight-thirty, 1f563
+        "🕘", //nine o’clock, 1f558
+        "🕤", //nine-thirty, 1f564
+        "🕙", //ten o’clock, 1f559
+        "🕥", //ten-thirty, 1f565
+        "🕚", //eleven o’clock, 1f55a
+        "🕦", //eleven-thirty, 1f566
+        "🌑", //new moon, 1f311
+        "🌒", //waxing crescent moon, 1f312
+        "🌓", //first quarter moon, 1f313
+        "🌔", //waxing gibbous moon, 1f314
+        "🌕", //full moon, 1f315
+        "🌖", //waning gibbous moon, 1f316
+        "🌗", //last quarter moon, 1f317
+        "🌘", //waning crescent moon, 1f318
+        "🌙", //crescent moon, 1f319
+        "🌚", //new moon face, 1f31a
+        "🌛", //first quarter moon face, 1f31b
+        "🌜", //last quarter moon face, 1f31c
+        "🌡", //thermometer, 1f321
+        "☀", //sun, 2600
+        "🌝", //full moon face, 1f31d
+        "🌞", //sun with face, 1f31e
+        "⭐", //white medium star, 2b50
+        "🌟", //glowing star, 1f31f
+        "🌠", //shooting star, 1f320
+        "☁", //cloud, 2601
+        "⛅", //sun behind cloud, 26c5
+        "⛈", //cloud with lightning and rain, 26c8
+        "🌤", //sun behind small cloud, 1f324
+        "🌥", //sun behind large cloud, 1f325
+        "🌦", //sun behind rain cloud, 1f326
+        "🌧", //cloud with rain, 1f327
+        "🌨", //cloud with snow, 1f328
+        "🌩", //cloud with lightning, 1f329
+        "🌪", //tornado, 1f32a
+        "🌫", //fog, 1f32b
+        "🌬", //wind face, 1f32c
+        "🌀", //cyclone, 1f300
+        "🌈", //rainbow, 1f308
+        "🌂", //closed umbrella, 1f302
+        "☂", //umbrella, 2602
+        "☔", //umbrella with rain drops, 2614
+        "⛱", //umbrella on ground, 26f1
+        "⚡", //high voltage, 26a1
+        "❄", //snowflake, 2744
+        "☃", //snowman, 2603
+        "⛄", //snowman without snow, 26c4
+        "☄", //comet, 2604
+        "🔥", //fire, 1f525
+        "💧", //droplet, 1f4a7
+        "🌊" //water wave, 1f30a
 )

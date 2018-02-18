@@ -1,6 +1,8 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
-class StringElementTokenizer(private val text: String) {
+import com.vdurmont.emoji.EmojiParser
+
+private class StringElementTokenizer(private val text: String) {
     val elements = mutableListOf<TextSegment>()
 
     private var start = 0
@@ -9,19 +11,19 @@ class StringElementTokenizer(private val text: String) {
         while (start < text.length) {
             val nls = nextLinkStart()
             if (nls == null) {
-                elements.add(TextSegment(TextSegmentKind.Plain, text.substring(start)))
+                elements.add(PlainTextSegment(text.substring(start)))
                 break
             } else {
                 if (nls != start) {
-                    elements.add(TextSegment(TextSegmentKind.Plain, text.substring(start, nls)))
+                    elements.add(PlainTextSegment( text.substring(start, nls)))
                 }
                 start = nls
                 val nw = nextWhilespace()
                 if (nw == null) {
-                    elements.add(TextSegment(TextSegmentKind.Link, text.substring(start)))
+                    elements.add(LinkTextSegment(text.substring(start)))
                     break
                 } else {
-                    elements.add(TextSegment(TextSegmentKind.Link, text.substring(start, nw)))
+                    elements.add(LinkTextSegment(text.substring(start, nw)))
                     start = nw
                 }
             }
@@ -44,16 +46,58 @@ class StringElementTokenizer(private val text: String) {
     }
 }
 
-class TextSegment(
-        val kind: TextSegmentKind,
-        val text: String
-) {
-    override fun toString(): String {
-        return "$kind text: $text"
+
+private object EmojiSeparator: EmojiParser() {
+    fun separateEmojis(textSegment: PlainTextSegment): List<TextSegment> {
+        val input = textSegment.text
+        var prev = 0;
+        val output = mutableListOf<TextSegment>()
+        val replacements = getUnicodeCandidates(input)
+        for (uc in replacements.iterator()) {
+            output.add(PlainTextSegment(input.substring(prev, uc.emojiStartIndex)))
+            output.add(EmojiTextSegment(uc.emoji.unicode))
+            prev = uc.emojiEndIndex
+        }
+        output.add(PlainTextSegment(input.substring(prev)))
+        return output
     }
 }
 
-enum class TextSegmentKind {
-        Plain,
-        Link,
+sealed class TextSegment()
+
+class PlainTextSegment(
+        val text: String
+): TextSegment() {
+    override fun toString(): String {
+        return "plain text: $text"
+    }
 }
+
+class LinkTextSegment(
+        val text: String
+): TextSegment() {
+    override fun toString(): String {
+        return "link: $text"
+    }
+}
+
+class EmojiTextSegment(
+        val emoji: String
+): TextSegment() {
+    override fun toString(): String {
+        return "emoji: $emoji"
+    }
+}
+
+fun tokenize_string(input: String): List<TextSegment> {
+    val textAndLinks = StringElementTokenizer(input).elements
+    val segments= textAndLinks.flatMap { textSegment: TextSegment ->
+        if (textSegment is PlainTextSegment) {
+            EmojiSeparator.separateEmojis(textSegment)
+        } else {
+            listOf(textSegment)
+        }
+    }
+    return segments
+}
+

@@ -6,6 +6,7 @@ import javafx.scene.input.Clipboard
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
+import koma.gui.element.emoji.icon.EmojiIcon
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.mediaViewConstructors
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
@@ -17,13 +18,22 @@ sealed class FlowElement {
     fun isMultiLine() = this is WebContentNode && this.multiLine
 }
 
-class InlineElement(override val node: Text): FlowElement()
+class InlineElement(override val node: Node): FlowElement() {
+    fun startsWithNewline(): Boolean = this.node is Text && this.node.text.firstOrNull() == '\n'
+    fun endsWithNewline(): Boolean = this.node is Text && this.node.text.lastOrNull() == '\n'
+}
 
 fun TextSegment.toFlow(): FlowElement {
-    return when(this.kind) {
-        TextSegmentKind.Plain -> InlineElement(Text(this.text))
-        TextSegmentKind.Link -> WebContentNode(this.text)
+    return when(this) {
+        is PlainTextSegment -> InlineElement(Text(this.text))
+        is LinkTextSegment -> WebContentNode(this.text)
+        is EmojiTextSegment -> makeEmojiElement(this.emoji)
     }
+}
+
+private fun makeEmojiElement(emoji: String): InlineElement {
+    val icon = EmojiIcon(emoji)
+    return InlineElement(icon)
 }
 
 /**

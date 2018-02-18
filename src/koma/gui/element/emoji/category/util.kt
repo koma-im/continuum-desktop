@@ -1,14 +1,8 @@
 package koma.gui.element.emoji.category
 
-data class EmojiSymbol(
-        val glyph: String,
-        val codepoint: String,
-        val description: String
-)
-
 data class EmojiCategory(
         val name: String,
-        val emojis: List<EmojiSymbol>
+        val emojis: List<String>
 )
 
 val emojiCategories = listOf(

@@ -1,209 +1,209 @@
 package koma.gui.element.emoji.category;
 
 val Symbols = listOf(
-        EmojiSymbol("🏧", "1f3e7", "ATM sign"),
-        EmojiSymbol("🚮", "1f6ae", "litter in bin sign"),
-        EmojiSymbol("🚰", "1f6b0", "potable water"),
-        EmojiSymbol("♿", "267f", "wheelchair symbol"),
-        EmojiSymbol("🚹", "1f6b9", "men’s room"),
-        EmojiSymbol("🚺", "1f6ba", "women’s room"),
-        EmojiSymbol("🚻", "1f6bb", "restroom"),
-        EmojiSymbol("🚼", "1f6bc", "baby symbol"),
-        EmojiSymbol("🚾", "1f6be", "water closet"),
-        EmojiSymbol("🛂", "1f6c2", "passport control"),
-        EmojiSymbol("🛃", "1f6c3", "customs"),
-        EmojiSymbol("🛄", "1f6c4", "baggage claim"),
-        EmojiSymbol("🛅", "1f6c5", "left luggage"),
-        EmojiSymbol("⚠", "26a0", "warning"),
-        EmojiSymbol("🚸", "1f6b8", "children crossing"),
-        EmojiSymbol("⛔", "26d4", "no entry"),
-        EmojiSymbol("🚫", "1f6ab", "prohibited"),
-        EmojiSymbol("🚳", "1f6b3", "no bicycles"),
-        EmojiSymbol("🚭", "1f6ad", "no smoking"),
-        EmojiSymbol("🚯", "1f6af", "no littering"),
-        EmojiSymbol("🚱", "1f6b1", "non-potable water"),
-        EmojiSymbol("🚷", "1f6b7", "no pedestrians"),
-        EmojiSymbol("📵", "1f4f5", "no mobile phones"),
-        EmojiSymbol("🔞", "1f51e", "no one under eighteen"),
-        EmojiSymbol("☢", "2622", "radioactive"),
-        EmojiSymbol("☣", "2623", "biohazard"),
-        EmojiSymbol("⬆", "2b06", "up arrow"),
-        EmojiSymbol("↗", "2197", "up-right arrow"),
-        EmojiSymbol("➡", "27a1", "right arrow"),
-        EmojiSymbol("↘", "2198", "down-right arrow"),
-        EmojiSymbol("⬇", "2b07", "down arrow"),
-        EmojiSymbol("↙", "2199", "down-left arrow"),
-        EmojiSymbol("⬅", "2b05", "left arrow"),
-        EmojiSymbol("↖", "2196", "up-left arrow"),
-        EmojiSymbol("↕", "2195", "up-down arrow"),
-        EmojiSymbol("↔", "2194", "left-right arrow"),
-        EmojiSymbol("↩", "21a9", "right arrow curving left"),
-        EmojiSymbol("↪", "21aa", "left arrow curving right"),
-        EmojiSymbol("⤴", "2934", "right arrow curving up"),
-        EmojiSymbol("⤵", "2935", "right arrow curving down"),
-        EmojiSymbol("🔃", "1f503", "clockwise vertical arrows"),
-        EmojiSymbol("🔄", "1f504", "counterclockwise arrows button"),
-        EmojiSymbol("🔙", "1f519", "BACK arrow"),
-        EmojiSymbol("🔚", "1f51a", "END arrow"),
-        EmojiSymbol("🔛", "1f51b", "ON! arrow"),
-        EmojiSymbol("🔜", "1f51c", "SOON arrow"),
-        EmojiSymbol("🔝", "1f51d", "TOP arrow"),
-        EmojiSymbol("🛐", "1f6d0", "place of worship"),
-        EmojiSymbol("⚛", "269b", "atom symbol"),
-        EmojiSymbol("🕉", "1f549", "om"),
-        EmojiSymbol("✡", "2721", "star of David"),
-        EmojiSymbol("☸", "2638", "wheel of dharma"),
-        EmojiSymbol("☯", "262f", "yin yang"),
-        EmojiSymbol("✝", "271d", "latin cross"),
-        EmojiSymbol("☦", "2626", "orthodox cross"),
-        EmojiSymbol("☪", "262a", "star and crescent"),
-        EmojiSymbol("☮", "262e", "peace symbol"),
-        EmojiSymbol("🕎", "1f54e", "menorah"),
-        EmojiSymbol("🔯", "1f52f", "dotted six-pointed star"),
-        EmojiSymbol("♈", "2648", "Aries"),
-        EmojiSymbol("♉", "2649", "Taurus"),
-        EmojiSymbol("♊", "264a", "Gemini"),
-        EmojiSymbol("♋", "264b", "Cancer"),
-        EmojiSymbol("♌", "264c", "Leo"),
-        EmojiSymbol("♍", "264d", "Virgo"),
-        EmojiSymbol("♎", "264e", "Libra"),
-        EmojiSymbol("♏", "264f", "Scorpius"),
-        EmojiSymbol("♐", "2650", "Sagittarius"),
-        EmojiSymbol("♑", "2651", "Capricorn"),
-        EmojiSymbol("♒", "2652", "Aquarius"),
-        EmojiSymbol("♓", "2653", "Pisces"),
-        EmojiSymbol("⛎", "26ce", "Ophiuchus"),
-        EmojiSymbol("🔀", "1f500", "shuffle tracks button"),
-        EmojiSymbol("🔁", "1f501", "repeat button"),
-        EmojiSymbol("🔂", "1f502", "repeat single button"),
-        EmojiSymbol("▶", "25b6", "play button"),
-        EmojiSymbol("⏩", "23e9", "fast-forward button"),
-        EmojiSymbol("⏭", "23ed", "next track button"),
-        EmojiSymbol("⏯", "23ef", "play or pause button"),
-        EmojiSymbol("◀", "25c0", "reverse button"),
-        EmojiSymbol("⏪", "23ea", "fast reverse button"),
-        EmojiSymbol("⏮", "23ee", "last track button"),
-        EmojiSymbol("🔼", "1f53c", "up button"),
-        EmojiSymbol("⏫", "23eb", "fast up button"),
-        EmojiSymbol("🔽", "1f53d", "down button"),
-        EmojiSymbol("⏬", "23ec", "fast down button"),
-        EmojiSymbol("⏸", "23f8", "pause button"),
-        EmojiSymbol("⏹", "23f9", "stop button"),
-        EmojiSymbol("⏺", "23fa", "record button"),
-        EmojiSymbol("⏏", "23cf", "eject button"),
-        EmojiSymbol("🎦", "1f3a6", "cinema"),
-        EmojiSymbol("🔅", "1f505", "dim button"),
-        EmojiSymbol("🔆", "1f506", "bright button"),
-        EmojiSymbol("📶", "1f4f6", "antenna bars"),
-        EmojiSymbol("📳", "1f4f3", "vibration mode"),
-        EmojiSymbol("📴", "1f4f4", "mobile phone off"),
-        EmojiSymbol("♀", "2640", "female sign"),
-        EmojiSymbol("♂", "2642", "male sign"),
-        EmojiSymbol("⚕", "2695", "medical symbol"),
-        EmojiSymbol("♻", "267b", "recycling symbol"),
-        EmojiSymbol("⚜", "269c", "fleur-de-lis"),
-        EmojiSymbol("🔱", "1f531", "trident emblem"),
-        EmojiSymbol("📛", "1f4db", "name badge"),
-        EmojiSymbol("🔰", "1f530", "Japanese symbol for beginner"),
-        EmojiSymbol("⭕", "2b55", "heavy large circle"),
-        EmojiSymbol("✅", "2705", "white heavy check mark"),
-        EmojiSymbol("☑", "2611", "ballot box with check"),
-        EmojiSymbol("✔", "2714", "heavy check mark"),
-        EmojiSymbol("✖", "2716", "heavy multiplication x"),
-        EmojiSymbol("❌", "274c", "cross mark"),
-        EmojiSymbol("❎", "274e", "cross mark button"),
-        EmojiSymbol("➕", "2795", "heavy plus sign"),
-        EmojiSymbol("➖", "2796", "heavy minus sign"),
-        EmojiSymbol("➗", "2797", "heavy division sign"),
-        EmojiSymbol("➰", "27b0", "curly loop"),
-        EmojiSymbol("➿", "27bf", "double curly loop"),
-        EmojiSymbol("〽", "303d", "part alternation mark"),
-        EmojiSymbol("✳", "2733", "eight-spoked asterisk"),
-        EmojiSymbol("✴", "2734", "eight-pointed star"),
-        EmojiSymbol("❇", "2747", "sparkle"),
-        EmojiSymbol("‼", "203c", "double exclamation mark"),
-        EmojiSymbol("⁉", "2049", "exclamation question mark"),
-        EmojiSymbol("❓", "2753", "question mark"),
-        EmojiSymbol("❔", "2754", "white question mark"),
-        EmojiSymbol("❕", "2755", "white exclamation mark"),
-        EmojiSymbol("❗", "2757", "exclamation mark"),
-        EmojiSymbol("〰", "3030", "wavy dash"),
-        EmojiSymbol("©", "00a9", "copyright"),
-        EmojiSymbol("®", "00ae", "registered"),
-        EmojiSymbol("™", "2122", "trade mark"),
-        EmojiSymbol("#️⃣", "0023-fe0f-20e3", "keycap: #"),
-        EmojiSymbol("*️⃣", "002a-fe0f-20e3", "keycap: *"),
-        EmojiSymbol("0️⃣", "0030-fe0f-20e3", "keycap: 0"),
-        EmojiSymbol("1️⃣", "0031-fe0f-20e3", "keycap: 1"),
-        EmojiSymbol("2️⃣", "0032-fe0f-20e3", "keycap: 2"),
-        EmojiSymbol("3️⃣", "0033-fe0f-20e3", "keycap: 3"),
-        EmojiSymbol("4️⃣", "0034-fe0f-20e3", "keycap: 4"),
-        EmojiSymbol("5️⃣", "0035-fe0f-20e3", "keycap: 5"),
-        EmojiSymbol("6️⃣", "0036-fe0f-20e3", "keycap: 6"),
-        EmojiSymbol("7️⃣", "0037-fe0f-20e3", "keycap: 7"),
-        EmojiSymbol("8️⃣", "0038-fe0f-20e3", "keycap: 8"),
-        EmojiSymbol("9️⃣", "0039-fe0f-20e3", "keycap: 9"),
-        EmojiSymbol("🔟", "1f51f", "keycap 10"),
-        EmojiSymbol("💯", "1f4af", "hundred points"),
-        EmojiSymbol("🔠", "1f520", "input latin uppercase"),
-        EmojiSymbol("🔡", "1f521", "input latin lowercase"),
-        EmojiSymbol("🔢", "1f522", "input numbers"),
-        EmojiSymbol("🔣", "1f523", "input symbols"),
-        EmojiSymbol("🔤", "1f524", "input latin letters"),
-        EmojiSymbol("🅰", "1f170", "A button (blood type)"),
-        EmojiSymbol("🆎", "1f18e", "AB button (blood type)"),
-        EmojiSymbol("🅱", "1f171", "B button (blood type)"),
-        EmojiSymbol("🆑", "1f191", "CL button"),
-        EmojiSymbol("🆒", "1f192", "COOL button"),
-        EmojiSymbol("🆓", "1f193", "FREE button"),
-        EmojiSymbol("ℹ", "2139", "information"),
-        EmojiSymbol("🆔", "1f194", "ID button"),
-        EmojiSymbol("Ⓜ", "24c2", "circled M"),
-        EmojiSymbol("🆕", "1f195", "NEW button"),
-        EmojiSymbol("🆖", "1f196", "NG button"),
-        EmojiSymbol("🅾", "1f17e", "O button (blood type)"),
-        EmojiSymbol("🆗", "1f197", "OK button"),
-        EmojiSymbol("🅿", "1f17f", "P button"),
-        EmojiSymbol("🆘", "1f198", "SOS button"),
-        EmojiSymbol("🆙", "1f199", "UP! button"),
-        EmojiSymbol("🆚", "1f19a", "VS button"),
-        EmojiSymbol("🈁", "1f201", "Japanese “here” button"),
-        EmojiSymbol("🈂", "1f202", "Japanese “service charge” button"),
-        EmojiSymbol("🈷", "1f237", "Japanese “monthly amount” button"),
-        EmojiSymbol("🈶", "1f236", "Japanese “not free of charge” button"),
-        EmojiSymbol("🈯", "1f22f", "Japanese “reserved” button"),
-        EmojiSymbol("🉐", "1f250", "Japanese “bargain” button"),
-        EmojiSymbol("🈹", "1f239", "Japanese “discount” button"),
-        EmojiSymbol("🈚", "1f21a", "Japanese “free of charge” button"),
-        EmojiSymbol("🈲", "1f232", "Japanese “prohibited” button"),
-        EmojiSymbol("🉑", "1f251", "Japanese “acceptable” button"),
-        EmojiSymbol("🈸", "1f238", "Japanese “application” button"),
-        EmojiSymbol("🈴", "1f234", "Japanese “passing grade” button"),
-        EmojiSymbol("🈳", "1f233", "Japanese “vacancy” button"),
-        EmojiSymbol("㊗", "3297", "Japanese “congratulations” button"),
-        EmojiSymbol("㊙", "3299", "Japanese “secret” button"),
-        EmojiSymbol("🈺", "1f23a", "Japanese “open for business” button"),
-        EmojiSymbol("🈵", "1f235", "Japanese “no vacancy” button"),
-        EmojiSymbol("▪", "25aa", "black small square"),
-        EmojiSymbol("▫", "25ab", "white small square"),
-        EmojiSymbol("◻", "25fb", "white medium square"),
-        EmojiSymbol("◼", "25fc", "black medium square"),
-        EmojiSymbol("◽", "25fd", "white medium-small square"),
-        EmojiSymbol("◾", "25fe", "black medium-small square"),
-        EmojiSymbol("⬛", "2b1b", "black large square"),
-        EmojiSymbol("⬜", "2b1c", "white large square"),
-        EmojiSymbol("🔶", "1f536", "large orange diamond"),
-        EmojiSymbol("🔷", "1f537", "large blue diamond"),
-        EmojiSymbol("🔸", "1f538", "small orange diamond"),
-        EmojiSymbol("🔹", "1f539", "small blue diamond"),
-        EmojiSymbol("🔺", "1f53a", "red triangle pointed up"),
-        EmojiSymbol("🔻", "1f53b", "red triangle pointed down"),
-        EmojiSymbol("💠", "1f4a0", "diamond with a dot"),
-        EmojiSymbol("🔘", "1f518", "radio button"),
-        EmojiSymbol("🔲", "1f532", "black square button"),
-        EmojiSymbol("🔳", "1f533", "white square button"),
-        EmojiSymbol("⚪", "26aa", "white circle"),
-        EmojiSymbol("⚫", "26ab", "black circle"),
-        EmojiSymbol("🔴", "1f534", "red circle"),
-        EmojiSymbol("🔵", "1f535", "blue circle")
+        "🏧", //ATM sign, 1f3e7
+        "🚮", //litter in bin sign, 1f6ae
+        "🚰", //potable water, 1f6b0
+        "♿", //wheelchair symbol, 267f
+        "🚹", //men’s room, 1f6b9
+        "🚺", //women’s room, 1f6ba
+        "🚻", //restroom, 1f6bb
+        "🚼", //baby symbol, 1f6bc
+        "🚾", //water closet, 1f6be
+        "🛂", //passport control, 1f6c2
+        "🛃", //customs, 1f6c3
+        "🛄", //baggage claim, 1f6c4
+        "🛅", //left luggage, 1f6c5
+        "⚠", //warning, 26a0
+        "🚸", //children crossing, 1f6b8
+        "⛔", //no entry, 26d4
+        "🚫", //prohibited, 1f6ab
+        "🚳", //no bicycles, 1f6b3
+        "🚭", //no smoking, 1f6ad
+        "🚯", //no littering, 1f6af
+        "🚱", //non-potable water, 1f6b1
+        "🚷", //no pedestrians, 1f6b7
+        "📵", //no mobile phones, 1f4f5
+        "🔞", //no one under eighteen, 1f51e
+        "☢", //radioactive, 2622
+        "☣", //biohazard, 2623
+        "⬆", //up arrow, 2b06
+        "↗", //up-right arrow, 2197
+        "➡", //right arrow, 27a1
+        "↘", //down-right arrow, 2198
+        "⬇", //down arrow, 2b07
+        "↙", //down-left arrow, 2199
+        "⬅", //left arrow, 2b05
+        "↖", //up-left arrow, 2196
+        "↕", //up-down arrow, 2195
+        "↔", //left-right arrow, 2194
+        "↩", //right arrow curving left, 21a9
+        "↪", //left arrow curving right, 21aa
+        "⤴", //right arrow curving up, 2934
+        "⤵", //right arrow curving down, 2935
+        "🔃", //clockwise vertical arrows, 1f503
+        "🔄", //counterclockwise arrows button, 1f504
+        "🔙", //BACK arrow, 1f519
+        "🔚", //END arrow, 1f51a
+        "🔛", //ON! arrow, 1f51b
+        "🔜", //SOON arrow, 1f51c
+        "🔝", //TOP arrow, 1f51d
+        "🛐", //place of worship, 1f6d0
+        "⚛", //atom symbol, 269b
+        "🕉", //om, 1f549
+        "✡", //star of David, 2721
+        "☸", //wheel of dharma, 2638
+        "☯", //yin yang, 262f
+        "✝", //latin cross, 271d
+        "☦", //orthodox cross, 2626
+        "☪", //star and crescent, 262a
+        "☮", //peace symbol, 262e
+        "🕎", //menorah, 1f54e
+        "🔯", //dotted six-pointed star, 1f52f
+        "♈", //Aries, 2648
+        "♉", //Taurus, 2649
+        "♊", //Gemini, 264a
+        "♋", //Cancer, 264b
+        "♌", //Leo, 264c
+        "♍", //Virgo, 264d
+        "♎", //Libra, 264e
+        "♏", //Scorpius, 264f
+        "♐", //Sagittarius, 2650
+        "♑", //Capricorn, 2651
+        "♒", //Aquarius, 2652
+        "♓", //Pisces, 2653
+        "⛎", //Ophiuchus, 26ce
+        "🔀", //shuffle tracks button, 1f500
+        "🔁", //repeat button, 1f501
+        "🔂", //repeat single button, 1f502
+        "▶", //play button, 25b6
+        "⏩", //fast-forward button, 23e9
+        "⏭", //next track button, 23ed
+        "⏯", //play or pause button, 23ef
+        "◀", //reverse button, 25c0
+        "⏪", //fast reverse button, 23ea
+        "⏮", //last track button, 23ee
+        "🔼", //up button, 1f53c
+        "⏫", //fast up button, 23eb
+        "🔽", //down button, 1f53d
+        "⏬", //fast down button, 23ec
+        "⏸", //pause button, 23f8
+        "⏹", //stop button, 23f9
+        "⏺", //record button, 23fa
+        "⏏", //eject button, 23cf
+        "🎦", //cinema, 1f3a6
+        "🔅", //dim button, 1f505
+        "🔆", //bright button, 1f506
+        "📶", //antenna bars, 1f4f6
+        "📳", //vibration mode, 1f4f3
+        "📴", //mobile phone off, 1f4f4
+        "♀", //female sign, 2640
+        "♂", //male sign, 2642
+        "⚕", //medical symbol, 2695
+        "♻", //recycling symbol, 267b
+        "⚜", //fleur-de-lis, 269c
+        "🔱", //trident emblem, 1f531
+        "📛", //name badge, 1f4db
+        "🔰", //Japanese symbol for beginner, 1f530
+        "⭕", //heavy large circle, 2b55
+        "✅", //white heavy check mark, 2705
+        "☑", //ballot box with check, 2611
+        "✔", //heavy check mark, 2714
+        "✖", //heavy multiplication x, 2716
+        "❌", //cross mark, 274c
+        "❎", //cross mark button, 274e
+        "➕", //heavy plus sign, 2795
+        "➖", //heavy minus sign, 2796
+        "➗", //heavy division sign, 2797
+        "➰", //curly loop, 27b0
+        "➿", //double curly loop, 27bf
+        "〽", //part alternation mark, 303d
+        "✳", //eight-spoked asterisk, 2733
+        "✴", //eight-pointed star, 2734
+        "❇", //sparkle, 2747
+        "‼", //double exclamation mark, 203c
+        "⁉", //exclamation question mark, 2049
+        "❓", //question mark, 2753
+        "❔", //white question mark, 2754
+        "❕", //white exclamation mark, 2755
+        "❗", //exclamation mark, 2757
+        "〰", //wavy dash, 3030
+        "©", //copyright, 00a9
+        "®", //registered, 00ae
+        "™", //trade mark, 2122
+        "#️⃣", //keycap: #, 0023-fe0f-20e3
+        "*️⃣", //keycap: *, 002a-fe0f-20e3
+        "0️⃣", //keycap: 0, 0030-fe0f-20e3
+        "1️⃣", //keycap: 1, 0031-fe0f-20e3
+        "2️⃣", //keycap: 2, 0032-fe0f-20e3
+        "3️⃣", //keycap: 3, 0033-fe0f-20e3
+        "4️⃣", //keycap: 4, 0034-fe0f-20e3
+        "5️⃣", //keycap: 5, 0035-fe0f-20e3
+        "6️⃣", //keycap: 6, 0036-fe0f-20e3
+        "7️⃣", //keycap: 7, 0037-fe0f-20e3
+        "8️⃣", //keycap: 8, 0038-fe0f-20e3
+        "9️⃣", //keycap: 9, 0039-fe0f-20e3
+        "🔟", //keycap 10, 1f51f
+        "💯", //hundred points, 1f4af
+        "🔠", //input latin uppercase, 1f520
+        "🔡", //input latin lowercase, 1f521
+        "🔢", //input numbers, 1f522
+        "🔣", //input symbols, 1f523
+        "🔤", //input latin letters, 1f524
+        "🅰", //A button (blood type), 1f170
+        "🆎", //AB button (blood type), 1f18e
+        "🅱", //B button (blood type), 1f171
+        "🆑", //CL button, 1f191
+        "🆒", //COOL button, 1f192
+        "🆓", //FREE button, 1f193
+        "ℹ", //information, 2139
+        "🆔", //ID button, 1f194
+        "Ⓜ", //circled M, 24c2
+        "🆕", //NEW button, 1f195
+        "🆖", //NG button, 1f196
+        "🅾", //O button (blood type), 1f17e
+        "🆗", //OK button, 1f197
+        "🅿", //P button, 1f17f
+        "🆘", //SOS button, 1f198
+        "🆙", //UP! button, 1f199
+        "🆚", //VS button, 1f19a
+        "🈁", //Japanese “here” button, 1f201
+        "🈂", //Japanese “service charge” button, 1f202
+        "🈷", //Japanese “monthly amount” button, 1f237
+        "🈶", //Japanese “not free of charge” button, 1f236
+        "🈯", //Japanese “reserved” button, 1f22f
+        "🉐", //Japanese “bargain” button, 1f250
+        "🈹", //Japanese “discount” button, 1f239
+        "🈚", //Japanese “free of charge” button, 1f21a
+        "🈲", //Japanese “prohibited” button, 1f232
+        "🉑", //Japanese “acceptable” button, 1f251
+        "🈸", //Japanese “application” button, 1f238
+        "🈴", //Japanese “passing grade” button, 1f234
+        "🈳", //Japanese “vacancy” button, 1f233
+        "㊗", //Japanese “congratulations” button, 3297
+        "㊙", //Japanese “secret” button, 3299
+        "🈺", //Japanese “open for business” button, 1f23a
+        "🈵", //Japanese “no vacancy” button, 1f235
+        "▪", //black small square, 25aa
+        "▫", //white small square, 25ab
+        "◻", //white medium square, 25fb
+        "◼", //black medium square, 25fc
+        "◽", //white medium-small square, 25fd
+        "◾", //black medium-small square, 25fe
+        "⬛", //black large square, 2b1b
+        "⬜", //white large square, 2b1c
+        "🔶", //large orange diamond, 1f536
+        "🔷", //large blue diamond, 1f537
+        "🔸", //small orange diamond, 1f538
+        "🔹", //small blue diamond, 1f539
+        "🔺", //red triangle pointed up, 1f53a
+        "🔻", //red triangle pointed down, 1f53b
+        "💠", //diamond with a dot, 1f4a0
+        "🔘", //radio button, 1f518
+        "🔲", //black square button, 1f532
+        "🔳", //white square button, 1f533
+        "⚪", //white circle, 26aa
+        "⚫", //black circle, 26ab
+        "🔴", //red circle, 1f534
+        "🔵" //blue circle, 1f535
 )
