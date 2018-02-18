@@ -34,7 +34,7 @@ fun createButtonBar(inputField: TextField, room: Room): ButtonBar {
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT, size)
             action {
                 val ep = EmojiKeyboard
-                ep.onEmojiChosen = {inputField.text += it.glyph}
+                ep.onEmojiChosen = {inputField.text += it}
                 ep.show(this)
             }
         }

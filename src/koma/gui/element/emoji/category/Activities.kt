@@ -1,64 +1,64 @@
 package koma.gui.element.emoji.category;
 
 val Activities = listOf(
-        EmojiSymbol("🎃", "1f383", "jack-o-lantern"),
-        EmojiSymbol("🎄", "1f384", "Christmas tree"),
-        EmojiSymbol("🎆", "1f386", "fireworks"),
-        EmojiSymbol("🎇", "1f387", "sparkler"),
-        EmojiSymbol("✨", "2728", "sparkles"),
-        EmojiSymbol("🎈", "1f388", "balloon"),
-        EmojiSymbol("🎉", "1f389", "party popper"),
-        EmojiSymbol("🎊", "1f38a", "confetti ball"),
-        EmojiSymbol("🎋", "1f38b", "tanabata tree"),
-        EmojiSymbol("🎍", "1f38d", "pine decoration"),
-        EmojiSymbol("🎎", "1f38e", "Japanese dolls"),
-        EmojiSymbol("🎏", "1f38f", "carp streamer"),
-        EmojiSymbol("🎐", "1f390", "wind chime"),
-        EmojiSymbol("🎑", "1f391", "moon viewing ceremony"),
-        EmojiSymbol("🎀", "1f380", "ribbon"),
-        EmojiSymbol("🎁", "1f381", "wrapped gift"),
-        EmojiSymbol("🎗", "1f397", "reminder ribbon"),
-        EmojiSymbol("🎟", "1f39f", "admission tickets"),
-        EmojiSymbol("🎫", "1f3ab", "ticket"),
-        EmojiSymbol("🎖", "1f396", "military medal"),
-        EmojiSymbol("🏆", "1f3c6", "trophy"),
-        EmojiSymbol("🏅", "1f3c5", "sports medal"),
-        EmojiSymbol("🥇", "1f947", "1st place medal"),
-        EmojiSymbol("🥈", "1f948", "2nd place medal"),
-        EmojiSymbol("🥉", "1f949", "3rd place medal"),
-        EmojiSymbol("⚽", "26bd", "soccer ball"),
-        EmojiSymbol("⚾", "26be", "baseball"),
-        EmojiSymbol("🏀", "1f3c0", "basketball"),
-        EmojiSymbol("🏐", "1f3d0", "volleyball"),
-        EmojiSymbol("🏈", "1f3c8", "american football"),
-        EmojiSymbol("🏉", "1f3c9", "rugby football"),
-        EmojiSymbol("🎾", "1f3be", "tennis"),
-        EmojiSymbol("🎱", "1f3b1", "pool 8 ball"),
-        EmojiSymbol("🎳", "1f3b3", "bowling"),
-        EmojiSymbol("🏏", "1f3cf", "cricket game"),
-        EmojiSymbol("🏑", "1f3d1", "field hockey"),
-        EmojiSymbol("🏒", "1f3d2", "ice hockey"),
-        EmojiSymbol("🏓", "1f3d3", "ping pong"),
-        EmojiSymbol("🏸", "1f3f8", "badminton"),
-        EmojiSymbol("🥊", "1f94a", "boxing glove"),
-        EmojiSymbol("🥋", "1f94b", "martial arts uniform"),
-        EmojiSymbol("🥅", "1f945", "goal net"),
-        EmojiSymbol("🎯", "1f3af", "direct hit"),
-        EmojiSymbol("⛳", "26f3", "flag in hole"),
-        EmojiSymbol("⛸", "26f8", "ice skate"),
-        EmojiSymbol("🎣", "1f3a3", "fishing pole"),
-        EmojiSymbol("🎽", "1f3bd", "running shirt"),
-        EmojiSymbol("🎿", "1f3bf", "skis"),
-        EmojiSymbol("🛷", "1f6f7", "sled"),
-        EmojiSymbol("🥌", "1f94c", "curling stone"),
-        EmojiSymbol("🎮", "1f3ae", "video game"),
-        EmojiSymbol("🕹", "1f579", "joystick"),
-        EmojiSymbol("🎲", "1f3b2", "game die"),
-        EmojiSymbol("♠", "2660", "spade suit"),
-        EmojiSymbol("♥", "2665", "heart suit"),
-        EmojiSymbol("♦", "2666", "diamond suit"),
-        EmojiSymbol("♣", "2663", "club suit"),
-        EmojiSymbol("🃏", "1f0cf", "joker"),
-        EmojiSymbol("🀄", "1f004", "mahjong red dragon"),
-        EmojiSymbol("🎴", "1f3b4", "flower playing cards")
+        "🎃", // jack-o-lantern 1f383
+        "🎄", // Christmas tree 1f384
+        "🎆", // fireworks 1f386
+        "🎇", // sparkler 1f387
+        "✨", // sparkles 2728
+        "🎈", // balloon 1f388
+        "🎉", // party popper 1f389
+        "🎊", // confetti ball 1f38a
+        "🎋", // tanabata tree 1f38b
+        "🎍", // pine decoration 1f38d
+        "🎎", // Japanese dolls 1f38e
+        "🎏", // carp streamer 1f38f
+        "🎐", // wind chime 1f390
+        "🎑", // moon viewing ceremony 1f391
+        "🎀", // ribbon 1f380
+        "🎁", // wrapped gift 1f381
+        "🎗", // reminder ribbon 1f397
+        "🎟", // admission tickets 1f39f
+        "🎫", // ticket 1f3ab
+        "🎖", // military medal 1f396
+        "🏆", // trophy 1f3c6
+        "🏅", // sports medal 1f3c5
+        "🥇", // 1st place medal 1f947
+        "🥈", // 2nd place medal 1f948
+        "🥉", // 3rd place medal 1f949
+        "⚽", // soccer ball 26bd
+        "⚾", // baseball 26be
+        "🏀", // basketball 1f3c0
+        "🏐", // volleyball 1f3d0
+        "🏈", // american football 1f3c8
+        "🏉", // rugby football 1f3c9
+        "🎾", // tennis 1f3be
+        "🎱", // pool 8 ball 1f3b1
+        "🎳", // bowling 1f3b3
+        "🏏", // cricket game 1f3cf
+        "🏑", // field hockey 1f3d1
+        "🏒", // ice hockey 1f3d2
+        "🏓", // ping pong 1f3d3
+        "🏸", // badminton 1f3f8
+        "🥊", // boxing glove 1f94a
+        "🥋", // martial arts uniform 1f94b
+        "🥅", // goal net 1f945
+        "🎯", // direct hit 1f3af
+        "⛳", // flag in hole 26f3
+        "⛸", // ice skate 26f8
+        "🎣", // fishing pole 1f3a3
+        "🎽", // running shirt 1f3bd
+        "🎿", // skis 1f3bf
+        "🛷", // sled 1f6f7
+        "🥌", // curling stone 1f94c
+        "🎮", // video game 1f3ae
+        "🕹", // joystick 1f579
+        "🎲", // game die 1f3b2
+        "♠", // spade suit 2660
+        "♥", // heart suit 2665
+        "♦", // diamond suit 2666
+        "♣", // club suit 2663
+        "🃏", // joker 1f0cf
+        "🀄", // mahjong red dragon 1f004
+        "🎴" // "flower playing cards 1f3b4
 )

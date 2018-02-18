@@ -1,5 +1,6 @@
 package koma.gui.element.emoji.keyboard
 
+import com.vdurmont.emoji.EmojiManager
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -9,7 +10,6 @@ import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Font
 import javafx.util.Callback
-import koma.gui.element.emoji.category.EmojiSymbol
 import koma.gui.element.emoji.category.emojiCategories
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.storage.config.settings.AppSettings
@@ -19,7 +19,7 @@ import tornadofx.*
 
 data class EmojiCategoryInRows(
         val name: String,
-        val rows: ObservableList<List<EmojiSymbol>>
+        val rows: ObservableList<List<String>>
 )
 
 private fun<T> List<T>.groupEvery(n: Int): List<List<T>> {
@@ -44,8 +44,8 @@ object EmojiKeyboard {
     private val root = VBox()
 
     private val stage = PopOver(root)
-    private val emojicategoryrowlist = SimpleListProperty<List<EmojiSymbol>>()
-    var onEmojiChosen: ((EmojiSymbol)->Unit)? = null
+    private val emojicategoryrowlist = SimpleListProperty<List<String>>()
+    var onEmojiChosen: ((String)->Unit)? = null
 
     init {
         root.maxHeight = 150.0
@@ -72,11 +72,11 @@ object EmojiKeyboard {
                 }
             }
 
-            val rows = PrettyListView<List<EmojiSymbol>>()
+            val rows = PrettyListView<List<String>>()
             with(rows) {
                 items = emojicategoryrowlist
-                cellFactory = object: Callback<ListView<List<EmojiSymbol>>, ListCell<List<EmojiSymbol>>> {
-                    override fun call(param: ListView<List<EmojiSymbol>>?): ListCell<List<EmojiSymbol>> {
+                cellFactory = object: Callback<ListView<List<String>>, ListCell<List<String>>> {
+                    override fun call(param: ListView<List<String>>?): ListCell<List<String>> {
                         return EmojiRowCell({ onEmojiClicked(it)})
                     }
                 }
@@ -86,11 +86,11 @@ object EmojiKeyboard {
         }
     }
 
-    private fun onEmojiClicked(emojiSymbol: EmojiSymbol) {
+    private fun onEmojiClicked(emojiSymbol: String) {
         onEmojiChosen?.invoke(emojiSymbol)
     }
 
-    class EmojiRowCell(val cb: (em: EmojiSymbol) -> Unit) : ListCell<List<EmojiSymbol>>() {
+    class EmojiRowCell(val cb: (em: String) -> Unit) : ListCell<List<String>>() {
         private val icons = mutableListOf<EmojiIcon>()
 
         init {
@@ -107,14 +107,14 @@ object EmojiKeyboard {
             }
         }
 
-        override fun updateItem(item: List<EmojiSymbol>?, empty: Boolean) {
+        override fun updateItem(item: List<String>?, empty: Boolean) {
             super.updateItem(item, empty)
 
             if (item != null) {
                 item.forEachIndexed { index, emojiSymbol ->
                     val icon = icons[index]
                     icon.setEmoji(emojiSymbol)
-                    icon.tooltip?.text = emojiSymbol.description
+                    icon.tooltip?.text = getEmojiDescription(emojiSymbol)
                 }
             }
         }
@@ -123,6 +123,10 @@ object EmojiKeyboard {
     fun show(own: Node) {
         stage.show(own)
     }
+}
+
+private fun getEmojiDescription(emoji: String): String? {
+    return EmojiManager.getByUnicode(emoji)?.description
 }
 
 class NoSelectionModel<T>(): MultipleSelectionModel<T>() {

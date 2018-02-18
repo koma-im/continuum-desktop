@@ -102,6 +102,11 @@
             <artifactId>kotlin-coroutines-retrofit</artifactId>
             <version>0.8.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.vdurmont</groupId>
+            <artifactId>emoji-java</artifactId>
+            <version>4.0.0</version>
+        </dependency>
     </dependencies>
     <properties>
         <kotlin.version>1.2.10</kotlin.version>

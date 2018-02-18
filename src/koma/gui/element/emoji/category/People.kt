@@ -1,451 +1,451 @@
 package koma.gui.element.emoji.category;
 
 val People = listOf(
-        EmojiSymbol("😀", "1f600", "grinning face"),
-        EmojiSymbol("😁", "1f601", "beaming face with smiling eyes"),
-        EmojiSymbol("😂", "1f602", "face with tears of joy"),
-        EmojiSymbol("🤣", "1f923", "rolling on the floor laughing"),
-        EmojiSymbol("😃", "1f603", "grinning face with big eyes"),
-        EmojiSymbol("😄", "1f604", "grinning face with smiling eyes"),
-        EmojiSymbol("😅", "1f605", "grinning face with sweat"),
-        EmojiSymbol("😆", "1f606", "grinning squinting face"),
-        EmojiSymbol("😉", "1f609", "winking face"),
-        EmojiSymbol("😊", "1f60a", "smiling face with smiling eyes"),
-        EmojiSymbol("😋", "1f60b", "face savoring food"),
-        EmojiSymbol("😎", "1f60e", "smiling face with sunglasses"),
-        EmojiSymbol("😍", "1f60d", "smiling face with heart-eyes"),
-        EmojiSymbol("😘", "1f618", "face blowing a kiss"),
-        EmojiSymbol("😗", "1f617", "kissing face"),
-        EmojiSymbol("😙", "1f619", "kissing face with smiling eyes"),
-        EmojiSymbol("😚", "1f61a", "kissing face with closed eyes"),
-        EmojiSymbol("☺", "263a", "smiling face"),
-        EmojiSymbol("🙂", "1f642", "slightly smiling face"),
-        EmojiSymbol("🤗", "1f917", "hugging face"),
-        EmojiSymbol("🤩", "1f929", "star-struck"),
-        EmojiSymbol("🤔", "1f914", "thinking face"),
-        EmojiSymbol("🤨", "1f928", "face with raised eyebrow"),
-        EmojiSymbol("😐", "1f610", "neutral face"),
-        EmojiSymbol("😑", "1f611", "expressionless face"),
-        EmojiSymbol("😶", "1f636", "face without mouth"),
-        EmojiSymbol("🙄", "1f644", "face with rolling eyes"),
-        EmojiSymbol("😏", "1f60f", "smirking face"),
-        EmojiSymbol("😣", "1f623", "persevering face"),
-        EmojiSymbol("😥", "1f625", "sad but relieved face"),
-        EmojiSymbol("😮", "1f62e", "face with open mouth"),
-        EmojiSymbol("🤐", "1f910", "zipper-mouth face"),
-        EmojiSymbol("😯", "1f62f", "hushed face"),
-        EmojiSymbol("😪", "1f62a", "sleepy face"),
-        EmojiSymbol("😫", "1f62b", "tired face"),
-        EmojiSymbol("😴", "1f634", "sleeping face"),
-        EmojiSymbol("😌", "1f60c", "relieved face"),
-        EmojiSymbol("😛", "1f61b", "face with tongue"),
-        EmojiSymbol("😜", "1f61c", "winking face with tongue"),
-        EmojiSymbol("😝", "1f61d", "squinting face with tongue"),
-        EmojiSymbol("🤤", "1f924", "drooling face"),
-        EmojiSymbol("😒", "1f612", "unamused face"),
-        EmojiSymbol("😓", "1f613", "downcast face with sweat"),
-        EmojiSymbol("😔", "1f614", "pensive face"),
-        EmojiSymbol("😕", "1f615", "confused face"),
-        EmojiSymbol("🙃", "1f643", "upside-down face"),
-        EmojiSymbol("🤑", "1f911", "money-mouth face"),
-        EmojiSymbol("😲", "1f632", "astonished face"),
-        EmojiSymbol("☹", "2639", "frowning face"),
-        EmojiSymbol("🙁", "1f641", "slightly frowning face"),
-        EmojiSymbol("😖", "1f616", "confounded face"),
-        EmojiSymbol("😞", "1f61e", "disappointed face"),
-        EmojiSymbol("😟", "1f61f", "worried face"),
-        EmojiSymbol("😤", "1f624", "face with steam from nose"),
-        EmojiSymbol("😢", "1f622", "crying face"),
-        EmojiSymbol("😭", "1f62d", "loudly crying face"),
-        EmojiSymbol("😦", "1f626", "frowning face with open mouth"),
-        EmojiSymbol("😧", "1f627", "anguished face"),
-        EmojiSymbol("😨", "1f628", "fearful face"),
-        EmojiSymbol("😩", "1f629", "weary face"),
-        EmojiSymbol("🤯", "1f92f", "exploding head"),
-        EmojiSymbol("😬", "1f62c", "grimacing face"),
-        EmojiSymbol("😰", "1f630", "anxious face with sweat"),
-        EmojiSymbol("😱", "1f631", "face screaming in fear"),
-        EmojiSymbol("😳", "1f633", "flushed face"),
-        EmojiSymbol("🤪", "1f92a", "crazy face"),
-        EmojiSymbol("😵", "1f635", "dizzy face"),
-        EmojiSymbol("😡", "1f621", "pouting face"),
-        EmojiSymbol("😠", "1f620", "angry face"),
-        EmojiSymbol("🤬", "1f92c", "face with symbols on mouth"),
-        EmojiSymbol("😷", "1f637", "face with medical mask"),
-        EmojiSymbol("🤒", "1f912", "face with thermometer"),
-        EmojiSymbol("🤕", "1f915", "face with head-bandage"),
-        EmojiSymbol("🤢", "1f922", "nauseated face"),
-        EmojiSymbol("🤮", "1f92e", "face vomiting"),
-        EmojiSymbol("🤧", "1f927", "sneezing face"),
-        EmojiSymbol("😇", "1f607", "smiling face with halo"),
-        EmojiSymbol("🤠", "1f920", "cowboy hat face"),
-        EmojiSymbol("🤡", "1f921", "clown face"),
-        EmojiSymbol("🤥", "1f925", "lying face"),
-        EmojiSymbol("🤫", "1f92b", "shushing face"),
-        EmojiSymbol("🤭", "1f92d", "face with hand over mouth"),
-        EmojiSymbol("🧐", "1f9d0", "face with monocle"),
-        EmojiSymbol("🤓", "1f913", "nerd face"),
-        EmojiSymbol("😈", "1f608", "smiling face with horns"),
-        EmojiSymbol("👿", "1f47f", "angry face with horns"),
-        EmojiSymbol("👹", "1f479", "ogre"),
-        EmojiSymbol("👺", "1f47a", "goblin"),
-        EmojiSymbol("💀", "1f480", "skull"),
-        EmojiSymbol("☠", "2620", "skull and crossbones"),
-        EmojiSymbol("👻", "1f47b", "ghost"),
-        EmojiSymbol("👽", "1f47d", "alien"),
-        EmojiSymbol("👾", "1f47e", "alien monster"),
-        EmojiSymbol("🤖", "1f916", "robot face"),
-        EmojiSymbol("💩", "1f4a9", "pile of poo"),
-        EmojiSymbol("😺", "1f63a", "grinning cat face"),
-        EmojiSymbol("😸", "1f638", "grinning cat face with smiling eyes"),
-        EmojiSymbol("😹", "1f639", "cat face with tears of joy"),
-        EmojiSymbol("😻", "1f63b", "smiling cat face with heart-eyes"),
-        EmojiSymbol("😼", "1f63c", "cat face with wry smile"),
-        EmojiSymbol("😽", "1f63d", "kissing cat face"),
-        EmojiSymbol("🙀", "1f640", "weary cat face"),
-        EmojiSymbol("😿", "1f63f", "crying cat face"),
-        EmojiSymbol("😾", "1f63e", "pouting cat face"),
-        EmojiSymbol("🙈", "1f648", "see-no-evil monkey"),
-        EmojiSymbol("🙉", "1f649", "hear-no-evil monkey"),
-        EmojiSymbol("🙊", "1f64a", "speak-no-evil monkey"),
-        EmojiSymbol("👶", "1f476", "baby"),
-        EmojiSymbol("🧒", "1f9d2", "child"),
-        EmojiSymbol("👦", "1f466", "boy"),
-        EmojiSymbol("👧", "1f467", "girl"),
-        EmojiSymbol("🧑", "1f9d1", "adult"),
-        EmojiSymbol("👨", "1f468", "man"),
-        EmojiSymbol("👩", "1f469", "woman"),
-        EmojiSymbol("🧓", "1f9d3", "older adult"),
-        EmojiSymbol("👴", "1f474", "old man"),
-        EmojiSymbol("👵", "1f475", "old woman"),
-        EmojiSymbol("👨‍⚕️", "1f468-200d-2695-fe0f", "man health worker"),
-        EmojiSymbol("👩‍⚕️", "1f469-200d-2695-fe0f", "woman health worker"),
-        EmojiSymbol("👨‍🎓", "1f468-200d-1f393", "man student"),
-        EmojiSymbol("👩‍🎓", "1f469-200d-1f393", "woman student"),
-        EmojiSymbol("👨‍🏫", "1f468-200d-1f3eb", "man teacher"),
-        EmojiSymbol("👩‍🏫", "1f469-200d-1f3eb", "woman teacher"),
-        EmojiSymbol("👨‍⚖️", "1f468-200d-2696-fe0f", "man judge"),
-        EmojiSymbol("👩‍⚖️", "1f469-200d-2696-fe0f", "woman judge"),
-        EmojiSymbol("👨‍🌾", "1f468-200d-1f33e", "man farmer"),
-        EmojiSymbol("👩‍🌾", "1f469-200d-1f33e", "woman farmer"),
-        EmojiSymbol("👨‍🍳", "1f468-200d-1f373", "man cook"),
-        EmojiSymbol("👩‍🍳", "1f469-200d-1f373", "woman cook"),
-        EmojiSymbol("👨‍🔧", "1f468-200d-1f527", "man mechanic"),
-        EmojiSymbol("👩‍🔧", "1f469-200d-1f527", "woman mechanic"),
-        EmojiSymbol("👨‍🏭", "1f468-200d-1f3ed", "man factory worker"),
-        EmojiSymbol("👩‍🏭", "1f469-200d-1f3ed", "woman factory worker"),
-        EmojiSymbol("👨‍💼", "1f468-200d-1f4bc", "man office worker"),
-        EmojiSymbol("👩‍💼", "1f469-200d-1f4bc", "woman office worker"),
-        EmojiSymbol("👨‍🔬", "1f468-200d-1f52c", "man scientist"),
-        EmojiSymbol("👩‍🔬", "1f469-200d-1f52c", "woman scientist"),
-        EmojiSymbol("👨‍💻", "1f468-200d-1f4bb", "man technologist"),
-        EmojiSymbol("👩‍💻", "1f469-200d-1f4bb", "woman technologist"),
-        EmojiSymbol("👨‍🎤", "1f468-200d-1f3a4", "man singer"),
-        EmojiSymbol("👩‍🎤", "1f469-200d-1f3a4", "woman singer"),
-        EmojiSymbol("👨‍🎨", "1f468-200d-1f3a8", "man artist"),
-        EmojiSymbol("👩‍🎨", "1f469-200d-1f3a8", "woman artist"),
-        EmojiSymbol("👨‍✈️", "1f468-200d-2708-fe0f", "man pilot"),
-        EmojiSymbol("👩‍✈️", "1f469-200d-2708-fe0f", "woman pilot"),
-        EmojiSymbol("👨‍🚀", "1f468-200d-1f680", "man astronaut"),
-        EmojiSymbol("👩‍🚀", "1f469-200d-1f680", "woman astronaut"),
-        EmojiSymbol("👨‍🚒", "1f468-200d-1f692", "man firefighter"),
-        EmojiSymbol("👩‍🚒", "1f469-200d-1f692", "woman firefighter"),
-        EmojiSymbol("👮", "1f46e", "police officer"),
-        EmojiSymbol("👮‍♂️", "1f46e-200d-2642-fe0f", "man police officer"),
-        EmojiSymbol("👮‍♀️", "1f46e-200d-2640-fe0f", "woman police officer"),
-        EmojiSymbol("🕵", "1f575", "detective"),
-        EmojiSymbol("🕵️‍♂️", "1f575-fe0f-200d-2642-fe0f", "man detective"),
-        EmojiSymbol("🕵️‍♀️", "1f575-fe0f-200d-2640-fe0f", "woman detective"),
-        EmojiSymbol("💂", "1f482", "guard"),
-        EmojiSymbol("💂‍♂️", "1f482-200d-2642-fe0f", "man guard"),
-        EmojiSymbol("💂‍♀️", "1f482-200d-2640-fe0f", "woman guard"),
-        EmojiSymbol("👷", "1f477", "construction worker"),
-        EmojiSymbol("👷‍♂️", "1f477-200d-2642-fe0f", "man construction worker"),
-        EmojiSymbol("👷‍♀️", "1f477-200d-2640-fe0f", "woman construction worker"),
-        EmojiSymbol("🤴", "1f934", "prince"),
-        EmojiSymbol("👸", "1f478", "princess"),
-        EmojiSymbol("👳", "1f473", "person wearing turban"),
-        EmojiSymbol("👳‍♂️", "1f473-200d-2642-fe0f", "man wearing turban"),
-        EmojiSymbol("👳‍♀️", "1f473-200d-2640-fe0f", "woman wearing turban"),
-        EmojiSymbol("👲", "1f472", "man with Chinese cap"),
-        EmojiSymbol("🧕", "1f9d5", "woman with headscarf"),
-        EmojiSymbol("🧔", "1f9d4", "bearded person"),
-        EmojiSymbol("👱", "1f471", "blond-haired person"),
-        EmojiSymbol("👱‍♂️", "1f471-200d-2642-fe0f", "blond-haired man"),
-        EmojiSymbol("👱‍♀️", "1f471-200d-2640-fe0f", "blond-haired woman"),
-        EmojiSymbol("🤵", "1f935", "man in tuxedo"),
-        EmojiSymbol("👰", "1f470", "bride with veil"),
-        EmojiSymbol("🤰", "1f930", "pregnant woman"),
-        EmojiSymbol("🤱", "1f931", "breast-feeding"),
-        EmojiSymbol("👼", "1f47c", "baby angel"),
-        EmojiSymbol("🎅", "1f385", "Santa Claus"),
-        EmojiSymbol("🤶", "1f936", "Mrs. Claus"),
-        EmojiSymbol("🧙", "1f9d9", "mage"),
-        EmojiSymbol("🧙‍♀️", "1f9d9-200d-2640-fe0f", "woman mage"),
-        EmojiSymbol("🧙‍♂️", "1f9d9-200d-2642-fe0f", "man mage"),
-        EmojiSymbol("🧚", "1f9da", "fairy"),
-        EmojiSymbol("🧚‍♀️", "1f9da-200d-2640-fe0f", "woman fairy"),
-        EmojiSymbol("🧚‍♂️", "1f9da-200d-2642-fe0f", "man fairy"),
-        EmojiSymbol("🧛", "1f9db", "vampire"),
-        EmojiSymbol("🧛‍♀️", "1f9db-200d-2640-fe0f", "woman vampire"),
-        EmojiSymbol("🧛‍♂️", "1f9db-200d-2642-fe0f", "man vampire"),
-        EmojiSymbol("🧜", "1f9dc", "merperson"),
-        EmojiSymbol("🧜‍♀️", "1f9dc-200d-2640-fe0f", "mermaid"),
-        EmojiSymbol("🧜‍♂️", "1f9dc-200d-2642-fe0f", "merman"),
-        EmojiSymbol("🧝", "1f9dd", "elf"),
-        EmojiSymbol("🧝‍♀️", "1f9dd-200d-2640-fe0f", "woman elf"),
-        EmojiSymbol("🧝‍♂️", "1f9dd-200d-2642-fe0f", "man elf"),
-        EmojiSymbol("🧞", "1f9de", "genie"),
-        EmojiSymbol("🧞‍♀️", "1f9de-200d-2640-fe0f", "woman genie"),
-        EmojiSymbol("🧞‍♂️", "1f9de-200d-2642-fe0f", "man genie"),
-        EmojiSymbol("🧟", "1f9df", "zombie"),
-        EmojiSymbol("🧟‍♀️", "1f9df-200d-2640-fe0f", "woman zombie"),
-        EmojiSymbol("🧟‍♂️", "1f9df-200d-2642-fe0f", "man zombie"),
-        EmojiSymbol("🙍", "1f64d", "person frowning"),
-        EmojiSymbol("🙍‍♂️", "1f64d-200d-2642-fe0f", "man frowning"),
-        EmojiSymbol("🙍‍♀️", "1f64d-200d-2640-fe0f", "woman frowning"),
-        EmojiSymbol("🙎", "1f64e", "person pouting"),
-        EmojiSymbol("🙎‍♂️", "1f64e-200d-2642-fe0f", "man pouting"),
-        EmojiSymbol("🙎‍♀️", "1f64e-200d-2640-fe0f", "woman pouting"),
-        EmojiSymbol("🙅", "1f645", "person gesturing NO"),
-        EmojiSymbol("🙅‍♂️", "1f645-200d-2642-fe0f", "man gesturing NO"),
-        EmojiSymbol("🙅‍♀️", "1f645-200d-2640-fe0f", "woman gesturing NO"),
-        EmojiSymbol("🙆", "1f646", "person gesturing OK"),
-        EmojiSymbol("🙆‍♂️", "1f646-200d-2642-fe0f", "man gesturing OK"),
-        EmojiSymbol("🙆‍♀️", "1f646-200d-2640-fe0f", "woman gesturing OK"),
-        EmojiSymbol("💁", "1f481", "person tipping hand"),
-        EmojiSymbol("💁‍♂️", "1f481-200d-2642-fe0f", "man tipping hand"),
-        EmojiSymbol("💁‍♀️", "1f481-200d-2640-fe0f", "woman tipping hand"),
-        EmojiSymbol("🙋", "1f64b", "person raising hand"),
-        EmojiSymbol("🙋‍♂️", "1f64b-200d-2642-fe0f", "man raising hand"),
-        EmojiSymbol("🙋‍♀️", "1f64b-200d-2640-fe0f", "woman raising hand"),
-        EmojiSymbol("🙇", "1f647", "person bowing"),
-        EmojiSymbol("🙇‍♂️", "1f647-200d-2642-fe0f", "man bowing"),
-        EmojiSymbol("🙇‍♀️", "1f647-200d-2640-fe0f", "woman bowing"),
-        EmojiSymbol("🤦", "1f926", "person facepalming"),
-        EmojiSymbol("🤦‍♂️", "1f926-200d-2642-fe0f", "man facepalming"),
-        EmojiSymbol("🤦‍♀️", "1f926-200d-2640-fe0f", "woman facepalming"),
-        EmojiSymbol("🤷", "1f937", "person shrugging"),
-        EmojiSymbol("🤷‍♂️", "1f937-200d-2642-fe0f", "man shrugging"),
-        EmojiSymbol("🤷‍♀️", "1f937-200d-2640-fe0f", "woman shrugging"),
-        EmojiSymbol("💆", "1f486", "person getting massage"),
-        EmojiSymbol("💆‍♂️", "1f486-200d-2642-fe0f", "man getting massage"),
-        EmojiSymbol("💆‍♀️", "1f486-200d-2640-fe0f", "woman getting massage"),
-        EmojiSymbol("💇", "1f487", "person getting haircut"),
-        EmojiSymbol("💇‍♂️", "1f487-200d-2642-fe0f", "man getting haircut"),
-        EmojiSymbol("💇‍♀️", "1f487-200d-2640-fe0f", "woman getting haircut"),
-        EmojiSymbol("🚶", "1f6b6", "person walking"),
-        EmojiSymbol("🚶‍♂️", "1f6b6-200d-2642-fe0f", "man walking"),
-        EmojiSymbol("🚶‍♀️", "1f6b6-200d-2640-fe0f", "woman walking"),
-        EmojiSymbol("🏃", "1f3c3", "person running"),
-        EmojiSymbol("🏃‍♂️", "1f3c3-200d-2642-fe0f", "man running"),
-        EmojiSymbol("🏃‍♀️", "1f3c3-200d-2640-fe0f", "woman running"),
-        EmojiSymbol("💃", "1f483", "woman dancing"),
-        EmojiSymbol("🕺", "1f57a", "man dancing"),
-        EmojiSymbol("👯", "1f46f", "people with bunny ears"),
-        EmojiSymbol("👯‍♂️", "1f46f-200d-2642-fe0f", "men with bunny ears"),
-        EmojiSymbol("👯‍♀️", "1f46f-200d-2640-fe0f", "women with bunny ears"),
-        EmojiSymbol("🧖", "1f9d6", "person in steamy room"),
-        EmojiSymbol("🧖‍♀️", "1f9d6-200d-2640-fe0f", "woman in steamy room"),
-        EmojiSymbol("🧖‍♂️", "1f9d6-200d-2642-fe0f", "man in steamy room"),
-        EmojiSymbol("🧗", "1f9d7", "person climbing"),
-        EmojiSymbol("🧗‍♀️", "1f9d7-200d-2640-fe0f", "woman climbing"),
-        EmojiSymbol("🧗‍♂️", "1f9d7-200d-2642-fe0f", "man climbing"),
-        EmojiSymbol("🧘", "1f9d8", "person in lotus position"),
-        EmojiSymbol("🧘‍♀️", "1f9d8-200d-2640-fe0f", "woman in lotus position"),
-        EmojiSymbol("🧘‍♂️", "1f9d8-200d-2642-fe0f", "man in lotus position"),
-        EmojiSymbol("🛀", "1f6c0", "person taking bath"),
-        EmojiSymbol("🛌", "1f6cc", "person in bed"),
-        EmojiSymbol("🕴", "1f574", "man in suit levitating"),
-        EmojiSymbol("🗣", "1f5e3", "speaking head"),
-        EmojiSymbol("👤", "1f464", "bust in silhouette"),
-        EmojiSymbol("👥", "1f465", "busts in silhouette"),
-        EmojiSymbol("🤺", "1f93a", "person fencing"),
-        EmojiSymbol("🏇", "1f3c7", "horse racing"),
-        EmojiSymbol("⛷", "26f7", "skier"),
-        EmojiSymbol("🏂", "1f3c2", "snowboarder"),
-        EmojiSymbol("🏌", "1f3cc", "person golfing"),
-        EmojiSymbol("🏌️‍♂️", "1f3cc-fe0f-200d-2642-fe0f", "man golfing"),
-        EmojiSymbol("🏌️‍♀️", "1f3cc-fe0f-200d-2640-fe0f", "woman golfing"),
-        EmojiSymbol("🏄", "1f3c4", "person surfing"),
-        EmojiSymbol("🏄‍♂️", "1f3c4-200d-2642-fe0f", "man surfing"),
-        EmojiSymbol("🏄‍♀️", "1f3c4-200d-2640-fe0f", "woman surfing"),
-        EmojiSymbol("🚣", "1f6a3", "person rowing boat"),
-        EmojiSymbol("🚣‍♂️", "1f6a3-200d-2642-fe0f", "man rowing boat"),
-        EmojiSymbol("🚣‍♀️", "1f6a3-200d-2640-fe0f", "woman rowing boat"),
-        EmojiSymbol("🏊", "1f3ca", "person swimming"),
-        EmojiSymbol("🏊‍♂️", "1f3ca-200d-2642-fe0f", "man swimming"),
-        EmojiSymbol("🏊‍♀️", "1f3ca-200d-2640-fe0f", "woman swimming"),
-        EmojiSymbol("⛹", "26f9", "person bouncing ball"),
-        EmojiSymbol("⛹️‍♂️", "26f9-fe0f-200d-2642-fe0f", "man bouncing ball"),
-        EmojiSymbol("⛹️‍♀️", "26f9-fe0f-200d-2640-fe0f", "woman bouncing ball"),
-        EmojiSymbol("🏋", "1f3cb", "person lifting weights"),
-        EmojiSymbol("🏋️‍♂️", "1f3cb-fe0f-200d-2642-fe0f", "man lifting weights"),
-        EmojiSymbol("🏋️‍♀️", "1f3cb-fe0f-200d-2640-fe0f", "woman lifting weights"),
-        EmojiSymbol("🚴", "1f6b4", "person biking"),
-        EmojiSymbol("🚴‍♂️", "1f6b4-200d-2642-fe0f", "man biking"),
-        EmojiSymbol("🚴‍♀️", "1f6b4-200d-2640-fe0f", "woman biking"),
-        EmojiSymbol("🚵", "1f6b5", "person mountain biking"),
-        EmojiSymbol("🚵‍♂️", "1f6b5-200d-2642-fe0f", "man mountain biking"),
-        EmojiSymbol("🚵‍♀️", "1f6b5-200d-2640-fe0f", "woman mountain biking"),
-        EmojiSymbol("🏎", "1f3ce", "racing car"),
-        EmojiSymbol("🏍", "1f3cd", "motorcycle"),
-        EmojiSymbol("🤸", "1f938", "person cartwheeling"),
-        EmojiSymbol("🤸‍♂️", "1f938-200d-2642-fe0f", "man cartwheeling"),
-        EmojiSymbol("🤸‍♀️", "1f938-200d-2640-fe0f", "woman cartwheeling"),
-        EmojiSymbol("🤼", "1f93c", "people wrestling"),
-        EmojiSymbol("🤼‍♂️", "1f93c-200d-2642-fe0f", "men wrestling"),
-        EmojiSymbol("🤼‍♀️", "1f93c-200d-2640-fe0f", "women wrestling"),
-        EmojiSymbol("🤽", "1f93d", "person playing water polo"),
-        EmojiSymbol("🤽‍♂️", "1f93d-200d-2642-fe0f", "man playing water polo"),
-        EmojiSymbol("🤽‍♀️", "1f93d-200d-2640-fe0f", "woman playing water polo"),
-        EmojiSymbol("🤾", "1f93e", "person playing handball"),
-        EmojiSymbol("🤾‍♂️", "1f93e-200d-2642-fe0f", "man playing handball"),
-        EmojiSymbol("🤾‍♀️", "1f93e-200d-2640-fe0f", "woman playing handball"),
-        EmojiSymbol("🤹", "1f939", "person juggling"),
-        EmojiSymbol("🤹‍♂️", "1f939-200d-2642-fe0f", "man juggling"),
-        EmojiSymbol("🤹‍♀️", "1f939-200d-2640-fe0f", "woman juggling"),
-        EmojiSymbol("👫", "1f46b", "man and woman holding hands"),
-        EmojiSymbol("👬", "1f46c", "two men holding hands"),
-        EmojiSymbol("👭", "1f46d", "two women holding hands"),
-        EmojiSymbol("💏", "1f48f", "kiss"),
-        EmojiSymbol("👩‍❤️‍💋‍👨", "1f469-200d-2764-fe0f-200d-1f48b-200d-1f468", "kiss: woman, man"),
-        EmojiSymbol("👨‍❤️‍💋‍👨", "1f468-200d-2764-fe0f-200d-1f48b-200d-1f468", "kiss: man, man"),
-        EmojiSymbol("👩‍❤️‍💋‍👩", "1f469-200d-2764-fe0f-200d-1f48b-200d-1f469", "kiss: woman, woman"),
-        EmojiSymbol("💑", "1f491", "couple with heart"),
-        EmojiSymbol("👩‍❤️‍👨", "1f469-200d-2764-fe0f-200d-1f468", "couple with heart: woman, man"),
-        EmojiSymbol("👨‍❤️‍👨", "1f468-200d-2764-fe0f-200d-1f468", "couple with heart: man, man"),
-        EmojiSymbol("👩‍❤️‍👩", "1f469-200d-2764-fe0f-200d-1f469", "couple with heart: woman, woman"),
-        EmojiSymbol("👪", "1f46a", "family"),
-        EmojiSymbol("👨‍👩‍👦", "1f468-200d-1f469-200d-1f466", "family: man, woman, boy"),
-        EmojiSymbol("👨‍👩‍👧", "1f468-200d-1f469-200d-1f467", "family: man, woman, girl"),
-        EmojiSymbol("👨‍👩‍👧‍👦", "1f468-200d-1f469-200d-1f467-200d-1f466", "family: man, woman, girl, boy"),
-        EmojiSymbol("👨‍👩‍👦‍👦", "1f468-200d-1f469-200d-1f466-200d-1f466", "family: man, woman, boy, boy"),
-        EmojiSymbol("👨‍👩‍👧‍👧", "1f468-200d-1f469-200d-1f467-200d-1f467", "family: man, woman, girl, girl"),
-        EmojiSymbol("👨‍👨‍👦", "1f468-200d-1f468-200d-1f466", "family: man, man, boy"),
-        EmojiSymbol("👨‍👨‍👧", "1f468-200d-1f468-200d-1f467", "family: man, man, girl"),
-        EmojiSymbol("👨‍👨‍👧‍👦", "1f468-200d-1f468-200d-1f467-200d-1f466", "family: man, man, girl, boy"),
-        EmojiSymbol("👨‍👨‍👦‍👦", "1f468-200d-1f468-200d-1f466-200d-1f466", "family: man, man, boy, boy"),
-        EmojiSymbol("👨‍👨‍👧‍👧", "1f468-200d-1f468-200d-1f467-200d-1f467", "family: man, man, girl, girl"),
-        EmojiSymbol("👩‍👩‍👦", "1f469-200d-1f469-200d-1f466", "family: woman, woman, boy"),
-        EmojiSymbol("👩‍👩‍👧", "1f469-200d-1f469-200d-1f467", "family: woman, woman, girl"),
-        EmojiSymbol("👩‍👩‍👧‍👦", "1f469-200d-1f469-200d-1f467-200d-1f466", "family: woman, woman, girl, boy"),
-        EmojiSymbol("👩‍👩‍👦‍👦", "1f469-200d-1f469-200d-1f466-200d-1f466", "family: woman, woman, boy, boy"),
-        EmojiSymbol("👩‍👩‍👧‍👧", "1f469-200d-1f469-200d-1f467-200d-1f467", "family: woman, woman, girl, girl"),
-        EmojiSymbol("👨‍👦", "1f468-200d-1f466", "family: man, boy"),
-        EmojiSymbol("👨‍👦‍👦", "1f468-200d-1f466-200d-1f466", "family: man, boy, boy"),
-        EmojiSymbol("👨‍👧", "1f468-200d-1f467", "family: man, girl"),
-        EmojiSymbol("👨‍👧‍👦", "1f468-200d-1f467-200d-1f466", "family: man, girl, boy"),
-        EmojiSymbol("👨‍👧‍👧", "1f468-200d-1f467-200d-1f467", "family: man, girl, girl"),
-        EmojiSymbol("👩‍👦", "1f469-200d-1f466", "family: woman, boy"),
-        EmojiSymbol("👩‍👦‍👦", "1f469-200d-1f466-200d-1f466", "family: woman, boy, boy"),
-        EmojiSymbol("👩‍👧", "1f469-200d-1f467", "family: woman, girl"),
-        EmojiSymbol("👩‍👧‍👦", "1f469-200d-1f467-200d-1f466", "family: woman, girl, boy"),
-        EmojiSymbol("👩‍👧‍👧", "1f469-200d-1f467-200d-1f467", "family: woman, girl, girl"),
-        EmojiSymbol("🤳", "1f933", "selfie"),
-        EmojiSymbol("💪", "1f4aa", "flexed biceps"),
-        EmojiSymbol("👈", "1f448", "backhand index pointing left"),
-        EmojiSymbol("👉", "1f449", "backhand index pointing right"),
-        EmojiSymbol("☝", "261d", "index pointing up"),
-        EmojiSymbol("👆", "1f446", "backhand index pointing up"),
-        EmojiSymbol("🖕", "1f595", "middle finger"),
-        EmojiSymbol("👇", "1f447", "backhand index pointing down"),
-        EmojiSymbol("✌", "270c", "victory hand"),
-        EmojiSymbol("🤞", "1f91e", "crossed fingers"),
-        EmojiSymbol("🖖", "1f596", "vulcan salute"),
-        EmojiSymbol("🤘", "1f918", "sign of the horns"),
-        EmojiSymbol("🤙", "1f919", "call me hand"),
-        EmojiSymbol("🖐", "1f590", "hand with fingers splayed"),
-        EmojiSymbol("✋", "270b", "raised hand"),
-        EmojiSymbol("👌", "1f44c", "OK hand"),
-        EmojiSymbol("👍", "1f44d", "thumbs up"),
-        EmojiSymbol("👎", "1f44e", "thumbs down"),
-        EmojiSymbol("✊", "270a", "raised fist"),
-        EmojiSymbol("👊", "1f44a", "oncoming fist"),
-        EmojiSymbol("🤛", "1f91b", "left-facing fist"),
-        EmojiSymbol("🤜", "1f91c", "right-facing fist"),
-        EmojiSymbol("🤚", "1f91a", "raised back of hand"),
-        EmojiSymbol("👋", "1f44b", "waving hand"),
-        EmojiSymbol("🤟", "1f91f", "love-you gesture"),
-        EmojiSymbol("✍", "270d", "writing hand"),
-        EmojiSymbol("👏", "1f44f", "clapping hands"),
-        EmojiSymbol("👐", "1f450", "open hands"),
-        EmojiSymbol("🙌", "1f64c", "raising hands"),
-        EmojiSymbol("🤲", "1f932", "palms up together"),
-        EmojiSymbol("🙏", "1f64f", "folded hands"),
-        EmojiSymbol("🤝", "1f91d", "handshake"),
-        EmojiSymbol("💅", "1f485", "nail polish"),
-        EmojiSymbol("👂", "1f442", "ear"),
-        EmojiSymbol("👃", "1f443", "nose"),
-        EmojiSymbol("👣", "1f463", "footprints"),
-        EmojiSymbol("👀", "1f440", "eyes"),
-        EmojiSymbol("👁", "1f441", "eye"),
-        EmojiSymbol("👁️‍🗨️", "1f441-fe0f-200d-1f5e8-fe0f", "eye in speech bubble"),
-        EmojiSymbol("🧠", "1f9e0", "brain"),
-        EmojiSymbol("👅", "1f445", "tongue"),
-        EmojiSymbol("👄", "1f444", "mouth"),
-        EmojiSymbol("💋", "1f48b", "kiss mark"),
-        EmojiSymbol("💘", "1f498", "heart with arrow"),
-        EmojiSymbol("❤", "2764", "red heart"),
-        EmojiSymbol("💓", "1f493", "beating heart"),
-        EmojiSymbol("💔", "1f494", "broken heart"),
-        EmojiSymbol("💕", "1f495", "two hearts"),
-        EmojiSymbol("💖", "1f496", "sparkling heart"),
-        EmojiSymbol("💗", "1f497", "growing heart"),
-        EmojiSymbol("💙", "1f499", "blue heart"),
-        EmojiSymbol("💚", "1f49a", "green heart"),
-        EmojiSymbol("💛", "1f49b", "yellow heart"),
-        EmojiSymbol("🧡", "1f9e1", "orange heart"),
-        EmojiSymbol("💜", "1f49c", "purple heart"),
-        EmojiSymbol("🖤", "1f5a4", "black heart"),
-        EmojiSymbol("💝", "1f49d", "heart with ribbon"),
-        EmojiSymbol("💞", "1f49e", "revolving hearts"),
-        EmojiSymbol("💟", "1f49f", "heart decoration"),
-        EmojiSymbol("❣", "2763", "heavy heart exclamation"),
-        EmojiSymbol("💌", "1f48c", "love letter"),
-        EmojiSymbol("💤", "1f4a4", "zzz"),
-        EmojiSymbol("💢", "1f4a2", "anger symbol"),
-        EmojiSymbol("💣", "1f4a3", "bomb"),
-        EmojiSymbol("💥", "1f4a5", "collision"),
-        EmojiSymbol("💦", "1f4a6", "sweat droplets"),
-        EmojiSymbol("💨", "1f4a8", "dashing away"),
-        EmojiSymbol("💫", "1f4ab", "dizzy"),
-        EmojiSymbol("💬", "1f4ac", "speech balloon"),
-        EmojiSymbol("🗨", "1f5e8", "left speech bubble"),
-        EmojiSymbol("🗯", "1f5ef", "right anger bubble"),
-        EmojiSymbol("💭", "1f4ad", "thought balloon"),
-        EmojiSymbol("🕳", "1f573", "hole"),
-        EmojiSymbol("👓", "1f453", "glasses"),
-        EmojiSymbol("🕶", "1f576", "sunglasses"),
-        EmojiSymbol("👔", "1f454", "necktie"),
-        EmojiSymbol("👕", "1f455", "t-shirt"),
-        EmojiSymbol("👖", "1f456", "jeans"),
-        EmojiSymbol("🧣", "1f9e3", "scarf"),
-        EmojiSymbol("🧤", "1f9e4", "gloves"),
-        EmojiSymbol("🧥", "1f9e5", "coat"),
-        EmojiSymbol("🧦", "1f9e6", "socks"),
-        EmojiSymbol("👗", "1f457", "dress"),
-        EmojiSymbol("👘", "1f458", "kimono"),
-        EmojiSymbol("👙", "1f459", "bikini"),
-        EmojiSymbol("👚", "1f45a", "woman’s clothes"),
-        EmojiSymbol("👛", "1f45b", "purse"),
-        EmojiSymbol("👜", "1f45c", "handbag"),
-        EmojiSymbol("👝", "1f45d", "clutch bag"),
-        EmojiSymbol("🛍", "1f6cd", "shopping bags"),
-        EmojiSymbol("🎒", "1f392", "school backpack"),
-        EmojiSymbol("👞", "1f45e", "man’s shoe"),
-        EmojiSymbol("👟", "1f45f", "running shoe"),
-        EmojiSymbol("👠", "1f460", "high-heeled shoe"),
-        EmojiSymbol("👡", "1f461", "woman’s sandal"),
-        EmojiSymbol("👢", "1f462", "woman’s boot"),
-        EmojiSymbol("👑", "1f451", "crown"),
-        EmojiSymbol("👒", "1f452", "woman’s hat"),
-        EmojiSymbol("🎩", "1f3a9", "top hat"),
-        EmojiSymbol("🎓", "1f393", "graduation cap"),
-        EmojiSymbol("🧢", "1f9e2", "billed cap"),
-        EmojiSymbol("⛑", "26d1", "rescue worker’s helmet"),
-        EmojiSymbol("📿", "1f4ff", "prayer beads"),
-        EmojiSymbol("💄", "1f484", "lipstick"),
-        EmojiSymbol("💍", "1f48d", "ring"),
-        EmojiSymbol("💎", "1f48e", "gem stone")
+        "😀", //grinning face, 1f600
+        "😁", //beaming face with smiling eyes, 1f601
+        "😂", //face with tears of joy, 1f602
+        "🤣", //rolling on the floor laughing, 1f923
+        "😃", //grinning face with big eyes, 1f603
+        "😄", //grinning face with smiling eyes, 1f604
+        "😅", //grinning face with sweat, 1f605
+        "😆", //grinning squinting face, 1f606
+        "😉", //winking face, 1f609
+        "😊", //smiling face with smiling eyes, 1f60a
+        "😋", //face savoring food, 1f60b
+        "😎", //smiling face with sunglasses, 1f60e
+        "😍", //smiling face with heart-eyes, 1f60d
+        "😘", //face blowing a kiss, 1f618
+        "😗", //kissing face, 1f617
+        "😙", //kissing face with smiling eyes, 1f619
+        "😚", //kissing face with closed eyes, 1f61a
+        "☺", //smiling face, 263a
+        "🙂", //slightly smiling face, 1f642
+        "🤗", //hugging face, 1f917
+        "🤩", //star-struck, 1f929
+        "🤔", //thinking face, 1f914
+        "🤨", //face with raised eyebrow, 1f928
+        "😐", //neutral face, 1f610
+        "😑", //expressionless face, 1f611
+        "😶", //face without mouth, 1f636
+        "🙄", //face with rolling eyes, 1f644
+        "😏", //smirking face, 1f60f
+        "😣", //persevering face, 1f623
+        "😥", //sad but relieved face, 1f625
+        "😮", //face with open mouth, 1f62e
+        "🤐", //zipper-mouth face, 1f910
+        "😯", //hushed face, 1f62f
+        "😪", //sleepy face, 1f62a
+        "😫", //tired face, 1f62b
+        "😴", //sleeping face, 1f634
+        "😌", //relieved face, 1f60c
+        "😛", //face with tongue, 1f61b
+        "😜", //winking face with tongue, 1f61c
+        "😝", //squinting face with tongue, 1f61d
+        "🤤", //drooling face, 1f924
+        "😒", //unamused face, 1f612
+        "😓", //downcast face with sweat, 1f613
+        "😔", //pensive face, 1f614
+        "😕", //confused face, 1f615
+        "🙃", //upside-down face, 1f643
+        "🤑", //money-mouth face, 1f911
+        "😲", //astonished face, 1f632
+        "☹", //frowning face, 2639
+        "🙁", //slightly frowning face, 1f641
+        "😖", //confounded face, 1f616
+        "😞", //disappointed face, 1f61e
+        "😟", //worried face, 1f61f
+        "😤", //face with steam from nose, 1f624
+        "😢", //crying face, 1f622
+        "😭", //loudly crying face, 1f62d
+        "😦", //frowning face with open mouth, 1f626
+        "😧", //anguished face, 1f627
+        "😨", //fearful face, 1f628
+        "😩", //weary face, 1f629
+        "🤯", //exploding head, 1f92f
+        "😬", //grimacing face, 1f62c
+        "😰", //anxious face with sweat, 1f630
+        "😱", //face screaming in fear, 1f631
+        "😳", //flushed face, 1f633
+        "🤪", //crazy face, 1f92a
+        "😵", //dizzy face, 1f635
+        "😡", //pouting face, 1f621
+        "😠", //angry face, 1f620
+        "🤬", //face with symbols on mouth, 1f92c
+        "😷", //face with medical mask, 1f637
+        "🤒", //face with thermometer, 1f912
+        "🤕", //face with head-bandage, 1f915
+        "🤢", //nauseated face, 1f922
+        "🤮", //face vomiting, 1f92e
+        "🤧", //sneezing face, 1f927
+        "😇", //smiling face with halo, 1f607
+        "🤠", //cowboy hat face, 1f920
+        "🤡", //clown face, 1f921
+        "🤥", //lying face, 1f925
+        "🤫", //shushing face, 1f92b
+        "🤭", //face with hand over mouth, 1f92d
+        "🧐", //face with monocle, 1f9d0
+        "🤓", //nerd face, 1f913
+        "😈", //smiling face with horns, 1f608
+        "👿", //angry face with horns, 1f47f
+        "👹", //ogre, 1f479
+        "👺", //goblin, 1f47a
+        "💀", //skull, 1f480
+        "☠", //skull and crossbones, 2620
+        "👻", //ghost, 1f47b
+        "👽", //alien, 1f47d
+        "👾", //alien monster, 1f47e
+        "🤖", //robot face, 1f916
+        "💩", //pile of poo, 1f4a9
+        "😺", //grinning cat face, 1f63a
+        "😸", //grinning cat face with smiling eyes, 1f638
+        "😹", //cat face with tears of joy, 1f639
+        "😻", //smiling cat face with heart-eyes, 1f63b
+        "😼", //cat face with wry smile, 1f63c
+        "😽", //kissing cat face, 1f63d
+        "🙀", //weary cat face, 1f640
+        "😿", //crying cat face, 1f63f
+        "😾", //pouting cat face, 1f63e
+        "🙈", //see-no-evil monkey, 1f648
+        "🙉", //hear-no-evil monkey, 1f649
+        "🙊", //speak-no-evil monkey, 1f64a
+        "👶", //baby, 1f476
+        "🧒", //child, 1f9d2
+        "👦", //boy, 1f466
+        "👧", //girl, 1f467
+        "🧑", //adult, 1f9d1
+        "👨", //man, 1f468
+        "👩", //woman, 1f469
+        "🧓", //older adult, 1f9d3
+        "👴", //old man, 1f474
+        "👵", //old woman, 1f475
+        "👨‍⚕️", //man health worker, 1f468-200d-2695-fe0f
+        "👩‍⚕️", //woman health worker, 1f469-200d-2695-fe0f
+        "👨‍🎓", //man student, 1f468-200d-1f393
+        "👩‍🎓", //woman student, 1f469-200d-1f393
+        "👨‍🏫", //man teacher, 1f468-200d-1f3eb
+        "👩‍🏫", //woman teacher, 1f469-200d-1f3eb
+        "👨‍⚖️", //man judge, 1f468-200d-2696-fe0f
+        "👩‍⚖️", //woman judge, 1f469-200d-2696-fe0f
+        "👨‍🌾", //man farmer, 1f468-200d-1f33e
+        "👩‍🌾", //woman farmer, 1f469-200d-1f33e
+        "👨‍🍳", //man cook, 1f468-200d-1f373
+        "👩‍🍳", //woman cook, 1f469-200d-1f373
+        "👨‍🔧", //man mechanic, 1f468-200d-1f527
+        "👩‍🔧", //woman mechanic, 1f469-200d-1f527
+        "👨‍🏭", //man factory worker, 1f468-200d-1f3ed
+        "👩‍🏭", //woman factory worker, 1f469-200d-1f3ed
+        "👨‍💼", //man office worker, 1f468-200d-1f4bc
+        "👩‍💼", //woman office worker, 1f469-200d-1f4bc
+        "👨‍🔬", //man scientist, 1f468-200d-1f52c
+        "👩‍🔬", //woman scientist, 1f469-200d-1f52c
+        "👨‍💻", //man technologist, 1f468-200d-1f4bb
+        "👩‍💻", //woman technologist, 1f469-200d-1f4bb
+        "👨‍🎤", //man singer, 1f468-200d-1f3a4
+        "👩‍🎤", //woman singer, 1f469-200d-1f3a4
+        "👨‍🎨", //man artist, 1f468-200d-1f3a8
+        "👩‍🎨", //woman artist, 1f469-200d-1f3a8
+        "👨‍✈️", //man pilot, 1f468-200d-2708-fe0f
+        "👩‍✈️", //woman pilot, 1f469-200d-2708-fe0f
+        "👨‍🚀", //man astronaut, 1f468-200d-1f680
+        "👩‍🚀", //woman astronaut, 1f469-200d-1f680
+        "👨‍🚒", //man firefighter, 1f468-200d-1f692
+        "👩‍🚒", //woman firefighter, 1f469-200d-1f692
+        "👮", //police officer, 1f46e
+        "👮‍♂️", //man police officer, 1f46e-200d-2642-fe0f
+        "👮‍♀️", //woman police officer, 1f46e-200d-2640-fe0f
+        "🕵", //detective, 1f575
+        "🕵️‍♂️", //man detective, 1f575-fe0f-200d-2642-fe0f
+        "🕵️‍♀️", //woman detective, 1f575-fe0f-200d-2640-fe0f
+        "💂", //guard, 1f482
+        "💂‍♂️", //man guard, 1f482-200d-2642-fe0f
+        "💂‍♀️", //woman guard, 1f482-200d-2640-fe0f
+        "👷", //construction worker, 1f477
+        "👷‍♂️", //man construction worker, 1f477-200d-2642-fe0f
+        "👷‍♀️", //woman construction worker, 1f477-200d-2640-fe0f
+        "🤴", //prince, 1f934
+        "👸", //princess, 1f478
+        "👳", //person wearing turban, 1f473
+        "👳‍♂️", //man wearing turban, 1f473-200d-2642-fe0f
+        "👳‍♀️", //woman wearing turban, 1f473-200d-2640-fe0f
+        "👲", //man with Chinese cap, 1f472
+        "🧕", //woman with headscarf, 1f9d5
+        "🧔", //bearded person, 1f9d4
+        "👱", //blond-haired person, 1f471
+        "👱‍♂️", //blond-haired man, 1f471-200d-2642-fe0f
+        "👱‍♀️", //blond-haired woman, 1f471-200d-2640-fe0f
+        "🤵", //man in tuxedo, 1f935
+        "👰", //bride with veil, 1f470
+        "🤰", //pregnant woman, 1f930
+        "🤱", //breast-feeding, 1f931
+        "👼", //baby angel, 1f47c
+        "🎅", //Santa Claus, 1f385
+        "🤶", //Mrs. Claus, 1f936
+        "🧙", //mage, 1f9d9
+        "🧙‍♀️", //woman mage, 1f9d9-200d-2640-fe0f
+        "🧙‍♂️", //man mage, 1f9d9-200d-2642-fe0f
+        "🧚", //fairy, 1f9da
+        "🧚‍♀️", //woman fairy, 1f9da-200d-2640-fe0f
+        "🧚‍♂️", //man fairy, 1f9da-200d-2642-fe0f
+        "🧛", //vampire, 1f9db
+        "🧛‍♀️", //woman vampire, 1f9db-200d-2640-fe0f
+        "🧛‍♂️", //man vampire, 1f9db-200d-2642-fe0f
+        "🧜", //merperson, 1f9dc
+        "🧜‍♀️", //mermaid, 1f9dc-200d-2640-fe0f
+        "🧜‍♂️", //merman, 1f9dc-200d-2642-fe0f
+        "🧝", //elf, 1f9dd
+        "🧝‍♀️", //woman elf, 1f9dd-200d-2640-fe0f
+        "🧝‍♂️", //man elf, 1f9dd-200d-2642-fe0f
+        "🧞", //genie, 1f9de
+        "🧞‍♀️", //woman genie, 1f9de-200d-2640-fe0f
+        "🧞‍♂️", //man genie, 1f9de-200d-2642-fe0f
+        "🧟", //zombie, 1f9df
+        "🧟‍♀️", //woman zombie, 1f9df-200d-2640-fe0f
+        "🧟‍♂️", //man zombie, 1f9df-200d-2642-fe0f
+        "🙍", //person frowning, 1f64d
+        "🙍‍♂️", //man frowning, 1f64d-200d-2642-fe0f
+        "🙍‍♀️", //woman frowning, 1f64d-200d-2640-fe0f
+        "🙎", //person pouting, 1f64e
+        "🙎‍♂️", //man pouting, 1f64e-200d-2642-fe0f
+        "🙎‍♀️", //woman pouting, 1f64e-200d-2640-fe0f
+        "🙅", //person gesturing NO, 1f645
+        "🙅‍♂️", //man gesturing NO, 1f645-200d-2642-fe0f
+        "🙅‍♀️", //woman gesturing NO, 1f645-200d-2640-fe0f
+        "🙆", //person gesturing OK, 1f646
+        "🙆‍♂️", //man gesturing OK, 1f646-200d-2642-fe0f
+        "🙆‍♀️", //woman gesturing OK, 1f646-200d-2640-fe0f
+        "💁", //person tipping hand, 1f481
+        "💁‍♂️", //man tipping hand, 1f481-200d-2642-fe0f
+        "💁‍♀️", //woman tipping hand, 1f481-200d-2640-fe0f
+        "🙋", //person raising hand, 1f64b
+        "🙋‍♂️", //man raising hand, 1f64b-200d-2642-fe0f
+        "🙋‍♀️", //woman raising hand, 1f64b-200d-2640-fe0f
+        "🙇", //person bowing, 1f647
+        "🙇‍♂️", //man bowing, 1f647-200d-2642-fe0f
+        "🙇‍♀️", //woman bowing, 1f647-200d-2640-fe0f
+        "🤦", //person facepalming, 1f926
+        "🤦‍♂️", //man facepalming, 1f926-200d-2642-fe0f
+        "🤦‍♀️", //woman facepalming, 1f926-200d-2640-fe0f
+        "🤷", //person shrugging, 1f937
+        "🤷‍♂️", //man shrugging, 1f937-200d-2642-fe0f
+        "🤷‍♀️", //woman shrugging, 1f937-200d-2640-fe0f
+        "💆", //person getting massage, 1f486
+        "💆‍♂️", //man getting massage, 1f486-200d-2642-fe0f
+        "💆‍♀️", //woman getting massage, 1f486-200d-2640-fe0f
+        "💇", //person getting haircut, 1f487
+        "💇‍♂️", //man getting haircut, 1f487-200d-2642-fe0f
+        "💇‍♀️", //woman getting haircut, 1f487-200d-2640-fe0f
+        "🚶", //person walking, 1f6b6
+        "🚶‍♂️", //man walking, 1f6b6-200d-2642-fe0f
+        "🚶‍♀️", //woman walking, 1f6b6-200d-2640-fe0f
+        "🏃", //person running, 1f3c3
+        "🏃‍♂️", //man running, 1f3c3-200d-2642-fe0f
+        "🏃‍♀️", //woman running, 1f3c3-200d-2640-fe0f
+        "💃", //woman dancing, 1f483
+        "🕺", //man dancing, 1f57a
+        "👯", //people with bunny ears, 1f46f
+        "👯‍♂️", //men with bunny ears, 1f46f-200d-2642-fe0f
+        "👯‍♀️", //women with bunny ears, 1f46f-200d-2640-fe0f
+        "🧖", //person in steamy room, 1f9d6
+        "🧖‍♀️", //woman in steamy room, 1f9d6-200d-2640-fe0f
+        "🧖‍♂️", //man in steamy room, 1f9d6-200d-2642-fe0f
+        "🧗", //person climbing, 1f9d7
+        "🧗‍♀️", //woman climbing, 1f9d7-200d-2640-fe0f
+        "🧗‍♂️", //man climbing, 1f9d7-200d-2642-fe0f
+        "🧘", //person in lotus position, 1f9d8
+        "🧘‍♀️", //woman in lotus position, 1f9d8-200d-2640-fe0f
+        "🧘‍♂️", //man in lotus position, 1f9d8-200d-2642-fe0f
+        "🛀", //person taking bath, 1f6c0
+        "🛌", //person in bed, 1f6cc
+        "🕴", //man in suit levitating, 1f574
+        "🗣", //speaking head, 1f5e3
+        "👤", //bust in silhouette, 1f464
+        "👥", //busts in silhouette, 1f465
+        "🤺", //person fencing, 1f93a
+        "🏇", //horse racing, 1f3c7
+        "⛷", //skier, 26f7
+        "🏂", //snowboarder, 1f3c2
+        "🏌", //person golfing, 1f3cc
+        "🏌️‍♂️", //man golfing, 1f3cc-fe0f-200d-2642-fe0f
+        "🏌️‍♀️", //woman golfing, 1f3cc-fe0f-200d-2640-fe0f
+        "🏄", //person surfing, 1f3c4
+        "🏄‍♂️", //man surfing, 1f3c4-200d-2642-fe0f
+        "🏄‍♀️", //woman surfing, 1f3c4-200d-2640-fe0f
+        "🚣", //person rowing boat, 1f6a3
+        "🚣‍♂️", //man rowing boat, 1f6a3-200d-2642-fe0f
+        "🚣‍♀️", //woman rowing boat, 1f6a3-200d-2640-fe0f
+        "🏊", //person swimming, 1f3ca
+        "🏊‍♂️", //man swimming, 1f3ca-200d-2642-fe0f
+        "🏊‍♀️", //woman swimming, 1f3ca-200d-2640-fe0f
+        "⛹", //person bouncing ball, 26f9
+        "⛹️‍♂️", //man bouncing ball, 26f9-fe0f-200d-2642-fe0f
+        "⛹️‍♀️", //woman bouncing ball, 26f9-fe0f-200d-2640-fe0f
+        "🏋", //person lifting weights, 1f3cb
+        "🏋️‍♂️", //man lifting weights, 1f3cb-fe0f-200d-2642-fe0f
+        "🏋️‍♀️", //woman lifting weights, 1f3cb-fe0f-200d-2640-fe0f
+        "🚴", //person biking, 1f6b4
+        "🚴‍♂️", //man biking, 1f6b4-200d-2642-fe0f
+        "🚴‍♀️", //woman biking, 1f6b4-200d-2640-fe0f
+        "🚵", //person mountain biking, 1f6b5
+        "🚵‍♂️", //man mountain biking, 1f6b5-200d-2642-fe0f
+        "🚵‍♀️", //woman mountain biking, 1f6b5-200d-2640-fe0f
+        "🏎", //racing car, 1f3ce
+        "🏍", //motorcycle, 1f3cd
+        "🤸", //person cartwheeling, 1f938
+        "🤸‍♂️", //man cartwheeling, 1f938-200d-2642-fe0f
+        "🤸‍♀️", //woman cartwheeling, 1f938-200d-2640-fe0f
+        "🤼", //people wrestling, 1f93c
+        "🤼‍♂️", //men wrestling, 1f93c-200d-2642-fe0f
+        "🤼‍♀️", //women wrestling, 1f93c-200d-2640-fe0f
+        "🤽", //person playing water polo, 1f93d
+        "🤽‍♂️", //man playing water polo, 1f93d-200d-2642-fe0f
+        "🤽‍♀️", //woman playing water polo, 1f93d-200d-2640-fe0f
+        "🤾", //person playing handball, 1f93e
+        "🤾‍♂️", //man playing handball, 1f93e-200d-2642-fe0f
+        "🤾‍♀️", //woman playing handball, 1f93e-200d-2640-fe0f
+        "🤹", //person juggling, 1f939
+        "🤹‍♂️", //man juggling, 1f939-200d-2642-fe0f
+        "🤹‍♀️", //woman juggling, 1f939-200d-2640-fe0f
+        "👫", //man and woman holding hands, 1f46b
+        "👬", //two men holding hands, 1f46c
+        "👭", //two women holding hands, 1f46d
+        "💏", //kiss, 1f48f
+        "👩‍❤️‍💋‍👨", //kiss: woman, man, 1f469-200d-2764-fe0f-200d-1f48b-200d-1f468
+        "👨‍❤️‍💋‍👨", //kiss: man, man, 1f468-200d-2764-fe0f-200d-1f48b-200d-1f468
+        "👩‍❤️‍💋‍👩", //kiss: woman, woman, 1f469-200d-2764-fe0f-200d-1f48b-200d-1f469
+        "💑", //couple with heart, 1f491
+        "👩‍❤️‍👨", //couple with heart: woman, man, 1f469-200d-2764-fe0f-200d-1f468
+        "👨‍❤️‍👨", //couple with heart: man, man, 1f468-200d-2764-fe0f-200d-1f468
+        "👩‍❤️‍👩", //couple with heart: woman, woman, 1f469-200d-2764-fe0f-200d-1f469
+        "👪", //family, 1f46a
+        "👨‍👩‍👦", //family: man, woman, boy, 1f468-200d-1f469-200d-1f466
+        "👨‍👩‍👧", //family: man, woman, girl, 1f468-200d-1f469-200d-1f467
+        "👨‍👩‍👧‍👦", //family: man, woman, girl, boy, 1f468-200d-1f469-200d-1f467-200d-1f466
+        "👨‍👩‍👦‍👦", //family: man, woman, boy, boy, 1f468-200d-1f469-200d-1f466-200d-1f466
+        "👨‍👩‍👧‍👧", //family: man, woman, girl, girl, 1f468-200d-1f469-200d-1f467-200d-1f467
+        "👨‍👨‍👦", //family: man, man, boy, 1f468-200d-1f468-200d-1f466
+        "👨‍👨‍👧", //family: man, man, girl, 1f468-200d-1f468-200d-1f467
+        "👨‍👨‍👧‍👦", //family: man, man, girl, boy, 1f468-200d-1f468-200d-1f467-200d-1f466
+        "👨‍👨‍👦‍👦", //family: man, man, boy, boy, 1f468-200d-1f468-200d-1f466-200d-1f466
+        "👨‍👨‍👧‍👧", //family: man, man, girl, girl, 1f468-200d-1f468-200d-1f467-200d-1f467
+        "👩‍👩‍👦", //family: woman, woman, boy, 1f469-200d-1f469-200d-1f466
+        "👩‍👩‍👧", //family: woman, woman, girl, 1f469-200d-1f469-200d-1f467
+        "👩‍👩‍👧‍👦", //family: woman, woman, girl, boy, 1f469-200d-1f469-200d-1f467-200d-1f466
+        "👩‍👩‍👦‍👦", //family: woman, woman, boy, boy, 1f469-200d-1f469-200d-1f466-200d-1f466
+        "👩‍👩‍👧‍👧", //family: woman, woman, girl, girl, 1f469-200d-1f469-200d-1f467-200d-1f467
+        "👨‍👦", //family: man, boy, 1f468-200d-1f466
+        "👨‍👦‍👦", //family: man, boy, boy, 1f468-200d-1f466-200d-1f466
+        "👨‍👧", //family: man, girl, 1f468-200d-1f467
+        "👨‍👧‍👦", //family: man, girl, boy, 1f468-200d-1f467-200d-1f466
+        "👨‍👧‍👧", //family: man, girl, girl, 1f468-200d-1f467-200d-1f467
+        "👩‍👦", //family: woman, boy, 1f469-200d-1f466
+        "👩‍👦‍👦", //family: woman, boy, boy, 1f469-200d-1f466-200d-1f466
+        "👩‍👧", //family: woman, girl, 1f469-200d-1f467
+        "👩‍👧‍👦", //family: woman, girl, boy, 1f469-200d-1f467-200d-1f466
+        "👩‍👧‍👧", //family: woman, girl, girl, 1f469-200d-1f467-200d-1f467
+        "🤳", //selfie, 1f933
+        "💪", //flexed biceps, 1f4aa
+        "👈", //backhand index pointing left, 1f448
+        "👉", //backhand index pointing right, 1f449
+        "☝", //index pointing up, 261d
+        "👆", //backhand index pointing up, 1f446
+        "🖕", //middle finger, 1f595
+        "👇", //backhand index pointing down, 1f447
+        "✌", //victory hand, 270c
+        "🤞", //crossed fingers, 1f91e
+        "🖖", //vulcan salute, 1f596
+        "🤘", //sign of the horns, 1f918
+        "🤙", //call me hand, 1f919
+        "🖐", //hand with fingers splayed, 1f590
+        "✋", //raised hand, 270b
+        "👌", //OK hand, 1f44c
+        "👍", //thumbs up, 1f44d
+        "👎", //thumbs down, 1f44e
+        "✊", //raised fist, 270a
+        "👊", //oncoming fist, 1f44a
+        "🤛", //left-facing fist, 1f91b
+        "🤜", //right-facing fist, 1f91c
+        "🤚", //raised back of hand, 1f91a
+        "👋", //waving hand, 1f44b
+        "🤟", //love-you gesture, 1f91f
+        "✍", //writing hand, 270d
+        "👏", //clapping hands, 1f44f
+        "👐", //open hands, 1f450
+        "🙌", //raising hands, 1f64c
+        "🤲", //palms up together, 1f932
+        "🙏", //folded hands, 1f64f
+        "🤝", //handshake, 1f91d
+        "💅", //nail polish, 1f485
+        "👂", //ear, 1f442
+        "👃", //nose, 1f443
+        "👣", //footprints, 1f463
+        "👀", //eyes, 1f440
+        "👁", //eye, 1f441
+        "👁️‍🗨️", //eye in speech bubble, 1f441-fe0f-200d-1f5e8-fe0f
+        "🧠", //brain, 1f9e0
+        "👅", //tongue, 1f445
+        "👄", //mouth, 1f444
+        "💋", //kiss mark, 1f48b
+        "💘", //heart with arrow, 1f498
+        "❤", //red heart, 2764
+        "💓", //beating heart, 1f493
+        "💔", //broken heart, 1f494
+        "💕", //two hearts, 1f495
+        "💖", //sparkling heart, 1f496
+        "💗", //growing heart, 1f497
+        "💙", //blue heart, 1f499
+        "💚", //green heart, 1f49a
+        "💛", //yellow heart, 1f49b
+        "🧡", //orange heart, 1f9e1
+        "💜", //purple heart, 1f49c
+        "🖤", //black heart, 1f5a4
+        "💝", //heart with ribbon, 1f49d
+        "💞", //revolving hearts, 1f49e
+        "💟", //heart decoration, 1f49f
+        "❣", //heavy heart exclamation, 2763
+        "💌", //love letter, 1f48c
+        "💤", //zzz, 1f4a4
+        "💢", //anger symbol, 1f4a2
+        "💣", //bomb, 1f4a3
+        "💥", //collision, 1f4a5
+        "💦", //sweat droplets, 1f4a6
+        "💨", //dashing away, 1f4a8
+        "💫", //dizzy, 1f4ab
+        "💬", //speech balloon, 1f4ac
+        "🗨", //left speech bubble, 1f5e8
+        "🗯", //right anger bubble, 1f5ef
+        "💭", //thought balloon, 1f4ad
+        "🕳", //hole, 1f573
+        "👓", //glasses, 1f453
+        "🕶", //sunglasses, 1f576
+        "👔", //necktie, 1f454
+        "👕", //t-shirt, 1f455
+        "👖", //jeans, 1f456
+        "🧣", //scarf, 1f9e3
+        "🧤", //gloves, 1f9e4
+        "🧥", //coat, 1f9e5
+        "🧦", //socks, 1f9e6
+        "👗", //dress, 1f457
+        "👘", //kimono, 1f458
+        "👙", //bikini, 1f459
+        "👚", //woman’s clothes, 1f45a
+        "👛", //purse, 1f45b
+        "👜", //handbag, 1f45c
+        "👝", //clutch bag, 1f45d
+        "🛍", //shopping bags, 1f6cd
+        "🎒", //school backpack, 1f392
+        "👞", //man’s shoe, 1f45e
+        "👟", //running shoe, 1f45f
+        "👠", //high-heeled shoe, 1f460
+        "👡", //woman’s sandal, 1f461
+        "👢", //woman’s boot, 1f462
+        "👑", //crown, 1f451
+        "👒", //woman’s hat, 1f452
+        "🎩", //top hat, 1f3a9
+        "🎓", //graduation cap, 1f393
+        "🧢", //billed cap, 1f9e2
+        "⛑", //rescue worker’s helmet, 26d1
+        "📿", //prayer beads, 1f4ff
+        "💄", //lipstick, 1f484
+        "💍", //ring, 1f48d
+        "💎" //gem stone 1f48e
 )

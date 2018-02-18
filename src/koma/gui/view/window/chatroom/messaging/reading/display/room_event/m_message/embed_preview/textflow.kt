@@ -6,7 +6,7 @@ import javafx.scene.text.TextFlow
 import tornadofx.*
 
 fun TextFlow.addStringWithElements(str: String) {
-    val textelements =  StringElementTokenizer(str).elements
+    val textelements = tokenize_string(str)
     val nodes = textelements.map { it.toFlow() }.toNodes()
     this.addNodes(nodes)
 }
@@ -21,8 +21,8 @@ fun List<FlowElement>.toNodes(): List<Node> {
     for (f in this) {
         val pre = prev
 
-        val textThenWeb = pre is InlineElement && f.isMultiLine() && pre.node.text.lastOrNull() != '\n'
-        val webThenText = pre?.isMultiLine() == true && f is InlineElement && f.node.text.firstOrNull() != '\n'
+        val textThenWeb = pre is InlineElement && f.isMultiLine() && !pre.endsWithNewline()
+        val webThenText = pre?.isMultiLine() == true && f is InlineElement && !f.startsWithNewline()
         if (textThenWeb || webThenText) {
             nodes.add(Text("\n"))
         }

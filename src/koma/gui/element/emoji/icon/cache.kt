@@ -6,12 +6,22 @@ import koma.network.media.ImgCacheProc
 import koma.storage.config.settings.AppSettings
 import okhttp3.HttpUrl
 import java.io.InputStream
+import kotlin.streams.toList
 
 object EmojiCache: ImgCacheProc({ i -> processEmoji(i) }) {
-    fun getEmoji(emojicode: String): ObservableValue<Image> {
-        val url = getCdnEmojiUrl(emojicode)
+    fun getEmoji(emoji: String): ObservableValue<Image> {
+        val code = getEmojiCode(emoji)
+        val url = getCdnEmojiUrl(code)
         return getProcImg(url, 365)
     }
+}
+
+private fun getEmojiCode(emoji: String): String {
+    val points = emoji.codePoints().filter {
+        it != 0xfe0f && it != 0x200d
+        && it != 0x2640 && it != 0x2640
+    }.toList()
+    return points.map { String.format("%x", it) }.joinToString("-")
 }
 
 private fun getCdnEmojiUrl(code: String): HttpUrl {
