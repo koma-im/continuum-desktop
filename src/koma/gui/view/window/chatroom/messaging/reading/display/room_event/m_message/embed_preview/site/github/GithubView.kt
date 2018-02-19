@@ -6,8 +6,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import okhttp3.HttpUrl
 import tornadofx.*
 
-fun createGithubView(link: String): GithubView? {
-    val url = HttpUrl.parse(link) ?: return null
+fun createGithubView(url: HttpUrl): GithubView? {
     val ps = url.pathSegments()
     val owner = ps.getOrNull(0) ?: return null
     val repo = ps.getOrNull(1) ?: return null
