@@ -15,7 +15,6 @@ object guiEvents {
     val loginRequests = CompositeObservable<LoginRequest>()
 
     val createRoomRequests = CompositeObservable<ActionEvent>()
-    val leaveRoomRequests = CompositeObservable<Room>()
     val uploadRoomIconRequests = CompositeObservable<Room>()
     val putRoomAliasRequests = CompositeObservable<Room>()
     val renameRoomRequests = CompositeObservable<Room>()

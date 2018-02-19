@@ -14,7 +14,6 @@ import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
-import rx.lang.kotlin.subscribeBy
 import rx.schedulers.Schedulers
 import tornadofx.*
 import java.util.*
@@ -45,12 +44,6 @@ class ChatController(
                         println("created room $result")
                     }
                 }
-        guiEvents.leaveRoomRequests.toObservable()
-                .map { it.id }
-                .observeOn(Schedulers.io())
-                .subscribeBy(onNext = {
-                    apiClient.leavingRoom(it)
-                })
         guiEvents.updateAvatar.toObservable()
                 .map {
                     val dialog = FileChooser()
