@@ -11,6 +11,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.mediaViewConstructors
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
 import koma.storage.config.settings.AppSettings
+import okhttp3.HttpUrl
 import tornadofx.*
 
 sealed class FlowElement {
@@ -64,11 +65,14 @@ class WebContentNode(private val link: String): FlowElement() {
     }
 
     private fun findPreview(): ViewNode? {
-        val site = link.substringAfter("://").substringBefore('/')
-        val sview = siteViewConstructors.get(site)?.let { view -> view(link) }
+        val url = HttpUrl.parse(link)
+        url ?: return null
+        val site = url.host()
+        val sview = siteViewConstructors.get(site)?.let { view -> view(url) }
 
-        val ext = link.substringAfterLast('/').substringAfter('.')
-        val view = sview ?: mediaViewConstructors.get(ext)?.let { vc -> vc(link) }
+        val filename = url.pathSegments().last()
+        val ext = filename.substringAfter('.')
+        val view = sview ?: mediaViewConstructors.get(ext)?.let { vc -> vc(url) }
         return view
     }
 
