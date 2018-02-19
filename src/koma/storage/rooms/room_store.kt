@@ -3,7 +3,7 @@ package koma.storage.rooms
 import javafx.collections.FXCollections
 import koma.koma_app.SaveJobs
 import koma.matrix.room.naming.RoomId
-import koma.storage.rooms.state.load_rooms
+import koma.storage.rooms.state.loadRoom
 import koma.storage.rooms.state.save
 import model.Room
 import java.util.concurrent.ConcurrentHashMap
@@ -37,14 +37,11 @@ object RoomStore{
     private val store = ConcurrentHashMap<RoomId, Room>()
 
     fun getOrCreate(roomId: RoomId): Room {
-        val newRoom = store.computeIfAbsent(roomId, {Room(roomId)})
+        val newRoom = store.computeIfAbsent(roomId, { loadRoom(roomId)?: Room(roomId)})
         return newRoom
     }
 
     init {
-        for (r in load_rooms()) {
-            store.put(r.id, r)
-        }
 
         SaveJobs.addJob {
             this.store.forEach { _, u: Room -> u.save() }

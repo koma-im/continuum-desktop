@@ -15,27 +15,17 @@ import java.io.File
 import java.io.IOException
 import java.util.stream.Stream
 
-val state_dir = config_paths.getOrCreate("state")
+val state_dir = config_paths.getCreateDir("state")
 
-fun load_rooms(): Iterable<Room> {
-    val f = File(state_dir)
-    val rooms = mutableListOf<Room>()
-    for (s in f.list()) {
-        val serv = f.resolve(s)
-        val rs = serv.list()
-        if (rs != null) {
-            for (r in rs) {
-                val roomid = RoomId(s, r)
-                val path = serv.resolve(r)
-                load_room(roomid, path)?.let { rooms.add(it) }
-            }
-        }
-    }
-    return rooms
+fun loadRoom(roomId: RoomId): Room? {
+    println("Loading room with id $roomId")
+    state_dir?: return null
+    val dir = state_dir.resolve(roomId.servername).resolve(roomId.localstr)
+    return loadRoomAt(roomId, dir)
 }
 
-fun load_room(roomId: RoomId, path: File): Room? {
-    val sf = File(path.resolve(statefilename).absolutePath)
+private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
+    val sf = File(roomDir.resolve(statefilename).absolutePath)
     val jsonAdapter = Moshi.Builder()
             .add(RoomIdAdapter())
             .add(RoomAliasAdapter())
@@ -62,7 +52,7 @@ fun load_room(roomId: RoomId, path: File): Room? {
     room.visibility = savedRoomState.visibility
     room.power_levels.putAll(savedRoomState.power_levels)
 
-    val members = load_members(path.resolve(usersfilename))
+    val members = load_members(roomDir.resolve(usersfilename))
     for (m in members) {
         val u = UserId_new(m.first)
         room.members.add(UserStore.getOrCreateUserId(u))
