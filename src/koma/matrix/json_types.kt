@@ -25,13 +25,9 @@ data class DiscoveredRoom(
         val topic: String?,
         val world_readable: Boolean
 ) {
-    fun dispName(): String {
-        val dispname = if (name != null)
-            name
-        else {
-            aliases?.getOrNull(0)?:room_id
-        }
-        return dispname
+    fun dispName(): String{
+        val n = name ?: aliases?.getOrNull(0) ?: room_id
+        return n
     }
 
     fun aliasesProperty(): SimpleListProperty<String> {

@@ -7,25 +7,18 @@ import kotlinx.coroutines.experimental.launch
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
 import tornadofx.*
-import view.dialog.FindJoinRoomDialog
+import koma.gui.view.window.roomfinder.RoomFinder
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
 fun ask_join_room() {
-    val dialog = FindJoinRoomDialog()
+    val dialog = RoomFinder({ r -> joinRoomById(r)})
+    dialog.open()
+}
 
-    val result = dialog.showAndWait()
-
-    if (!result.isPresent()) {
-        println("no room selected to join")
-        return
-    } else {
-        println("now join room ${result.get()}")
-    }
-    val roomid = result.get()
-
+fun joinRoomById(roomid: String) {
     launch(UI) {
         val res = apiClient!!.joinRoom(RoomId(roomid)).awaitResult()
-        when(res) {
+        when (res) {
             is Result.Ok -> {}
             is Result.Error -> {
                 val content = "http error ${res.exception.code()}: ${res.exception.message()}"

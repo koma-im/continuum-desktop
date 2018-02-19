@@ -21,6 +21,7 @@ fun loadRoom(roomId: RoomId): Room? {
     println("Loading room with id $roomId")
     state_dir?: return null
     val dir = state_dir.resolve(roomId.servername).resolve(roomId.localstr)
+    if (!dir.isDirectory) return null
     return loadRoomAt(roomId, dir)
 }
 
