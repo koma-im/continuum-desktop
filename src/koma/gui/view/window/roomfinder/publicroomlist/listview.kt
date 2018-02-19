@@ -1,11 +1,12 @@
-package koma.gui.view.listview.room.discovery
+package koma.gui.view.window.roomfinder.publicroomlist
 
 import domain.DiscoveredRoom
-import gui.view.listview.room.discovery.DiscoveredRoomFragment
 import javafx.beans.property.StringProperty
 import javafx.collections.ObservableList
 import javafx.scene.Node
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import rx.javafx.kt.toObservable
 import rx.lang.kotlin.filterNotNull
 import tornadofx.*
@@ -18,6 +19,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>, val jo
 
     init {
         createui()
+        ui.vgrow = Priority.ALWAYS
     }
 
     private fun createui() {
@@ -47,7 +49,8 @@ class RoomListView(roomlist: ObservableList<DiscoveredRoom>): View() {
 
     init {
         with(root) {
-            minWidth = 300.0
+            vgrow = Priority.ALWAYS
+            minWidth = 600.0
             cellFragment(DiscoveredRoomFragment::class)
         }
     }

@@ -99,7 +99,7 @@ interface MatrixAccessApi {
                      @Body roomInfo: RoomInfo): Call<EmptyResult>
 
     @GET("publicRooms")
-    fun publicRooms(@Query("since") since: String = "",
+    fun publicRooms(@Query("since") since: String? = null,
                     @Query("limit") limit: Int = 20
     ): Call<RoomBatch<DiscoveredRoom>>
 

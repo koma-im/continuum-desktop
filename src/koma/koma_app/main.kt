@@ -5,7 +5,6 @@ import javafx.event.EventHandler
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import koma.gui.save_win_geometry
-import koma.gui.view.overlay.tooltip.style.TooltipStyle
 import koma_app.appState
 import tornadofx.*
 import view.LoginScreen
@@ -18,7 +17,7 @@ fun main(args: Array<String>) {
 }
 
 
-class KomaApp : App(LoginScreen::class, TooltipStyle::class) {
+class KomaApp : App(LoginScreen::class) {
 
     init {
         Thread.setDefaultUncaughtExceptionHandler(NoAlertErrorHandler())
