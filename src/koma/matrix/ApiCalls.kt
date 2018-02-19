@@ -291,29 +291,13 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-  fun banMember(
-          roomid: RoomId,
-          memId: UserId
-          ): Call<BanRoomResult> = service.banUser(roomid.id, token, MemberBanishment(memId))
+    fun banMember(
+            roomid: RoomId,
+            memId: UserId
+    ): Call<BanRoomResult> = service.banUser(roomid.id, token, MemberBanishment(memId))
 
-  fun leavingRoom(roomid: RoomId): LeaveRoomResult? {
-
-      println("leaving room with id $roomid")
-      val call = service.leaveRoom(roomid, token)
-      val resp: Response<LeaveRoomResult>
-      try {
-          resp = call.execute()
-      } catch(e: Exception) {
-          e.printStackTrace()
-          return null
-      }
-      if (resp.isSuccessful) {
-          return resp.body()
-      } else {
-          println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-          return null
-      }
-  }
+    fun leavingRoom(roomid: RoomId): Call<LeaveRoomResult>
+            = service.leaveRoom(roomid, token)
 
     fun setRoomAlias(roomid: RoomId, alias: String): EmptyResult? {
 
