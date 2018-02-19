@@ -37,7 +37,7 @@ class Room(val id: RoomId) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    val messageManager = MessageManager(id)
+    val messageManager by lazy { MessageManager(id) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
     /**
      * including power levels of members

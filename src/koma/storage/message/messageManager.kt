@@ -23,6 +23,7 @@ class MessageManager(val roomid: RoomId) {
     var continued = false
 
     init {
+        println("Loading messages of room $roomid")
         val _messages: ObservableList<RoomEvent> = FXCollections.observableArrayList<RoomEvent>()
         stitcher = Stitcher(_messages)
         messages = FXCollections.unmodifiableObservableList(_messages)
