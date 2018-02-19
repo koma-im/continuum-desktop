@@ -12,7 +12,8 @@
   * Known media type are auto-loaded, image links are converted to images
   * Koma is going to save you quite a few clicks
 
-* Built-in virtual [emoji keyboard](https://github.com/koma-im/emojipanel)
+* Display Emoji on all OS using [Emoji One](https://github.com/emojione/emojione/)
+  * Built-in virtual emoji keyboard
 
 * Fetch chat history to allow you to read early messages
 
