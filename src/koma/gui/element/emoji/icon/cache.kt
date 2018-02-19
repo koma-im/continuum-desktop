@@ -16,7 +16,7 @@ object EmojiCache: ImgCacheProc({ i -> processEmoji(i) }) {
     }
 }
 
-private fun getEmojiCode(emoji: String): String {
+fun getEmojiCode(emoji: String): String {
     val points = emoji.codePoints().filter {
         it != 0xfe0f && it != 0x200d
         && it != 0x2640 && it != 0x2640
