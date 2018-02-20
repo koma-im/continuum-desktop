@@ -7,11 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
-import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.storage.config.settings.AppSettings
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
 import tornadofx.*
 
 class RoomFinder(joinFun: (String)->Unit): Fragment() {
@@ -48,18 +44,6 @@ class RoomFinder(joinFun: (String)->Unit): Fragment() {
         joinButton.action {
             val rid = this.pubs.roomfield.get()
             joinFun(rid)
-        }
-
-        loadPublicRooms()
-    }
-
-    private fun loadPublicRooms() {
-        val pr = getPublicRooms()
-        launch(JavaFx) {
-            for (room in pr) {
-                publicRoomList.add(room)
-                delay(1000)
-            }
         }
     }
 }
