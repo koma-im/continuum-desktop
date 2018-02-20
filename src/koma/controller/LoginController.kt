@@ -7,8 +7,6 @@ import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
 import koma_app.appState
 import matrix.ApiClient
-import matrix.UserPassword
-import matrix.login
 import matrix.register
 import rx.javafx.kt.observeOnFx
 import rx.schedulers.Schedulers
@@ -16,28 +14,14 @@ import tornadofx.*
 import view.ChatView
 import view.RootLayoutView
 
-data class LoginData(
+private class LoginData(
         val profile: Profile?,
         val serverConf: ServerConf
 )
 
 class LoginController: Controller() {
     init {
-        guiEvents.loginRequests.toObservable().observeOn(Schedulers.io())
-                .map {
-                    val authed = if (it.password == null) {
-                        Profile.new(it.user)
-                    } else {
-                        login(
-                                UserPassword(user = it.user.toString(), password = it.password),
-                                it.serverConf
-                                )
-                    }
-                    LoginData(authed, it.serverConf)
-                }
-                .observeOnFx()
-                .subscribe { postLogin(it) }
-        guiEvents.registerRequests.toObservable().observeOn(Schedulers.io())
+       guiEvents.registerRequests.toObservable().observeOn(Schedulers.io())
                 .map {
                     val user = register(it.usereg, it.serverConf)?.let {
                         Profile(it.user_id, it.access_token)
@@ -48,23 +32,24 @@ class LoginController: Controller() {
                     )
                 }
                 .observeOnFx()
-                .subscribe { postLogin(it) }
+                .subscribe {
+                    if (it.profile == null) {
+                        alert(Alert.AlertType.ERROR, "Register Fail")
+                    } else {
+                        postLogin(it.profile, it.serverConf)
+                    }
+                }
     }
 
-    private fun postLogin(target: LoginData) {
-        val authed = target.profile
-        val userid = authed?.userId
-        if (authed == null || userid == null) {
-            alert(Alert.AlertType.WARNING, "Invalid user-id/password")
-            return
-        }
+    fun postLogin(authedUser: Profile, serverConf: ServerConf) {
+        val userid = authedUser.userId
         saveLastUsed(userid)
 
-        val apiClient = ApiClient(authed, target.serverConf)
+        val apiClient = ApiClient(authedUser, serverConf)
         appState.apiClient = apiClient
-        appState.serverConf = target.serverConf
+        appState.serverConf = serverConf
 
-        val chatview = ChatView(authed)
+        val chatview = ChatView(authedUser)
         val chatctrl = ChatController(apiClient)
         appState.chatController = chatctrl
         val rootView = RootLayoutView(chatctrl)

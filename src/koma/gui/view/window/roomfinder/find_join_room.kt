@@ -30,6 +30,7 @@ class RoomFinder(joinFun: (String)->Unit): Fragment() {
         val joinButton = button("Join")
         pubs = PublicRoomsView(publicRoomList, joinButton)
         root.apply {
+            this.minWidth = 600.0
             vgrow = Priority.ALWAYS
             style {
                 fontSize = AppSettings.scaling.em

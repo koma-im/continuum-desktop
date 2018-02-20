@@ -1,7 +1,6 @@
 package view
 
 import controller.LoginController
-import controller.LoginRequest
 import controller.RegisterRequest
 import controller.guiEvents
 import javafx.collections.FXCollections
@@ -11,6 +10,7 @@ import javafx.scene.control.PasswordField
 import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
+import koma.controller.requests.account.login.doLogin
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.matrix.user.identity.UserId_new
 import koma.matrix.user.identity.isUserIdValid
@@ -102,12 +102,9 @@ class LoginScreen(): View() {
                 }
                 button("Login") {
                     isDefaultButton = true
-                    actionEvents().map { UserId_new(userId.value) }.filterNotNull() .map {
-                        LoginRequest(
-                                it,
-                                if (password.text.isNotEmpty()) password.text else null,
-                                serverConfWithAddr(it.server, serverCombo.editor.text))
-                    }.addTo(guiEvents.loginRequests)
+                    action {
+                        doLogin(userId.value, password.text, serverCombo.editor.text, controller)
+                    }
                 }
             }
         }

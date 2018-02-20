@@ -23,7 +23,6 @@ import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
-import koma.storage.config.server.loadCert
 import koma.storage.config.settings.AppSettings
 import matrix.event.room_message.RoomEventType
 import okhttp3.MediaType
@@ -367,7 +366,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         token = profile.access_token
         userId = profile.userId
 
-        val cb = createClientBuilder(serverConf)
+        val cb = AppHttpClient.builderForServer(serverConf)
         val rb = createRetrofitBuilder()
 
         service = rb.client(cb.tryAddAppCache("matrix-access", 5*1024*1024).build()).build().create(MatrixAccessApi::class.java)
@@ -383,21 +382,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
             val nb = next_batch
             nb?.let { saveSyncBatchToken(userId, it) }
         }
-    }
-
-
-    /**
-     * add proxy and optionally additional trust
-     */
-    private fun createClientBuilder(serverConf: ServerConf): OkHttpClient.Builder {
-        val proxy = AppSettings.getProxy()
-        var cb = OkHttpClient.Builder().proxy(proxy)
-
-        val addtrust = serverConf.loadCert()
-        if (addtrust != null) {
-            cb = cb.sslSocketFactory(addtrust.first.socketFactory, addtrust.second)
-        }
-        return cb
     }
 
     /**
@@ -441,10 +425,9 @@ interface MatrixLoginApi {
 }
 
 fun login(userpass: UserPassword, serverConf: ServerConf):
-        Profile? {
+        Call<AuthedUser> {
     val moshi = Moshi.Builder().add(UserIdAdapter()).build()
-    val proxy = AppSettings.getProxy()
-    val client = OkHttpClient.Builder().proxy(proxy).build()
+    val client = AppHttpClient.builderForServer(serverConf).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
             .client(client)
@@ -452,21 +435,7 @@ fun login(userpass: UserPassword, serverConf: ServerConf):
             .build()
     val service = retrofit.create(MatrixLoginApi::class.java)
     val auth_call: Call<AuthedUser> = service.login(userpass)
-    val authed: retrofit2.Response<AuthedUser> = auth_call.execute()
-    if (authed.isSuccessful) {
-        println("successful login")
-        val user: AuthedUser? = authed.body()
-        user?: return null
-        val prof = Profile(user.user_id, user.access_token)
-        return prof
-    } else{
-        println("error code ${authed.code()}," +
-                "error message ${authed.message()}," +
-                "headers ${authed.headers()}, " +
-                "raw ${authed.raw()} " +
-                "body ${authed.body()}")
-        return null
-    }
+    return auth_call
 }
 
 data class UserRegistering(

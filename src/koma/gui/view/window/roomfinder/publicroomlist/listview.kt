@@ -50,7 +50,6 @@ class RoomListView(roomlist: ObservableList<DiscoveredRoom>): View() {
     init {
         with(root) {
             vgrow = Priority.ALWAYS
-            minWidth = 600.0
             cellFragment(DiscoveredRoomFragment::class)
         }
     }
