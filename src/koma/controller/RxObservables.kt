@@ -1,7 +1,6 @@
 package controller
 
 import javafx.event.ActionEvent
-import koma.matrix.UserId
 import koma.storage.config.server.ServerConf
 import matrix.UserRegistering
 import model.Room
@@ -12,7 +11,6 @@ import rx.javafx.sources.CompositeObservable
  */
 object guiEvents {
     val registerRequests = CompositeObservable<RegisterRequest>()
-    val loginRequests = CompositeObservable<LoginRequest>()
 
     val createRoomRequests = CompositeObservable<ActionEvent>()
     val uploadRoomIconRequests = CompositeObservable<Room>()
@@ -21,12 +19,6 @@ object guiEvents {
 
     val updateAvatar = CompositeObservable<ActionEvent>()
 }
-
-data class LoginRequest(
-        val user: UserId,
-        val password: String?,
-        val serverConf: ServerConf
-)
 
 data class RegisterRequest(
         val usereg: UserRegistering,
