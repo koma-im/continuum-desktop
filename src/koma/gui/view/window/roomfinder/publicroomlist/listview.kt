@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
+import javafx.geometry.Pos
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -15,7 +16,7 @@ import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFra
 import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
-import koma.util.coroutine.adapter.retrofit.getResult
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
@@ -65,7 +66,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
         val api = appState.apiClient
         api ?: return
         launch {
-            val rs = api.resolveRoomAlias(alias).getResult()
+            val rs = api.resolveRoomAlias(alias).awaitMatrix()
             rs.success {
                 joinRoomById(it.room_id)
             }
@@ -74,6 +75,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
                     Notifications.create()
                             .owner(this@PublicRoomsView.ui)
                             .title("Failed to resolve room alias $alias")
+                            .position(Pos.CENTER)
                             .text(it.message)
                             .showWarning()
                 }
