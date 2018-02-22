@@ -3,9 +3,12 @@ package koma.gui.view.window.roomfinder.publicroomlist.listcell
 import domain.DiscoveredRoom
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
+import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
+import koma.controller.requests.membership.joinRoomById
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import tornadofx.*
@@ -36,32 +39,44 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
 
     override val root = hbox(spacing = 10.0) {
         add(avatar)
-        vbox  {
-            minWidth = 1.0
-            prefWidth = 1.0
+        stackpane {
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
-            hbox(9.0) {
-                text(droom.displayName) {
-                    style {
-                        fontWeight = FontWeight.EXTRA_BOLD
+            vbox {
+                minWidth = 1.0
+                prefWidth = 1.0
+                hgrow = Priority.ALWAYS
+                vgrow = Priority.ALWAYS
+                hbox(9.0) {
+                    label(droom.displayName) {
+                        style {
+                            fontWeight = FontWeight.EXTRA_BOLD
+                        }
+                    }
+                    label("World Readable") { removeWhen { droom.world_read.toBinding().not() } }
+                    label("Guest Joinable") { removeWhen { droom.guest.toBinding().not() } }
+                    text("Members: ") { style { opacity = 0.5 } }
+                    text() {
+                        textProperty().bind(stringBinding(droom.n_mems) { "$value" })
                     }
                 }
-                label("World Readable") { removeWhen { droom.world_read.toBinding().not() }}
-                label("Guest Joinable") { removeWhen { droom.guest.toBinding().not() }}
-                text("Members: ") { style { opacity = 0.5}}
-                text() {
-                    textProperty().bind(stringBinding(droom.n_mems) { "$value"})
+                val topicLess = booleanBinding(droom.topic) { value?.isEmpty() ?: true }
+                text(droom.topic) { removeWhen { topicLess } }
+                val aliases = stringBinding(droom.aliases) { value?.joinToString(", ") }
+                label() {
+                    textProperty().bind(aliases)
+                    style {
+                        opacity = 0.6
+                    }
                 }
             }
-            val topicLess = booleanBinding(droom.topic) { value?.isEmpty() ?: true }
-            text(droom.topic) { removeWhen { topicLess }}
-            val aliases = stringBinding(droom.aliases) { value?.joinToString(", ")}
-            label() {
-                textProperty().bind(aliases)
-                style {
-                    opacity = 0.6
+            stackpane {
+                AnchorPane.setRightAnchor(this, 10.0)
+                button("Join") {
+                    visibleWhen { this@stackpane.hoverProperty() }
+                    action { joinRoomById(droom.room_id.value) }
                 }
+                alignment = Pos.CENTER_RIGHT
             }
         }
     }
