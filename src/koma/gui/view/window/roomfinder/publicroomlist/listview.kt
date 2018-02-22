@@ -46,6 +46,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
         input.bind(field.textProperty())
         ui.apply {
             hbox(5.0) {
+                alignment = Pos.CENTER_LEFT
                 label("Filter:")
                 add(field)
                 button("Join by Room Alias") {
