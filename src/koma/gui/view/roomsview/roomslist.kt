@@ -5,6 +5,7 @@ import javafx.beans.property.Property
 import javafx.scene.control.Alert
 import javafx.scene.layout.HBox
 import koma_app.appState
+import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import model.Room
 import ru.gildor.coroutines.retrofit.Result
@@ -27,9 +28,11 @@ fun addMenu(node: HBox, room: Property<Room>) {
                     val result = api.leavingRoom(mxroom.id).awaitResult()
                     when(result) {
                         is Result.Error, is Result.Exception -> {
-                            alert(Alert.AlertType.ERROR,
-                                    "Error while leaving room ${roomname}",
-                                    result.toString())
+                            launch(JavaFx) {
+                                alert(Alert.AlertType.ERROR,
+                                        "Error while leaving room ${roomname}",
+                                        result.toString())
+                            }
                         }
                     }
                 }
