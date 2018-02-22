@@ -24,6 +24,7 @@ import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
 import tornadofx.*
+import java.util.concurrent.ConcurrentHashMap
 
 class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
 
@@ -91,7 +92,13 @@ class RoomListView(private val roomlist: ObservableList<DiscoveredRoom>): View()
     private val percent = SimpleDoubleProperty()
     private val publicRoomSrc = getPublicRooms()
 
+    private val existing = ConcurrentHashMap.newKeySet<String>()
+
     init {
+        appState.apiClient?.let {
+            val rooms=it.profile.roomStore.roomList.map { it.id.id }
+            existing.addAll(rooms)
+        }
         with(root) {
             vgrow = Priority.ALWAYS
             cellFragment(DiscoveredRoomFragment::class)
@@ -111,8 +118,10 @@ class RoomListView(private val roomlist: ObservableList<DiscoveredRoom>): View()
         var added = 0
         launch(JavaFx) {
             for (room in publicRoomSrc) {
-                roomlist.add(room)
-                added += 1
+                if (existing.add(room.room_id)) {
+                    roomlist.add(room)
+                    added += 1
+                }
                 if (added > 10) break
             }
         }

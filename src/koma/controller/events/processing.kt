@@ -6,10 +6,11 @@ import koma.matrix.epemeral.parse
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
-import koma_app.appState
+import koma.storage.config.profile.Profile
 import koma_app.appState.sortMembersInEachRoom
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
+import matrix.room.LeftRoom
 
 
 fun process_presence(message: PresenceMessage) {
@@ -21,9 +22,8 @@ fun process_presence(message: PresenceMessage) {
     }
 }
 
-private fun handle_joined_room(roomid: RoomId, data: JoinedRoom) {
-    val roomStore= appState.apiClient?.profile?.roomStore!!
-    val room = roomStore.add(roomid)
+private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
+    val room = this.roomStore.add(roomid)
 
     data.state.events.forEach { room.applyUpdate(it) }
     val timeline = data.timeline
@@ -34,15 +34,20 @@ private fun handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     // TODO:  account_data
 }
 
+private fun Profile.leaveLeftRooms(roomid: RoomId, leftRoom: LeftRoom) {
+    this.roomStore.remove(roomid)
+}
+
 private fun handle_invited_room(roomid: String, data: InvitedRoom) {
     println("TODO: handle room invitation $data")
 }
 
-fun processEventsResult(syncRes: SyncResponse) {
+fun Profile.processEventsResult(syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
-    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(RoomId(rid), data)}
+    syncRes.rooms.join.forEach{ rid, data -> this.handle_joined_room(RoomId(rid), data)}
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data)}
+    syncRes.rooms.leave.forEach { id, leftroom -> this.leaveLeftRooms(RoomId(id), leftroom) }
     // there's also left rooms
 
     sortMembersInEachRoom()

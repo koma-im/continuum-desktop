@@ -15,6 +15,7 @@ import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
+import koma.matrix.room.naming.RoomIdAdapter
 import koma.matrix.sync.SyncResponse
 import koma.network.client.okhttp.AppHttpClient
 import koma.network.client.okhttp.tryAddAppCache
@@ -377,6 +378,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     private fun createRetrofitBuilder(): Retrofit.Builder {
         val moshi = Moshi.Builder()
                 .add(UserIdAdapter())
+                .add(RoomIdAdapter())
                 .add(RoomAliasAdapter())
                 .add(getPolyMessageAdapter())
                 .add(getPolyRoomEventAdapter())

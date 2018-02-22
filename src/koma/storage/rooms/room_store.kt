@@ -24,12 +24,7 @@ class UserRoomStore {
 
     @Synchronized
     fun remove(roomId: RoomId) {
-        for ((index, value) in roomList.withIndex()) {
-            if (value.id == roomId) {
-                roomList.removeAt(index)
-                break;
-            }
-        }
+        roomList.removeIf { it.id == roomId }
     }
 }
 

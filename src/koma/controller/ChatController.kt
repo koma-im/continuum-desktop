@@ -124,7 +124,7 @@ class ChatController(
         val syncEventChannel = startSyncing(start, shutdownSignalChan)
         launch(JavaFx) {
             for (s in syncEventChannel) {
-                processEventsResult(s)
+                apiClient.profile.processEventsResult(s)
             }
         }
     }
