@@ -336,22 +336,9 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-    fun resolveRoomAlias(roomAlias: String): ResolveRoomAliasResult? {
-        println("resolving room alias $roomAlias")
+    fun resolveRoomAlias(roomAlias: String): Call<ResolveRoomAliasResult> {
         val call: Call<ResolveRoomAliasResult> = service.resolveRoomAlias(roomAlias)
-        val resp: Response<ResolveRoomAliasResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
+        return call
     }
 
     fun sendRoomMessage(roomId: RoomId, message: M_Message): Call<SendResult> {
