@@ -1,27 +1,34 @@
 package koma.gui.view.window.roomfinder.publicroomlist
 
+import com.github.kittinunf.result.failure
+import com.github.kittinunf.result.success
 import domain.DiscoveredRoom
 import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
-import javafx.scene.Node
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.controller.requests.membership.joinRoomById
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.matrix.publicapi.rooms.getPublicRooms
+import koma.matrix.room.naming.canBeValidRoomAlias
+import koma.matrix.room.naming.canBeValidRoomId
+import koma.util.coroutine.adapter.retrofit.getResult
+import koma_app.appState
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
-import rx.javafx.kt.toObservable
-import rx.lang.kotlin.filterNotNull
+import org.controlsfx.control.Notifications
+import org.controlsfx.control.textfield.CustomTextField
+import org.controlsfx.control.textfield.TextFields
 import tornadofx.*
 
-class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>, val joinButton: Node) {
+class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
 
-    val ui = VBox()
+    val ui = VBox(5.0)
 
-    lateinit var roomfield: StringProperty
+    val input  = SimpleStringProperty()
 
     init {
         createui()
@@ -29,23 +36,48 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>, val jo
     }
 
     private fun createui() {
+        val inputIsAlias = booleanBinding(input) {
+            value?.let { canBeValidRoomAlias(it)} ?: false }
+        val inputIsId = booleanBinding(input) {
+            value?.let { canBeValidRoomId(it)  } ?: false }
+        val field = TextFields.createClearableTextField() as CustomTextField
+        field.promptText = "#example:matrix.org"
+        input.bind(field.textProperty())
         ui.apply {
-            hbox {
-                label("Room")
-                textfield() {
-                    roomfield = textProperty()
-                    textProperty().addListener({ _, _, newValue ->
-                        joinButton.setDisable(newValue.trim().isEmpty())
-                    })
+            hbox(5.0) {
+                label("Filter:")
+                add(field)
+                button("Join by Room Alias") {
+                    removeWhen { inputIsAlias.not() }
+                    action { joinRoomByAlias(input.get()) }
+                }
+                button("Join by Room Id") {
+                    removeWhen { inputIsId.not() }
+                    action { joinRoomById(input.get()) }
                 }
             }
             val roomlist = RoomListView(publicRoomList)
-            roomlist.root.selectionModel.selectedItemProperty().toObservable()
-                    .filterNotNull() // when nothing's selected
-                    .subscribe {
-                        roomfield.set(it.room_id)
-                    }
             this+=roomlist
+        }
+    }
+
+    private fun joinRoomByAlias(alias: String) {
+        val api = appState.apiClient
+        api ?: return
+        launch {
+            val rs = api.resolveRoomAlias(alias).getResult()
+            rs.success {
+                joinRoomById(it.room_id)
+            }
+            rs.failure {
+                launch(JavaFx) {
+                    Notifications.create()
+                            .owner(this@PublicRoomsView.ui)
+                            .title("Failed to resolve room alias $alias")
+                            .text(it.message)
+                            .showWarning()
+                }
+            }
         }
     }
 }

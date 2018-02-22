@@ -1,17 +1,17 @@
 package koma.controller.requests.membership
 
 import javafx.scene.control.Alert
+import koma.gui.view.window.roomfinder.RoomFinder
 import koma.matrix.room.naming.RoomId
 import koma_app.appState.apiClient
 import kotlinx.coroutines.experimental.launch
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
 import tornadofx.*
-import koma.gui.view.window.roomfinder.RoomFinder
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
 fun ask_join_room() {
-    val dialog = RoomFinder({ r -> joinRoomById(r)})
+    val dialog = RoomFinder()
     dialog.open()
 }
 

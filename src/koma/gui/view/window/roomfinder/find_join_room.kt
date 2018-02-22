@@ -10,7 +10,7 @@ import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
-class RoomFinder(joinFun: (String)->Unit): Fragment() {
+class RoomFinder(): Fragment() {
     override val root = VBox(5.0)
 
     private val publicRoomList: ObservableList<DiscoveredRoom> = FXCollections.observableArrayList<DiscoveredRoom>()
@@ -23,8 +23,7 @@ class RoomFinder(joinFun: (String)->Unit): Fragment() {
 
     init {
         this.title = "Room finder"
-        val joinButton = button("Join")
-        pubs = PublicRoomsView(publicRoomList, joinButton)
+        pubs = PublicRoomsView(publicRoomList)
         root.apply {
             this.minWidth = 600.0
             vgrow = Priority.ALWAYS
@@ -32,18 +31,6 @@ class RoomFinder(joinFun: (String)->Unit): Fragment() {
                 fontSize = AppSettings.scaling.em
             }
             add(pubs.ui)
-            buttonbar {
-                add(joinButton)
-                button("Cancel") {
-                    action { stage?.close() }
-                }
-            }
-        }
-
-        joinButton.setDisable(true)
-        joinButton.action {
-            val rid = this.pubs.roomfield.get()
-            joinFun(rid)
         }
     }
 }
