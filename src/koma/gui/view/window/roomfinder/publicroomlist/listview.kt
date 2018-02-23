@@ -51,6 +51,8 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
     fun clean() = roomlist.clean()
 
     private fun createui(field: CustomTextField) {
+        val inputStartAlias = booleanBinding(input) { value?.startsWith('#') ?: false }
+        val inputStartId = booleanBinding(input) { value?.startsWith('!') ?: false }
         val inputIsAlias = booleanBinding(input) {
             value?.let { canBeValidRoomAlias(it)} ?: false }
         val inputIsId = booleanBinding(input) {
@@ -62,11 +64,13 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
                 label("Filter:")
                 add(field)
                 button("Join by Room Alias") {
-                    removeWhen { inputIsAlias.not() }
+                    removeWhen { inputStartAlias.not() }
+                    enableWhen { inputIsAlias }
                     action { joinRoomByAlias(input.get()) }
                 }
                 button("Join by Room Id") {
-                    removeWhen { inputIsId.not() }
+                    removeWhen { inputStartId.not() }
+                    enableWhen { inputIsId }
                     action {
                         val inputid = input.get()
                         joinById(RoomId(inputid), inputid, this) }
@@ -147,6 +151,9 @@ class RoomListView(
         // all rooms unfiltered
         if (term.isBlank()) {
             matchRooms.predicate = null
+            return
+        }
+        if (term.startsWith('#') || term.startsWith('!')) {
             return
         }
         filterTerm = term
