@@ -10,7 +10,7 @@ fun canBeValidRoomId(input: String): Boolean {
 }
 
 
-data class RoomId(val id: String) {
+data class RoomId(val id: String): Comparable<RoomId> {
     val localstr by lazy {
         id.substringAfter('!').substringBefore(':')
     }
@@ -23,6 +23,8 @@ data class RoomId(val id: String) {
     }
 
     override fun toString() = id
+
+    override fun compareTo(other: RoomId): Int = this.id.compareTo(other.id)
 }
 
 class RoomIdAdapter {

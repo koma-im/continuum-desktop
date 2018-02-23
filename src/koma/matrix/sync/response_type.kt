@@ -1,5 +1,6 @@
 package koma.matrix.sync
 
+import koma.matrix.room.naming.RoomId
 import koma.matrix.user.presence.PresenceMessage
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
@@ -19,5 +20,5 @@ data class SyncResponse(
 data class RoomsResponse(
         val join: Map<String, JoinedRoom>,
         val invite: Map<String, InvitedRoom>,
-        val leave: Map<String, LeftRoom>
+        val leave: Map<RoomId, LeftRoom>
 )

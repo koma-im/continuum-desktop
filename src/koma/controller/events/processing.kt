@@ -11,6 +11,7 @@ import koma_app.appState.sortMembersInEachRoom
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
 import matrix.room.LeftRoom
+import model.Room
 
 
 fun process_presence(message: PresenceMessage) {
@@ -23,7 +24,7 @@ fun process_presence(message: PresenceMessage) {
 }
 
 private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
-    val room = this.roomStore.add(roomid)
+    val room = this.joinRoom(roomid)
 
     data.state.events.forEach { room.applyUpdate(it) }
     val timeline = data.timeline
@@ -32,6 +33,11 @@ private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
 
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data
+}
+
+fun Profile.joinRoom(roomid: RoomId): Room {
+    val room = this.roomStore.add(roomid)
+    return room
 }
 
 private fun Profile.leaveLeftRooms(roomid: RoomId, leftRoom: LeftRoom) {
@@ -47,7 +53,7 @@ fun Profile.processEventsResult(syncRes: SyncResponse) {
     // TODO: handle account_data
     syncRes.rooms.join.forEach{ rid, data -> this.handle_joined_room(RoomId(rid), data)}
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data)}
-    syncRes.rooms.leave.forEach { id, leftroom -> this.leaveLeftRooms(RoomId(id), leftroom) }
+    syncRes.rooms.leave.forEach { id, leftroom -> this.leaveLeftRooms(id, leftroom) }
     // there's also left rooms
 
     sortMembersInEachRoom()

@@ -60,7 +60,7 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
                     break@sync
                 }
                 is SyncStatus.TransientFailure -> {
-                    System.err.println("restarting sync after ${ss.delay} because ${ss.message}")
+                    System.err.println("restarting sync after ${ss.delay} because ${ss.exception}")
                     delay(ss.delay)
                 }
                 is SyncStatus.Response -> {
