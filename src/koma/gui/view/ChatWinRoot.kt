@@ -3,9 +3,9 @@ package view
 import controller.ChatController
 import controller.guiEvents
 import koma.controller.requests.membership.ask_invite_member
-import koma.controller.requests.membership.ask_join_room
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.gui.view.window.preferences.PreferenceWindow
+import koma.gui.view.window.roomfinder.RoomFinder
 import koma.storage.config.settings.AppSettings
 import rx.javafx.kt.actionEvents
 import rx.javafx.kt.addTo
@@ -27,7 +27,7 @@ class RootLayoutView(val controller: ChatController): View() {
                     item("Create Room").actionEvents().addTo(
                             guiEvents.createRoomRequests)
                     item("Join Room") {
-                        action { ask_join_room() }
+                        action { RoomFinder().open() }
                     }
                     item("Preferences").action {
                         find(PreferenceWindow::class).openModal()

@@ -22,12 +22,12 @@ data class DiscoveredRoom(
         val guest_can_join: Boolean,
         val name: String?,
         val num_joined_members: Int,
-        val room_id: String,
+        val room_id: RoomId,
         val topic: String?,
         val world_readable: Boolean
 ) {
     fun dispName(): String{
-        val n = name ?: aliases?.getOrNull(0)?.full ?: room_id
+        val n = name ?: aliases?.getOrNull(0)?.full ?: room_id.localstr
         return n
     }
 

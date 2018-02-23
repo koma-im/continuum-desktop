@@ -64,7 +64,7 @@ data class MemberBanishment(val user_id: UserId)
 class BanRoomResult()
 
 data class ResolveRoomAliasResult(
-        val room_id: String,
+        val room_id: RoomId,
         val servers: List<String>
 )
 
