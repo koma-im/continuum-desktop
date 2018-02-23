@@ -2,6 +2,7 @@ package domain
 
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.naming.RoomId
 
 /**
@@ -16,7 +17,7 @@ data class Chunked<T>(
 )
 
 data class DiscoveredRoom(
-        val aliases: List<String>?,
+        val aliases: List<RoomAlias>?,
         val avatar_url: String?,
         val guest_can_join: Boolean,
         val name: String?,
@@ -26,13 +27,26 @@ data class DiscoveredRoom(
         val world_readable: Boolean
 ) {
     fun dispName(): String{
-        val n = name ?: aliases?.getOrNull(0) ?: room_id
+        val n = name ?: aliases?.getOrNull(0)?.full ?: room_id
         return n
     }
 
     fun aliasesProperty(): SimpleListProperty<String> {
-        val l = aliases ?: listOf()
+        val l = aliases?.map { it.full } ?: listOf()
         return SimpleListProperty(FXCollections.observableArrayList(l))
+    }
+
+    fun containsTerms(terms: List<String>): Boolean {
+        fun String.containsAll(ss: List<String>): Boolean {
+            return ss.all { this.contains(it, ignoreCase = true) }
+        }
+        if (this.aliases?.any {
+                    // exclude the server name part, such as matrix.org
+                    it.alias.containsAll(terms)
+                } == true) return true
+        if (this.name?.containsAll(terms) == true) return true
+        if (this.topic?.containsAll(terms) == true) return true
+        return false
     }
 }
 

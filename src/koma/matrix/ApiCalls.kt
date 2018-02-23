@@ -13,6 +13,7 @@ import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
+import koma.matrix.publicapi.rooms.RoomDirectoryQuery
 import koma.matrix.room.naming.RoomAliasAdapter
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.RoomIdAdapter
@@ -102,6 +103,13 @@ interface MatrixAccessApi {
     fun publicRooms(@Query("since") since: String? = null,
                     @Query("limit") limit: Int = 20
     ): Call<RoomBatch<DiscoveredRoom>>
+
+    @POST("publicRooms")
+    fun findPublicRooms(
+            @Query("access_token") token: String,
+            @Body query: RoomDirectoryQuery
+    ): Call<RoomBatch<DiscoveredRoom>>
+
 
 
     @GET("rooms/{roomId}/messages")
@@ -346,6 +354,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         println("sending message $message to room $roomId ")
         return service.sendMessageEvent(roomId, RoomEventType.Message, getTxnId(), token, message)
     }
+
+    fun findPublicRooms(query: RoomDirectoryQuery) = service.findPublicRooms(token, query)
 
     fun getEvents(from: String?): Call<SyncResponse>
             = longPollService.getEvents(from, token)
