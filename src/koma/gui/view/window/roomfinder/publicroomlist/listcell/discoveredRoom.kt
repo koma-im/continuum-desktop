@@ -42,7 +42,7 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
 
     init {
         val color = SimpleObjectProperty<Color>()
-        color.bind(objectBinding(droom.room_id) { hashStringColorDark( value)} )
+        color.bind(objectBinding(droom.room_id) { value ?.let { hashStringColorDark( it.id)}} )
         avatar = AvatarAlways(droom.avatar_url, droom.displayName, color)
         with(root) { setUpCell() }
     }
@@ -84,7 +84,7 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
                 AnchorPane.setRightAnchor(this, 10.0)
                 button("Join") {
                     visibleWhen { this@stackpane.hoverProperty() }
-                    action { joinById(droom, root) }
+                    action { joinById(droom.room_id.value, droom.displayName.value, root) }
                 }
                 alignment = Pos.CENTER_RIGHT
             }
@@ -92,10 +92,9 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
     }
 }
 
-private fun joinById(roomItemModel: DiscoveredRoomItemModel, owner: Node) {
+fun joinById(roomid: RoomId, name: String, owner: Node) {
     val api = appState.apiClient
     api ?: return
-    val roomid = RoomId(roomItemModel.room_id.value)
     launch {
         val rs = api.joinRoom(roomid).awaitMatrix()
         rs.success {
@@ -105,7 +104,7 @@ private fun joinById(roomItemModel: DiscoveredRoomItemModel, owner: Node) {
             launch(JavaFx) {
                 Notifications.create()
                         .owner(owner)
-                        .title("Failed to join room ${roomItemModel.displayName.value}")
+                        .title("Failed to join room ${name}")
                         .position(Pos.CENTER)
                         .text(it.message)
                         .showWarning()

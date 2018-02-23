@@ -13,10 +13,11 @@ import javafx.geometry.Pos
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.controller.requests.membership.joinRoomById
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
+import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.matrix.publicapi.rooms.findPublicRooms
 import koma.matrix.publicapi.rooms.getPublicRooms
+import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
@@ -66,7 +67,9 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
                 }
                 button("Join by Room Id") {
                     removeWhen { inputIsId.not() }
-                    action { joinRoomById(input.get()) }
+                    action {
+                        val inputid = input.get()
+                        joinById(RoomId(inputid), inputid, this) }
                 }
             }
             this+=roomlist
@@ -79,7 +82,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
         launch {
             val rs = api.resolveRoomAlias(alias).awaitMatrix()
             rs.success {
-                joinRoomById(it.room_id)
+                joinById(it.room_id, alias, this@PublicRoomsView.ui )
             }
             rs.failure {
                 launch(JavaFx) {
@@ -113,11 +116,11 @@ class RoomListView(
     private var curRoomSrc = getRoomSource(filterTerm)
 
     // rooms already joined by user or loaded in room finder
-    private val existing = ConcurrentHashMap.newKeySet<String>()
+    private val existing = ConcurrentHashMap.newKeySet<RoomId>()
 
     init {
         appState.apiClient?.let {
-            val rooms=it.profile.roomStore.roomList.map { it.id.id }
+            val rooms=it.profile.roomStore.roomList.map { it.id }
             existing.addAll(rooms)
         }
         with(root) {
