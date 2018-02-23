@@ -5,7 +5,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.stage.Stage
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.storage.config.settings.AppSettings
 import tornadofx.*
@@ -15,10 +14,14 @@ class RoomFinder(): Fragment() {
 
     private val publicRoomList: ObservableList<DiscoveredRoom> = FXCollections.observableArrayList<DiscoveredRoom>()
     val pubs: PublicRoomsView
-    var stage: Stage? = null
 
     fun open() {
-        stage = this.openWindow()
+        val s = this.openWindow()
+        s ?: return
+        s.setOnHidden {
+            // cleaning up
+            pubs.clean()
+        }
     }
 
     init {

@@ -3,9 +3,11 @@ package koma.gui.view.window.roomfinder.publicroomlist
 import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
 import domain.DiscoveredRoom
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.collections.ObservableList
+import javafx.collections.transformation.FilteredList
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.control.ScrollBar
@@ -13,11 +15,14 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.controller.requests.membership.joinRoomById
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
+import koma.matrix.publicapi.rooms.findPublicRooms
 import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
+import kotlinx.coroutines.experimental.channels.ProducerJob
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import org.controlsfx.control.Notifications
@@ -25,26 +30,31 @@ import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
 import tornadofx.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.function.Predicate
 
 class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
 
     val ui = VBox(5.0)
 
-    val input  = SimpleStringProperty()
+    val input: StringProperty
+    private val roomlist: RoomListView
 
     init {
-        createui()
+        val field = TextFields.createClearableTextField() as CustomTextField
+        input = field.textProperty()
+        roomlist = RoomListView(publicRoomList, input)
+        createui(field)
         ui.vgrow = Priority.ALWAYS
     }
 
-    private fun createui() {
+    fun clean() = roomlist.clean()
+
+    private fun createui(field: CustomTextField) {
         val inputIsAlias = booleanBinding(input) {
             value?.let { canBeValidRoomAlias(it)} ?: false }
         val inputIsId = booleanBinding(input) {
             value?.let { canBeValidRoomId(it)  } ?: false }
-        val field = TextFields.createClearableTextField() as CustomTextField
         field.promptText = "#example:matrix.org"
-        input.bind(field.textProperty())
         ui.apply {
             hbox(5.0) {
                 alignment = Pos.CENTER_LEFT
@@ -59,7 +69,6 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
                     action { joinRoomById(input.get()) }
                 }
             }
-            val roomlist = RoomListView(publicRoomList)
             this+=roomlist
         }
     }
@@ -86,12 +95,24 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
     }
 }
 
-class RoomListView(private val roomlist: ObservableList<DiscoveredRoom>): View() {
-    override val root = listview(roomlist)
+class RoomListView(
+        private val roomlist: ObservableList<DiscoveredRoom>,
+        private val input: StringProperty
+): View() {
+    private val matchRooms = FilteredList(roomlist)
 
+    override val root = listview(matchRooms)
+
+    // whether displayed rooms don't fill a screen
+    private val enoughRooms = SimpleBooleanProperty(false)
+    // scroll bar position
     private val percent = SimpleDoubleProperty()
-    private val publicRoomSrc = getPublicRooms()
+    private val roomSources= ConcurrentHashMap<String, RoomListingSource>()
 
+    private var filterTerm = ""
+    private var curRoomSrc = getRoomSource(filterTerm)
+
+    // rooms already joined by user or loaded in room finder
     private val existing = ConcurrentHashMap.newKeySet<String>()
 
     init {
@@ -106,25 +127,64 @@ class RoomListView(private val roomlist: ObservableList<DiscoveredRoom>): View()
         root.skinProperty().addListener { _o ->
             val scrollBar = findScrollBar()
             if (scrollBar != null) {
-                scrollBar.valueProperty().divide(scrollBar.maxProperty())
-                percent.bind(scrollBar.valueProperty())
+                enoughRooms.bind(scrollBar.visibleProperty())
+                percent.bind(scrollBar.valueProperty().divide(scrollBar.maxProperty()))
             }
         }
-        loadMoreRooms()
-        percent.onChange { if (it > 0.78) loadMoreRooms() }
+        loadMoreRooms(10)
+        percent.onChange { if (it > 0.78) loadMoreRooms(10) }
+        input.addListener { _, _, newValue -> if (newValue != null) updateFilter(newValue.trim()) }
     }
 
-    private fun loadMoreRooms() {
+    fun clean() {
+        roomSources.forEach { _, r -> r.produce.cancel() }
+    }
+
+    private fun updateFilter(term: String) {
+        // all rooms unfiltered
+        if (term.isBlank()) {
+            matchRooms.predicate = null
+            return
+        }
+        filterTerm = term
+        val words = term.split(' ')
+        matchRooms.predicate = Predicate { r: DiscoveredRoom ->
+            r.containsTerms(words)
+        }
+        launch {
+            delay(500)
+            if (filterTerm == term) {
+                curRoomSrc = getRoomSource(filterTerm)
+                launch(JavaFx) {
+                    for (room in curRoomSrc.produce) {
+                        if (existing.add(room.room_id)) roomlist.add(room)
+                        if (enoughRooms.get()) break
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadMoreRooms(upto: Int) {
         var added = 0
         launch(JavaFx) {
-            for (room in publicRoomSrc) {
+            for (room in curRoomSrc.produce) {
                 if (existing.add(room.room_id)) {
                     roomlist.add(room)
                     added += 1
                 }
-                if (added > 10) break
+                if (added >= upto) break
             }
         }
+    }
+
+    private fun getRoomSource(term: String): RoomListingSource {
+        return roomSources.computeIfAbsent(term.trim(), {
+            if (it.isBlank())
+                RoomListingSource("", getPublicRooms())
+            else
+                RoomListingSource(it, findPublicRooms(it))
+        })
     }
 
     private fun findScrollBar(): ScrollBar? {
@@ -138,5 +198,15 @@ class RoomListView(private val roomlist: ObservableList<DiscoveredRoom>): View()
         }
         System.err.println("failed to find scrollbar of listview")
         return null
+    }
+}
+
+private class RoomListingSource(
+        val term: String,
+        val produce: ProducerJob<DiscoveredRoom>
+) {
+    override fun toString(): String {
+        return if (term.isBlank()) "Listing for all public rooms"
+        else "Listing for rooms with term $term"
     }
 }
