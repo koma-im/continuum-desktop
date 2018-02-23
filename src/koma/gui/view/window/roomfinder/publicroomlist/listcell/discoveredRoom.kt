@@ -1,16 +1,25 @@
 package koma.gui.view.window.roomfinder.publicroomlist.listcell
 
+import com.github.kittinunf.result.failure
+import com.github.kittinunf.result.success
 import domain.DiscoveredRoom
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import koma.controller.requests.membership.joinRoomById
+import koma.controller.events_processing.joinRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.matrix.room.naming.RoomId
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma_app.appState
+import kotlinx.coroutines.experimental.javafx.JavaFx
+import kotlinx.coroutines.experimental.launch
+import org.controlsfx.control.Notifications
 import tornadofx.*
 
 class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
@@ -27,7 +36,7 @@ class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
 }
 
 class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
-
+    override val root = hbox(spacing = 10.0)
     val droom = DiscoveredRoomItemModel(itemProperty)
     private val avatar: AvatarAlways
 
@@ -35,9 +44,10 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
         val color = SimpleObjectProperty<Color>()
         color.bind(objectBinding(droom.room_id) { hashStringColorDark( value)} )
         avatar = AvatarAlways(droom.avatar_url, droom.displayName, color)
+        with(root) { setUpCell() }
     }
 
-    override val root = hbox(spacing = 10.0) {
+    private fun setUpCell(){
         add(avatar)
         stackpane {
             hgrow = Priority.ALWAYS
@@ -74,9 +84,31 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
                 AnchorPane.setRightAnchor(this, 10.0)
                 button("Join") {
                     visibleWhen { this@stackpane.hoverProperty() }
-                    action { joinRoomById(droom.room_id.value) }
+                    action { joinById(droom, root) }
                 }
                 alignment = Pos.CENTER_RIGHT
+            }
+        }
+    }
+}
+
+private fun joinById(roomItemModel: DiscoveredRoomItemModel, owner: Node) {
+    val api = appState.apiClient
+    api ?: return
+    val roomid = RoomId(roomItemModel.room_id.value)
+    launch {
+        val rs = api.joinRoom(roomid).awaitMatrix()
+        rs.success {
+            launch(JavaFx) { api.profile.joinRoom(roomid) }
+        }
+        rs.failure {
+            launch(JavaFx) {
+                Notifications.create()
+                        .owner(owner)
+                        .title("Failed to join room ${roomItemModel.displayName.value}")
+                        .position(Pos.CENTER)
+                        .text(it.message)
+                        .showWarning()
             }
         }
     }

@@ -22,12 +22,13 @@ class RoomFinder(): Fragment() {
     }
 
     init {
-        this.title = "Room finder"
+        this.title = "Room Finder"
         pubs = PublicRoomsView(publicRoomList)
         root.apply {
             this.minWidth = 600.0
             vgrow = Priority.ALWAYS
             style {
+                paddingAll = 10
                 fontSize = AppSettings.scaling.em
             }
             add(pubs.ui)
