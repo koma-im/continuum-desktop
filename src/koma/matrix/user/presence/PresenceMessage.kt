@@ -24,7 +24,7 @@ data class PresenceMessageContent (
     val displayname: String? = null,
     val last_active_ago: Long?,
     val presence: UserPresenceType,
-    val user_id: String?
+    val user_id: UserId?
     )
 
 enum class UserPresenceType {

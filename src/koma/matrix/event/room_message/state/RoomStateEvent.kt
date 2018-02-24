@@ -1,18 +1,19 @@
 package koma.matrix.event.room_message.state
 
 import koma.matrix.UserId
+import koma.matrix.event.EventId
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.member.PrevContent
 import koma.matrix.event.room_message.state.member.RoomMemberContent
 import koma.matrix.event.room_message.state.member.RoomMemberUnsigned
 import koma.matrix.event.room_message.state.member.StrippedState
 
-sealed class RoomStateEvent(event_id: String, origin_server_ts: Long): RoomEvent(event_id, origin_server_ts)
+sealed class RoomStateEvent(event_id: EventId, origin_server_ts: Long): RoomEvent(event_id, origin_server_ts)
 
 class MRoomAliases(
         //val age: Long?,
         origin_server_ts: Long,
-        event_id: String,
+        event_id: EventId,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
         val state_key: String,
@@ -20,7 +21,7 @@ class MRoomAliases(
 }
 class MRoomCanonAlias(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -30,7 +31,7 @@ class MRoomCanonAlias(
 
 class MRoomCreate(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -40,7 +41,7 @@ class MRoomCreate(
 
 class MRoomJoinRule(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -50,7 +51,7 @@ class MRoomJoinRule(
 
 class MRoomMember(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: PrevContent?,
         val sender: UserId,
@@ -62,7 +63,7 @@ class MRoomMember(
 
 class MRoomPowerLevels(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -71,7 +72,7 @@ class MRoomPowerLevels(
 
 class MRoomPinnedEvents(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -82,7 +83,7 @@ class MRoomPinnedEvents(
 
 class MRoomTopic(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -92,7 +93,7 @@ class MRoomTopic(
 
 class MRoomName(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -102,7 +103,7 @@ class MRoomName(
 
 class MRoomAvatar(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -112,7 +113,7 @@ class MRoomAvatar(
 
 class MRoomHistoryVisibility(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -122,7 +123,7 @@ class MRoomHistoryVisibility(
 
 class MRoomGuestAccess(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,

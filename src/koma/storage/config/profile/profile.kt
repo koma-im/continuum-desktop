@@ -4,8 +4,8 @@ import com.squareup.moshi.Moshi
 import javafx.collections.ObservableList
 import koma.koma_app.SaveJobs
 import koma.matrix.UserId
+import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.room.naming.RoomId
-import koma.matrix.room.naming.RoomIdAdapter
 import koma.storage.rooms.UserRoomStore
 import model.Room
 import java.io.File
@@ -57,7 +57,7 @@ private fun loadUserState(userId: UserId): SavedUserState? {
     dir?:return null
     val file = File(dir).resolve(userProfileFilename)
     val jsonAdapter = Moshi.Builder()
-            .add(RoomIdAdapter())
+            .add(NewTypeStringAdapterFactory())
             .build()
             .adapter(SavedUserState::class.java)
     val savedRoomState = try {
@@ -80,7 +80,7 @@ fun Profile.save() {
             joinedRooms = getRoomList().map { it.id }
     )
     val moshi = Moshi.Builder()
-            .add(RoomIdAdapter())
+            .add(NewTypeStringAdapterFactory())
             .build()
     val jsonAdapter = moshi.adapter(SavedUserState::class.java).indent("    ")
     val json = try {

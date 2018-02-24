@@ -1,9 +1,8 @@
 package koma.storage.rooms.state
 
 import com.squareup.moshi.Moshi
+import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.room.naming.RoomAlias
-import koma.matrix.room.naming.RoomAliasAdapter
-import koma.matrix.room.naming.RoomIdAdapter
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
@@ -40,8 +39,7 @@ private fun Room.saveUnsync(){
             this.power_levels
     )
     val moshi = Moshi.Builder()
-            .add(RoomIdAdapter())
-            .add(RoomAliasAdapter())
+            .add(NewTypeStringAdapterFactory())
             .build()
     val jsonAdapter = moshi.adapter(SavedRoomState::class.java).indent("    ")
     val json = try {

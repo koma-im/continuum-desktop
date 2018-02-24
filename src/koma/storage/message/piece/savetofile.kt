@@ -1,6 +1,7 @@
 package koma.storage.message.piece
 
 import com.squareup.moshi.JsonDataException
+import koma.matrix.event.EventId
 import koma.matrix.room.naming.RoomId
 import java.io.File
 import java.time.Instant
@@ -59,5 +60,5 @@ fun DiscussionPiece.set_log_path(time: Long, roomId: RoomId) {
     filename = path
 }
 
-fun DiscussionPiece.first_event_id(): String? =
+fun DiscussionPiece.first_event_id(): EventId? =
         this.messages.firstOrNull()?.event_id

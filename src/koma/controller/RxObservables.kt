@@ -12,7 +12,6 @@ import rx.javafx.sources.CompositeObservable
 object guiEvents {
     val registerRequests = CompositeObservable<RegisterRequest>()
 
-    val createRoomRequests = CompositeObservable<ActionEvent>()
     val uploadRoomIconRequests = CompositeObservable<Room>()
     val putRoomAliasRequests = CompositeObservable<Room>()
     val renameRoomRequests = CompositeObservable<Room>()

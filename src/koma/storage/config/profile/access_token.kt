@@ -2,7 +2,7 @@ package koma.storage.config.profile
 
 import com.squareup.moshi.Moshi
 import koma.matrix.UserId
-import koma.matrix.UserIdAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 import matrix.AuthedUser
 import java.io.File
 import java.io.FileNotFoundException
@@ -15,7 +15,7 @@ fun saveToken(userId: UserId, token: String) {
     dir?: return
     val data = Token(token)
     val moshi = Moshi.Builder()
-            .add(UserIdAdapter())
+            .add(NewTypeStringAdapterFactory())
             .build()
     val jsonAdapter = moshi.adapter(Token::class.java).indent("    ")
     val json = jsonAdapter.toJson(data)
@@ -36,7 +36,7 @@ fun getToken(userId: UserId): AuthedUser? {
 
     val file = File(dir).resolve(tokenfilename)
     val jsonAdapter = Moshi.Builder()
-            .add(UserIdAdapter())
+            .add(NewTypeStringAdapterFactory())
             .build()
             .adapter(Token::class.java)
     val token = try {

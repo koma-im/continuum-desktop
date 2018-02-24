@@ -2,17 +2,17 @@ package koma.matrix.event.room_message
 
 import com.squareup.moshi.Moshi
 import koma.matrix.UserId
-import koma.matrix.UserIdAdapter
+import koma.matrix.event.EventId
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.MessageUnsigned
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.state.RoomRedactContent
-import koma.matrix.room.naming.RoomAliasAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 
 // try to make moshi return different kind of objects depending on a key
 
 abstract class RoomEvent(
-        val event_id: String,
+        val event_id: EventId,
         val origin_server_ts: Long
 ): Comparable<RoomEvent>{
     override fun compareTo(other: RoomEvent): Int {
@@ -28,8 +28,7 @@ abstract class RoomEvent(
 
     companion object {
         private val adapterOneline = Moshi.Builder()
-                .add(UserIdAdapter())
-                .add(RoomAliasAdapter())
+                .add(NewTypeStringAdapterFactory())
                 .add(getPolyRoomEventAdapter())
                 .add(getPolyMessageAdapter())
                 .build().adapter(RoomEvent::class.java)
@@ -46,7 +45,7 @@ abstract class RoomEvent(
 
 class MRoomMessage(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -58,7 +57,7 @@ class MRoomMessage(
 
 class MRoomRedaction(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId,
@@ -68,7 +67,7 @@ class MRoomRedaction(
 
 class MRoomUnrecognized(
         //val age: Long?,
-        event_id: String,
+        event_id: EventId,
         origin_server_ts: Long,
         val prev_content: Map<String, Any>?,
         val sender: UserId?,

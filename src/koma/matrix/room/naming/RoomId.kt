@@ -1,7 +1,6 @@
 package koma.matrix.room.naming
 
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
+import koma.matrix.json.NewTypeString
 
 fun canBeValidRoomId(input: String): Boolean {
     val ss = input.split(':')
@@ -10,7 +9,7 @@ fun canBeValidRoomId(input: String): Boolean {
 }
 
 
-data class RoomId(val id: String): Comparable<RoomId> {
+data class RoomId(val id: String): Comparable<RoomId>, NewTypeString(id) {
     val localstr by lazy {
         id.substringAfter('!').substringBefore(':')
     }
@@ -22,18 +21,5 @@ data class RoomId(val id: String): Comparable<RoomId> {
     constructor(serv: String, local: String): this("!$local:$serv") {
     }
 
-    override fun toString() = id
-
     override fun compareTo(other: RoomId): Int = this.id.compareTo(other.id)
-}
-
-class RoomIdAdapter {
-    @ToJson fun toJson(roomId: RoomId): String {
-        return roomId.id
-    }
-
-    @FromJson
-    fun fromJson(str: String): RoomId {
-        return RoomId(str)
-    }
 }

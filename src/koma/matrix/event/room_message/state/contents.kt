@@ -1,6 +1,7 @@
 package koma.matrix.event.room_message.state
 
 import com.squareup.moshi.Json
+import koma.matrix.UserId
 import koma.matrix.event.room_message.chat.ImageInfo
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.participation.RoomJoinRules
@@ -32,7 +33,7 @@ class RoomPowerLevelsContent(
         val kick: Float = 50f,
         val redact: Float = 50f,
         val events: Map<String, Float>,
-        val users: Map<String, Float>
+        val users: Map<UserId, Float>
 )
 
 
@@ -45,7 +46,7 @@ class RoomRedactContent(
 )
 
 class RoomCreateContent(
-        val creator: String,
+        val creator: UserId,
         @Json(name = "m.federate") val federate: Boolean = true
 )
 

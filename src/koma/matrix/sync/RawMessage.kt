@@ -2,7 +2,7 @@ package koma.matrix.sync
 
 import com.squareup.moshi.Moshi
 import koma.matrix.UserId
-import koma.matrix.UserIdAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 import matrix.event.room_message.RoomEventType
 
 /**
@@ -19,7 +19,7 @@ data class RawMessage(
         val txn_id: String?,
         val content: Map<String, Any>) {
     companion object {
-        private val adapter = Moshi.Builder().add(UserIdAdapter()).build().adapter(RawMessage::class.java)
+        private val adapter = Moshi.Builder().add(NewTypeStringAdapterFactory()).build().adapter(RawMessage::class.java)
     }
 
     /**

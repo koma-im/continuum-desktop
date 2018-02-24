@@ -4,6 +4,7 @@ import controller.ChatController
 import controller.guiEvents
 import koma.controller.requests.membership.ask_invite_member
 import koma.controller.requests.membership.runAskBanRoomMember
+import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.storage.config.settings.AppSettings
@@ -24,8 +25,7 @@ class RootLayoutView(val controller: ChatController): View() {
             }
             top = menubar {
                 menu("File") {
-                    item("Create Room").actionEvents().addTo(
-                            guiEvents.createRoomRequests)
+                    item("Create Room").action { createRoomInteractive() }
                     item("Join Room") {
                         action { RoomFinder().open() }
                     }

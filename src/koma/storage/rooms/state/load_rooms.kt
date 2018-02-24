@@ -2,9 +2,8 @@ package koma.storage.rooms.state
 
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
-import koma.matrix.room.naming.RoomAliasAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.room.naming.RoomId
-import koma.matrix.room.naming.RoomIdAdapter
 import koma.matrix.room.visibility.HistoryVisibilityCaseInsensitiveAdapter
 import koma.matrix.room.visibility.RoomVisibilityCaseInsensitiveAdapter
 import koma.matrix.user.identity.UserId_new
@@ -28,8 +27,7 @@ fun loadRoom(roomId: RoomId): Room? {
 private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     val sf = File(roomDir.resolve(statefilename).absolutePath)
     val jsonAdapter = Moshi.Builder()
-            .add(RoomIdAdapter())
-            .add(RoomAliasAdapter())
+            .add(NewTypeStringAdapterFactory())
             .add(HistoryVisibilityCaseInsensitiveAdapter())
             .add(RoomVisibilityCaseInsensitiveAdapter())
             .build()

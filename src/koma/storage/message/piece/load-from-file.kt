@@ -1,11 +1,11 @@
 package koma.storage.message.piece
 
 import com.squareup.moshi.Moshi
-import koma.matrix.UserIdAdapter
+import koma.matrix.event.EventId
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
-import koma.matrix.room.naming.RoomAliasAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.room.naming.RoomId
 import koma.storage.config.config_paths
 import java.io.File
@@ -28,17 +28,16 @@ fun loadStoredDiscussion(roomId: RoomId): List<DiscussionPiece> {
 private fun File.loadDiscussion(): DiscussionPiece? {
     val time = this.name.toLongOrNull()
     time?: return null
-    var following: String? = null
+    var following: EventId? = null
     val moshi = Moshi.Builder()
             .add(getPolyRoomEventAdapter())
             .add(getPolyMessageAdapter())
-            .add(RoomAliasAdapter())
-            .add(UserIdAdapter()).build()
+            .add(NewTypeStringAdapterFactory()).build()
     val adapter = moshi.adapter(RoomEvent::class.java)
     val messages = this.readLines().mapNotNull {
         if (it.startsWith("#")) {
             if (it.startsWith("# following_event ")) {
-                following = it.substringAfter("# following_event ").trim()
+                following = EventId(it.substringAfter("# following_event ").trim())
             }
             null
         } else {

@@ -1,7 +1,6 @@
 package koma.matrix.room.naming
 
-import com.squareup.moshi.FromJson
-import com.squareup.moshi.ToJson
+import koma.matrix.json.NewTypeString
 
 fun canBeValidRoomAlias(input: String): Boolean {
     val ss = input.split(':')
@@ -9,24 +8,12 @@ fun canBeValidRoomAlias(input: String): Boolean {
     return ss[0].startsWith('#') && ss[1].isNotEmpty()
 }
 
-data class RoomAlias(val full: String) {
+data class RoomAlias(val full: String): NewTypeString(full) {
     val alias: String by lazy {
         full.substringBefore(':')
     }
 
     val servername: String by lazy {
         full.substringAfter(':', "<unknown server>")
-    }
-}
-
-class RoomAliasAdapter {
-    @ToJson
-    fun toJson(roomId: RoomAlias): String {
-        return roomId.full
-    }
-
-    @FromJson
-    fun fromJson(str: String): RoomAlias {
-        return RoomAlias(str)
     }
 }
