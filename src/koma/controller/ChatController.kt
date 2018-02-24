@@ -3,8 +3,7 @@ package controller
 import domain.AvatarUrl
 import domain.EmptyResult
 import javafx.concurrent.Task
-import javafx.scene.control.*
-import javafx.scene.layout.GridPane
+import javafx.scene.control.TextInputDialog
 import javafx.stage.FileChooser
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.startSyncing
@@ -16,7 +15,6 @@ import matrix.ApiClient
 import rx.lang.kotlin.filterNotNull
 import rx.schedulers.Schedulers
 import tornadofx.*
-import java.util.*
 
 /**
  * Created by developer on 2017/6/22.
@@ -27,23 +25,6 @@ class ChatController(
     private val shutdownSignalChan = Channel<Unit>()
 
     init{
-
-        guiEvents.createRoomRequests.toObservable()
-                .map{ createRoom() }
-                .observeOn(Schedulers.io())
-                .filter{it.isPresent}
-                .subscribe {
-                    val room_publicity: Pair<String, Boolean> = it.get()
-                    val roomname = room_publicity.first
-                    val visibility = if (room_publicity.second) "public" else "private"
-
-                    val result = apiClient.createRoom(roomname, visibility)
-                    if (result == null) {
-                        println("Failed to create $visibility room $roomname")
-                    } else {
-                        println("created room $result")
-                    }
-                }
         guiEvents.updateAvatar.toObservable()
                 .map {
                     val dialog = FileChooser()
@@ -151,44 +132,5 @@ class ChatController(
         }
         Thread(task).start()
     }
-
-    fun createRoom(): Optional<Pair<String, Boolean>> {
-        val dialog: Dialog<Pair<String, Boolean>> = Dialog()
-        dialog.setTitle("Creation Dialog")
-        dialog.setHeaderText("Create a room")
-
-        val createButtonType = ButtonType("Create", ButtonBar.ButtonData.OK_DONE)
-        dialog.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL)
-
-        val grid = GridPane()
-
-        val roomnamef = TextField()
-        roomnamef.setPromptText("Room")
-        val publicf = ToggleButton("public")
-
-        grid.add(Label("Room:"), 0, 0)
-        grid.add(roomnamef, 1, 0)
-        grid.add(publicf, 1, 1)
-
-        val creationButton = dialog.getDialogPane().lookupButton(createButtonType)
-        creationButton.setDisable(true)
-
-        roomnamef.textProperty().addListener({ _, _, newValue ->
-            creationButton.setDisable(newValue.trim().isEmpty()) })
-
-        dialog.getDialogPane().setContent(grid)
-
-        dialog.setResultConverter({ dialogButton ->
-            if (dialogButton === createButtonType) {
-                return@setResultConverter Pair(roomnamef.getText(), publicf.isSelected)
-            }
-            null
-        })
-
-        val result = dialog.showAndWait()
-
-        return result
-    }
-
 
 }

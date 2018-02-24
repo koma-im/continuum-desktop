@@ -37,7 +37,6 @@ class MEmoteViewNode(val content: EmoteMessage, val event: MRoomMessage): ViewNo
         val user = event.sender.getState()
         with(node) {
             label(user.displayName) {
-                maxWidth = 100.0
                 textFill = user.color
             }
             text(" ")

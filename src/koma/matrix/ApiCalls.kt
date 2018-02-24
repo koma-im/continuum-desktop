@@ -5,18 +5,26 @@ import domain.*
 import koma.controller.sync.longPollTimeout
 import koma.koma_app.SaveJobs
 import koma.matrix.UserId
-import koma.matrix.UserIdAdapter
+import koma.matrix.event.EventId
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
+import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.publicapi.rooms.RoomDirectoryQuery
-import koma.matrix.room.naming.RoomAliasAdapter
+import koma.matrix.room.admin.BanRoomResult
+import koma.matrix.room.admin.CreateRoomResult
+import koma.matrix.room.admin.CreateRoomSettings
+import koma.matrix.room.admin.MemberBanishment
+import koma.matrix.room.naming.ResolveRoomAliasResult
 import koma.matrix.room.naming.RoomId
-import koma.matrix.room.naming.RoomIdAdapter
+import koma.matrix.room.participation.LeaveRoomResult
+import koma.matrix.room.participation.invite.InviteMemResult
+import koma.matrix.room.participation.invite.InviteUserData
+import koma.matrix.room.participation.join.JoinRoomResult
 import koma.matrix.sync.SyncResponse
 import koma.network.client.okhttp.AppHttpClient
 import koma.network.client.okhttp.tryAddAppCache
@@ -40,36 +48,8 @@ import java.io.FileInputStream
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
-
-
-data class CreateRoomSettings(
-        val room_alias_name: String,
-        val visibility: String)
-
-data class CreateRoomResult(
-        val room_id: String)
-
-data class JoinRoomResult(
-        val room_id: String)
-
-
-data class InviteUserData(val user_id: UserId)
-
-class InviteMemResult()
-
-class LeaveRoomResult()
-
-data class MemberBanishment(val user_id: UserId)
-
-class BanRoomResult()
-
-data class ResolveRoomAliasResult(
-        val room_id: RoomId,
-        val servers: List<String>
-)
-
 data class SendResult(
-        val event_id: String
+        val event_id: EventId
 )
 
 class UpdateAvatarResult()
@@ -155,7 +135,7 @@ interface MatrixAccessApi {
 
     @GET("rooms/{roomId}/context/{eventId}")
     fun getEventContext(@Path("roomId") roomId: RoomId,
-                 @Path("eventId") eventId: String,
+                 @Path("eventId") eventId: EventId,
                         @Query("limit") limit: Int = 2,
                  @Query("access_token") token: String
     ): Call<ContextResponse>
@@ -205,8 +185,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     fun getTxnId() = txnIdUnique.getAndAdd(1)
 
-    fun createRoom(roomname: String, visibility: String): CreateRoomResult? {
-        return service.createRoom(token, CreateRoomSettings(roomname, visibility)).execute().body()
+    fun createRoom(settings: CreateRoomSettings): Call<CreateRoomResult> {
+        return service.createRoom(token, settings)
     }
 
     fun getRoomMessages(roomId: RoomId, from: String, direction: FetchDirection, to: String?=null): Call<Chunked<RoomEvent>> {
@@ -217,7 +197,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         return service.joinRoom(roomid.id, token)
     }
 
-    fun getEventContext(roomid: RoomId, eventId: String): Call<ContextResponse> {
+    fun getEventContext(roomid: RoomId, eventId: EventId): Call<ContextResponse> {
         return service.getEventContext(roomid, eventId,token= token)
     }
 
@@ -387,9 +367,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
      */
     private fun createRetrofitBuilder(): Retrofit.Builder {
         val moshi = Moshi.Builder()
-                .add(UserIdAdapter())
-                .add(RoomIdAdapter())
-                .add(RoomAliasAdapter())
+                .add(NewTypeStringAdapterFactory())
                 .add(getPolyMessageAdapter())
                 .add(getPolyRoomEventAdapter())
                 .build()
@@ -425,7 +403,7 @@ interface MatrixLoginApi {
 
 fun login(userpass: UserPassword, serverConf: ServerConf):
         Call<AuthedUser> {
-    val moshi = Moshi.Builder().add(UserIdAdapter()).build()
+    val moshi = Moshi.Builder().add(NewTypeStringAdapterFactory()).build()
     val client = AppHttpClient.builderForServer(serverConf).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
@@ -459,7 +437,7 @@ interface MatrixRegisterApi {
 fun register(userregi: UserRegistering, serverConf: ServerConf):
         RegisterdUser? {
     println("register user $userregi on ${serverConf.servername}")
-    val moshi = Moshi.Builder().add(UserIdAdapter()).build()
+    val moshi = Moshi.Builder().add(NewTypeStringAdapterFactory()).build()
     val proxy = AppSettings.getProxy()
     val client = OkHttpClient.Builder().proxy(proxy).build()
     val retrofit = Retrofit.Builder()

@@ -15,7 +15,6 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
-import koma.matrix.user.identity.UserId_new
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
@@ -96,7 +95,7 @@ class Room(val id: RoomId) {
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
         power_levels.putAll(roomPowerLevel.events.mapValues { it.value.toDouble() })
         for (user in roomPowerLevel.users)
-            userStates.get(UserId_new(user.key)).power = user.value
+            userStates.get(user.key).power = user.value
     }
 
     override fun toString(): String {

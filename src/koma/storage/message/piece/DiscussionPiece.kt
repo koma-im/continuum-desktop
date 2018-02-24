@@ -1,6 +1,7 @@
 package koma.storage.message.piece
 
 import koma.koma_app.SaveJobs
+import koma.matrix.event.EventId
 import koma.matrix.event.room_message.RoomEvent
 
 /**
@@ -27,7 +28,7 @@ class DiscussionPiece(
      * first event stored in next text file
      * used to tell whether there are gaps
      */
-    var following_event: String? = null
+    var following_event: EventId? = null
 
     var filename: String? = null
 
