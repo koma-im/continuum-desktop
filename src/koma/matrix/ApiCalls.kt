@@ -141,7 +141,7 @@ interface MatrixAccessApi {
             @Path("eventType") eventType: RoomEventType,
             @Path("txnId") txnId: Long,
             @Query("access_token") token: String,
-            @Body message: Any): Call<SendResult>
+            @Body message: M_Message): Call<SendResult>
 
     @PUT("rooms/{roomId}/state/m.room.avatar")
     fun setRoomIcon(@Path("roomId") roomId: RoomId,
