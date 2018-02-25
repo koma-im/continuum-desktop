@@ -1,5 +1,6 @@
 package model
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -30,8 +31,7 @@ class RoomItemModel(property: ObjectProperty<Room>) : ItemViewModel<Room>(itemPr
 }
 
 class Room(val id: RoomId) {
-    // aliases have a specific format
-    // there can be a canonical alias, but it's not the same as a name
+    val canonicalAlias = SimpleObjectProperty<RoomAlias>()
     val aliases = SimpleListProperty<RoomAlias>(FXCollections.observableArrayList())
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
@@ -48,6 +48,9 @@ class Room(val id: RoomId) {
     var joinRule: RoomJoinRules = RoomJoinRules.Invite
     var histVisibility = HistoryVisibility.Shared
 
+    val name = SimpleStringProperty()
+
+    // fallback in order: name, first alias, id
     val displayName = SimpleStringProperty(id.toString())
 
     val iconURLProperty = SimpleStringProperty("")
@@ -66,6 +69,16 @@ class Room(val id: RoomId) {
     }
 
     init {
+        val alias0 = stringBinding(aliases) { value.getOrNull(0)?.toString() }
+        val alias_id = Bindings.`when`(alias0.isNotEmpty).then(alias0).otherwise(id.toString())
+        val canonstr = stringBinding(canonicalAlias) { value?.str }
+        val canonAlias = Bindings.`when`(canonstr.isNotEmpty)
+                .then(canonstr)
+                .otherwise(alias_id)
+        val n = Bindings.`when`(name.isNotEmpty)
+                .then(name)
+                .otherwise(canonAlias)
+        displayName.bind(n)
     }
 
     /**
@@ -85,11 +98,19 @@ class Room(val id: RoomId) {
         }
     }
 
-    fun setCanonicalAlias(alias: RoomAlias) {
-        if (this.aliases.contains(alias))
-            this.aliases.move(alias, 0)
-        else
-            this.aliases.add(0, alias)
+    fun setCanonicalAlias(alias: RoomAlias?) {
+        canonicalAlias.set(alias)
+        if (alias != null) {
+            addAlias(alias)
+        }
+    }
+
+    fun addAlias(alias: RoomAlias) {
+        synchronized(aliases) {
+            if (!aliases.contains(alias)) {
+                aliases.add(alias)
+            }
+        }
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {

@@ -11,6 +11,7 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
+import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
@@ -79,6 +80,11 @@ interface MatrixAccessApi {
                      @Query("access_token") token: String,
                      @Body roomInfo: RoomInfo): Call<EmptyResult>
 
+    @DELETE("directory/room/{roomAlias}")
+    fun deleteRoomAlias(@Path("roomAlias") roomAlias: String,
+                        @Query("access_token") token: String
+    ): Call<EmptyResult>
+
     @GET("publicRooms")
     fun publicRooms(@Query("since") since: String? = null,
                     @Query("limit") limit: Int = 20
@@ -128,10 +134,12 @@ interface MatrixAccessApi {
                     @Query("access_token") token: String,
                     @Body avatar: Map<String, String>): Call<SendResult>
 
-    @PUT("rooms/{roomId}/state/m.room.canonical_alias")
-    fun setRoomAlias(@Path("roomId") roomId: RoomId,
-                    @Query("access_token") token: String,
-                    @Body alias: Map<String, String>): Call<SendResult>
+    @PUT("rooms/{roomId}/state/{eventType}")
+    fun sendStateEvent(
+            @Path("roomId") roomId: RoomId,
+            @Path("eventType") type: RoomEventType,
+            @Query("access_token") token: String,
+            @Body alias: Any): Call<SendResult>
 
     @GET("rooms/{roomId}/context/{eventId}")
     fun getEventContext(@Path("roomId") roomId: RoomId,
@@ -287,43 +295,14 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     fun leavingRoom(roomid: RoomId): Call<LeaveRoomResult>
             = service.leaveRoom(roomid, token)
 
-    fun setRoomAlias(roomid: RoomId, alias: String): EmptyResult? {
+    fun putRoomAlias(roomid: RoomId, alias: String): Call<EmptyResult>
+            = service.putRoomAlias(alias, token, RoomInfo(roomid))
 
-        val call = service.putRoomAlias(alias, token, RoomInfo(roomid))
-        val resp: Response<EmptyResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            println("put alias $alias to room $roomid")
-            return resp.body()
-        } else {
-            println("error code ${resp.code()}, ${resp.raw()}")
-            return null
-        }
-    }
+    fun deleteRoomAlias(alias: String): Call<EmptyResult>
+            = service.deleteRoomAlias(alias, token)
 
-    fun setRoomCanonicalAlias(roomid: RoomId, alias: String): SendResult? {
-
-        val call = service.setRoomAlias(roomid, token, mapOf(Pair("alias", alias)))
-        val resp: Response<SendResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            println("set alias $alias as canonical to room $roomid")
-            return resp.body()
-        } else {
-            println("error code ${resp.code()}, ${resp.raw()}")
-            return null
-        }
-    }
+    fun setRoomCanonicalAlias(roomid: RoomId, canonicalAlias: RoomCanonAliasContent)
+            = service.sendStateEvent(roomid, RoomEventType.CanonAlias, token, canonicalAlias)
 
     fun resolveRoomAlias(roomAlias: String): Call<ResolveRoomAliasResult> {
         val call: Call<ResolveRoomAliasResult> = service.resolveRoomAlias(roomAlias)

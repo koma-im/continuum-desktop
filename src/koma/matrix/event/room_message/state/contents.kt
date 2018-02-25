@@ -13,7 +13,8 @@ class RoomAliasesContent(
 )
 
 class RoomCanonAliasContent(
-        val alias: RoomAlias
+        // empty when it's a delete event
+        val alias: RoomAlias?
 )
 
 class RoomHistoryVisibilityContent(

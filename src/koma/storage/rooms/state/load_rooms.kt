@@ -44,7 +44,7 @@ private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     savedRoomState?: return null
     val room = Room(roomId)
     room.aliases.setAll(savedRoomState.aliases)
-    room.displayName.set(savedRoomState.name)
+    room.name.set(savedRoomState.name)
     room.iconURL=savedRoomState.icon_Url
     room.histVisibility = savedRoomState.history_visibility
     room.joinRule = savedRoomState.join_rule

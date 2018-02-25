@@ -34,7 +34,7 @@ private fun Room.saveUnsync(){
             this.visibility,
             this.joinRule,
             this.histVisibility,
-            this.displayName.get(),
+            this.name.get(),
             this.iconURL,
             this.power_levels
     )
@@ -62,7 +62,7 @@ class SavedRoomState (
     val visibility: RoomVisibility,
     val join_rule: RoomJoinRules,
     val history_visibility: HistoryVisibility,
-    val name: String,
+    val name: String?,
     val icon_Url: String,
     val power_levels: Map<String, Double>
 )

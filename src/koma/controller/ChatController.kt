@@ -61,43 +61,6 @@ class ChatController(
                             apiClient.uploadRoomIcon(room.id, result.content_uri)
                     }
                 }
-        guiEvents.putRoomAliasRequests.toObservable()
-                .map {
-                    val dia = TextInputDialog()
-                    dia.title = "Add alias to room ${it.displayName}"
-                    val result = dia.showAndWait()
-                    val newname = if (result.isPresent && result.get().isNotBlank())
-                       result.get()
-                    else
-                        null
-                    Pair(it, newname)
-                }
-                .filter { it.second != null }
-                .observeOn(Schedulers.io())
-                .subscribe {
-                    val roomid = it.first.id
-                    val newname = it.second as String
-                    apiClient.setRoomAlias(roomid, newname)
-                }
-        guiEvents.renameRoomRequests.toObservable()
-                .map {
-                    val dia = TextInputDialog()
-                    dia.title = "Rename room ${it.displayName}"
-                    val result = dia.showAndWait()
-                    val newname = if (result.isPresent && result.get().isNotBlank())
-                       result.get()
-                    else
-                        null
-                    Pair(it, newname)
-                }
-                .filter { it.second != null }
-                .observeOn(Schedulers.io())
-                .subscribe {
-                    val roomid = it.first.id
-                    val newname = it.second as String
-                    apiClient.setRoomAlias(roomid, newname)
-                    apiClient.setRoomCanonicalAlias(roomid, newname)
-                }
     }
 
     fun start() {

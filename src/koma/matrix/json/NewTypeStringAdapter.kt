@@ -19,15 +19,17 @@ class NewTypeStringAdapterFactory: JsonAdapter.Factory {
         if (annotations.isNotEmpty() || !newStringClass.isAssignableFrom(rawType)) {
             return null
         }
+        val name = type.typeName
         val toJson = moshi.adapter(String::class.java)
         @Suppress("UNCHECKED_CAST")
         val cons = rawType.getConstructor(String::class.java) as Constructor<NewTypeString>
-        return NewTypeStringAdapter(cons, toJson)
+        return NewTypeStringAdapter(cons, toJson, name)
     }
 
     private class NewTypeStringAdapter internal constructor(
             private val constructor: Constructor<NewTypeString>,
-            private val toJsonDelegate: JsonAdapter<String>
+            private val toJsonDelegate: JsonAdapter<String>,
+            private val name: String
     ) : JsonAdapter<NewTypeString>() {
         @Throws(IOException::class)
         override fun fromJson(reader: JsonReader): NewTypeString? {
@@ -42,7 +44,7 @@ class NewTypeStringAdapterFactory: JsonAdapter.Factory {
 
         @Throws(IOException::class)
         override fun toJson(writer: JsonWriter, value: NewTypeString?) {
-            if (value == null) throw JsonDataException("can't encode null as NewTypeString")
+            if (value == null) throw JsonDataException("can't encode null as $name")
             toJsonDelegate.toJson(writer, value.str)
         }
     }

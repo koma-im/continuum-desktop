@@ -5,10 +5,11 @@ import com.sun.javafx.scene.control.skin.LabeledSkinBase
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
-import javafx.scene.Group
+import javafx.geometry.Pos
 import javafx.scene.control.ButtonBase
 import javafx.scene.control.Skin
 import javafx.scene.image.ImageView
+import javafx.scene.layout.StackPane
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 import koma.storage.config.settings.AppSettings
@@ -49,11 +50,12 @@ class EmojiIcon (): ButtonBase() {
     }
 
     init {
-        val pane = Group()
+        val pane = StackPane()
         val imageAvail= booleanBinding(imageView.imageProperty()) { value != null }
         text.removeWhen { imageAvail }
         text.font = Font(size)
         pane.add(text)
+        pane.alignment = Pos.BASELINE_CENTER
         pane.add(imageView)
         this.graphic = pane
     }
