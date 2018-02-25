@@ -4,6 +4,7 @@ import controller.guiEvents
 import javafx.beans.property.Property
 import javafx.scene.control.Alert
 import javafx.scene.layout.HBox
+import koma.gui.dialog.room.RoomAliasDialog
 import koma_app.appState
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
@@ -41,12 +42,8 @@ fun addMenu(node: HBox, room: Property<Room>) {
         item("upload icon") {
             actionEvents().map { room.value }.addTo(guiEvents.uploadRoomIconRequests)
         }
-        item("Add alias") {
-            actionEvents().map { room.value }.addTo(guiEvents.putRoomAliasRequests)
-        }
-        item("Set alias") {
-            actionEvents().map { room.value }.addTo(guiEvents.renameRoomRequests)
-        }
+        item("Update alias") { action {
+            RoomAliasDialog(room.value).openWindow() } }
     }
 }
 
