@@ -1,4 +1,4 @@
-package koma.gui.dialog.room.alias
+package koma.gui.view.window.chatroom.roominfo.about.requests
 
 import com.github.kittinunf.result.Result
 import koma.matrix.event.room_message.state.RoomCanonAliasContent

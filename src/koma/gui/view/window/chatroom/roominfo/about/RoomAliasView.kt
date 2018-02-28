@@ -1,4 +1,4 @@
-package koma.gui.dialog.room
+package koma.gui.view.window.chatroom.roominfo.about
 
 import com.github.kittinunf.result.Result
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -13,8 +13,8 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.text.FontWeight
 import javafx.util.Callback
-import koma.gui.dialog.room.alias.requestAddRoomAlias
-import koma.gui.dialog.room.alias.requestSetRoomCanonicalAlias
+import koma.gui.view.window.chatroom.roominfo.about.requests.requestAddRoomAlias
+import koma.gui.view.window.chatroom.roominfo.about.requests.requestSetRoomCanonicalAlias
 import koma.gui.element.emoji.keyboard.NoSelectionModel
 import koma.matrix.room.naming.RoomAlias
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
