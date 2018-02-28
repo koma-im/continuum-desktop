@@ -7,7 +7,6 @@ import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
@@ -81,7 +80,6 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
                 }
             }
             stackpane {
-                AnchorPane.setRightAnchor(this, 10.0)
                 button("Join") {
                     visibleWhen { this@stackpane.hoverProperty() }
                     action { joinById(droom.room_id.value, droom.displayName.value, root) }

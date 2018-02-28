@@ -3,7 +3,6 @@ package controller
 import javafx.event.ActionEvent
 import koma.storage.config.server.ServerConf
 import matrix.UserRegistering
-import model.Room
 import rx.javafx.sources.CompositeObservable
 
 /**
@@ -11,8 +10,6 @@ import rx.javafx.sources.CompositeObservable
  */
 object guiEvents {
     val registerRequests = CompositeObservable<RegisterRequest>()
-
-    val uploadRoomIconRequests = CompositeObservable<Room>()
 
     val updateAvatar = CompositeObservable<ActionEvent>()
 }

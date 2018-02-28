@@ -43,24 +43,7 @@ class ChatController(
                 .subscribe {
                     apiClient.updateAvatar(apiClient.userId, AvatarUrl(it))
                 }
-        guiEvents.uploadRoomIconRequests.toObservable()
-                .map {
-                    val dialog = FileChooser()
-                    dialog.title = "Upload a icon for the room"
 
-                    val file = dialog.showOpenDialog(FX.primaryStage)
-                    Pair(it, file)
-                }
-                .observeOn(Schedulers.io())
-                .subscribe {
-                    val room = it.first
-                    val file = it.second
-                    if (file != null && file.absolutePath != null) {
-                        val result = apiClient.uploadMedia(file.absolutePath)
-                        if (result != null)
-                            apiClient.uploadRoomIcon(room.id, result.content_uri)
-                    }
-                }
     }
 
     fun start() {
