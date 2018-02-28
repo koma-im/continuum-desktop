@@ -77,7 +77,10 @@ class RoomFragment: ListCellFragment<Room>() {
     }
 
     private fun openInfoView() {
-        RoomInfoDialog(itemProperty.value).openWindow()
+        val room = itemProperty.value
+        if (room != null) {
+            RoomInfoDialog(room).openWindow()
+        }
     }
 }
 
