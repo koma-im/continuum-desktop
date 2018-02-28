@@ -1,13 +1,14 @@
-package koma.gui.dialog.room
+package koma.gui.view.window.chatroom.roominfo
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.gui.dialog.room.info.chooseUpdateRoomIcon
-import koma.gui.dialog.room.info.requestUpdateRoomName
 import koma.gui.element.icon.AvatarAlways
+import koma.gui.view.window.chatroom.roominfo.about.RoomAliasForm
+import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIcon
+import koma.gui.view.window.chatroom.roominfo.about.requests.requestUpdateRoomName
 import model.Room
 import tornadofx.*
 

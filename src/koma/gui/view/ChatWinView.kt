@@ -2,10 +2,11 @@ package view
 
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
-import koma.gui.view.roomsview.addMenu
+import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.storage.config.profile.Profile
 import koma.storage.config.settings.AppSettings
 import model.Room
@@ -54,18 +55,29 @@ class RoomFragment: ListCellFragment<Room>() {
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT
-        addMenu(this, room.room)
+        contextmenu {
+            item("Room Info").action { openInfoView() }
+            separator()
+            item("Leave").action {
+                leaveRoom(itemProperty.value)
+            }
+
+        }
         val iconsize = scale * 32.0
-        stackpane {
-            add(AvatarAlways(iconUrl, room.name, room.color))
+        hyperlink {
+            graphic = AvatarAlways(iconUrl, room.name, room.color)
             minHeight = iconsize
             minWidth = iconsize
+            action { openInfoView() }
         }
 
-        // supports ellipses
         label(room.name) {
             textFillProperty().bind(room.color)
         }
+    }
+
+    private fun openInfoView() {
+        RoomInfoDialog(itemProperty.value).openWindow()
     }
 }
 
