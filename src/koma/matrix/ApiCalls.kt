@@ -11,7 +11,9 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.getPolyRoomEventAdapter
+import koma.matrix.event.room_message.state.RoomAvatarContent
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
+import koma.matrix.event.room_message.state.RoomNameContent
 import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
@@ -129,17 +131,12 @@ interface MatrixAccessApi {
             @Query("access_token") token: String,
             @Body message: M_Message): Call<SendResult>
 
-    @PUT("rooms/{roomId}/state/m.room.avatar")
-    fun setRoomIcon(@Path("roomId") roomId: RoomId,
-                    @Query("access_token") token: String,
-                    @Body avatar: Map<String, String>): Call<SendResult>
-
     @PUT("rooms/{roomId}/state/{eventType}")
     fun sendStateEvent(
             @Path("roomId") roomId: RoomId,
             @Path("eventType") type: RoomEventType,
             @Query("access_token") token: String,
-            @Body alias: Any): Call<SendResult>
+            @Body content: Any): Call<SendResult>
 
     @GET("rooms/{roomId}/context/{eventId}")
     fun getEventContext(@Path("roomId") roomId: RoomId,
@@ -269,23 +266,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         }
     }
 
-    fun uploadRoomIcon(roomId: RoomId, iconUrl: String): SendResult? {
-        val call: Call<SendResult> = service.setRoomIcon(roomId, token, mapOf(Pair("url", iconUrl)))
-        val resp: Response<SendResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            println("set icon of room $roomId to $iconUrl")
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
-    }
+    fun setRoomIcon(roomId: RoomId, content: RoomAvatarContent):Call<SendResult>
+            = service.sendStateEvent(roomId, RoomEventType.Avatar, token, content)
 
     fun banMember(
             roomid: RoomId,
@@ -303,6 +285,9 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
 
     fun setRoomCanonicalAlias(roomid: RoomId, canonicalAlias: RoomCanonAliasContent)
             = service.sendStateEvent(roomid, RoomEventType.CanonAlias, token, canonicalAlias)
+
+    fun setRoomName(roomid: RoomId, name: RoomNameContent)
+            = service.sendStateEvent(roomid, RoomEventType.Name, token, name)
 
     fun resolveRoomAlias(roomAlias: String): Call<ResolveRoomAliasResult> {
         val call: Call<ResolveRoomAliasResult> = service.resolveRoomAlias(roomAlias)

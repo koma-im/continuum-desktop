@@ -1,18 +1,15 @@
 package koma.gui.view.roomsview
 
-import controller.guiEvents
 import javafx.beans.property.Property
 import javafx.scene.control.Alert
 import javafx.scene.layout.HBox
-import koma.gui.dialog.room.RoomAliasDialog
+import koma.gui.dialog.room.RoomInfoDialog
 import koma_app.appState
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import model.Room
 import ru.gildor.coroutines.retrofit.Result
 import ru.gildor.coroutines.retrofit.awaitResult
-import rx.javafx.kt.actionEvents
-import rx.javafx.kt.addTo
 import tornadofx.*
 
 
@@ -39,11 +36,8 @@ fun addMenu(node: HBox, room: Property<Room>) {
                 }
             }
         }
-        item("upload icon") {
-            actionEvents().map { room.value }.addTo(guiEvents.uploadRoomIconRequests)
-        }
-        item("Update alias") { action {
-            RoomAliasDialog(room.value).openWindow() } }
+        item("Room Info") { action {
+            RoomInfoDialog(room.value).openWindow() } }
     }
 }
 

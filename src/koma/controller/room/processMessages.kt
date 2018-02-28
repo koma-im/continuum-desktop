@@ -33,7 +33,7 @@ fun Room.applyUpdate(update: RoomEvent) {
         is MRoomCreate -> { }
         is MRoomPinnedEvents -> {}
         is MRoomTopic -> {}
-        is MRoomName -> {}
+        is MRoomName -> { this.name.set(update.content.name) }
         is MRoomGuestAccess -> {}
     }
 }

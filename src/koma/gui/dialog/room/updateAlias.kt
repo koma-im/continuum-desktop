@@ -26,38 +26,37 @@ import org.controlsfx.control.Notifications
 import tornadofx.*
 import java.util.concurrent.Callable
 
-class RoomAliasDialog(room: Room): Fragment() {
-    override val root= Form()
+class RoomAliasForm(room: Room): Fragment() {
+    override val root: Fieldset
 
     init {
         this.title = "Update Aliases of Room ${room.displayName.value}"
-        with(root) {
-            prefHeight = 300.0
-            fieldset("Room Aliases") {
-                vbox(5) {
-                    listview(room.aliases) {
-                        selectionModel = NoSelectionModel()
-                        cellFactory = object : Callback<ListView<RoomAlias>, ListCell<RoomAlias>> {
-                            override fun call(param: ListView<RoomAlias>?): ListCell<RoomAlias> {
-                                return RoomAliasCell(room)
-                            }
+
+        root = fieldset("Room Aliases") {
+            vbox(5) {
+                listview(room.aliases) {
+                    prefHeight = 200.0
+                    selectionModel = NoSelectionModel()
+                    cellFactory = object : Callback<ListView<RoomAlias>, ListCell<RoomAlias>> {
+                        override fun call(param: ListView<RoomAlias>?): ListCell<RoomAlias> {
+                            return RoomAliasCell(room)
                         }
-                        vgrow = Priority.ALWAYS
                     }
-                    hbox(5.0) {
-                        val field = TextField()
-                        field.promptText = "additional-alias"
-                        val servername = appState.serverConf.servername
-                        hbox {
-                            alignment = Pos.CENTER
-                            label("#")
-                            add(field)
-                            label(":")
-                            label(servername)
-                        }
-                        val getAlias = { "#${field.text}:$servername" }
-                        button("Add") { action { requestAddRoomAlias(room, getAlias()) } }
+                    vgrow = Priority.ALWAYS
+                }
+                hbox(5.0) {
+                    val field = TextField()
+                    field.promptText = "additional-alias"
+                    val servername = appState.serverConf.servername
+                    hbox {
+                        alignment = Pos.CENTER
+                        label("#")
+                        add(field)
+                        label(":")
+                        label(servername)
                     }
+                    val getAlias = { "#${field.text}:$servername" }
+                    button("Add") { action { requestAddRoomAlias(room, getAlias()) } }
                 }
             }
         }

@@ -61,7 +61,7 @@ class RoomTopicContent(
 
 class RoomAvatarContent(
         val url: String,
-        val info: ImageInfo?
+        val info: ImageInfo?=null
 )
 
 class RoomPinnedEventsContent(
