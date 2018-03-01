@@ -10,7 +10,6 @@ import koma.storage.message.piece.DiscussionPiece
 import koma.storage.message.piece.first_event_id
 import koma_app.appState
 import kotlinx.coroutines.experimental.delay
-import retrofit2.HttpException
 import ru.gildor.coroutines.retrofit.await
 
 
@@ -24,18 +23,10 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
         val fetchkey = cur.prev_batch
         val res = try {
             koma.storage.message.fetch.doFetch(cur, roomid)
-        } catch (he: HttpException) {
-            if (he.code() == 404) {
-                println("stopping fetching history because of 404 at: ${cur.first_event_id()}")
-                break@loop
-            } else {
-                delay(1000)
-                continue@loop
-            }
         } catch (te: Throwable) {
+            println("stopping fetching history because of error at: ${cur.first_event_id()}")
             te.printStackTrace()
-            delay(1000)
-            continue@loop
+            break@loop
         }
         if (res == null) {
             println("stopping fetching history because of null at: ${cur.first_event_id()}")
