@@ -1,6 +1,8 @@
 package view
 
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
@@ -28,6 +30,11 @@ class ChatView(profile: Profile): View() {
     init {
         val roomList = profile.getRoomList()
         roomListView = RoomListView(roomList)
+
+        root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
+            if (e.code == KeyCode.PAGE_DOWN) switchableRoomView.scroll(true)
+            else if (e.code == KeyCode.PAGE_UP) switchableRoomView.scroll(false)
+        })
 
         with(root) {
             hbox() {

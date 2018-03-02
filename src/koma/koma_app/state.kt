@@ -5,11 +5,10 @@ import javafx.beans.property.SimpleObjectProperty
 import koma.storage.config.server.ServerConf
 import matrix.ApiClient
 import model.Room
-import java.util.*
 
 
 object appState {
-    val currRoom = SimpleObjectProperty<Optional<Room>>(Optional.empty())
+    val currRoom = SimpleObjectProperty<Room>()
 
     lateinit var chatController: ChatController
     var apiClient: ApiClient? = null
