@@ -2,8 +2,8 @@ package koma.gui.view.chatview
 
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.usersview.RoomMemberListView
+import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import model.Room
 import tornadofx.*
 
@@ -16,6 +16,8 @@ class JoinedRoomView(room: Room): View() {
 
     val messageRecvSendView = ChatRecvSendView(room)
     val usersListView = RoomMemberListView(room.members)
+
+    fun scroll(down: Boolean) = messageRecvSendView.scroll(down)
 
     init {
         with(root) {

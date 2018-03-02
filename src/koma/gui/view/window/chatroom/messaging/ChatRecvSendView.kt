@@ -1,8 +1,6 @@
 package koma.gui.view.window.chatroom.messaging
 
 import javafx.scene.control.TextField
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.controller.requests.sendMessage
 import koma.gui.view.window.chatroom.messaging.reading.MessagesListScrollPane
@@ -16,16 +14,8 @@ class ChatRecvSendView(room: Room): View() {
     private val messageScroll = MessagesListScrollPane(room)
     private val messageInput = TextField()
 
+    fun scroll(down: Boolean) = messageScroll.scrollPage(down)
     init {
-
-        root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
-            if (e.code == KeyCode.PAGE_DOWN) {
-                messageScroll.scrollPage(true)
-            } else if (e.code == KeyCode.PAGE_UP) {
-                messageScroll.scrollPage(false)
-            }
-        })
-
         with(root) {
             hgrow = Priority.ALWAYS
 
