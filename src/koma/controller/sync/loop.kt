@@ -1,13 +1,13 @@
 package koma.controller.sync
 
 import koma.matrix.sync.SyncResponse
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.chatController
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.selects.select
-import ru.gildor.coroutines.retrofit.awaitResult
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
@@ -44,7 +44,7 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
     val timeCheck = detectTimeLeap()
     launch {
         sync@ while (true) {
-            val ar = async {  client.getEvents(since).awaitResult() }
+            val ar = async {  client.getEvents(since).awaitMatrix() }
 
             val ss = select<SyncStatus> {
                 shutdownChan.onReceive { SyncStatus.Shutdown() }

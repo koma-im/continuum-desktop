@@ -5,28 +5,16 @@ import kotlinx.coroutines.experimental.CancellableContinuation
 import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.HttpException
 import retrofit2.Response
 
 /**
  * Suspend extension for [Call] that returns a result
  */
-suspend fun <T : Any> Call<T>.await(): Result<T, Exception> {
+suspend fun <T : Any> Call<T>.await(): Result<Response<T>, Exception> {
     return suspendCancellableCoroutine { continuation ->
         enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>?, response: Response<T>) {
-                continuation.resume(
-                        if (response.isSuccessful) {
-                            val body = response.body()
-                            if (body == null) {
-                                Result.error(NullPointerException("Response body is null"))
-                            } else {
-                                Result.of(body)
-                            }
-                        } else {
-                            Result.error(HttpException(response))
-                        }
-                )
+                continuation.resume(Result.of(response))
             }
 
             override fun onFailure(call: Call<T>, t: Throwable) {

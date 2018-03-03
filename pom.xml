@@ -98,11 +98,6 @@
             <version>0.19.3</version>
         </dependency>
         <dependency>
-            <groupId>ru.gildor.coroutines</groupId>
-            <artifactId>kotlin-coroutines-retrofit</artifactId>
-            <version>0.8.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.vdurmont</groupId>
             <artifactId>emoji-java</artifactId>
             <version>4.0.0</version>

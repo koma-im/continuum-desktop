@@ -2,6 +2,7 @@ package koma.network.media
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
+import koma.util.result.ok
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
@@ -31,7 +32,7 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
     private fun createImageProperty(url: HttpUrl, cacheDays: Int?): ImageProperty{
         val prop = ImageProperty()
         launch {
-            val bs = downloadMedia(url, cacheDays)
+            val bs = downloadMedia(url, cacheDays).ok()
             bs ?: return@launch
             val img = processing(bs.inputStream())
             launch(JavaFx) { prop.set(img) }

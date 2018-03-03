@@ -8,6 +8,7 @@ import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.network.media.getResponse
 import koma.storage.config.settings.AppSettings
+import koma.util.result.ok
 import kotlinx.coroutines.experimental.launch
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -26,7 +27,7 @@ class ImageElement(val url: HttpUrl): ViewNode {
         menuItems = menuItems()
 
         launch {
-            val res = getResponse(url) ?: return@launch
+            val res = getResponse(url).ok() ?: return@launch
             val image = Image(res.bytes().inputStream())
             if (image.width > imageSize) {
                 imageView.fitHeight = imageSize
