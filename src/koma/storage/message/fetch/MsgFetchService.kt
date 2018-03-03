@@ -24,8 +24,7 @@ suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
         val res = try {
             koma.storage.message.fetch.doFetch(cur, roomid)
         } catch (te: Throwable) {
-            println("stopping fetching history because of error at: ${cur.first_event_id()}")
-            te.printStackTrace()
+            println("stopping fetching history because of error ${te} at: ${cur.first_event_id()}")
             break@loop
         }
         if (res == null) {
