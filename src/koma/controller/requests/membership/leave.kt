@@ -1,14 +1,13 @@
 package koma.controller.requests.membership
 
 import com.github.kittinunf.result.Result
-import koma.util.coroutine.adapter.retrofit.MatrixException
+import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import model.Room
 import org.controlsfx.control.Notifications
-import retrofit2.HttpException
 import tornadofx.*
 
 fun leaveRoom(mxroom: Room) {
@@ -30,8 +29,7 @@ fun leaveRoom(mxroom: Room) {
                             .owner(FX.primaryStage)
                             .showWarning()
                 }
-                if ((ex is HttpException && ex.code() == 404)
-                        || (ex is MatrixException && ex.httpErr.code() == 404)) {
+                if ((ex is HttpException && ex.code == 404)) {
                     System.err.println()
                     removeLocally()
                 }

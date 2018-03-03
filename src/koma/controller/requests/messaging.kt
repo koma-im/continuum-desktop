@@ -1,5 +1,6 @@
 package koma.controller.requests
 
+import com.github.kittinunf.result.Result
 import domain.UploadResponse
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
@@ -9,12 +10,11 @@ import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import koma_app.appState.apiClient
 import kotlinx.coroutines.experimental.launch
 import okhttp3.MediaType
-import ru.gildor.coroutines.retrofit.Result
-import ru.gildor.coroutines.retrofit.awaitResult
 import tornadofx.*
 import kotlinx.coroutines.experimental.javafx.JavaFx as UI
 
@@ -22,17 +22,10 @@ fun sendMessage(room: RoomId, message: String) {
     val msg = textToMessage(message)
     val resultsend = apiClient!!.sendRoomMessage(room, msg)
     launch(UI) {
-        val result = resultsend.awaitResult()
-        when (result) {
-            is Result.Ok -> println("message $message sent: ${result.value}")
-            is Result.Error -> {
-                val content = "http error ${result.exception.code()}: ${result.exception.message()}"
-                alert(Alert.AlertType.ERROR, "failed to send message", content)
-            }
-            is Result.Exception -> {
-                val content = result.exception.localizedMessage
-                alert(Alert.AlertType.ERROR, "failed to send message", content)
-            }
+        val result = resultsend.awaitMatrix()
+        if (result is Result.Failure) {
+            val content = result.error.message
+            alert(Alert.AlertType.ERROR, "failed to send message", content)
         }
     }
 }
@@ -49,12 +42,12 @@ fun sendFileMessage(room: RoomId) {
     api?:return
     launch {
         val uploadResult = uploadFile(api, file, type)
-        if (uploadResult is Result.Ok) {
+        if (uploadResult is Result.Success) {
             val up: UploadResponse = uploadResult.value
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
-            api.sendRoomMessage(room, message).awaitResult()
+            api.sendRoomMessage(room, message).awaitMatrix()
         }
     }
 }
@@ -71,11 +64,11 @@ fun sendImageMessage(room: RoomId) {
     api?:return
     launch {
         val uploadResult = uploadFile(api, file, type)
-        if (uploadResult is Result.Ok) {
+        if (uploadResult is Result.Success) {
             val up: UploadResponse = uploadResult.value
             println("sending image $file ${up.content_uri}")
             val msg = ImageMessage(file.name, up.content_uri)
-            api.sendRoomMessage(room, msg).awaitResult()
+            api.sendRoomMessage(room, msg).awaitMatrix()
         }
     }
 }

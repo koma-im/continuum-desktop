@@ -1,7 +1,7 @@
 package koma.controller.sync
 
+import com.github.kittinunf.result.Result
 import koma.matrix.sync.SyncResponse
-import ru.gildor.coroutines.retrofit.Result
 import java.net.SocketTimeoutException
 
 sealed class SyncStatus {
@@ -11,18 +11,14 @@ sealed class SyncStatus {
     class Response(val response: SyncResponse): SyncStatus()
 }
 
-fun Result<SyncResponse>.inspect(): SyncStatus {
+fun Result<SyncResponse, Exception>.inspect(): SyncStatus {
     return when (this) {
-        is Result.Ok -> SyncStatus.Response(this.value)
-        is Result.Error -> {
-            SyncStatus.TransientFailure(500, this.exception)
-        }
-        is Result.Exception -> {
-            val ex = this.exception
-            if (ex is SocketTimeoutException) {
-                SyncStatus.TransientFailure(0, ex)
-            } else {
-                SyncStatus.TransientFailure(500, ex)
+        is Result.Success -> SyncStatus.Response(this.value)
+        is Result.Failure -> {
+            val ex = this.error
+            when (ex) {
+                is SocketTimeoutException -> SyncStatus.TransientFailure(0, ex)
+                else -> SyncStatus.TransientFailure(1500, ex)
             }
         }
     }

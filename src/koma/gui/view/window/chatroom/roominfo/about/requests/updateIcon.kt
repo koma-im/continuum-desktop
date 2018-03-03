@@ -11,7 +11,6 @@ import kotlinx.coroutines.experimental.launch
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
-import ru.gildor.coroutines.retrofit.Result as retroResult
 
 fun chooseUpdateRoomIcon(room: Room) {
     val api = appState.apiClient
@@ -21,7 +20,7 @@ fun chooseUpdateRoomIcon(room: Room) {
     val file = dialog.showOpenDialog(FX.primaryStage)
     launch {
         val upload = uploadFile(api, file)
-        if (upload is retroResult.Ok) {
+        if (upload is Result.Success) {
             val icon = RoomAvatarContent(upload.value.content_uri)
             val result = api.setRoomIcon(room.id, icon).awaitMatrix()
             if (result is Result.Failure) {

@@ -1,14 +1,12 @@
 package koma.matrix.publicapi.rooms
 
+import com.github.kittinunf.result.Result
 import domain.DiscoveredRoom
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
 import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.delay
 import retrofit2.HttpException
-import ru.gildor.coroutines.retrofit.Result
-import ru.gildor.coroutines.retrofit.awaitResult
-
 
 fun getPublicRooms() = produce<DiscoveredRoom>(capacity = 1) {
     val service = appState.apiClient?.service
@@ -16,9 +14,9 @@ fun getPublicRooms() = produce<DiscoveredRoom>(capacity = 1) {
     var since: String? = null
     var fetched = 0
     while (true) {
-        val call_res = service.publicRooms(since).awaitResult()
+        val call_res = service.publicRooms(since).awaitMatrix()
         when (call_res) {
-            is Result.Ok -> {
+            is Result.Success -> {
                 val roomBatch = call_res.value
                 val rooms = roomBatch.chunk
                 fetched += rooms.size

@@ -8,10 +8,10 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.message.MessageManager
 import koma.storage.message.piece.DiscussionPiece
 import koma.storage.message.piece.first_event_id
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.result.ok
 import koma_app.appState
 import kotlinx.coroutines.experimental.delay
-import ru.gildor.coroutines.retrofit.await
-
 
 suspend fun MessageManager.fetchEarlier(entry: DiscussionPiece) {
     var cur = entry
@@ -59,11 +59,11 @@ private suspend fun doFetch(piece: DiscussionPiece, roomid: RoomId): Pair<List<R
     return if (fetchkey == null) {
         val eventid = piece.first_event_id()
         eventid?: return null
-        val res = service.getEventContext(roomid, eventid).await()
+        val res = service.getEventContext(roomid, eventid).awaitMatrix().ok() ?: return null
         val msgs = res.messagesInChrono()
         Pair(msgs, res.earlierKey())
     } else {
-        val res = service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).await()
+        val res = service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).awaitMatrix().ok() ?: return null
         val msgs = res.messagesInChrono()
         Pair(msgs, res.earlierKey())
     }
