@@ -16,10 +16,12 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
-import org.fxmisc.flowless.Cell
 import tornadofx.*
 
-class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
+class MessageCell(val message: RoomEvent) {
+    val node
+        get() = _node
+
     private val _node: Node
 
     init {
@@ -29,9 +31,9 @@ class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
             is MRoomMessage -> MRoomMessageViewNode(message)
             else -> null
         }
-        if (vn == null)
+        if (vn == null) {
             _node = Region()
-        else {
+        } else {
             _node = vn.node
             _node.contextmenu {
                 this.items.addAll(vn.menuItems)
@@ -39,10 +41,14 @@ class MessageCell(val message: RoomEvent): Cell<RoomEvent, Node> {
             }
         }
     }
+}
 
-    override fun getNode(): Node {
-        return _node
-    }
+fun RoomEvent.supportedByDisplay(): Boolean
+        = when (this) {
+    is MRoomMember,
+    is MRoomCreate,
+    is MRoomMessage -> true
+    else -> false
 }
 
 interface ViewNode {

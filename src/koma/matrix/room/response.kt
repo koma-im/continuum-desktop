@@ -16,7 +16,7 @@ data class JoinedRoom(
         val timeline: Timeline<RoomEvent>
 )
 
-data class Timeline<T>(
+data class  Timeline<T>(
         val events: List<T>,
         val limited: Boolean?,
         val prev_batch: String?

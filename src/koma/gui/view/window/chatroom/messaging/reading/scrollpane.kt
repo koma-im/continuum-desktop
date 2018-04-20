@@ -6,29 +6,30 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.Scene
+import javafx.scene.control.ListCell
+import javafx.scene.control.ListView
+import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.stage.Window
-import koma.gui.view.window.chatroom.messaging.reading.display.MessageCell
+import javafx.util.Callback
+import koma.gui.element.control.KListView
 import koma.matrix.event.room_message.RoomEvent
 import koma.storage.config.settings.AppSettings
+import koma.storage.message.ShowLatest
+import koma.storage.message.VisibleRange
+import kotlinx.coroutines.experimental.launch
 import model.Room
-import org.fxmisc.flowless.VirtualFlow
-import org.fxmisc.flowless.VirtualizedScrollPane
 import org.reactfx.value.Val
 import tornadofx.*
 import kotlin.math.roundToInt
 
-typealias MessageFlow = VirtualFlow<RoomEvent, MessageCell>
-
 class MessagesListScrollPane(room: Room): View() {
     override val root = AnchorPane()
 
-    private val virtualList: MessageFlow
+    private val virtualList: KListView<RoomEvent>
 
     private val msgList: ObservableList<RoomEvent>
-
-    private val visibleMessages: ObservableList<MessageCell>
 
     // decide whether to scroll
     private val followingLatest = SimpleBooleanProperty(true)
@@ -38,32 +39,34 @@ class MessagesListScrollPane(room: Room): View() {
     private var lastTime: Long = 0
 
     fun scrollPage(scrollDown: Boolean) {
-        val dist =virtualList.height * 0.8
+        val scrollRatio = 0.8f
         if (scrollDown) {
-            virtualList.scrollYBy(dist)
-            onScrollDownwards()
+            virtualList.flow?.scroll(scrollRatio)
         } else {
-            virtualList.scrollYBy(-dist)
-            onScrollUpwards()
+            virtualList.flow?.scroll(-scrollRatio)
         }
     }
 
     fun scrollToBottom() {
         followingLatest.set(true)
-        virtualList.showAsLast(msgList.size)
-        onScrollDownwards()
+        virtualList.scrollTo(msgList.size - 1)
     }
 
     init {
         root.vgrow = Priority.ALWAYS
 
-        msgList = room.messageManager.messages
-        virtualList = VirtualFlow.createVertical(
-                msgList, { MessageCell(it) }, VirtualFlow.Gravity.REAR
-        )
+        msgList = room.messageManager.shownList
+        virtualList = KListView(msgList)
         virtualList.vgrow = Priority.ALWAYS
         virtualList.hgrow = Priority.ALWAYS
-        visibleMessages = virtualList.visibleCells()
+        launch {
+            with(room.messageManager.chan) {
+                send(ShowLatest)
+                send(VisibleRange(virtualList.visibleIndexRange))
+            }
+        }
+        virtualList.cellFactory = Callback<ListView<RoomEvent>, ListCell<RoomEvent>> {
+            RoomEventCell() }
 
         addVirtualScrollPane()
         addScrollBottomButton()
@@ -74,19 +77,14 @@ class MessagesListScrollPane(room: Room): View() {
     private fun setUpListeners() {
         msgList.lastOrNull()?.let { lastTime = it.origin_server_ts }
         msgList.addListener { e: ListChangeListener.Change<out RoomEvent> -> onAddedMessages(e) }
-        virtualList.setOnScroll { se ->
-            if (se.deltaY > 0) {
-                onScrollUpwards()
-            } else if (se.deltaY < 0) {
-                onScrollDownwards()
-            }
-        }
+        virtualList.addEventFilter(ScrollEvent.SCROLL, { _: ScrollEvent ->
+            onScroll()
+        })
     }
 
     private fun addVirtualScrollPane() {
-        val virtualScroll = VirtualizedScrollPane<MessageFlow>(virtualList)
+        val virtualScroll = virtualList
         virtualScroll.vgrow = Priority.ALWAYS
-
         AnchorPane.setTopAnchor(virtualScroll, 0.0)
         AnchorPane.setLeftAnchor(virtualScroll, 0.0)
         AnchorPane.setRightAnchor(virtualScroll, 0.0)
@@ -137,27 +135,15 @@ class MessagesListScrollPane(room: Room): View() {
 
     /**
      * remove the scrollToBottom button when the visible area goes downward
-     *
-     * visible cells may change
-     * because of mouse wheel scroll
-     * or PageUp PageDown
-     * or in the future swipe
      */
-    private fun onScrollDownwards() {
-        if (!followingLatest.get()) {
-            val visibleLatest = visibleMessages.lastOrNull()?.message?.origin_server_ts
-            if (visibleLatest != null && visibleLatest >= lastTime) {
-                followingLatest.set(true)
-            }
-        }
-    }
-
-    private fun onScrollUpwards() {
-        if (followingLatest.get()) {
-            val visibleLatest = visibleMessages.lastOrNull()?.message?.origin_server_ts
-            if (visibleLatest != null && visibleLatest < lastTime) {
-                followingLatest.set(false)
-            }
+    private fun onScroll() {
+        val visibleLastIndex = virtualList.visibleIndexRange.value?.endInclusive
+        visibleLastIndex ?:return
+        val loadedLastIndex = msgList.size - 1
+        if (visibleLastIndex >= loadedLastIndex - 2) {
+            followingLatest.set(true)
+        } else {
+            followingLatest.set(false)
         }
     }
 }

@@ -17,4 +17,6 @@ internal class NewTypeStringTest {
         // not the case
         // assertNotEquals(UserId(useridstr1).hashCode(), RoomId(useridstr1).hashCode())
     }
+
+
 }

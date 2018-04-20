@@ -22,7 +22,7 @@ import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.channels.ProducerJob
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
@@ -213,7 +213,7 @@ class RoomListView(
 
 private class RoomListingSource(
         val term: String,
-        val produce: ProducerJob<DiscoveredRoom>
+        val produce: ReceiveChannel<DiscoveredRoom>
 ) {
     override fun toString(): String {
         return if (term.isBlank()) "Listing for all public rooms"

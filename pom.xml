@@ -20,7 +20,7 @@
         <dependency>
             <groupId>no.tornado</groupId>
             <artifactId>tornadofx</artifactId>
-            <version>1.7.8</version>
+            <version>1.7.15</version>
         </dependency>
         <dependency>
             <groupId>org.cache2k</groupId>
@@ -55,12 +55,12 @@
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx-fontawesome</artifactId>
-            <version>4.7.0-5</version>
+            <version>4.7.0-9.1.2</version>
         </dependency>
        <dependency>
            <groupId>de.jensd</groupId>
            <artifactId>fontawesomefx-materialicons</artifactId>
-           <version>2.2.0-5</version>
+           <version>2.2.0-9.1.2</version>
        </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -70,7 +70,7 @@
         <dependency>
             <groupId>de.jensd</groupId>
             <artifactId>fontawesomefx-commons</artifactId>
-            <version>8.15</version>
+            <version>9.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.reactfx</groupId>
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>8.40.14</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.u1haru</groupId>
@@ -90,12 +90,12 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
-            <version>0.19.3</version>
+            <version>${kotlinx.coroutine.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-javafx</artifactId>
-            <version>0.19.3</version>
+            <version>${kotlinx.coroutine.version}</version>
         </dependency>
         <dependency>
             <groupId>com.vdurmont</groupId>
@@ -114,7 +114,8 @@
         </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>1.2.21</kotlin.version>
+        <kotlin.version>1.2.30</kotlin.version>
+        <kotlinx.coroutine.version>0.22.5</kotlinx.coroutine.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -130,6 +131,7 @@
                 <executions>
                     <execution>
                         <id>compile</id>
+                        <phase>process-sources</phase>
                         <goals> <goal>compile</goal> </goals>
                     </execution>
 
@@ -163,6 +165,14 @@
                             <mainClass>koma.koma_app.MainKt</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
                 </configuration>
             </plugin>
         </plugins>

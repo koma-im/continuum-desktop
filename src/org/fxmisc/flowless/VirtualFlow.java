@@ -79,25 +79,6 @@ public class VirtualFlow<T, C extends Cell<T, ?>> extends Region implements Virt
     }
 
     /**
-     * Creates a viewport that lays out content horizontally from left to right
-     */
-    public static <T, C extends Cell<T, ?>> VirtualFlow<T, C> createHorizontal(
-            ObservableList<T> items,
-            Function<? super T, ? extends C> cellFactory) {
-        return createHorizontal(items, cellFactory, Gravity.FRONT);
-    }
-
-    /**
-     * Creates a viewport that lays out content horizontally
-     */
-    public static <T, C extends Cell<T, ?>> VirtualFlow<T, C> createHorizontal(
-            ObservableList<T> items,
-            Function<? super T, ? extends C> cellFactory,
-            Gravity gravity) {
-        return new VirtualFlow<>(items, cellFactory, new HorizontalHelper(), gravity);
-    }
-
-    /**
      * Creates a viewport that lays out content vertically from top to bottom
      */
     public static <T, C extends Cell<T, ?>> VirtualFlow<T, C> createVertical(
