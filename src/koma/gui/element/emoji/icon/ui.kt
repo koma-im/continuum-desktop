@@ -1,13 +1,13 @@
 package koma.gui.element.emoji.icon
 
-import com.sun.javafx.scene.control.behavior.ButtonBehavior
-import com.sun.javafx.scene.control.skin.LabeledSkinBase
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.ButtonBase
+import javafx.scene.control.Label
 import javafx.scene.control.Skin
+import javafx.scene.control.skin.LabeledSkinBase
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.text.Font
@@ -30,6 +30,7 @@ class EmojiIcon (): ButtonBase() {
     }
 
     override fun createDefaultSkin(): Skin<*> {
+        Label()
         return EmojiIconSkin(this)
     }
 
@@ -67,6 +68,4 @@ class EmojiIcon (): ButtonBase() {
 }
 
 private class EmojiIconSkin(icon: EmojiIcon)
-    : LabeledSkinBase<EmojiIcon, ButtonBehavior<EmojiIcon>>(
-        icon, ButtonBehavior(icon)
-)
+    : LabeledSkinBase<EmojiIcon>(icon)

@@ -7,7 +7,9 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.storage.config.profile.Profile
+import koma.storage.message.AppendSync
 import koma_app.appState.sortMembersInEachRoom
+import kotlinx.coroutines.experimental.launch
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
 import matrix.room.LeftRoom
@@ -29,8 +31,9 @@ private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     data.state.events.forEach { room.applyUpdate(it) }
     val timeline = data.timeline
     timeline.events.forEach { room.applyUpdate(it) }
-    room.messageManager.appendTimeline(timeline)
-
+    launch {
+        room.messageManager.chan.send(AppendSync(timeline))
+    }
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data
 }

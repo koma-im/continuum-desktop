@@ -1,13 +1,11 @@
 package koma.matrix.event.room_message
 
-import com.squareup.moshi.Moshi
 import koma.matrix.UserId
 import koma.matrix.event.EventId
 import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.MessageUnsigned
-import koma.matrix.event.room_message.chat.getPolyMessageAdapter
 import koma.matrix.event.room_message.state.RoomRedactContent
-import koma.matrix.json.NewTypeStringAdapterFactory
+import koma.matrix.json.MoshiInstance
 
 // try to make moshi return different kind of objects depending on a key
 
@@ -20,6 +18,7 @@ abstract class RoomEvent(
     }
 
     override fun equals(other: Any?): Boolean {
+        other ?: return false
         val om = other as RoomEvent
         return this.event_id == om.event_id
     }
@@ -27,17 +26,12 @@ abstract class RoomEvent(
     override fun hashCode() = this.event_id.hashCode()
 
     companion object {
-        private val adapterOneline = Moshi.Builder()
-                .add(NewTypeStringAdapterFactory())
-                .add(getPolyRoomEventAdapter())
-                .add(getPolyMessageAdapter())
-                .build().adapter(RoomEvent::class.java)
-
-        private val adapterIndented = adapterOneline.indent("    ")
+        private val adapter = MoshiInstance.roomEventAdapter
+        private val adapterIndented = adapter.indent("    ")
     }
 
     fun toJson(indent: Boolean = false): String{
-        val adapter = if (indent) adapterIndented else adapterOneline
+        val adapter = if (indent) adapterIndented else adapter
         val json = adapter.toJson(this)
         return json
     }

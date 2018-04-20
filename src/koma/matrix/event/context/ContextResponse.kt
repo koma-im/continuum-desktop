@@ -6,6 +6,7 @@ import koma.matrix.event.room_message.RoomEvent
 data class ContextResponse(
         /**
          *A token that can be used to paginate backwards with.
+         * Actually, I'm afraid it can be null
          */
         val start: String,
         val end: String,
