@@ -5,13 +5,11 @@ import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.scene.Scene
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
-import javafx.stage.Window
 import javafx.util.Callback
 import koma.gui.element.control.KListView
 import koma.matrix.event.room_message.RoomEvent
@@ -20,7 +18,6 @@ import koma.storage.message.ShowLatest
 import koma.storage.message.VisibleRange
 import kotlinx.coroutines.experimental.launch
 import model.Room
-import org.reactfx.value.Val
 import tornadofx.*
 import kotlin.math.roundToInt
 
@@ -34,7 +31,7 @@ class MessagesListScrollPane(room: Room): View() {
     // decide whether to scroll
     private val followingLatest = SimpleBooleanProperty(true)
     // whether room is currently on screen
-    private val showing = Val.flatMap(this.root.sceneProperty(), Scene::windowProperty).flatMap(Window::showingProperty);
+    private val showing = this.root.sceneProperty().select { it.windowProperty() }.select { it.showingProperty() }
     // timestamp of last message
     private var lastTime: Long = 0
 
@@ -122,7 +119,7 @@ class MessagesListScrollPane(room: Room): View() {
                     if (added.size > 9) {
                         //added too much
                         followingLatest.set(false)
-                    } else if (!showing.getOrElse(false)) {
+                    } else if (showing.value != true) {
                         //new message in a not selected room
                         followingLatest.set(false)
                     } else {
