@@ -14,6 +14,7 @@ import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.event.room_message.state.RoomAvatarContent
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.event.room_message.state.RoomNameContent
+import koma.matrix.json.MoshiInstance
 import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
@@ -36,7 +37,6 @@ import koma.storage.config.profile.loadSyncBatchToken
 import koma.storage.config.profile.saveSyncBatchToken
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
-import koma.storage.config.settings.AppSettings
 import matrix.event.room_message.RoomEventType
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -367,7 +367,7 @@ interface MatrixLoginApi {
 
 fun login(userpass: UserPassword, serverConf: ServerConf):
         Call<AuthedUser> {
-    val moshi = Moshi.Builder().add(NewTypeStringAdapterFactory()).build()
+    val moshi = MoshiInstance.moshi
     val client = AppHttpClient.builderForServer(serverConf).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
@@ -399,29 +399,15 @@ interface MatrixRegisterApi {
 }
 
 fun register(userregi: UserRegistering, serverConf: ServerConf):
-        RegisterdUser? {
+        Call<RegisterdUser> {
     println("register user $userregi on ${serverConf.servername}")
-    val moshi = Moshi.Builder().add(NewTypeStringAdapterFactory()).build()
-    val proxy = AppSettings.getProxy()
-    val client = OkHttpClient.Builder().proxy(proxy).build()
+    val moshi = MoshiInstance.moshi
+    val client = AppHttpClient.builderForServer(serverConf).build()
     val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
     val service = retrofit.create(MatrixRegisterApi::class.java)
-    val auth_call: Call<RegisterdUser> = service.register(userregi)
-    val authed: retrofit2.Response<RegisterdUser> = auth_call.execute()
-    if (authed.isSuccessful) {
-        println("successful registeration")
-        val user: RegisterdUser? = authed.body()
-        return user
-    } else{
-        println("error code ${authed.code()}," +
-                "error message ${authed.message()}," +
-                "headers ${authed.headers()}, " +
-                "raw ${authed.raw()} " +
-                "body ${authed.body()}")
-        return null
-    }
+    return service.register(userregi)
 }
