@@ -1,4 +1,4 @@
-package koma.gui.view.window.chatroom.roominfo.about.requests
+package koma.gui.view.window.userinfo.actions
 
 import com.github.kittinunf.result.Result
 import javafx.stage.FileChooser
@@ -12,16 +12,23 @@ import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
-fun chooseUpdateRoomIcon(room: Room) {
+fun chooseUpdateUserAvatar(room: Room) {
     val api = appState.apiClient
     api ?: return
+
+            .subscribe {
+                apiClient.updateAvatar(apiClient.userId, AvatarUrl(it))
+            }
+
+
     val dialog = FileChooser()
-    dialog.title = "Upload a icon for the room"
+    dialog.title = "Upload a new avatar"
     val file = dialog.showOpenDialog(FX.primaryStage)
     file ?: return
     launch {
         val upload = uploadFile(api, file)
         if (upload is Result.Success) {
+            api.updateAvatar()
             val icon = RoomAvatarContent(upload.value.content_uri)
             val result = api.setRoomIcon(room.id, icon).awaitMatrix()
             if (result is Result.Failure) {

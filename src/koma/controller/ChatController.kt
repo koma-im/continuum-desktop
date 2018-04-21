@@ -1,10 +1,8 @@
 package controller
 
-import domain.AvatarUrl
 import domain.EmptyResult
 import javafx.concurrent.Task
 import javafx.scene.control.TextInputDialog
-import javafx.stage.FileChooser
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.startSyncing
 import kotlinx.coroutines.experimental.channels.Channel
@@ -12,9 +10,6 @@ import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
 import matrix.ApiClient
-import rx.lang.kotlin.filterNotNull
-import rx.schedulers.Schedulers
-import tornadofx.*
 
 /**
  * Created by developer on 2017/6/22.
@@ -25,24 +20,6 @@ class ChatController(
     private val shutdownSignalChan = Channel<Unit>()
 
     init{
-        guiEvents.updateAvatar.toObservable()
-                .map {
-                    val dialog = FileChooser()
-                    dialog.title = "Upload a file"
-
-                    val file = dialog.showOpenDialog(FX.primaryStage)
-                    file?.absolutePath
-                }
-                .filterNotNull()
-                .observeOn(Schedulers.io())
-                .map({
-                    val result = apiClient.uploadMedia(it)
-                    result?.content_uri
-                })
-                .filterNotNull()
-                .subscribe {
-                    apiClient.updateAvatar(apiClient.userId, AvatarUrl(it))
-                }
 
     }
 
