@@ -73,11 +73,6 @@
             <version>9.1.2</version>
         </dependency>
         <dependency>
-            <groupId>org.reactfx</groupId>
-            <artifactId>reactfx</artifactId>
-            <version>2.0-M5</version>
-        </dependency>
-        <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
             <version>9.0.0</version>
