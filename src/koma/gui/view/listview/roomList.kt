@@ -3,15 +3,12 @@ package koma.gui.view.listview
 import javafx.collections.ObservableList
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
-import javafx.scene.control.SelectionModel
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.storage.config.settings.AppSettings
 import koma_app.appState
 import model.Room
-import rx.javafx.kt.toObservable
-import rx.lang.kotlin.filterNotNull
 import tornadofx.*
 import view.RoomFragment
 
@@ -43,17 +40,9 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
         node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
         node.cellFragment(RoomFragment::class)
-        val selectionModel = node.selectionModel
-        switchRoomOnSelect(selectionModel)
+        node.selectionModel.selectedItemProperty().onChange { room ->
+            if (room != null) appState.currRoom.set(room)
+        }
    }
 }
-
-private fun switchRoomOnSelect(selectionModel: SelectionModel<Room>) {
-    selectionModel.selectedItemProperty().toObservable()
-            .filterNotNull()
-            .subscribe {
-                appState.currRoom.set(it)
-            }
-}
-
 

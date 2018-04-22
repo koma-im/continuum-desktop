@@ -16,8 +16,6 @@ import koma.matrix.user.identity.isUserIdValid
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.settings.AppSettings
-import rx.javafx.kt.toObservableNonNull
-import rx.lang.kotlin.filterNotNull
 import tornadofx.*
 import kotlinx.coroutines.experimental.launch as corolaunch
 
@@ -95,19 +93,14 @@ class LoginScreen(): View() {
                 }
             }
         }
-
-        set_up_listeners()
+        userId.selectionModel.selectedItem?.let { setServerAddr(it) }
+        userId.selectionModel.selectedItemProperty().onChange { it?.let { setServerAddr(it) } }
     }
 
-    private fun set_up_listeners(){
-        userId.selectionModel.selectedItemProperty().toObservableNonNull()
-                            .map{ UserId_new(it) }
-                            .filterNotNull()
-                            .map { loadServerConf(it.server).addresses }
-                            .filterNotNull()
-                            .subscribe {
-                                serverCombo.items = FXCollections.observableArrayList(it)
-                                serverCombo.selectionModel.selectFirst()
-                            }
+    private fun setServerAddr(input: String){
+        val id = UserId_new(input)
+        val addrs = loadServerConf(id.server).addresses
+        serverCombo.items = FXCollections.observableArrayList(addrs)
+        serverCombo.selectionModel.selectFirst()
     }
 }
