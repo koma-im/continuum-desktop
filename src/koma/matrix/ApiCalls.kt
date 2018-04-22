@@ -229,23 +229,8 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
           memId: UserId): Call<InviteMemResult> =
             service.inviteUser(room.id, token, InviteUserData(memId))
 
-    fun updateAvatar(user_id: UserId, avatarUrl: AvatarUrl): UpdateAvatarResult? {
-        println("updating avatar of $user_id to $avatarUrl")
-        val call: Call<UpdateAvatarResult> = service.updateAvatar(user_id, token, avatarUrl)
-        val resp: Response<UpdateAvatarResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
-    }
+    fun updateAvatar(user_id: UserId, avatarUrl: AvatarUrl): Call<UpdateAvatarResult>
+            = service.updateAvatar(user_id, token, avatarUrl)
 
     fun updateDisplayName(newname: String):EmptyResult? {
         val call: Call<EmptyResult> = service.updateDisplayName(
