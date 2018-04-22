@@ -385,12 +385,14 @@ class KListViewSkin<T>
         val sm = skinnable.selectionModel ?: return
 
         val pos = sm.selectedIndex
-        flow!!.scrollTo(pos)
+        if (pos < 0) return
+        flow.scrollTo(pos)
 
         // Fix for RT-11299
         val cell = flow.firstVisibleCell
         if (cell == null || pos < cell.index) {
-            flow.setPosition(pos / itemCount.toDouble())
+            val p = pos / itemCount.toDouble()
+            flow.setPosition(p)
         }
     }
 
