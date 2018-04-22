@@ -22,15 +22,15 @@ import java.util.*
 class ListViewBehavior<T>
 (control: ListView<T>) : BehaviorBase<ListView<T>>(control) {
 
-    override val inputMap: InputMap<ListView<T>>
+    override val inputMap: InputMap<ListView<T>> = createInputMap()
 
     private val keyEventListener = { e: KeyEvent ->
-        if (!e.isConsumed()) {
+        if (!e.isConsumed) {
             // RT-12751: we want to keep an eye on the user holding down the shift key,
             // so that we know when they enter/leave multiple selection mode. This
             // changes what happens when certain key combinations are pressed.
-            isShiftDown = e.getEventType() == KeyEvent.KEY_PRESSED && e.isShiftDown()
-            isShortcutDown = e.getEventType() == KeyEvent.KEY_PRESSED && e.isShortcutDown()
+            isShiftDown = e.eventType == KeyEvent.KEY_PRESSED && e.isShiftDown
+            isShortcutDown = e.eventType == KeyEvent.KEY_PRESSED && e.isShortcutDown
         }
     }
 
@@ -64,7 +64,7 @@ class ListViewBehavior<T>
                 }
             }
 
-            val shift = if (c.wasPermutated()) c.getTo() - c.getFrom() else 0
+            val shift = if (c.wasPermutated()) c.to - c.from else 0
 
             val sm = node.selectionModel
 
@@ -80,8 +80,8 @@ class ListViewBehavior<T>
             // we care about the situation where the selection changes, and there is no anchor. In this
             // case, we set a new anchor to be the selected index
             if (newAnchor == -1) {
-                val addedSize = c.getAddedSize()
-                newAnchor = if (addedSize > 0) c.getAddedSubList().get(addedSize - 1) else newAnchor
+                val addedSize = c.addedSize
+                newAnchor = if (addedSize > 0) c.addedSubList.get(addedSize - 1) else newAnchor
             }
         }
 
@@ -96,10 +96,10 @@ class ListViewBehavior<T>
 
             var newAnchor = if (hasAnchor()) anchor else 0
 
-            if (c.wasAdded() && c.getFrom() <= newAnchor) {
-                newAnchor += c.getAddedSize()
-            } else if (c.wasRemoved() && c.getFrom() <= newAnchor) {
-                newAnchor -= c.getRemovedSize()
+            if (c.wasAdded() && c.from <= newAnchor) {
+                newAnchor += c.addedSize
+            } else if (c.wasRemoved() && c.from <= newAnchor) {
+                newAnchor -= c.removedSize
             }
 
             anchor = if (newAnchor < 0) 0 else newAnchor
@@ -134,7 +134,6 @@ class ListViewBehavior<T>
     init {
 
         // create a map for listView-specific mappings
-        inputMap = createInputMap()
 
         // add focus traversal mappings
         addDefaultMapping(inputMap, *FocusTraversalInputMap.focusTraversalMappings)
@@ -171,7 +170,7 @@ class ListViewBehavior<T>
         // create OS-specific child mappings
         // --- mac OS
         val macInputMap = InputMap(control)
-        macInputMap.setInterceptor { event -> !Utils.MAC }
+        macInputMap.setInterceptor { _ -> !Utils.MAC }
         addDefaultMapping(macInputMap, InputMap.KeyMapping(KeyBinding(SPACE).shortcut().ctrl()) { e -> toggleFocusOwnerSelection() })
         addDefaultChildMap(inputMap, macInputMap)
 
