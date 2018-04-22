@@ -1,15 +1,13 @@
 package view
 
 import controller.ChatController
-import controller.guiEvents
 import koma.controller.requests.membership.ask_invite_member
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
+import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.storage.config.settings.AppSettings
-import rx.javafx.kt.actionEvents
-import rx.javafx.kt.addTo
 import tornadofx.*
 
 /**
@@ -45,8 +43,7 @@ class RootLayoutView(val controller: ChatController): View() {
                     }
                 }
                 menu("Me") {
-                    item("Upload media").actionEvents().addTo(
-                            guiEvents.updateAvatar)
+                    item("Update avatar").action { chooseUpdateUserAvatar() }
                     item("Update my name").action { controller.updateMyAlias() }
                 }
             }
