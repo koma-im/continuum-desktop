@@ -1343,9 +1343,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         if (cell != null) {
             scrollTo(cell)
         } else {
-            adjustPositionToIndex(index)
-            addAllToPile()
-            requestLayout()
+            return
         }
     }
 
