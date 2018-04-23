@@ -7,17 +7,6 @@ import koma_app.appState
 import okhttp3.HttpUrl
 
 /**
- * convert url to http(s) if it's not already one
- */
-fun makeAnyUrlHttp(url: String): HttpUrl? {
-    if (url.startsWith("mxc://")) {
-        val server = appState.serverConf
-        return server.mxcToHttp(url)
-    }
-    return HttpUrl.parse(url)
-}
-
-/**
  * convert mxc:// to https://
  */
 fun ServerConf.mxcToHttp(mxc: String): HttpUrl? {

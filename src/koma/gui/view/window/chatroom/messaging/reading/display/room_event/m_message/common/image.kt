@@ -1,19 +1,20 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common
 
+import com.github.kittinunf.result.success
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.network.media.getResponse
+import koma.network.media.MHUrl
+import koma.network.media.downloadMedia
 import koma.storage.config.settings.AppSettings
 import koma.util.result.ok
 import kotlinx.coroutines.experimental.launch
-import okhttp3.HttpUrl
 import tornadofx.*
 
-class ImageElement(val url: HttpUrl): ViewNode {
+class ImageElement(val url: MHUrl): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
@@ -27,8 +28,8 @@ class ImageElement(val url: HttpUrl): ViewNode {
         menuItems = menuItems()
 
         launch {
-            val res = getResponse(url).ok() ?: return@launch
-            val image = Image(res.bytes().inputStream())
+            val res = downloadMedia(url).ok() ?: return@launch
+            val image = Image(res.inputStream())
             if (image.width > imageSize) {
                 imageView.fitHeight = imageSize
                 imageView.fitWidth = imageSize
@@ -42,7 +43,9 @@ class ImageElement(val url: HttpUrl): ViewNode {
     private fun menuItems(): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.action {
-            downloadFileAs(url, title = "Save Image As")
+            url.toHttpUrl().success {
+                downloadFileAs(it, title = "Save Image As")
+            }
         }
         return listOf(tm)
     }
