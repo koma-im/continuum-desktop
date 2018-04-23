@@ -42,12 +42,10 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.*
 import java.io.File
-import java.io.FileInputStream
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 
@@ -211,19 +209,6 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
         return mediaService.uploadMedia(contentType.toString(), token, req)
     }
 
-    fun uploadMedia(file: String): UploadResponse? {
-        val instream = FileInputStream(File(file))
-        val buf = instream.readBytes()
-        val requestBody = RequestBody.create(MediaType.parse("application/octet-stream"), buf)
-        val res = mediaService.uploadMedia("application/octet-stream", token, requestBody).execute()
-        if (res.isSuccessful)
-            return res.body()
-        else {
-            println("error uploading $file code ${res.code()}, ${res.errorBody()}, ${res.body()}")
-            return null
-        }
-    }
-
     fun inviteMember(
           room: RoomId,
           memId: UserId): Call<InviteMemResult> =
@@ -232,24 +217,10 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
     fun updateAvatar(user_id: UserId, avatarUrl: AvatarUrl): Call<UpdateAvatarResult>
             = service.updateAvatar(user_id, token, avatarUrl)
 
-    fun updateDisplayName(newname: String):EmptyResult? {
-        val call: Call<EmptyResult> = service.updateDisplayName(
-                this.userId, token,
-                mapOf(Pair("displayname", newname)))
-        val resp: Response<EmptyResult>
-        try {
-            resp = call.execute()
-        } catch(e: Exception) {
-            e.printStackTrace()
-            return null
-        }
-        if (resp.isSuccessful) {
-            return resp.body()
-        } else{
-            println("error code ${resp.code()}, ${resp.errorBody()}, ${resp.body()}")
-            return null
-        }
-    }
+    fun updateDisplayName(newname: String): Call<EmptyResult>
+            = service.updateDisplayName(
+            this.userId, token,
+            mapOf(Pair("displayname", newname)))
 
     fun setRoomIcon(roomId: RoomId, content: RoomAvatarContent):Call<SendResult>
             = service.sendStateEvent(roomId, RoomEventType.Avatar, token, content)
