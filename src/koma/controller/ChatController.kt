@@ -1,8 +1,5 @@
 package controller
 
-import domain.EmptyResult
-import javafx.concurrent.Task
-import javafx.scene.control.TextInputDialog
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.startSyncing
 import kotlinx.coroutines.experimental.channels.Channel
@@ -39,21 +36,4 @@ class ChatController(
             shutdownSignalChan.receive()
         }
     }
-
-    fun updateMyAlias() {
-        val dia = TextInputDialog()
-        dia.title = "Update my alias"
-        val result = dia.showAndWait()
-        val newname = if (result.isPresent && result.get().isNotBlank())
-            result.get()
-        else
-            return
-        val task = object: Task<EmptyResult?>() {
-            override fun call(): EmptyResult? {
-                return apiClient.updateDisplayName(newname)
-            }
-        }
-        Thread(task).start()
-    }
-
 }

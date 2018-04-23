@@ -7,6 +7,7 @@ import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
+import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.storage.config.settings.AppSettings
 import tornadofx.*
 
@@ -44,7 +45,7 @@ class RootLayoutView(val controller: ChatController): View() {
                 }
                 menu("Me") {
                     item("Update avatar").action { chooseUpdateUserAvatar() }
-                    item("Update my name").action { controller.updateMyAlias() }
+                    item("Update my name").action { updateMyAlias() }
                 }
             }
         }
