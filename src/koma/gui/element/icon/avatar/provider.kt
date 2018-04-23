@@ -1,17 +1,17 @@
 package koma.gui.element.icon.avatar
 
+import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.map
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import koma.gui.element.icon.avatar.processing.processAvatar
-import koma.network.matrix.media.makeAnyUrlHttp
 import koma.network.media.ImgCacheProc
+import koma.network.media.MHUrl
 
 
 object AvatarProvider: ImgCacheProc({i -> processAvatar(i)}) {
 
-    fun getAvatar(uri: String): SimpleObjectProperty<Image>? {
-        val url = makeAnyUrlHttp(uri)
-        url ?: return null
-        return getProcImg(url)
-    }
+    fun getAvatar(uri: String): Result<SimpleObjectProperty<Image>, Exception>
+            = MHUrl.fromStr(uri).map { getProcImg(it) }
+
 }

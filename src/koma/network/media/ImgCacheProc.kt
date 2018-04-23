@@ -5,7 +5,6 @@ import javafx.scene.image.Image
 import koma.util.result.ok
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
-import okhttp3.HttpUrl
 import org.cache2k.Cache
 import org.cache2k.Cache2kBuilder
 import org.cache2k.configuration.Cache2kConfiguration
@@ -20,19 +19,19 @@ typealias ImageProperty = SimpleObjectProperty<Image>
  * using the same Image is probably more efficient
  */
 open class ImgCacheProc(val processing: (InputStream) -> Image) {
-    private val cache: Cache<HttpUrl, ImageProperty>
+    private val cache: Cache<MHUrl, ImageProperty>
 
     init {
         cache = createCache()
     }
 
-    fun getProcImg(url: HttpUrl, cacheDays: Int? = null): ImageProperty
-            = cache.computeIfAbsent(url, { createImageProperty(url, cacheDays) })
+    fun getProcImg(url: MHUrl): ImageProperty
+            = cache.computeIfAbsent(url, { createImageProperty(url) })
 
-    private fun createImageProperty(url: HttpUrl, cacheDays: Int?): ImageProperty{
+    private fun createImageProperty(url: MHUrl): ImageProperty{
         val prop = ImageProperty()
         launch {
-            val bs = downloadMedia(url, cacheDays).ok()
+            val bs = downloadMedia(url).ok()
             bs ?: return@launch
             val img = processing(bs.inputStream())
             launch(JavaFx) { prop.set(img) }
@@ -40,8 +39,8 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
         return prop
     }
 
-    private fun createCache(): Cache<HttpUrl, ImageProperty> {
-        val conf = Cache2kConfiguration<HttpUrl, ImageProperty>()
+    private fun createCache(): Cache<MHUrl, ImageProperty> {
+        val conf = Cache2kConfiguration<MHUrl, ImageProperty>()
         val cache = Cache2kBuilder.of(conf)
                 .entryCapacity(300)
         return cache.build()

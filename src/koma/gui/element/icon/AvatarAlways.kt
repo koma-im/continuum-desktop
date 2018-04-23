@@ -9,6 +9,7 @@ import javafx.scene.paint.Color
 import koma.gui.element.icon.avatar.AvatarProvider
 import koma.gui.element.icon.placeholder.AvatarPlaceholder
 import koma.storage.config.settings.AppSettings
+import koma.util.result.ok
 import tornadofx.*
 
 
@@ -48,7 +49,7 @@ class AvatarAlways private constructor(urlV: ObservableValue<String>, ap: Avatar
 
     private fun updateImage(urlV: ObservableValue<String>) {
         val imp =  urlV.select { url ->
-            AvatarProvider.getAvatar(url) ?: SimpleObjectProperty<Image>()
+            AvatarProvider.getAvatar(url).ok() ?: SimpleObjectProperty<Image>()
         }
         this.imageView.imageProperty().bind(imp)
     }

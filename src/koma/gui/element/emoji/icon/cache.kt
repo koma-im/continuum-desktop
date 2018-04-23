@@ -3,6 +3,7 @@ package koma.gui.element.emoji.icon
 import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
 import koma.network.media.ImgCacheProc
+import koma.network.media.MHUrl
 import koma.storage.config.settings.AppSettings
 import okhttp3.HttpUrl
 import java.io.InputStream
@@ -12,7 +13,7 @@ object EmojiCache: ImgCacheProc({ i -> processEmoji(i) }) {
     fun getEmoji(emoji: String): ObservableValue<Image> {
         val code = getEmojiCode(emoji)
         val url = getCdnEmojiUrl(code)
-        return getProcImg(url, 365)
+        return getProcImg(MHUrl.Http(url,365 * 86400))
     }
 }
 
