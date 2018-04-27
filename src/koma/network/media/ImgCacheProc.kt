@@ -5,6 +5,7 @@ import javafx.scene.image.Image
 import koma.util.result.ok
 import kotlinx.coroutines.experimental.javafx.JavaFx
 import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import org.cache2k.Cache
 import org.cache2k.Cache2kBuilder
 import org.cache2k.configuration.Cache2kConfiguration
@@ -34,7 +35,7 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
             val bs = downloadMedia(url).ok()
             bs ?: return@launch
             val img = processing(bs.inputStream())
-            launch(JavaFx) { prop.set(img) }
+            withContext(JavaFx) { prop.set(img) }
         }
         return prop
     }
