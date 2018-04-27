@@ -80,6 +80,24 @@ sealed class MHUrl {
         }
     }
 
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        return (this is Mxc && other is Mxc && this.mxc == other.mxc)
+        || (this is Http && other is Http && this.http == other.http && this.maxStale == other.maxStale)
+    }
+
+    override fun hashCode(): Int {
+        return when (this ) {
+            is Mxc -> this.mxc.hashCode()
+            is Http -> this.http.hashCode() * 31 + (this.maxStale ?: 0)
+        }
+    }
+
+
+
     companion object {
         fun fromStr(url: String): Result<MHUrl, Exception>{
             if (url.startsWith("mxc://")) {
