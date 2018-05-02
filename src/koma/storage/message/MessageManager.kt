@@ -46,11 +46,7 @@ class MessageManager(val roomId: RoomId) {
                 is ShowLatest -> showLatest()
                 is VisibleRange -> { visibleRange.cleanBind(msg.property) }
                 is StartFetchEarlier -> startFetchEarlierOnce(msg.index)
-                is PrependFetched -> {
-                    val ns = prependFetched(msg.key, msg.messages)
-                    val ne = if(ns.fetchEarlierStarted) null else ns
-                    msg.newEdge.complete(ne)
-                }
+                is PrependFetched -> prependFetched(msg)
                 is FillUi -> fillViewBefore(msg.key)
             }
         }
@@ -170,14 +166,19 @@ class MessageManager(val roomId: RoomId) {
     }
 
 
-    private suspend fun prependFetched(key: Long, elements: List<RoomEvent>): Segment {
-        return if (prependTo(key, elements)) {
-            findLowEnd(key)
+    private suspend fun prependFetched(msg: PrependFetched) {
+        val key = msg.key
+        val elements = msg.messages
+        if (prependTo(key, elements)) {
+            val ns = findLowEnd(key)
+            val ne = if (ns.fetchEarlierStarted) null else ns
+            msg.newEdge.complete(ne)
         } else {
             val s = this.segDir.get(key)!!
-            s
+            msg.newEdge.complete(s)
         }
     }
+
     /**
      * returns whether it is united with the neighboring segment
      */
