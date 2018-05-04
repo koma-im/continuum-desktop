@@ -35,11 +35,11 @@ suspend fun fetchEarlier(
                 }
             }
             is Result.Success -> {
-                if (r.value.prevKey == segment.prev_batch) {
+                if (r.value.prevKey == segment.meta.prev_batch) {
                     println("No more batches before $segment in $roomId")
                     break@fetch
                 }
-                segment.prev_batch = r.value.prevKey
+                segment.meta.prev_batch = r.value.prevKey
                 val msg = PrependFetched(
                         segment.key, r.value.messages,
                         CompletableDeferred())
