@@ -44,8 +44,7 @@ class NewTypeStringAdapterFactory: JsonAdapter.Factory {
 
         @Throws(IOException::class)
         override fun toJson(writer: JsonWriter, value: NewTypeString?) {
-            if (value == null) throw JsonDataException("can't encode null as $name")
-            toJsonDelegate.toJson(writer, value.str)
+            toJsonDelegate.toJson(writer, value?.str)
         }
     }
 }

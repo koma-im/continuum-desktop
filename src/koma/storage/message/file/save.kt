@@ -2,6 +2,7 @@ package koma.storage.message.file
 
 import com.squareup.moshi.JsonDataException
 import koma.storage.message.piece.Segment
+import koma.util.common.eprintln
 
 fun Segment.save() {
     val seg = this
@@ -18,13 +19,17 @@ fun Segment.save() {
             writer.append(line)
             writer.append('\n')
         } catch (e: JsonDataException) {
+            eprintln("Failed to encode $mesg: $e")
         }
     }
     try {
         writer.append("# metadata ")
-        writer.append(Segment.Metadata.adapter.toJson(seg.meta))
+        val info = Segment.Metadata.adapter.toJson(seg.meta)
+        writer.append(info)
         writer.append("\n")
-    } catch (e: JsonDataException) {}
+    } catch (e: JsonDataException) {
+        eprintln("Failed to encode ${seg.meta}: $e")
+    }
     writer.close()
     seg.savedHash = list.hashCode()
 }
