@@ -20,7 +20,11 @@ fun Segment.save() {
         } catch (e: JsonDataException) {
         }
     }
-    seg.following_event?.let { writer.append("# following_event " + it + "\n") }
+    try {
+        writer.append("# metadata ")
+        writer.append(Segment.Metadata.adapter.toJson(seg.meta))
+        writer.append("\n")
+    } catch (e: JsonDataException) {}
     writer.close()
     seg.savedHash = list.hashCode()
 }

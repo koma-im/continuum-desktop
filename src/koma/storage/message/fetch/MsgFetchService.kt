@@ -17,9 +17,10 @@ suspend fun doFetch(piece: Segment, roomid: RoomId)
     if (service == null) {
         return Result.error(NullPointerException("no service for loading messages"))
     }
-    val fetchkey = piece.prev_batch
+    val fetchkey = piece.meta.prev_batch
     return if (fetchkey == null) {
         val eventid = piece.list.first().event_id
+        println("Warning: trying to get pagination token by getting the context of $eventid")
         service.getEventContext(roomid, eventid).awaitMatrix().map { res ->
             FetchedBatch.fromContextBackward(res)
         }

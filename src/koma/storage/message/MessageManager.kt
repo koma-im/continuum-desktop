@@ -156,7 +156,7 @@ class MessageManager(val roomId: RoomId) {
             if (newk != null) {
                 val new = this.get(newk)!!
                 if (new.list.firstOrNull() == first) {
-                    new.prev_batch = timeline.prev_batch
+                    new.meta.prev_batch = timeline.prev_batch
                 }
                 addToUi(newk, new.list)
                 chan.send(StartFetchEarlier(newk))
