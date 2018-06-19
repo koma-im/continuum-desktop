@@ -25,11 +25,19 @@
 
 ## Requirements
 
-Java runtime version 8, with JavaFx. You may need to install openjfx if you are using Linux OS.
+Java runtime version 9 or higher.
+
+##### Notes for Linux users
+
+JavaFx 9 may not be included if Java is installed using the package manager.
+Usually, the easiest solution is to install Java
+from the
+[official site](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
+which has JavaFx bundled.
 
 ## Get a compiled package
 
-[Click to download](https://jitpack.io/com/github/koma-im/koma/a737923/koma-a737923-jar-with-dependencies.jar)
+[Click to download](https://github.com/koma-im/koma/releases/download/0.7.3/koma-0.7.3-standalone.jar)
 
 ## Alternatively, use the source
 
