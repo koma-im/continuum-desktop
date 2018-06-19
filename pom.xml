@@ -97,7 +97,7 @@
         <kotlin.version>1.2.30</kotlin.version>
         <kotlinx.coroutine.version>0.22.5</kotlinx.coroutine.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <build>
@@ -138,7 +138,7 @@
                 </executions>
                 <configuration>
                     <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                        <descriptorRef>standalone</descriptorRef>
                     </descriptorRefs>
                     <archive>
                         <manifest>
@@ -150,6 +150,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+		<version>3.7.0</version>
                 <configuration>
                     <source>9</source>
                     <target>9</target>
