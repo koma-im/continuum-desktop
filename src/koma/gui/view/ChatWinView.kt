@@ -70,13 +70,7 @@ class RoomFragment: ListCellFragment<Room>() {
             }
 
         }
-        val iconsize = scale * 32.0
-        hyperlink {
-            graphic = AvatarAlways(iconUrl, room.name, room.color)
-            minHeight = iconsize
-            minWidth = iconsize
-            action { openInfoView() }
-        }
+        add(AvatarAlways(iconUrl, room.name, room.color))
 
         label(room.name) {
             textFillProperty().bind(room.color)
