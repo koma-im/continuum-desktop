@@ -19,7 +19,6 @@ import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import koma.storage.users.UserStore
-import model.room.user.RoomUserMap
 import tornadofx.*
 
 
@@ -38,10 +37,6 @@ class Room(val id: RoomId) {
 
     val messageManager by lazy { MessageManager(id) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
-    /**
-     * including power levels of members
-     */
-    val userStates = RoomUserMap()
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -60,7 +55,7 @@ class Room(val id: RoomId) {
             iconURLProperty.set(value)
         }
 
-    val power_levels = mutableMapOf<String, Double>()
+    var power_levels: RoomPowerLevelsContent? = null
 
     val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
 
@@ -113,9 +108,7 @@ class Room(val id: RoomId) {
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
-        power_levels.putAll(roomPowerLevel.events.mapValues { it.value.toDouble() })
-        for (user in roomPowerLevel.users)
-            userStates.get(user.key).power = user.value
+        this.power_levels = roomPowerLevel
     }
 
     override fun toString(): String {

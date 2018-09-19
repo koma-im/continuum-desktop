@@ -1,6 +1,7 @@
 package koma.storage.rooms.state
 
 import com.squareup.moshi.Moshi
+import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.participation.RoomJoinRules
@@ -9,7 +10,6 @@ import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.config.config_paths
 import model.Room
-import model.room.user.RoomUserMap
 import java.io.File
 import java.io.IOException
 
@@ -54,7 +54,7 @@ private fun Room.saveUnsync(){
         file.writeText(json)
     } catch (e: IOException) {
     }
-    save_room_members(dir, this.members.sorted(), this.userStates)
+    save_room_members(dir, this.members.sorted())
 }
 
 class SavedRoomState (
@@ -64,10 +64,10 @@ class SavedRoomState (
     val history_visibility: HistoryVisibility,
     val name: String?,
     val icon_Url: String,
-    val power_levels: Map<String, Double>
+    val power_levels: RoomPowerLevelsContent?
 )
 
-fun save_room_members(dir: String, users: List<UserState>, userState: RoomUserMap) {
+fun save_room_members(dir: String, users: List<UserState>) {
     val filename = dir + File.separator + usersfilename
     val file = File(filename)
     file.writeText("")
@@ -75,11 +75,6 @@ fun save_room_members(dir: String, users: List<UserState>, userState: RoomUserMa
     for (user in users) {
         val u = user.id.toString()
         writer.append(u)
-        val p = userState.get(user.id).power
-        if (p != null) {
-            writer.append(' ')
-            writer.append(p.toString())
-        }
         writer.append('\n')
     }
     writer.close()
