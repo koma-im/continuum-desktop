@@ -11,6 +11,7 @@ import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.storage.config.profile.Profile
 import koma.storage.config.settings.AppSettings
+import koma_app.appState.apiClient
 import model.Room
 import model.RoomItemModel
 import tornadofx.*
@@ -79,8 +80,9 @@ class RoomFragment: ListCellFragment<Room>() {
 
     private fun openInfoView() {
         val room = itemProperty.value
-        if (room != null) {
-            RoomInfoDialog(room).openWindow()
+        val user = apiClient?.userId
+        if (room != null && user != null) {
+            RoomInfoDialog(room, user).openWindow()
         }
     }
 }

@@ -49,16 +49,12 @@ private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     room.histVisibility = savedRoomState.history_visibility
     room.joinRule = savedRoomState.join_rule
     room.visibility = savedRoomState.visibility
-    room.power_levels.putAll(savedRoomState.power_levels)
+    room.power_levels = savedRoomState.power_levels
 
     val members = load_members(roomDir.resolve(usersfilename))
     for (m in members) {
         val u = UserId_new(m.first)
         room.members.add(UserStore.getOrCreateUserId(u))
-        val l = m.second
-        if (l != null) {
-            room.userStates.get(u).power = l
-        }
     }
     return room
 }
