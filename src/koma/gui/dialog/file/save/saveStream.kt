@@ -3,8 +3,10 @@ package koma.gui.dialog.file.save
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
 import koma.network.media.saveUrlToFile
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -16,9 +18,9 @@ fun downloadFileAs(url: HttpUrl, filename: String = url.guessFileName(), title: 
     val file = dialog.showSaveDialog(FX.primaryStage)
     file?:return
 
-    launch {
+    GlobalScope.launch {
         if (!saveUrlToFile(url, file))
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR,
                         "Something went wrong while downloading file",
                         "Source: $url\nDestination: $file")

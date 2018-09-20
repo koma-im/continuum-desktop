@@ -4,8 +4,10 @@ import com.github.kittinunf.result.Result
 import javafx.scene.control.TextInputDialog
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.apiClient
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -19,11 +21,11 @@ fun updateMyAlias() {
         return
     val api = apiClient
     api?:return
-    launch {
+    GlobalScope.launch {
         val result = api.updateDisplayName(newname).awaitMatrix()
         when (result) {
             is Result.Failure -> {
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to update nick name")
                             .text(result.error.message.toString())

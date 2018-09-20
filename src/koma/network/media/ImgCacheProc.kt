@@ -3,9 +3,11 @@ package koma.network.media
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import koma.util.result.ok
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.cache2k.Cache
 import org.cache2k.Cache2kBuilder
 import org.cache2k.configuration.Cache2kConfiguration
@@ -31,11 +33,11 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
 
     private fun createImageProperty(url: MHUrl): ImageProperty{
         val prop = ImageProperty()
-        launch {
+        GlobalScope.launch {
             val bs = downloadMedia(url).ok()
             bs ?: return@launch
             val img = processing(bs.inputStream())
-            withContext(JavaFx) { prop.set(img) }
+            withContext(Dispatchers.JavaFx) { prop.set(img) }
         }
         return prop
     }

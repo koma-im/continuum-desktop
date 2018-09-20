@@ -12,13 +12,14 @@ import koma.storage.message.file.SegmentsDirectory
 import koma.storage.message.file.get_log_path
 import koma.storage.message.piece.Segment
 import koma.util.observable.list.concat.TreeConcatList
-import kotlinx.coroutines.experimental.DefaultDispatcher
-import kotlinx.coroutines.experimental.channels.actor
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.withContext
 import matrix.room.Timeline
 import tornadofx.*
-import kotlinx.coroutines.experimental.launch as corolaunch
+import kotlinx.coroutines.launch as corolaunch
 
 class MessageManager(val roomId: RoomId) {
     // added to UI, needs to be modified on FX thread
@@ -39,7 +40,7 @@ class MessageManager(val roomId: RoomId) {
         value?.endInclusive?.let { concatList.locateKey(it)?.key } ?: -1
     }
 
-    val chan = actor<MessageManagerMsg> {
+    val chan = GlobalScope.actor<MessageManagerMsg> {
         for (msg in channel) {
             when (msg) {
                 is AppendSync -> appendTimeline(msg.timeline)
@@ -55,7 +56,7 @@ class MessageManager(val roomId: RoomId) {
     init {
         visibleLast.onChange {
             if (it > 42) {
-                corolaunch {
+                GlobalScope.corolaunch {
                     chan.send(FillUi(it))
                 }
             }
@@ -69,12 +70,12 @@ class MessageManager(val roomId: RoomId) {
             s.fetchEarlierStarted = true
             val sl = findLowEnd(s.key)
             if (sl.key == s.key) {
-                corolaunch {
+                GlobalScope.corolaunch {
                     fetchEarlier(chan, s, visibleKey, roomId)
                 }
             } else if (!sl.fetchEarlierStarted) {
                 sl.fetchEarlierStarted = true
-                corolaunch {
+                GlobalScope.corolaunch {
                     fetchEarlier(chan, sl, visibleKey, roomId)
                 }
             }
@@ -97,12 +98,12 @@ class MessageManager(val roomId: RoomId) {
         last ?: return
         addToUi(last.key, last.list)
         fillViewBefore(last.key)
-        corolaunch { chan.send(StartFetchEarlier(last.key)) }
+        GlobalScope.corolaunch { chan.send(StartFetchEarlier(last.key)) }
     }
     private suspend fun addToUi(key: Long, list: ObservableList<RoomEvent>) {
         if (this.concatList.containsKey(key)) return
-        withContext(JavaFx) {
-            this.concatList.put(key, list)
+        withContext(Dispatchers.JavaFx) {
+            concatList.put(key, list)
         }
     }
     /**
@@ -186,7 +187,7 @@ class MessageManager(val roomId: RoomId) {
         val n_all = elements.size
         val newelements = filterPre(key, elements)
         val p = this.segDir[key]!!
-        withContext(if (concatList.containsKey(key)) JavaFx else DefaultDispatcher) {
+        withContext(if (concatList.containsKey(key)) Dispatchers.JavaFx else Dispatchers.Default) {
             p.list.addAll(0, newelements)
         }
         return newelements.size < n_all

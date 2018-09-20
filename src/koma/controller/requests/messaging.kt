@@ -13,15 +13,17 @@ import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import koma_app.appState.apiClient
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import tornadofx.*
-import kotlinx.coroutines.experimental.javafx.JavaFx as UI
+import kotlinx.coroutines.javafx.JavaFx as UI
 
 fun sendMessage(room: RoomId, message: String) {
     val msg = textToMessage(message)
     val resultsend = apiClient!!.sendRoomMessage(room, msg)
-    launch(UI) {
+    GlobalScope.launch(Dispatchers.UI) {
         val result = resultsend.awaitMatrix()
         if (result is Result.Failure) {
             val content = result.error.message
@@ -40,7 +42,7 @@ fun sendFileMessage(room: RoomId) {
     val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
     val api = apiClient
     api?:return
-    launch {
+    GlobalScope.launch {
         val uploadResult = uploadFile(api, file, type)
         if (uploadResult is Result.Success) {
             val up: UploadResponse = uploadResult.value
@@ -62,7 +64,7 @@ fun sendImageMessage(room: RoomId) {
     val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
     val api = apiClient
     api?:return
-    launch {
+    GlobalScope.launch {
         val uploadResult = uploadFile(api, file, type)
         if (uploadResult is Result.Success) {
             val up: UploadResponse = uploadResult.value

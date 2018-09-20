@@ -8,10 +8,10 @@ import koma.storage.message.PrependFetched
 import koma.storage.message.piece.Segment
 import koma.util.coroutine.observable.updates
 import koma.util.observable.list.concat.TreeConcatList
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.channels.SendChannel
-import kotlinx.coroutines.experimental.channels.filterNotNull
-import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.filterNotNull
+import kotlinx.coroutines.delay
 import retrofit2.HttpException
 
 suspend fun fetchEarlier(

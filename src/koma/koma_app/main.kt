@@ -8,7 +8,7 @@ import koma.gui.save_win_geometry
 import koma_app.appState
 import tornadofx.*
 import view.LoginScreen
-import kotlinx.coroutines.experimental.javafx.JavaFx as UI
+import kotlinx.coroutines.javafx.JavaFx as UI
 
 fun main(args: Array<String>) {
     Application.launch(KomaApp::class.java, *args)

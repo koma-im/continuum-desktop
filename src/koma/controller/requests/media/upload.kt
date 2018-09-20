@@ -5,7 +5,10 @@ import domain.UploadResponse
 import javafx.scene.control.Alert
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import matrix.ApiClient
 import okhttp3.MediaType
 import tornadofx.*
@@ -20,7 +23,7 @@ suspend fun uploadFile(api: ApiClient, file: File, filetype: MediaType? = null):
     if (uploadResult is Result.Failure ) {
         val ex = uploadResult.error
         val error = "during upload: error ${ex.message}"
-        launch(kotlinx.coroutines.experimental.javafx.JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             alert(Alert.AlertType.ERROR, error)
         }
     }

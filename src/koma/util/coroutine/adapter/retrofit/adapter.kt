@@ -1,11 +1,12 @@
 package koma.util.coroutine.adapter.retrofit
 
 import com.github.kittinunf.result.Result
-import kotlinx.coroutines.experimental.CancellableContinuation
-import kotlinx.coroutines.experimental.suspendCancellableCoroutine
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.coroutines.resume
 
 /**
  * Suspend extension for [Call] that returns a result
@@ -29,7 +30,7 @@ suspend fun <T : Any> Call<T>.await(): Result<Response<T>, Exception> {
 }
 
 private fun Call<*>.registerOnCompletion(continuation: CancellableContinuation<*>) {
-    continuation.invokeOnCompletion {
+    continuation.invokeOnCancellation {
         if (continuation.isCancelled)
             try {
                 cancel()

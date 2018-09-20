@@ -6,8 +6,10 @@ import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -18,12 +20,12 @@ fun chooseUpdateUserAvatar() {
     dialog.title = "Upload a new avatar"
     val file = dialog.showOpenDialog(FX.primaryStage)
     file ?: return
-    launch {
+    GlobalScope.launch {
         val upload = uploadFile(api, file)
         when (upload) {
             is Result.Failure -> {
                 val message = upload.error.message
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to upload new avatar")
                             .text(message.toString())
@@ -36,7 +38,7 @@ fun chooseUpdateUserAvatar() {
                 val result = api.updateAvatar(api.userId, data).awaitMatrix()
                 if (result is Result.Failure) {
                     val message = result.error.message
-                    launch(JavaFx) {
+                    launch(Dispatchers.JavaFx) {
                         Notifications.create()
                                 .title("Failed to set new avatar")
                                 .text(message.toString())

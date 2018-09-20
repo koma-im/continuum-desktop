@@ -3,13 +3,13 @@ package koma.controller.sync
 import koma.matrix.sync.SyncResponse
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.chatController
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.selects.select
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.selects.select
 import java.time.Instant
-import java.util.concurrent.TimeUnit
 
 val longPollTimeout = 50
 
@@ -19,9 +19,9 @@ val longPollTimeout = 50
 fun detectTimeLeap(): Channel<Unit> {
     val timeleapSignal = Channel<Unit>(Channel.CONFLATED)
     var prev = Instant.now().epochSecond
-    launch {
+    GlobalScope.launch {
         while (true) {
-            delay(1, TimeUnit.SECONDS)
+            delay(1000000) // should be 1 sec
             val now = Instant.now().epochSecond
             if (now - prev > 2) {
                 println("detected time leap from $prev to $now")
@@ -42,9 +42,9 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
     val client = chatController.apiClient
 
     val timeCheck = detectTimeLeap()
-    launch {
+    GlobalScope.launch {
         sync@ while (true) {
-            val ar = async {  client.getEvents(since).awaitMatrix() }
+            val ar = GlobalScope.async {  client.getEvents(since).awaitMatrix() }
 
             val ss = select<SyncStatus> {
                 shutdownChan.onReceive { SyncStatus.Shutdown() }
