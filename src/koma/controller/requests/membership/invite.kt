@@ -7,8 +7,10 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.apiClient
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import tornadofx.*
 import java.util.*
 
@@ -24,7 +26,7 @@ fun ask_invite_member() {
     val roomid = room_user.first
 
     val userid = UserId_new(username)
-    launch(JavaFx) {
+    GlobalScope.launch(Dispatchers.JavaFx) {
         val result = apiClient!!.inviteMember(RoomId(roomid), userid).awaitMatrix()
         if (result is Result.Failure) {
             val content = result.error.message

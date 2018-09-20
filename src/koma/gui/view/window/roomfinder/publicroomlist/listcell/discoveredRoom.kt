@@ -16,8 +16,10 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -93,13 +95,13 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
 fun joinById(roomid: RoomId, name: String, owner: Node) {
     val api = appState.apiClient
     api ?: return
-    launch {
+    GlobalScope.launch {
         val rs = api.joinRoom(roomid).awaitMatrix()
         rs.success {
-            launch(JavaFx) { api.profile.joinRoom(roomid) }
+            launch(Dispatchers.JavaFx) { api.profile.joinRoom(roomid) }
         }
         rs.failure {
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .owner(owner)
                         .title("Failed to join room ${name}")

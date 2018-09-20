@@ -11,7 +11,8 @@ import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.storage.config.settings.AppSettings
 import koma.util.result.ok
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import tornadofx.*
 
 class ImageElement(val url: MHUrl): ViewNode {
@@ -27,7 +28,7 @@ class ImageElement(val url: MHUrl): ViewNode {
 
         menuItems = menuItems()
 
-        launch {
+        GlobalScope.launch {
             val res = downloadMedia(url).ok() ?: return@launch
             val image = Image(res.inputStream())
             if (image.width > imageSize) {

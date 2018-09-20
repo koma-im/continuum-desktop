@@ -22,10 +22,12 @@ import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
@@ -83,13 +85,13 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
     private fun joinRoomByAlias(alias: String) {
         val api = appState.apiClient
         api ?: return
-        launch {
+        GlobalScope.launch {
             val rs = api.resolveRoomAlias(alias).awaitMatrix()
             rs.success {
                 joinById(it.room_id, alias, this@PublicRoomsView.ui )
             }
             rs.failure {
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .owner(this@PublicRoomsView.ui)
                             .title("Failed to resolve room alias $alias")
@@ -161,11 +163,11 @@ class RoomListView(
         matchRooms.predicate = Predicate { r: DiscoveredRoom ->
             r.containsTerms(words)
         }
-        launch {
+        GlobalScope.launch {
             delay(500)
             if (filterTerm == term) {
                 curRoomSrc = getRoomSource(filterTerm)
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     for (room in curRoomSrc.produce) {
                         if (existing.add(room.room_id)) roomlist.add(room)
                         if (enoughRooms.get()) break
@@ -177,7 +179,7 @@ class RoomListView(
 
     private fun loadMoreRooms(upto: Int) {
         var added = 0
-        launch(JavaFx) {
+        GlobalScope.launch(Dispatchers.JavaFx) {
             for (room in curRoomSrc.produce) {
                 if (existing.add(room.room_id)) {
                     roomlist.add(room)

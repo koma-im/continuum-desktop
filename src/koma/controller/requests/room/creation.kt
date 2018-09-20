@@ -10,19 +10,21 @@ import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.apiClient
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
-fun createRoomInteractive() = launch(JavaFx) {
+fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     val input = RoomCreationDialog().showAndWait()
     if (!input.isPresent) return@launch
     val settings = input.get()
     val api = apiClient ?: return@launch
     val result = api.createRoom(settings).awaitMatrix()
     if (result is Result.Failure) {
-        launch(JavaFx) {
+        launch(Dispatchers.JavaFx) {
             Notifications.create()
                     .owner(FX.primaryStage)
                     .position(Pos.CENTER)

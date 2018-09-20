@@ -23,8 +23,10 @@ import koma.matrix.room.power.canUserSet
 import koma.matrix.room.power.canUserSetStates
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import matrix.event.room_message.RoomEventType
 import model.Room
 import org.controlsfx.control.Notifications
@@ -76,11 +78,11 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
     alias?:return
     val api = appState.apiClient
     api ?: return
-    launch {
+    GlobalScope.launch {
         val result = api.deleteRoomAlias(alias.str).awaitMatrix()
         if (result is Result.Failure) {
             val message = result.error.message
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to delete room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")
@@ -88,7 +90,7 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
                         .showWarning()
             }
         } else {
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 room.aliases.remove(alias)
             }
         }

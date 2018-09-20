@@ -7,9 +7,11 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.Profile
 import koma.storage.config.server.serverConfWithAddr
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import matrix.UserPassword
 import matrix.login
 import tornadofx.*
@@ -17,7 +19,7 @@ import tornadofx.*
 /**
  * accept text of text fields as parameters
  */
-fun doLogin(user: String, password: String, server: String, controller: LoginController) = async {
+fun doLogin(user: String, password: String, server: String, controller: LoginController) =GlobalScope.async {
     val userid = UserId_new(user)
     val servCon = serverConfWithAddr(userid.server, server)
     val authedProfile: Profile = if (!password.isBlank()) {
@@ -29,7 +31,7 @@ fun doLogin(user: String, password: String, server: String, controller: LoginCon
                 val mes = ex.message
                 System.err.println(mes)
                 ex.printStackTrace()
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     alert(Alert.AlertType.ERROR, "Login Fail with Error",
                            mes)
                 }
@@ -40,7 +42,7 @@ fun doLogin(user: String, password: String, server: String, controller: LoginCon
     } else {
         val p = Profile.new(userid)
         if (p == null) {
-            launch(JavaFx) {
+            GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Failed to login as $userid",
                         "No access token")
             }
@@ -48,7 +50,7 @@ fun doLogin(user: String, password: String, server: String, controller: LoginCon
         }
         p
     }
-    launch(JavaFx) {
+    launch(Dispatchers.JavaFx) {
         controller.postLogin(authedProfile, servCon)
     }
 }

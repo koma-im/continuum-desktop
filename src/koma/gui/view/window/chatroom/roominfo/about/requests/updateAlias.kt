@@ -5,8 +5,10 @@ import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.room.naming.RoomAlias
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -16,11 +18,11 @@ fun requestAddRoomAlias(room: Room, input: String?) {
     val api = appState.apiClient
     api ?: return
     val alias = RoomAlias(input)
-    launch {
+    GlobalScope.launch {
         val result = api.putRoomAlias(room.id, alias.str).awaitMatrix()
         if (result is Result.Failure) {
             val message = result.error.message
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to add room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")
@@ -28,7 +30,7 @@ fun requestAddRoomAlias(room: Room, input: String?) {
                         .showWarning()
             }
         } else {
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 room.addAlias(alias)
             }
         }
@@ -40,11 +42,11 @@ fun requestSetRoomCanonicalAlias(room: Room, alias: RoomAlias?) {
     val api = appState.apiClient
     api ?: return
     val content =  RoomCanonAliasContent(alias)
-    launch {
+    GlobalScope.launch {
         val result = api.setRoomCanonicalAlias(room.id, content).awaitMatrix()
         if (result is Result.Failure) {
             val message = result.error.message
-            launch(JavaFx) {
+            launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to set canonical room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")

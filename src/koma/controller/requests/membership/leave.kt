@@ -4,8 +4,10 @@ import com.github.kittinunf.result.Result
 import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState
-import kotlinx.coroutines.experimental.javafx.JavaFx
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -13,8 +15,8 @@ import tornadofx.*
 fun leaveRoom(mxroom: Room) {
     val api = appState.apiClient
     api ?: return
-    val removeLocally = { launch(JavaFx) { api.profile.roomStore.remove(mxroom.id) } }
-    launch {
+    val removeLocally = { GlobalScope.launch(Dispatchers.JavaFx) { api.profile.roomStore.remove(mxroom.id) } }
+    GlobalScope.launch {
         val roomname = mxroom.displayName.get()
         println("Leaving $roomname")
         val result = api.leavingRoom(mxroom.id).awaitMatrix()
@@ -22,7 +24,7 @@ fun leaveRoom(mxroom: Room) {
             is Result.Success -> { removeLocally() }
             is Result.Failure -> {
                 val ex = result.error
-                launch(JavaFx) {
+                launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Had error leaving room $roomname")
                             .text("${ex.message}")

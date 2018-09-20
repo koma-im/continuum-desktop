@@ -4,7 +4,7 @@ import javafx.beans.property.Property
 import koma.gui.element.control.NullableIndexRange
 import koma.matrix.event.room_message.RoomEvent
 import koma.storage.message.piece.Segment
-import kotlinx.coroutines.experimental.CompletableDeferred
+import kotlinx.coroutines.CompletableDeferred
 import matrix.room.Timeline
 
 sealed class MessageManagerMsg

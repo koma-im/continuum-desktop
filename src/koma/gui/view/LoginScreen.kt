@@ -16,8 +16,9 @@ import koma.matrix.user.identity.isUserIdValid
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.settings.AppSettings
+import kotlinx.coroutines.GlobalScope
 import tornadofx.*
-import kotlinx.coroutines.experimental.launch as corolaunch
+import kotlinx.coroutines.launch as corolaunch
 
 /**
  * Created by developer on 2017/6/21.
@@ -79,7 +80,7 @@ class LoginScreen(): View() {
                             alert(Alert.AlertType.WARNING, "Empty password")
                         } else {
                             val userid = UserId_new(userId.value)
-                            corolaunch {
+                            GlobalScope.corolaunch {
                                 registerUser(controller, userid, password.text, serverCombo.editor.text)
                             }
                         }

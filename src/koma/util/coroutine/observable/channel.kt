@@ -2,13 +2,14 @@ package koma.util.coroutine.observable
 
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.WeakChangeListener
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ClosedSendChannelException
-import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.channels.produce
 import tornadofx.*
 
-fun<T> ObservableValue<T>.updates() = produce<T>(capacity = Channel.CONFLATED){
+fun<T> ObservableValue<T>.updates() = GlobalScope.produce<T>(capacity = Channel.CONFLATED){
     val waitClose = CompletableDeferred<Unit>()
     val listener = ChangeListener { _, _, newValue: T ->
         try {

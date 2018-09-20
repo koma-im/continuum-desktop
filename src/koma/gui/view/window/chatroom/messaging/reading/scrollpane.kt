@@ -16,7 +16,8 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.storage.config.settings.AppSettings
 import koma.storage.message.ShowLatest
 import koma.storage.message.VisibleRange
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import model.Room
 import tornadofx.*
 import kotlin.math.roundToInt
@@ -56,7 +57,7 @@ class MessagesListScrollPane(room: Room): View() {
         virtualList = KListView(msgList)
         virtualList.vgrow = Priority.ALWAYS
         virtualList.hgrow = Priority.ALWAYS
-        launch {
+        GlobalScope.launch {
             with(room.messageManager.chan) {
                 send(ShowLatest)
                 send(VisibleRange(virtualList.visibleIndexRange))

@@ -2,13 +2,14 @@ package koma.util.coroutine.adapter.okhttp
 
 import com.github.kittinunf.result.Result
 import koma.util.coroutine.adapter.retrofit.HttpException
-import kotlinx.coroutines.experimental.CancellableContinuation
-import kotlinx.coroutines.experimental.suspendCancellableCoroutine
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Response
 import okhttp3.ResponseBody
 import java.io.IOException
+import kotlin.coroutines.resume
 
 
 /**
@@ -43,7 +44,7 @@ fun Response.extract(): Result<ResponseBody, Exception> {
 }
 
 private fun Call.registerOnCompletion(continuation: CancellableContinuation<*>) {
-    continuation.invokeOnCompletion {
+    continuation.invokeOnCancellation {
         if (continuation.isCancelled)
             try {
                 cancel()
