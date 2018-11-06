@@ -1,6 +1,7 @@
 package koma.controller.requests.account
 
 import com.github.kittinunf.result.Result
+import com.squareup.moshi.JsonEncodingException
 import controller.LoginController
 import javafx.scene.control.Alert
 import koma.matrix.UserId
@@ -22,7 +23,12 @@ suspend fun registerUser(controller: LoginController, userId: UserId, password: 
     when (r) {
         is Result.Failure -> {
             GlobalScope.launch(Dispatchers.JavaFx) {
-                alert(Alert.AlertType.ERROR, "Register Failure: ${r.error.message}")
+                val content = if (r.error is JsonEncodingException) {
+                    "Is $server really a matrix server with JSON API?"
+                } else {
+                    null
+                }
+                alert(Alert.AlertType.ERROR, "Register Failure: ${r.error.message}", content)
             }
             return
         }

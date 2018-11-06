@@ -1,6 +1,7 @@
 package koma.controller.requests.account.login
 
 import com.github.kittinunf.result.Result
+import com.squareup.moshi.JsonEncodingException
 import controller.LoginController
 import javafx.scene.control.Alert
 import koma.matrix.user.identity.UserId_new
@@ -30,10 +31,12 @@ fun doLogin(user: String, password: String, server: String, controller: LoginCon
                 val ex = authResu.error
                 val mes = ex.message
                 System.err.println(mes)
-                ex.printStackTrace()
+                val message = if (ex is JsonEncodingException) {
+                    "Does $server have a valid JSON API?"
+                } else mes
                 launch(Dispatchers.JavaFx) {
                     alert(Alert.AlertType.ERROR, "Login Fail with Error",
-                           mes)
+                           message)
                 }
                 return@async
             }
