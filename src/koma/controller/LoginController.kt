@@ -1,6 +1,5 @@
 package controller
 
-import koma.gui.setSaneStageSize
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
@@ -26,9 +25,6 @@ class LoginController: Controller() {
         rootView.root.center = chatview.root
         val stage = FX.primaryStage
         stage.scene.root = rootView.root
-        setSaneStageSize(stage)
-        stage.hide()
-        stage.show()
 
         chatctrl.start()
     }
