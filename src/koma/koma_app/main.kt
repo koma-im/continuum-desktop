@@ -5,9 +5,10 @@ import javafx.event.EventHandler
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import koma.gui.save_win_geometry
+import koma.gui.setSaneStageSize
+import koma.gui.view.window.start.StartScreen
 import koma_app.appState
 import tornadofx.*
-import view.LoginScreen
 import kotlinx.coroutines.javafx.JavaFx as UI
 
 fun main(args: Array<String>) {
@@ -17,7 +18,7 @@ fun main(args: Array<String>) {
 }
 
 
-class KomaApp : App(LoginScreen::class) {
+class KomaApp : App(StartScreen::class) {
 
     init {
         Thread.setDefaultUncaughtExceptionHandler(NoAlertErrorHandler())
@@ -26,6 +27,9 @@ class KomaApp : App(LoginScreen::class) {
 
   override fun start(stage: Stage) {
       super.start(stage)
+      setSaneStageSize(stage)
+      stage.hide()
+      stage.show()
       stage.onCloseRequest = EventHandler<WindowEvent> {
           save_win_geometry(stage)
       }

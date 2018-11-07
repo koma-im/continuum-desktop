@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import koma.storage.config.config_paths
 import koma.storage.config.server.cert_trust.CompositeX509TrustManager
 import koma.storage.config.server.cert_trust.loadContext
+import okhttp3.HttpUrl
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -110,4 +111,10 @@ fun serverConfWithAddr(servername: String, addr: String): ServerConf{
     val conf = ServerConfiguration.getServerConf(servername)
     conf.saveAddress(addr)
     return conf
+}
+
+fun configServerAddress(addr: String): ServerConf? {
+    val url = HttpUrl.parse(addr)?:return null
+    val name = url.host()
+    return serverConfWithAddr(name, addr)
 }

@@ -2,21 +2,18 @@ package view
 
 import controller.LoginController
 import javafx.collections.FXCollections
-import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.control.PasswordField
 import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
 import koma.controller.requests.account.login.doLogin
-import koma.controller.requests.account.registerUser
+import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.matrix.user.identity.UserId_new
-import koma.matrix.user.identity.isUserIdValid
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.settings.AppSettings
-import kotlinx.coroutines.GlobalScope
 import tornadofx.*
 import kotlinx.coroutines.launch as corolaunch
 
@@ -74,16 +71,7 @@ class LoginScreen(): View() {
             buttonbar {
                 button("Register") {
                     action {
-                        if (!isUserIdValid(userId.value)) {
-                            alert(Alert.AlertType.WARNING, "Invalid user-id")
-                        } else if (password.text.isBlank()) {
-                            alert(Alert.AlertType.WARNING, "Empty password")
-                        } else {
-                            val userid = UserId_new(userId.value)
-                            GlobalScope.corolaunch {
-                                registerUser(controller, userid, password.text, serverCombo.editor.text)
-                            }
-                        }
+                        openInternalWindow(RegistrationWizard(), owner = this@LoginScreen.root.parent.parent)
                     }
                 }
                 button("Login") {

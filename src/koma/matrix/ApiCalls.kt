@@ -334,36 +334,3 @@ fun login(userpass: UserPassword, serverConf: ServerConf):
     val auth_call: Call<AuthedUser> = service.login(userpass)
     return auth_call
 }
-
-data class UserRegistering(
-        val username: String,
-        val password: String,
-        val auth: Map<String, String> = mapOf(Pair("type", "m.login.dummy"))
-)
-
-data class RegisterdUser(
-        val access_token: String,
-        // set by the server admin, not necessarily a valid address
-        val home_server: String,
-        val user_id: UserId,
-        val refresh_token: String? = null
-)
-
-interface MatrixRegisterApi {
-    @POST("_matrix/client/r0/register")
-    fun register(@Body userreg: UserRegistering): Call<RegisterdUser>
-}
-
-fun register(userregi: UserRegistering, serverConf: ServerConf):
-        Call<RegisterdUser> {
-    println("register user $userregi on ${serverConf.servername}")
-    val moshi = MoshiInstance.moshi
-    val client = AppHttpClient.builderForServer(serverConf).build()
-    val retrofit = Retrofit.Builder()
-            .baseUrl(serverConf.getAddress())
-            .client(client)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .build()
-    val service = retrofit.create(MatrixRegisterApi::class.java)
-    return service.register(userregi)
-}
