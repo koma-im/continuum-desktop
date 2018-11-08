@@ -22,6 +22,10 @@ sealed class RegisterData() {
             val password: String,
             val auth: Map<String, String> = mapOf(Pair("type", "m.login.dummy"))
     ): RegisterData()
+    // resubmit a request with an auth dict with just the session ID
+    class Finalize(
+            val session: String
+    ): RegisterData()
 }
 
 data class RegisterdUser(
@@ -60,6 +64,12 @@ class Register(val serverConf: ServerConf) {
             return Result.error(ex)
         }
         return Result.error(Exception("Unexpected"))
+    }
+    suspend fun finishStage(): Result<RegisterdUser, Exception> {
+        val s = session
+        s ?: return Result.error(Exception("Session is null"))
+        val d = service.register(RegisterData.Finalize(s))
+        return d.awaitMatrixAuth()
     }
 
     fun registerByPassword(username: String, password: String):

@@ -1,6 +1,8 @@
 package koma.gui.view.window.auth
 
 import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.failure
+import com.github.kittinunf.result.success
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.BorderPane
@@ -8,10 +10,13 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import javafx.util.StringConverter
+import koma.matrix.user.auth.AuthException
 import koma.matrix.user.auth.Register
+import koma.matrix.user.auth.RegisterdUser
 import koma.matrix.user.auth.Unauthorized
 import koma.storage.config.server.configServerAddress
 import koma.storage.config.server.getApiUrlBuilder
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -23,6 +28,7 @@ class RegistrationWizard(): View() {
 
     override val root = BorderPane()
     private var current: RegisterWizardView = ServerSelection()
+    lateinit var register: Register
     init {
         title = "Join the Matrix network"
 
@@ -31,25 +37,49 @@ class RegistrationWizard(): View() {
             bottom {
                 borderpane {
                     right {
-                        button("OK") { action { nextStage() } }
+                        button("OK") { action { GlobalScope.launch { nextStage() } } }
                     }
                 }
 
             }
         }
     }
-    private fun nextStage() {
+    private suspend fun nextStage() {
         val cur = current
         when (cur) {
             is ServerSelection -> {
-                GlobalScope.launch {
-                    val (r, u) = cur.start()?:return@launch
-                    GlobalScope.launch(Dispatchers.JavaFx) {
-                        root.center = AuthStageView(r, u).root
+                val (r, u) = cur.start()?:return
+                register = r
+                GlobalScope.launch(Dispatchers.JavaFx) {
+                    val a = AuthStageView(r, u)
+                    current = a
+                    root.center = a.root
+                }
+            }
+            is AuthStageView -> {
+                val res = cur.submit()?: return
+                res.success { newUser ->
+                    println("Successfully registered $newUser")
+                }
+                res.failure { ex ->
+                    when (ex) {
+                        is AuthException.AuthFail -> {
+                            GlobalScope.launch(Dispatchers.JavaFx) {
+                                val a = AuthStageView(register, ex.status)
+                                current = a
+                                root.center = a.root
+                            }
+                        }
+                        else -> {
+                            GlobalScope.launch(Dispatchers.JavaFx) {
+                                alert(Alert.AlertType.ERROR, "Registration failed",
+                                        "Error $ex")
+                                this@RegistrationWizard.close()
+                            }
+                        }
                     }
                 }
             }
-            is AuthStageView -> {}
         }
     }
 }
@@ -60,8 +90,11 @@ class AuthStageView(
         private val register: Register,
         private val unauthorized: Unauthorized): RegisterWizardView() {
     override val root = BorderPane()
+    private var authView: AuthView? = null
+    suspend fun submit(): Result<RegisterdUser, Exception>? {
+        return authView?.finish()
+    }
 
-    suspend fun submit() {}
     init {
         val options = unauthorized.flows.map { flow -> flow.stages.first() }
         with(root) {
@@ -70,12 +103,13 @@ class AuthStageView(
                     label("Next step, continue with: ")
                     hbox { hgrow = Priority.ALWAYS }
                     combobox(values = options) {
-                        converter = object: StringConverter<String>() {
+                        converter = object : StringConverter<String>() {
                             // This is not going to be called
                             // because the ComboBox is editable
                             override fun fromString(string: String?): String {
                                 return "Error: Unexpected"
                             }
+
                             override fun toString(item: String): String {
                                 return authTypeToDisplay(item)
                             }
@@ -91,13 +125,46 @@ class AuthStageView(
             }
         }
     }
+
     private fun switchAuthType(type: String) {
         println("Switching to auth type $type")
-        fallbackWebviewLogin(type)
+        val a: AuthView = when (type) {
+            else -> FallbackWebviewAuth(register, unauthorized, type)
+        }
+        authView = a
+        root.center = a.root
     }
+}
 
-    private fun fallbackWebviewLogin(type: String) {
-        val web = WebView()
+abstract class AuthView: View() {
+    /**
+     * if it returns non-null value, the stage is none
+     * if the result is ok, registration is finished
+     * if it is Unauthorized, more stages are needed
+     * if it's other exceptions, registration has failed
+     */
+    abstract suspend fun finish(): Result<RegisterdUser, Exception>?
+}
+
+class FallbackWebviewAuth(
+        private val register: Register,
+        private val unauthorized: Unauthorized,
+        private val type: String
+): AuthView() {
+    override val root = WebView()
+    private var webAuthDone = false
+    override suspend fun finish(): Result<RegisterdUser, Exception>? {
+        if (webAuthDone) {
+            return register.finishStage()
+        } else {
+            uilaunch {
+                alert(Alert.AlertType.ERROR, "Step not done yet",
+                        "Please complete the step in the displayed web page")
+            }
+            return null
+        }
+    }
+    init {
         val url = register.serverConf.getApiUrlBuilder()!!
                 .addEncodedPathSegment("auth")
                 .addEncodedPathSegment(type)
@@ -106,17 +173,18 @@ class AuthStageView(
                 .addQueryParameter("session", unauthorized.session)
                 .build()
         println("Using fallback webpage authentication: $url")
-        web.engine.load(url.toString())
-        val win = web.engine.executeScript("window") as JSObject
+        root.engine.load(url.toString())
+        val win = root.engine.executeScript("window") as JSObject
 
         class JavaApplication {
             fun finishAuth() {
                 println("Auth is done")
+                webAuthDone = true
             }
         }
+
         val app = JavaApplication()
         win.setMember("onAuthDone", "app.finishAuth()")
-        root.center = web
     }
 }
 
@@ -163,4 +231,8 @@ private fun authTypeToDisplay(type: String): String {
         "m.login.email.identity" -> "Email"
         else -> type
     }
+}
+
+fun uilaunch(eval: suspend CoroutineScope.()->Unit) {
+    GlobalScope.launch(Dispatchers.JavaFx, block = eval)
 }
