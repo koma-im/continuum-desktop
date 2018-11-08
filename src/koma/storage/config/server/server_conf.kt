@@ -33,6 +33,12 @@ fun ServerConf.getAddress(): String {
     return slash
 }
 
+fun ServerConf.getApiUrlBuilder(): HttpUrl.Builder? {
+    val a = this.addresses.getOrNull(0) ?: return null
+    val u = HttpUrl.parse(a) ?: return null
+    return u.newBuilder().addPathSegments(apiPath)
+}
+
 /**
  * in practice null can happen
  */

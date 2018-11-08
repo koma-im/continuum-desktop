@@ -3,16 +3,19 @@ package koma.gui.view.window.auth
 import com.github.kittinunf.result.Result
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
-import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.web.WebView
 import koma.matrix.user.auth.Register
 import koma.matrix.user.auth.Unauthorized
 import koma.storage.config.server.configServerAddress
+import koma.storage.config.server.getApiUrlBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import netscape.javascript.JSObject
 import tornadofx.*
 
 class RegistrationWizard(): View() {
@@ -55,9 +58,55 @@ sealed class RegisterWizardView(): View()
 class AuthStageView(
         private val register: Register,
         private val unauthorized: Unauthorized): RegisterWizardView() {
-    override val root = Label("next stage")
+    override val root = BorderPane()
 
     suspend fun submit() {}
+    init {
+        val options = unauthorized.flows.map { flow -> flow.stages.first() }
+        with(root) {
+            top {
+                hbox {
+                    label("Next step: authenticate with: ")
+                    hbox { hgrow = Priority.ALWAYS }
+                    combobox(values = options) {
+                        selectionModel.selectedItemProperty().onChange { item ->
+                            if (item != null) {
+                                switchAuthType(item)
+                            }
+                        }
+                        selectionModel.select(0)
+                    }
+                }
+            }
+        }
+    }
+    private fun switchAuthType(type: String) {
+        println("Switching to auth type $type")
+        fallbackWebviewLogin(type)
+    }
+
+    private fun fallbackWebviewLogin(type: String) {
+        val web = WebView()
+        val url = register.serverConf.getApiUrlBuilder()!!
+                .addEncodedPathSegment("auth")
+                .addEncodedPathSegment(type)
+                .addEncodedPathSegment("fallback")
+                .addEncodedPathSegment("web")
+                .addQueryParameter("session", unauthorized.session)
+                .build()
+        println("Using fallback webpage authentication: $url")
+        web.engine.load(url.toString())
+        val win = web.engine.executeScript("window") as JSObject
+
+        class JavaApplication {
+            fun finishAuth() {
+                println("Auth is done")
+            }
+        }
+        val app = JavaApplication()
+        win.setMember("onAuthDone", "app.finishAuth()")
+        root.center = web
+    }
 }
 
 class ServerSelection(): RegisterWizardView() {
