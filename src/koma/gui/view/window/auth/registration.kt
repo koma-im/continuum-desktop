@@ -72,8 +72,10 @@ class ServerSelection(): RegisterWizardView() {
         val f = r.getFlows()
         when (f) {
             is Result.Failure -> {
-                alert(Alert.AlertType.ERROR,
-                        "Failed to get authentication flows from server: ${f.error}")
+                GlobalScope.launch(Dispatchers.JavaFx) {
+                    alert(Alert.AlertType.ERROR,
+                            "Failed to get authentication flows from server: ${f.error}")
+                }
                 return null
             }
             is Result.Success -> return Pair(r, f.value)
