@@ -7,6 +7,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
+import javafx.util.StringConverter
 import koma.matrix.user.auth.Register
 import koma.matrix.user.auth.Unauthorized
 import koma.storage.config.server.configServerAddress
@@ -66,9 +67,19 @@ class AuthStageView(
         with(root) {
             top {
                 hbox {
-                    label("Next step: authenticate with: ")
+                    label("Next step, continue with: ")
                     hbox { hgrow = Priority.ALWAYS }
                     combobox(values = options) {
+                        converter = object: StringConverter<String>() {
+                            // This is not going to be called
+                            // because the ComboBox is editable
+                            override fun fromString(string: String?): String {
+                                return "Error: Unexpected"
+                            }
+                            override fun toString(item: String): String {
+                                return authTypeToDisplay(item)
+                            }
+                        }
                         selectionModel.selectedItemProperty().onChange { item ->
                             if (item != null) {
                                 switchAuthType(item)
@@ -143,5 +154,13 @@ class ServerSelection(): RegisterWizardView() {
             }
             add(serverCombo)
         }
+    }
+}
+
+private fun authTypeToDisplay(type: String): String {
+    return when (type) {
+        "m.login.dummy" -> "Password"
+        "m.login.email.identity" -> "Email"
+        else -> type
     }
 }
