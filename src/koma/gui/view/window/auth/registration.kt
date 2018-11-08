@@ -27,13 +27,13 @@ import tornadofx.*
 class RegistrationWizard(): View() {
 
     override val root = BorderPane()
-    private var current: RegisterWizardView = ServerSelection()
+    private var state: WizardState = Start()
     lateinit var register: Register
     init {
         title = "Join the Matrix network"
 
         with(root) {
-            center = current.root
+            center = state.root
             bottom {
                 borderpane {
                     right {
@@ -45,18 +45,18 @@ class RegistrationWizard(): View() {
         }
     }
     private suspend fun nextStage() {
-        val cur = current
+        val cur = state
         when (cur) {
-            is ServerSelection -> {
+            is Start -> {
                 val (r, u) = cur.start()?:return
                 register = r
                 GlobalScope.launch(Dispatchers.JavaFx) {
-                    val a = AuthStageView(r, u)
-                    current = a
+                    val a = Stage(r, u)
+                    state = a
                     root.center = a.root
                 }
             }
-            is AuthStageView -> {
+            is Stage -> {
                 val res = cur.submit()?: return
                 res.success { newUser ->
                     println("Successfully registered $newUser")
@@ -65,8 +65,8 @@ class RegistrationWizard(): View() {
                     when (ex) {
                         is AuthException.AuthFail -> {
                             GlobalScope.launch(Dispatchers.JavaFx) {
-                                val a = AuthStageView(register, ex.status)
-                                current = a
+                                val a = Stage(register, ex.status)
+                                state = a
                                 root.center = a.root
                             }
                         }
@@ -84,11 +84,11 @@ class RegistrationWizard(): View() {
     }
 }
 
-sealed class RegisterWizardView(): View()
+sealed class WizardState(): View()
 
-class AuthStageView(
+class Stage(
         private val register: Register,
-        private val unauthorized: Unauthorized): RegisterWizardView() {
+        private val unauthorized: Unauthorized): WizardState() {
     override val root = BorderPane()
     private var authView: AuthView? = null
     suspend fun submit(): Result<RegisterdUser, Exception>? {
@@ -188,7 +188,7 @@ class FallbackWebviewAuth(
     }
 }
 
-class ServerSelection(): RegisterWizardView() {
+private class Start(): WizardState() {
     suspend fun start(): Pair<Register, Unauthorized>? {
         val addr = serverCombo.editor.text
         val s = configServerAddress(addr)
