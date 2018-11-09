@@ -129,6 +129,7 @@ class Stage(
     private fun switchAuthType(type: String) {
         println("Switching to auth type $type")
         val a: AuthView = when (type) {
+            "m.login.dummy" -> PasswordAuthView(register, unauthorized, type)
             else -> FallbackWebviewAuth(register, unauthorized, type)
         }
         authView = a
@@ -144,6 +145,60 @@ abstract class AuthView: View() {
      * if it's other exceptions, registration has failed
      */
     abstract suspend fun finish(): Result<RegisterdUser, Exception>?
+}
+
+/**
+ * Register by setting a password
+ */
+class PasswordAuthView(
+        private val register: Register,
+        private val unauthorized: Unauthorized,
+        private val type: String
+): AuthView() {
+    /**
+     * if it returns non-null value, the stage is none
+     * if the result is ok, registration is finished
+     * if it is Unauthorized, more stages are needed
+     * if it's other exceptions, registration has failed
+     */
+    override suspend fun finish(): Result<RegisterdUser, Exception>? {
+        val result = register.registerByPassword(user.text, pass.text)
+        when (result) {
+            is Result.Success -> return result
+            is Result.Failure -> {
+                when (result.error) {
+                    is AuthException.AuthFail -> return result
+                    else -> {
+                        uilaunch {
+                            alert(Alert.AlertType.WARNING,
+                                    "Registration hasn't succeeded",
+                                    "Error: ${result.error.message}"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    override val root = Form()
+    val user = textfield()
+    val pass = passwordfield()
+
+    init {
+        with(root) {
+            paddingAll = 5.0
+            fieldset {
+                field("Username") {
+                    add(user)
+                }
+                field("Password") {
+                    add(pass)
+                }
+            }
+        }
+    }
 }
 
 class FallbackWebviewAuth(

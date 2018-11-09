@@ -1,9 +1,8 @@
 package koma.matrix.user.auth
 
 import com.github.kittinunf.result.Result
-import com.squareup.moshi.KotlinJsonAdapterFactory
-import com.squareup.moshi.Moshi
 import koma.matrix.UserId
+import koma.matrix.json.MoshiInstance
 import koma.network.client.okhttp.AppHttpClient
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
@@ -17,7 +16,7 @@ import retrofit2.http.POST
 sealed class RegisterData() {
     // Use empty request to get auth types
     class Query(): RegisterData()
-    data class Password(
+    class Password(
             val username: String,
             val password: String,
             val auth: Map<String, String> = mapOf(Pair("type", "m.login.dummy"))
@@ -30,19 +29,21 @@ sealed class RegisterData() {
 
 data class RegisterdUser(
         val access_token: String,
-        // set by the server admin, not necessarily a valid address
-        val home_server: String,
+        // Deprecated. Clients should extract the server_name from user_id (by splitting at the first colon)
+        val home_server: String? = null,
         val user_id: UserId,
         val refresh_token: String? = null
 )
 
 interface MatrixRegisterApi {
     @POST("_matrix/client/r0/register")
-    fun register(@Body data: RegisterData): Call<RegisterdUser>
+    // moshi fails to encode sealed classes
+    // "Any" works
+    fun register(@Body data: Any): Call<RegisterdUser>
 }
 
 class Register(val serverConf: ServerConf) {
-    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+    private val moshi = MoshiInstance.moshi
     private val client = AppHttpClient.builderForServer(serverConf).build()
     private val retrofit = Retrofit.Builder()
             .baseUrl(serverConf.getAddress())
@@ -72,11 +73,11 @@ class Register(val serverConf: ServerConf) {
         return d.awaitMatrixAuth()
     }
 
-    fun registerByPassword(username: String, password: String):
-            Call<RegisterdUser> {
+    suspend fun registerByPassword(username: String, password: String):
+            Result<RegisterdUser, Exception> {
         val data = RegisterData.Password(username, password)
         println("register user $username on ${serverConf.servername}")
-        return service.register(data)
+        return service.register(data).awaitMatrixAuth()
     }
 }
 
