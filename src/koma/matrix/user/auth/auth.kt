@@ -58,12 +58,12 @@ data class AuthFlow(
         val stages: List<String>
 )
 
-sealed class AuthException: Exception() {
+sealed class AuthException(message: String): Exception(message) {
     class AuthFail(
-            val status: Unauthorized): AuthException()
+            val status: Unauthorized): AuthException(status.toString())
     class MatrixFail(
-            val error: MatrixError): AuthException()
+            val error: MatrixError): AuthException(error.toString())
     // Other http errors
     class HttpFail(
-            val error: HttpException): AuthException()
+            val error: HttpException): AuthException(error.message)
 }

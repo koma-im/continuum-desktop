@@ -3,7 +3,7 @@ package koma.util.coroutine.adapter.retrofit
 import okhttp3.Response
 
 open class HttpException(val code: Int,
-                    message: String): Exception(message) {
+                    override val message: String): Exception(message) {
     companion object {
         fun fromOkhttp(response: Response): HttpException {
             val code = response.code()

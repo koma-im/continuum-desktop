@@ -45,6 +45,8 @@ class MatrixError(
         val errcode: String,
         val error: String
 ) {
+    override fun toString() = "$errcode: $error"
+
     companion object {
         private val moshi = Moshi.Builder().build()
         private val jsonAdapter = moshi.adapter(MatrixError::class.java)
