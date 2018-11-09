@@ -12,10 +12,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import javafx.util.StringConverter
 import koma.gui.view.window.auth.login.startChatWithIdToken
-import koma.matrix.user.auth.AuthException
-import koma.matrix.user.auth.Register
-import koma.matrix.user.auth.RegisterdUser
-import koma.matrix.user.auth.Unauthorized
+import koma.matrix.user.auth.*
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.configServerAddress
 import koma.storage.config.server.getApiUrlBuilder
@@ -102,22 +99,24 @@ class Stage(
     }
 
     init {
-        val options = unauthorized.flows.map { flow -> flow.stages.first() }
+        val options: List<AuthType> = unauthorized.flows
+                .mapNotNull { flow -> flow.stages.firstOrNull() }
+                .map { AuthType.parse(it) }
         with(root) {
             top {
                 hbox {
                     label("Next step, continue with: ")
                     hbox { hgrow = Priority.ALWAYS }
                     combobox(values = options) {
-                        converter = object : StringConverter<String>() {
+                        converter = object : StringConverter<AuthType>() {
                             // This is not going to be called
                             // because the ComboBox is editable
-                            override fun fromString(string: String?): String {
-                                return "Error: Unexpected"
+                            override fun fromString(string: String?): AuthType {
+                                return AuthType.parse(string ?: "error")
                             }
 
-                            override fun toString(item: String): String {
-                                return authTypeToDisplay(item)
+                            override fun toString(item: AuthType): String {
+                                return item.toDisplay()
                             }
                         }
                         selectionModel.selectedItemProperty().onChange { item ->
@@ -132,11 +131,11 @@ class Stage(
         }
     }
 
-    private fun switchAuthType(type: String) {
+    private fun switchAuthType(type: AuthType) {
         println("Switching to auth type $type")
         val a: AuthView = when (type) {
-            "m.login.dummy" -> PasswordAuthView(register, unauthorized, type)
-            else -> FallbackWebviewAuth(register, unauthorized, type)
+            is AuthType.Dummy -> PasswordAuthView(register, unauthorized)
+            else -> FallbackWebviewAuth(register, unauthorized, type.type)
         }
         authView = a
         root.center = a.root
@@ -177,8 +176,7 @@ abstract class AuthView: View() {
  */
 class PasswordAuthView(
         private val register: Register,
-        private val unauthorized: Unauthorized,
-        private val type: String
+        private val unauthorized: Unauthorized
 ): AuthView() {
     /**
      * if it returns non-null value, the stage is none
@@ -235,7 +233,7 @@ class FallbackWebviewAuth(
     private var webAuthDone = false
     override suspend fun finish(): Result<RegisterdUser, Exception>? {
         if (webAuthDone) {
-            return register.finishStage()
+            TODO("not sure whether there is a fallback method for registration")
         } else {
             uilaunch {
                 alert(Alert.AlertType.ERROR, "Step not done yet",
@@ -302,14 +300,6 @@ private class Start(): WizardState() {
             }
             add(serverCombo)
         }
-    }
-}
-
-private fun authTypeToDisplay(type: String): String {
-    return when (type) {
-        "m.login.dummy" -> "Password"
-        "m.login.email.identity" -> "Email"
-        else -> type
     }
 }
 

@@ -15,6 +15,7 @@ enum class RoomEventType{
     @Json(name = "m.room.name") Name,
     @Json(name = "m.room.topic") Topic,
     @Json(name = "m.room.avatar") Avatar,
+    @Json(name = "m.room.bot.options") BotOptions,
 
     @Json(name = "m.room.history_visibility") HistoryVisibility,
 
@@ -23,6 +24,7 @@ enum class RoomEventType{
     override fun toString(): String {
         return when(this) {
             Aliases -> "m.room.aliases"
+            BotOptions -> "m.room.bot.options"
             CanonAlias ->         "m.room.canonical_alias"
             Create ->             "m.room.create"
             JoinRule ->           "m.room.join_rules"
