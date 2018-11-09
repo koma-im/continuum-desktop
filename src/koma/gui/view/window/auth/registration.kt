@@ -6,14 +6,17 @@ import com.github.kittinunf.result.success
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import javafx.util.StringConverter
+import koma.gui.view.window.auth.login.startChatWithIdToken
 import koma.matrix.user.auth.AuthException
 import koma.matrix.user.auth.Register
 import koma.matrix.user.auth.RegisterdUser
 import koma.matrix.user.auth.Unauthorized
+import koma.storage.config.server.ServerConf
 import koma.storage.config.server.configServerAddress
 import koma.storage.config.server.getApiUrlBuilder
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +62,10 @@ class RegistrationWizard(): View() {
             is Stage -> {
                 val res = cur.submit()?: return
                 res.success { newUser ->
-                    println("Successfully registered $newUser")
+                    println("Successfully registered ${newUser.user_id}")
+                    val s = Success(newUser, register.serverConf, this)
+                    state = s
+                    uilaunch { root.center = s.root }
                 }
                 res.failure { ex ->
                     when (ex) {
@@ -134,6 +140,25 @@ class Stage(
         }
         authView = a
         root.center = a.root
+    }
+}
+
+private class Success(user: RegisterdUser, serverConf: ServerConf, window: RegistrationWizard): WizardState() {
+
+    override val root = HBox()
+    init {
+        with(root) {
+            vbox {
+                label("Registration Success!")
+                label(user.user_id.toString())
+                button("Login Now") {
+                    action {
+                        window.close()
+                        startChatWithIdToken(user.user_id, user.access_token, serverConf)
+                    }
+                }
+            }
+        }
     }
 }
 

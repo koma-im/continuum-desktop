@@ -1,6 +1,5 @@
 package view
 
-import controller.LoginController
 import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
 import javafx.scene.control.PasswordField
@@ -14,8 +13,9 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import koma.storage.config.server.loadServerConf
 import koma.storage.config.settings.AppSettings
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import tornadofx.*
-import kotlinx.coroutines.launch as corolaunch
 
 /**
  * Created by developer on 2017/6/21.
@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch as corolaunch
 class LoginScreen(): View() {
 
     override val root = VBox()
-    val controller = LoginController()
 
     var userId: ComboBox<String> by singleAssign()
     var serverCombo: ComboBox<String> by singleAssign()
@@ -77,7 +76,9 @@ class LoginScreen(): View() {
                 button("Login") {
                     isDefaultButton = true
                     action {
-                        doLogin(userId.value, password.text, serverCombo.editor.text, controller)
+                        GlobalScope.launch {
+                            doLogin(userId.value, password.text, serverCombo.editor.text)
+                        }
                     }
                 }
             }
