@@ -3,37 +3,31 @@ package koma.gui.element.control.behavior
 import javafx.scene.Node
 import javafx.scene.input.KeyCode.*
 import javafx.scene.input.KeyEvent
-import koma.gui.element.control.inputmap.InputMap
+import koma.gui.element.control.inputmap.KInputMap
 import koma.gui.element.control.inputmap.KeyBinding
+import koma.gui.element.control.inputmap.mapping.KeyMapping
 import koma.gui.element.scene.traversal.Direction
-import java.util.*
 
-object FocusTraversalInputMap
-{
-    private val mappings = ArrayList<InputMap.Mapping<*>>()
+object FocusTraversalInputMap {
+    val mappings: List<KeyMapping> = listOf(
+        KeyMapping(UP, { e: KeyEvent -> traverseUp(e) }, null),
+        KeyMapping(DOWN, { e -> traverseDown(e) }, null),
+        KeyMapping(LEFT, { e -> traverseLeft(e) }),
+        KeyMapping(RIGHT, { e -> traverseRight(e) }),
+        KeyMapping(TAB, { e -> traverseNext(e) }),
+        KeyMapping(KeyBinding(TAB).shift(), { e -> traversePrevious(e) }),
 
-    init {
-        mappings.add(InputMap.KeyMapping(UP) { e -> traverseUp(e) })
-        mappings.add(InputMap.KeyMapping(DOWN) { e -> traverseDown(e) })
-        mappings.add(InputMap.KeyMapping(LEFT) { e -> traverseLeft(e) })
-        mappings.add(InputMap.KeyMapping(RIGHT) { e -> traverseRight(e) })
-        mappings.add(InputMap.KeyMapping(TAB) { e -> traverseNext(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(TAB).shift()) { e -> traversePrevious(e) })
+        KeyMapping(KeyBinding(UP).shift().alt().ctrl(), { e -> traverseUp(e) }),
+        KeyMapping(KeyBinding(DOWN).shift().alt().ctrl(), { e -> traverseDown(e) }),
+        KeyMapping(KeyBinding(LEFT).shift().alt().ctrl(), { e -> traverseLeft(e) }),
+        KeyMapping(KeyBinding(RIGHT).shift().alt().ctrl(), { e -> traverseRight(e) }),
+        KeyMapping(KeyBinding(TAB).shift().alt().ctrl(), { e -> traverseNext(e) }),
+        KeyMapping(KeyBinding(TAB).alt().ctrl(), { e -> traversePrevious(e) })
+    )
 
-        mappings.add(InputMap.KeyMapping(KeyBinding(UP).shift().alt().ctrl()) { e -> traverseUp(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(DOWN).shift().alt().ctrl()) { e -> traverseDown(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(LEFT).shift().alt().ctrl()) { e -> traverseLeft(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(RIGHT).shift().alt().ctrl()) { e -> traverseRight(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(TAB).shift().alt().ctrl()) { e -> traverseNext(e) })
-        mappings.add(InputMap.KeyMapping(KeyBinding(TAB).alt().ctrl()) { e -> traversePrevious(e) })
-    }
-
-    val focusTraversalMappings: Array<InputMap.Mapping<*>>
-        get() = mappings.toTypedArray()
-
-    fun <N : Node> createInputMap(node: N): InputMap<N> {
-        val inputMap = InputMap(node)
-        inputMap.mappings.addAll(*focusTraversalMappings)
+    fun <N : Node> createInputMap(node: N): KInputMap<N> {
+        val inputMap = KInputMap<N>(node)
+        inputMap.addKeyMappings(mappings)
         return inputMap
     }
 

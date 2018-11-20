@@ -22,7 +22,7 @@ import java.util.*
  * @since 9
  */
 class KeyBinding @JvmOverloads constructor(val code: KeyCode?, type: EventType<KeyEvent>? = null) {
-    val type: EventType<KeyEvent>?
+    val type: EventType<KeyEvent> = type ?: KeyEvent.KEY_PRESSED
     var shift = OptionalBoolean.FALSE
         private set
     var ctrl = OptionalBoolean.FALSE
@@ -37,10 +37,6 @@ class KeyBinding @JvmOverloads constructor(val code: KeyCode?, type: EventType<K
      * @param type
      */
     constructor(type: EventType<KeyEvent>) : this(null, type) {}
-
-    init {
-        this.type = type ?: KeyEvent.KEY_PRESSED
-    }
 
     @JvmOverloads
     fun shift(value: OptionalBoolean = OptionalBoolean.TRUE): KeyBinding {

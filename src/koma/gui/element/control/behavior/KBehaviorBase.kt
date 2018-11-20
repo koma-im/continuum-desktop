@@ -1,18 +1,20 @@
 package koma.gui.element.control.behavior
 
 import javafx.scene.Node
-import koma.gui.element.control.inputmap.InputMap
+import koma.gui.element.control.inputmap.KInputMap
+import koma.gui.element.control.inputmap.MappingType
+import koma.gui.element.control.inputmap.mapping.MouseMapping
 import java.util.*
 
-abstract class BehaviorBase<N : Node>(val node: N) {
-    private val installedDefaultMappings: MutableList<InputMap.Mapping<*>>
+abstract class KBehaviorBase<N : Node>(val node: N) {
+    private val installedDefaultMappings: MutableList<MappingType>
     private val childInputMapDisposalHandlers: MutableList<Runnable>
 
-    abstract val inputMap: InputMap<N>
+    abstract val inputMap: KInputMap<N>
 
 
     init {
-        this.installedDefaultMappings = ArrayList<InputMap.Mapping<*>>()
+        this.installedDefaultMappings = ArrayList()
         this.childInputMapDisposalHandlers = ArrayList()
     }
 
@@ -34,17 +36,9 @@ abstract class BehaviorBase<N : Node>(val node: N) {
         }
     }
 
-    protected fun addDefaultMapping(newMapping: List<InputMap.Mapping<*>>) {
-        addDefaultMapping(inputMap, *newMapping.toTypedArray())
-    }
-
-    protected fun addDefaultMapping(vararg newMapping: InputMap.Mapping<*>) {
-        addDefaultMapping(inputMap, *newMapping)
-    }
-
-    protected fun addDefaultMapping(inputMap: InputMap<N>, vararg newMapping: InputMap.Mapping<*>) {
+    protected fun addDefaultMapping(inputMap: KInputMap<N>, newMapping: List<MappingType>) {
         // make a copy of the existing mappings, so we only check against those
-        val existingMappings = ArrayList(inputMap.mappings)
+        val existingMappings = inputMap.mappings.toList()
 
         for (mapping in newMapping) {
             // check if a mapping already exists, and if so, do not add this mapping
@@ -55,23 +49,27 @@ abstract class BehaviorBase<N : Node>(val node: N) {
             installedDefaultMappings.add(mapping)
         }
     }
+    protected fun addDefaultMapping(vararg maps: MouseMapping) {
+        addDefaultMapping(inputMap, maps.map { MappingType.Mouse(it) })
 
-    protected fun <T : Node> addDefaultChildMap(parentInputMap: InputMap<T>, newChildInputMap: InputMap<T>) {
+    }
+
+    protected fun <T : Node> addDefaultChildMap(parentInputMap:KInputMap<T>, newChildInputMap: KInputMap<T>) {
         parentInputMap.childInputMaps.add(newChildInputMap)
 
         childInputMapDisposalHandlers.add(Runnable{ parentInputMap.childInputMaps.remove(newChildInputMap) })
     }
 
-    protected fun createInputMap(): InputMap<N> {
+    protected fun createInputMap(): KInputMap<N> {
         // TODO re-enable when InputMap moves back to Node / Control
-        return InputMap(node)
+        return KInputMap(node)
     }
 
     protected fun removeMapping(key: Any) {
         val inputMap = inputMap
         inputMap.lookupMapping(key).ifPresent { mapping ->
             inputMap.mappings.remove(mapping)
-            installedDefaultMappings.remove(mapping)
+            // FIXME installedDefaultMappings.remove(mapping)
         }
     }
 }

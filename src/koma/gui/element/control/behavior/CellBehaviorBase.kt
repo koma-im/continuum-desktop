@@ -4,7 +4,8 @@ import javafx.event.EventHandler
 import javafx.scene.control.*
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
-import koma.gui.element.control.inputmap.InputMap
+import koma.gui.element.control.inputmap.KInputMap
+import koma.gui.element.control.inputmap.mapping.MouseMapping
 import java.util.*
 
 /**
@@ -17,7 +18,7 @@ abstract class CellBehaviorBase<T : Cell<*>>
  * Constructors                                                            *
  * *
  */
-(control: T) : BehaviorBase<T>(control) {
+(control: T) : KBehaviorBase<T>(control) {
 
 
     /***************************************************************************
@@ -33,7 +34,7 @@ abstract class CellBehaviorBase<T : Cell<*>>
      */
 
     /** {@inheritDoc}  */
-    override val inputMap: InputMap<T>
+    override val inputMap: KInputMap<T>
 
     // To support touch devices, we have to slightly modify this behavior, such
     // that selection only happens on mouse release, if only minimal dragging
@@ -60,9 +61,9 @@ abstract class CellBehaviorBase<T : Cell<*>>
 
         // TODO add focus traversal mappings (?)
 
-        val pressedMapping = InputMap.MouseMapping(MouseEvent.MOUSE_PRESSED, EventHandler<MouseEvent> { this.mousePressed(it) })
-        val releasedMapping = InputMap.MouseMapping(MouseEvent.MOUSE_RELEASED, EventHandler<MouseEvent> { this.mouseReleased(it) })
-        val mouseDragged = InputMap.MouseMapping(MouseEvent.MOUSE_DRAGGED, EventHandler<MouseEvent> { this.mouseDragged(it) })
+        val pressedMapping = MouseMapping(MouseEvent.MOUSE_PRESSED, EventHandler<MouseEvent> { this.mousePressed(it) })
+        val releasedMapping = MouseMapping(MouseEvent.MOUSE_RELEASED, EventHandler<MouseEvent> { this.mouseReleased(it) })
+        val mouseDragged = MouseMapping(MouseEvent.MOUSE_DRAGGED, EventHandler<MouseEvent> { this.mouseDragged(it) })
         addDefaultMapping(pressedMapping, releasedMapping, mouseDragged)
         pressedMapping.isAutoConsume = false
         releasedMapping.isAutoConsume = false
