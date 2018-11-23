@@ -13,7 +13,7 @@ import javafx.util.Callback
 import koma.gui.element.emoji.category.emojiCategories
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.storage.config.settings.AppSettings
-import koma.ui.PrettyListView
+import koma.gui.element.control.PrettyListView
 import org.controlsfx.control.PopOver
 import tornadofx.*
 

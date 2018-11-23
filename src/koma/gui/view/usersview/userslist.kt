@@ -9,7 +9,7 @@ import javafx.scene.layout.VBox
 import koma.gui.view.usersview.fragment.get_cell_property
 import koma.model.user.UserState
 import koma.storage.config.settings.AppSettings
-import koma.ui.PrettyListView
+import koma.gui.element.control.PrettyListView
 import tornadofx.*
 import kotlin.math.roundToInt
 

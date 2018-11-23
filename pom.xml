@@ -64,11 +64,6 @@
             <version>9.0.0</version>
         </dependency>
         <dependency>
-            <groupId>com.github.u1haru</groupId>
-            <artifactId>prettylistview</artifactId>
-            <version>d168d39</version>
-       </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-coroutines-core</artifactId>
             <version>${kotlinx.coroutine.version}</version>
