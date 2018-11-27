@@ -6,7 +6,7 @@ import koma.matrix.json.RuntimeJsonAdapterFactory
 import matrix.event.room_message.RoomEventType
 
 fun getPolyRoomEventAdapter(): JsonAdapter.Factory {
-    val factory = RuntimeJsonAdapterFactory<RoomEvent>(RoomEvent::class.java, "type", MRoomUnrecognized::class.java)
+    val factory = RuntimeJsonAdapterFactory(RoomEvent::class.java, "type", MRoomUnrecognized::class.java)
     factory.registerSubtype(MRoomAliases::class.java, RoomEventType.Aliases.toString())
     factory.registerSubtype(MRoomMessage::class.java, RoomEventType.Message.toString())
     factory.registerSubtype(MRoomAvatar::class.java, RoomEventType.Avatar .toString())
