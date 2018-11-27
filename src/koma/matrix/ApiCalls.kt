@@ -1,6 +1,5 @@
 package matrix
 
-import com.squareup.moshi.Moshi
 import domain.*
 import koma.controller.sync.longPollTimeout
 import koma.koma_app.SaveJobs
@@ -9,13 +8,10 @@ import koma.matrix.event.EventId
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.chat.M_Message
-import koma.matrix.event.room_message.chat.getPolyMessageAdapter
-import koma.matrix.event.room_message.getPolyRoomEventAdapter
 import koma.matrix.event.room_message.state.RoomAvatarContent
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.event.room_message.state.RoomNameContent
 import koma.matrix.json.MoshiInstance
-import koma.matrix.json.NewTypeStringAdapterFactory
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.pagination.RoomBatch
 import koma.matrix.publicapi.rooms.RoomDirectoryQuery
@@ -286,11 +282,7 @@ class ApiClient(val profile: Profile, serverConf: ServerConf) {
      * add adapters to moshi and then add moshi to retrofit
      */
     private fun createRetrofitBuilder(): Retrofit.Builder {
-        val moshi = Moshi.Builder()
-                .add(NewTypeStringAdapterFactory())
-                .add(getPolyMessageAdapter())
-                .add(getPolyRoomEventAdapter())
-                .build()
+        val moshi = MoshiInstance.moshi
         val retrofitbuild = Retrofit.Builder()
                 .baseUrl(apiURL)
                 .addConverterFactory(MoshiConverterFactory.create(moshi))
