@@ -29,20 +29,25 @@ private class MessageAdapter(m: Moshi): JsonAdapter<M_Message>() {
     )
     private val labels = keyToAdapters.keys.toList()
     private val labelOptions = JsonReader.Options.of(*labels.toTypedArray())
+    val mapAdapter = m.adapter<Map<String, Any>>(Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java))
 
     override fun toJson(writer: JsonWriter, msg: M_Message?) {
         msg ?: return
         val t: String? = msg.getMsgType()
-        val a: JsonAdapter<M_Message>? = t?.let { keyToAdapters[it] }
-        a?.toJson(writer, msg)
+        if (t != null) {
+            val a: JsonAdapter<M_Message> = keyToAdapters[t]  !!
+            a.toJson(writer, msg)
+        } else if (msg is UnrecognizedMessage) {
+            mapAdapter.toJson(writer, msg.raw)
+        }
     }
 
     override fun fromJson(r: JsonReader): M_Message {
         val t = findType(r.peekJson())
         val a = t?.let { keyToAdapters[it] }
-        val m = a?.fromJson(r)
-        val raw = UnrecognizedMessage("")
-        return  m ?: raw
+        val mm = a?.fromJson(r)
+        val m = mm ?: UnrecognizedMessage(mapAdapter.fromJson(r)!!)
+        return  m
     }
 
     private fun findType(jr: JsonReader): String? {

@@ -77,6 +77,7 @@ class FileMessage(
 ): M_Message(body)
 
 class UnrecognizedMessage(
-        body: String
+        val raw: Map<String, Any>,
+        body: String = "other"
 ): M_Message(body)
 
