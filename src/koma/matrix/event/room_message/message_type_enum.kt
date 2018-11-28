@@ -15,6 +15,7 @@ enum class RoomEventType{
     @Json(name = "m.room.name") Name,
     @Json(name = "m.room.topic") Topic,
     @Json(name = "m.room.avatar") Avatar,
+    @Json(name = "pinned-events") PinnedEvents,
     @Json(name = "m.room.bot.options") BotOptions,
 
     @Json(name = "m.room.history_visibility") HistoryVisibility,
@@ -22,21 +23,23 @@ enum class RoomEventType{
     @Json(name = "m.room.guest_access") GuestAccess;
 
     override fun toString(): String {
-        return when(this) {
-            Aliases -> "m.room.aliases"
-            BotOptions -> "m.room.bot.options"
-            CanonAlias ->         "m.room.canonical_alias"
-            Create ->             "m.room.create"
-            JoinRule ->           "m.room.join_rules"
-            PowerLevels ->        "m.room.power_levels"
-            Member ->             "m.room.member"
-            Message ->            "m.room.message"
-            Redaction ->          "m.room.redaction"
-            Name ->               "m.room.name"
-            Topic ->              "m.room.topic"
-            Avatar ->             "m.room.avatar"
-            HistoryVisibility ->  "m.room.history_visibility"
-            GuestAccess ->        "m.room.guest_access"
+        return enumToStr(this)
+    }
+
+    companion object {
+        private val enumStrMap = values().map { it to findJsonAnnotationStr(it) }.toMap()
+        private val strEnumMap = enumStrMap.entries
+                .map { Pair(it.value, it.key) }.toMap()
+        private fun findJsonAnnotationStr(t: RoomEventType): String {
+            val am = RoomEventType::class.java.getField(t.name).getAnnotation(Json::class.java)
+            return am.name
+        }
+
+        fun enumToStr(t: RoomEventType): String {
+            return enumStrMap[t] !!
+        }
+        fun strToEnum(s: String): RoomEventType? {
+            return strEnumMap[s]
         }
     }
 }

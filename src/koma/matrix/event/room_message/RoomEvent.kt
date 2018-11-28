@@ -6,12 +6,14 @@ import koma.matrix.event.room_message.chat.M_Message
 import koma.matrix.event.room_message.chat.MessageUnsigned
 import koma.matrix.event.room_message.state.RoomRedactContent
 import koma.matrix.json.MoshiInstance
+import matrix.event.room_message.RoomEventType
 
 // try to make moshi return different kind of objects depending on a key
 
 abstract class RoomEvent(
         val event_id: EventId,
-        val origin_server_ts: Long
+        val origin_server_ts: Long,
+        open val type: RoomEventType?
 ): Comparable<RoomEvent>{
     override fun compareTo(other: RoomEvent): Int {
         return this.origin_server_ts.compareTo(other.origin_server_ts)
@@ -47,7 +49,7 @@ class MRoomMessage(
         /**
          * sometimes content can be as empty as {}
          */
-        val content: M_Message?): RoomEvent(event_id, origin_server_ts)
+        val content: M_Message?): RoomEvent(event_id, origin_server_ts, type=RoomEventType.Message)
 
 class MRoomRedaction(
         //val age: Long?,
@@ -57,7 +59,7 @@ class MRoomRedaction(
         val sender: UserId,
         val state_key: String?,
         val redacts: String,
-        val content: RoomRedactContent): RoomEvent(event_id, origin_server_ts)
+        val content: RoomRedactContent): RoomEvent(event_id, origin_server_ts, type = RoomEventType.Redaction)
 
 class MRoomUnrecognized(
         //val age: Long?,
@@ -67,5 +69,10 @@ class MRoomUnrecognized(
         val sender: UserId?,
         val state_key: String?,
         val unsigned: MessageUnsigned?,
-        val content: Map<String, Any>?): RoomEvent(event_id, origin_server_ts)
+        val content: Map<String, Any>?
+): RoomEvent(event_id, origin_server_ts, type = null) {
+    override fun toString(): String {
+        return "MRoomUnrecognized(prev_content=$prev_content, sender=$sender, state_key=$state_key, unsigned=$unsigned, content=$content)"
+    }
+}
 
