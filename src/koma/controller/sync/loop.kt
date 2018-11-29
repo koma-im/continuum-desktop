@@ -1,6 +1,7 @@
 package koma.controller.sync
 
 import koma.matrix.sync.SyncResponse
+import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.chatController
 import kotlinx.coroutines.GlobalScope
@@ -60,8 +61,12 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
                     break@sync
                 }
                 is SyncStatus.TransientFailure -> {
-                    System.err.println("restarting sync after ${ss.delay} because ${ss.exception}")
+                    val m = if (ss.exception is HttpException) {
+                        ss.exception.toStringShowBody()
+                    } else { "${ss.exception}"}
+                    System.err.print("Exception during sync: $m")
                     delay(ss.delay)
+                    System.err.println("restarting sync")
                 }
                 is SyncStatus.Response -> {
                     val r = ss.response

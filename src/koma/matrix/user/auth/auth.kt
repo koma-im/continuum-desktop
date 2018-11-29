@@ -1,12 +1,12 @@
 package koma.matrix.user.auth
 
 import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.flatMap
+import com.github.kittinunf.result.mapError
 import com.squareup.moshi.Moshi
 import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.MatrixError
-import koma.util.coroutine.adapter.retrofit.await
-import okio.BufferedSource
+import koma.util.coroutine.adapter.retrofit.MatrixException
+import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import retrofit2.Call
 
 
@@ -14,25 +14,23 @@ import retrofit2.Call
  * the server may return instructions for further authentication
  */
 suspend fun <T : Any> Call<T>.awaitMatrixAuth(): Result<T, Exception> {
-    val result = this.await()
-    return result.flatMap { response ->
-        if (response.isSuccessful) {
-            val body = response.body()
-            if (body == null)
-                return@flatMap Result.error(NullPointerException("Response body is null"))
-            return@flatMap Result.of(body)
-        }
-
-        if (response.code() == 401) {
-            val unauth = Unauthorized.fromSource(response.errorBody()?.source())
-            if (unauth != null)
-                return@flatMap Result.error(AuthException.AuthFail(unauth))
-        }
-        val m = MatrixError.fromSource(response.errorBody()?.source())
-        if (m!=null) return@flatMap Result.error(AuthException.MatrixFail(m))
-        val h = HttpException.fromOkhttp(response.raw())
-        return@flatMap Result.error(AuthException.HttpFail(h))
-    }
+    val result = this.awaitMatrix()
+            .mapError { error ->
+                if (error is MatrixException) {
+                    return@mapError AuthException.MatrixFail(error.mxErr)
+                } else if (error is HttpException) {
+                    if (error.code == 401 && error.body != null) {
+                        val unauth = Unauthorized.fromSource(error.body)
+                        if (unauth != null) {
+                            return@mapError AuthException.AuthFail(unauth)
+                        }
+                    } else {
+                        return@mapError AuthException.HttpFail(error)
+                    }
+                }
+                return@mapError error
+            }
+    return result
 }
 
 
@@ -55,7 +53,7 @@ data class Unauthorized(
         private val moshi = Moshi.Builder().build()
         private val jsonAdapter = moshi.adapter(Unauthorized::class.java)
 
-        fun fromSource(bs: BufferedSource?): Unauthorized? = bs?.let { jsonAdapter.fromJson(it) }
+        fun fromSource(bs: String): Unauthorized? =  jsonAdapter.fromJson(bs)
     }
 }
 
