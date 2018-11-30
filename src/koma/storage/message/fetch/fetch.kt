@@ -6,6 +6,7 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.message.MessageManagerMsg
 import koma.storage.message.PrependFetched
 import koma.storage.message.piece.Segment
+import koma.util.coroutine.adapter.retrofit.isTemporaryNetFailure
 import koma.util.coroutine.observable.updates
 import koma.util.observable.list.concat.TreeConcatList
 import kotlinx.coroutines.CompletableDeferred
@@ -13,7 +14,6 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.filterNotNull
 import kotlinx.coroutines.delay
 import mu.KotlinLogging
-import retrofit2.HttpException
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,8 +28,8 @@ suspend fun fetchEarlier(
         val r = doFetch(segment, roomId)
         when (r) {
             is Result.Failure -> {
-                if (r.error is HttpException) {
-                    System.err.println("Can't fetch messages before $segment: ${r.error} ${r.error.message}")
+                if (!r.error.isTemporaryNetFailure()) {
+                    logger.error { "Can't fetch messages before $segment: ${r.error} ${r.error.message}" }
                     return
                 } else {
                     logger.warn { "Warning fetching messages before $segment: ${r.error} ${r.error.message}" }
