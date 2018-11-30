@@ -12,7 +12,10 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.filterNotNull
 import kotlinx.coroutines.delay
+import mu.KotlinLogging
 import retrofit2.HttpException
+
+private val logger = KotlinLogging.logger {}
 
 suspend fun fetchEarlier(
         replyChan: SendChannel<MessageManagerMsg>,
@@ -29,7 +32,7 @@ suspend fun fetchEarlier(
                     System.err.println("Can't fetch messages before $segment: ${r.error} ${r.error.message}")
                     return
                 } else {
-                    System.err.println("Warning fetching messages before $segment: ${r.error} ${r.error.message}")
+                    logger.warn { "Warning fetching messages before $segment: ${r.error} ${r.error.message}" }
                     delay(1000)
                     continue@fetch
                 }

@@ -3,8 +3,11 @@ package koma.util.coroutine.adapter.retrofit
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.flatMap
 import com.squareup.moshi.Moshi
+import mu.KotlinLogging
 import retrofit2.Call
 import retrofit2.Response
+
+private val logger = KotlinLogging.logger {}
 
 suspend fun <T : Any> Call<T>.awaitMatrix(): Result<T, Exception>
         = this.await().flatMap { it.extractBody() }
@@ -19,7 +22,7 @@ private fun<T: Any> Response<T>.extractBody(): Result<T, Exception> {
         val s = this.errorBody()?.source()?.readUtf8()
         val me = s?.let { MatrixError.fromString(it) }
         val e = if (me != null) {
-            MatrixException(this.code(), this.message(), me)
+            MatrixException(this.code(), this.message(), me, s)
         } else {
             HttpException(this.code(), this.message(), body = s)
         }
@@ -27,15 +30,17 @@ private fun<T: Any> Response<T>.extractBody(): Result<T, Exception> {
     }
 }
 
-class MatrixException(val code: Int, val msg: String, val mxErr: MatrixError)
+class MatrixException(code: Int, msg: String, val mxErr: MatrixError, body: String? = null)
     : Exception(msg)
 {
-    fun mxErrMsg(): String {
-        return  """
-                |HTTP $code $msg
-                |Matrix Error ${mxErr.errcode} ${mxErr.error}
-                """.trimMargin()
+    val httpException = HttpException(code, msg, body)
+    val matrixErrorMessage by lazy { "Matrix Error ${mxErr.errcode} ${mxErr.error}" }
+    val fullerErrorMessage by lazy {
+        "$httpException\n" +
+                "Matrix Error ${mxErr.errcode} ${mxErr.error}"
     }
+
+    override fun toString(): String = matrixErrorMessage
 }
 
 class MatrixError(

@@ -2,6 +2,7 @@ package koma.controller.sync
 
 import koma.matrix.sync.SyncResponse
 import koma.util.coroutine.adapter.retrofit.HttpException
+import koma.util.coroutine.adapter.retrofit.MatrixException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma_app.appState.chatController
 import kotlinx.coroutines.GlobalScope
@@ -10,7 +11,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
+import mu.KotlinLogging
 import java.time.Instant
+
+
+private val logger = KotlinLogging.logger {}
 
 val longPollTimeout = 50
 
@@ -63,10 +68,12 @@ fun startSyncing(from: String?, shutdownChan: Channel<Unit>): Channel<SyncRespon
                 is SyncStatus.TransientFailure -> {
                     val m = if (ss.exception is HttpException) {
                         ss.exception.toStringShowBody()
+                    } else if (ss.exception is MatrixException) {
+                      ss.exception.fullerErrorMessage
                     } else { "${ss.exception}"}
-                    System.err.print("Exception during sync: $m")
+                    logger.warn { "Exception during sync: $m" }
                     delay(ss.delay)
-                    System.err.println("restarting sync")
+                    logger.debug { "restarting sync" }
                 }
                 is SyncStatus.Response -> {
                     val r = ss.response

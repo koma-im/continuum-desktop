@@ -24,3 +24,4 @@ koma.iml
 hs_err_pid*
 /nbproject/private/
 /build/
+/src/main/resources/simplelogger.properties
