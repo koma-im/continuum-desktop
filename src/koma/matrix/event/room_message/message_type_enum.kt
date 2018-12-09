@@ -1,6 +1,8 @@
 package matrix.event.room_message
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+import com.squareup.moshi.ToJson
 
 enum class RoomEventType{
     @Json(name = "m.room.aliases") Aliases,
@@ -41,5 +43,17 @@ enum class RoomEventType{
         fun strToEnum(s: String): RoomEventType? {
             return strEnumMap[s]
         }
+    }
+}
+
+class RoomEventTypeEnumAdapter {
+    @ToJson
+    fun toJson(t: RoomEventType): String {
+        return RoomEventType.enumToStr(t)
+    }
+
+    @FromJson
+    fun fromJson(str: String): RoomEventType? {
+        return RoomEventType.strToEnum(str)
     }
 }

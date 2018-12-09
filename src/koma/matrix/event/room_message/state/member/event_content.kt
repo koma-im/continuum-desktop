@@ -18,7 +18,7 @@ class PrevContent(
 )
 
 class RoomMemberUnsigned(
-        val age: Int,
+        val age: Long,
         val prev_content: PrevContent?,
         val prev_sender: UserId?,
         val replaces_state: String?
