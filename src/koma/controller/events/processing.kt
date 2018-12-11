@@ -8,6 +8,7 @@ import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.storage.config.profile.Profile
 import koma.storage.message.AppendSync
+import koma.util.matrix.getUserState
 import koma_app.appState.sortMembersInEachRoom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

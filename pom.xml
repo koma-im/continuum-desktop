@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.koma-im.koma</groupId>
-    <artifactId>koma</artifactId>
+    <artifactId>koma-desktop</artifactId>
     <packaging>jar</packaging>
     <version>0.7.3</version>
-    <name>koma</name>
+    <name>koma-desktop</name>
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -13,15 +13,9 @@
             <version>${kotlin.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.squareup.moshi</groupId>
-            <artifactId>moshi</artifactId>
-            <version>${moshi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.moshi</groupId>
-            <artifactId>moshi-kotlin-codegen</artifactId>
-            <version>${moshi.version}</version>
-            <scope>provided</scope>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>no.tornado</groupId>
@@ -32,16 +26,6 @@
             <groupId>org.cache2k</groupId>
             <artifactId>cache2k-core</artifactId>
             <version>1.0.2.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>retrofit</artifactId>
-            <version>${retrofit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.retrofit2</groupId>
-            <artifactId>converter-moshi</artifactId>
-            <version>${retrofit.version}</version>
         </dependency>
         <dependency>
             <groupId>de.jensd</groupId>
@@ -109,11 +93,14 @@
             <artifactId>slf4j-simple</artifactId>
             <version>1.8.0-beta2</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.koma-im.koma</groupId>
+            <artifactId>koma-library</artifactId>
+            <version>0.7.3</version>
+        </dependency>
     </dependencies>
     <properties>
         <kotlin.version>1.3.10</kotlin.version>
-        <moshi.version>1.8.0</moshi.version>
-        <retrofit.version>2.5.0</retrofit.version>
         <kotlinx.coroutine.version>1.0.1</kotlinx.coroutine.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <maven.compiler.source>1.9</maven.compiler.source>
@@ -128,19 +115,6 @@
                 <version>${kotlin.version}</version>
 
                 <executions>
-                    <execution>
-                        <id>kapt</id>
-                        <goals>
-                            <goal>kapt</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <sourceDir>src</sourceDir>
-                            </sourceDirs>
-                            <annotationProcessorPaths>
-                           </annotationProcessorPaths>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>compile</id>
                         <phase>compile</phase>

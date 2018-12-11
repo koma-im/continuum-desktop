@@ -8,6 +8,7 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.EmoteMessage
 import koma.matrix.event.room_message.chat.NoticeMessage
 import koma.matrix.event.room_message.chat.TextMessage
+import koma.util.matrix.getState
 import tornadofx.*
 
 class MTextViewNode(val content: TextMessage): ViewNode {
