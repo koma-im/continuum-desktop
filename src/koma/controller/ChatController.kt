@@ -3,13 +3,11 @@ package controller
 import com.github.kittinunf.result.Result
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import matrix.ApiClient
 import mu.KotlinLogging
+import java.net.SocketTimeoutException
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,8 +28,14 @@ class ChatController(
             for (s in sync.events) {
                 if (s is Result.Success) {
                     apiClient.profile.processEventsResult(s.value)
-                } else {
-                    logger.warn { "sync stopped because of $s" }
+                } else if (s is Result.Failure) {
+                    if (s.error is SocketTimeoutException) {
+                        logger.warn { "sync paused after timeout exception" }
+                        delay(1500)
+                        logger.info { "resuming sync after timeout" }
+                    } else {
+                        logger.warn { "sync stopped because of $s" }
+                    }
                 }
             }
         }
