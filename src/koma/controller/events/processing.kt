@@ -16,7 +16,9 @@ import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
 import matrix.room.LeftRoom
 import model.Room
+import mu.KotlinLogging
 
+private val logger = KotlinLogging.logger {}
 
 fun process_presence(message: PresenceMessage) {
     message.getUserState()?.let {

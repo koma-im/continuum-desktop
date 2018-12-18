@@ -10,14 +10,17 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.config.config_paths
 import koma.storage.users.UserStore
 import model.Room
+import mu.KotlinLogging
 import java.io.File
 import java.io.IOException
 import java.util.stream.Stream
 
+private val logger = KotlinLogging.logger {}
+
 val state_dir = config_paths.getCreateDir("state")
 
 fun loadRoom(roomId: RoomId): Room? {
-    println("Loading room with id $roomId")
+    logger.debug { "Loading room with id $roomId" }
     state_dir?: return null
     val dir = state_dir.resolve(roomId.servername).resolve(roomId.localstr)
     if (!dir.isDirectory) return null

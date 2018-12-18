@@ -18,8 +18,11 @@ import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.withContext
 import matrix.room.Timeline
+import mu.KotlinLogging
 import tornadofx.*
 import kotlinx.coroutines.launch as corolaunch
+
+private val logger = KotlinLogging.logger {}
 
 class MessageManager(val roomId: RoomId) {
     // added to UI, needs to be modified on FX thread
@@ -40,7 +43,7 @@ class MessageManager(val roomId: RoomId) {
         value?.endInclusive?.let { concatList.locateKey(it)?.key } ?: -1
     }
 
-    val chan = GlobalScope.actor<MessageManagerMsg> {
+    val chan = GlobalScope.actor<MessageManagerMsg>(capacity = 3) {
         for (msg in channel) {
             when (msg) {
                 is AppendSync -> appendTimeline(msg.timeline)
@@ -160,6 +163,9 @@ class MessageManager(val roomId: RoomId) {
                     new.meta.prev_batch = timeline.prev_batch
                 }
                 addToUi(newk, new.list)
+                // Is this a good idea?
+                // If the channel doesn't have a buffer, which is the default
+                // this would deadlock
                 chan.send(StartFetchEarlier(newk))
             }
             current = newk

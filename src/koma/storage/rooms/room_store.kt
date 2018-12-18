@@ -6,7 +6,10 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.rooms.state.loadRoom
 import koma.storage.rooms.state.save
 import model.Room
+import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * rooms the user actively participate in
@@ -17,8 +20,10 @@ class UserRoomStore {
     @Synchronized
     fun add(roomId: RoomId): Room {
         val room = RoomStore.getOrCreate(roomId)
-        if (!roomList.contains(room))
+        if (!roomList.contains(room)) {
+            logger.debug { "Add user joined room; $roomId" }
             roomList.add(room)
+        }
         return room
     }
 
