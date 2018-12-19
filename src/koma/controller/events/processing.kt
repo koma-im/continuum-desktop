@@ -9,6 +9,7 @@ import koma.matrix.user.presence.PresenceMessage
 import koma.storage.config.profile.Profile
 import koma.storage.message.AppendSync
 import koma.util.matrix.getUserState
+import koma_app.appState
 import koma_app.appState.sortMembersInEachRoom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -43,12 +44,11 @@ private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
 }
 
 fun Profile.joinRoom(roomid: RoomId): Room {
-    val room = this.roomStore.add(roomid)
-    return room
+    return appState.getAccountRoomStore(this.userId)!!.add(roomid)
 }
 
 private fun Profile.leaveLeftRooms(roomid: RoomId, leftRoom: LeftRoom) {
-    this.roomStore.remove(roomid)
+    appState.getAccountRoomStore(this.userId)!!.remove(roomid)
 }
 
 private fun handle_invited_room(roomid: String, data: InvitedRoom) {

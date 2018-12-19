@@ -11,8 +11,7 @@ import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
-import koma.storage.config.server.loadServerConf
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tornadofx.*
@@ -38,7 +37,7 @@ class LoginScreen(): View() {
         with(grid) {
             paddingAll = 5.0
             row("Username") {
-                val recentUsers = getRecentUsers().map { it.toString() }
+                val recentUsers = appState.koma.getRecentUsers().map { it.toString() }
                 userId = combobox(values = recentUsers) {
                     isEditable = true
                     selectionModel.selectFirst()
@@ -59,7 +58,7 @@ class LoginScreen(): View() {
         }
         with(root) {
             style {
-                fontSize=AppSettings.settings.scaling.em
+                fontSize= appState.koma.appSettings.settings.scaling.em
             }
             add(grid)
 
@@ -77,7 +76,7 @@ class LoginScreen(): View() {
                     isDefaultButton = true
                     action {
                         GlobalScope.launch {
-                            doLogin(userId.value, password.text, serverCombo.editor.text)
+                            appState.koma.doLogin(userId.value, password.text, serverCombo.editor.text)
                         }
                     }
                 }
@@ -89,7 +88,7 @@ class LoginScreen(): View() {
 
     private fun setServerAddr(input: String){
         val id = UserId_new(input)
-        val addrs = loadServerConf(id.server).addresses
+        val addrs = appState.koma.servers.serverConf(id.server).addresses
         serverCombo.items = FXCollections.observableArrayList(addrs)
         serverCombo.selectionModel.selectFirst()
     }

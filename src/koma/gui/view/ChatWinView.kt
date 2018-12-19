@@ -10,7 +10,7 @@ import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.storage.config.profile.Profile
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import koma_app.appState.apiClient
 import model.Room
 import model.RoomItemModel
@@ -29,7 +29,7 @@ class ChatView(profile: Profile): View() {
     val switchableRoomView: SwitchableRoomView by inject()
 
     init {
-        val roomList = profile.getRoomList()
+        val roomList = appState.getAccountRoomStore(profile.userId)!!.roomList
         roomListView = RoomListView(roomList)
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
@@ -59,7 +59,7 @@ class RoomFragment: ListCellFragment<Room>() {
     val iconUrl = room.select { it.iconURLProperty }
 
     override val root = hbox(spacing = 10.0) {
-        val scale = AppSettings.settings.scaling
+        val scale = appState.koma.appSettings.settings.scaling
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT

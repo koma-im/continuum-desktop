@@ -14,8 +14,8 @@ import javafx.util.StringConverter
 import koma.gui.view.window.auth.login.startChatWithIdToken
 import koma.matrix.user.auth.*
 import koma.storage.config.server.ServerConf
-import koma.storage.config.server.configServerAddress
 import koma.storage.config.server.getApiUrlBuilder
+import koma_app.appState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -153,7 +153,7 @@ private class Success(user: RegisterdUser, serverConf: ServerConf, window: Regis
                 button("Login Now") {
                     action {
                         window.close()
-                        startChatWithIdToken(user.user_id, user.access_token, serverConf)
+                        appState.koma.startChatWithIdToken(user.user_id, user.access_token, serverConf)
                     }
                 }
             }
@@ -269,12 +269,12 @@ class FallbackWebviewAuth(
 private class Start(): WizardState() {
     suspend fun start(): Pair<Register, Unauthorized>? {
         val addr = serverCombo.editor.text
-        val s = configServerAddress(addr)
+        val s = appState.koma.servers.serverConfFromAddr(addr)
         if (s == null) {
             alert(Alert.AlertType.ERROR, "$addr isn't valid server")
             return null
         }
-        val r = Register(s)
+        val r = Register(s, appState.koma.http)
         val f = r.getFlows()
         when (f) {
             is Result.Failure -> {

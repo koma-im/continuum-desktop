@@ -3,6 +3,7 @@ package koma.gui.dialog.file.save
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
 import koma.network.media.saveUrlToFile
+import koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -17,9 +18,8 @@ fun downloadFileAs(url: HttpUrl, filename: String = url.guessFileName(), title: 
 
     val file = dialog.showSaveDialog(FX.primaryStage)
     file?:return
-
     GlobalScope.launch {
-        if (!saveUrlToFile(url, file))
+        if (!appState.koma.saveUrlToFile(url, file))
             launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR,
                         "Something went wrong while downloading file",

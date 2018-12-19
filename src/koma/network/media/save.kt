@@ -1,11 +1,12 @@
 package koma.network.media
 
+import koma.Koma
 import koma.util.result.ok
 import okhttp3.HttpUrl
 import okio.Okio
 import java.io.File
 
-suspend fun saveUrlToFile(url: HttpUrl, file: File): Boolean {
+suspend fun Koma.saveUrlToFile(url: HttpUrl, file: File): Boolean {
     val body = getResponse(url).ok()
     body?: return false
 

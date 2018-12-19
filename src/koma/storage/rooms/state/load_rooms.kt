@@ -7,8 +7,8 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.visibility.HistoryVisibilityCaseInsensitiveAdapter
 import koma.matrix.room.visibility.RoomVisibilityCaseInsensitiveAdapter
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.config_paths
-import koma.storage.users.UserStore
+import koma.storage.config.ConfigPaths
+import koma_app.appState
 import model.Room
 import mu.KotlinLogging
 import java.io.File
@@ -17,10 +17,11 @@ import java.util.stream.Stream
 
 private val logger = KotlinLogging.logger {}
 
-val state_dir = config_paths.getCreateDir("state")
 
-fun loadRoom(roomId: RoomId): Room? {
+
+fun ConfigPaths.loadRoom(roomId: RoomId): Room? {
     logger.debug { "Loading room with id $roomId" }
+    val state_dir = this.getCreateDir("state")
     state_dir?: return null
     val dir = state_dir.resolve(roomId.servername).resolve(roomId.localstr)
     if (!dir.isDirectory) return null
@@ -57,7 +58,7 @@ private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     val members = load_members(roomDir.resolve(usersfilename))
     for (m in members) {
         val u = UserId_new(m.first)
-        room.members.add(UserStore.getOrCreateUserId(u))
+        room.members.add(appState.userStore.getOrCreateUserId(u))
     }
     return room
 }

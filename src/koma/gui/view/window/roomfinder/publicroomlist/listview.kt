@@ -125,8 +125,8 @@ class RoomListView(
     private val existing = ConcurrentHashMap.newKeySet<RoomId>()
 
     init {
-        appState.apiClient?.let {
-            val rooms=it.profile.roomStore.roomList.map { it.id }
+        val rooms = appState.accountRooms()?.map { it.id }
+        if (rooms != null) {
             existing.addAll(rooms)
         }
         with(root) {

@@ -3,25 +3,21 @@ package koma.storage.users.state
 import com.squareup.moshi.Moshi
 import koma.matrix.UserId
 import koma.model.user.UserState
-import koma.storage.config.config_paths
+import koma.storage.config.ConfigPaths
 import java.io.File
 import java.io.IOException
 
-fun user_save_path(userId: UserId): String? {
-    return config_paths.getOrCreate("people", userId.server)
+fun ConfigPaths.user_save_path(userId: UserId): String? {
+    return this.getOrCreate("people", userId.server)
 }
 
-fun UserState.save() {
-    synchronized(this) { this.saveUnsync() }
-}
-
-fun UserState.saveUnsync() {
-    if (!this.modified) return
-    val dir = user_save_path(id)
+fun ConfigPaths.saveUser(user: UserState) {
+    if (!user.modified) return
+    val dir = user_save_path(user.id)
     dir?: return
     val data = SavedUserState(
-            this.name,
-            this.avatar
+            user.name,
+            user.avatar
     )
     val moshi = Moshi.Builder()
             .build()
@@ -33,7 +29,7 @@ fun UserState.saveUnsync() {
         return
     }
     try {
-        val file = File(dir).resolve(id.user+".json")
+        val file = File(dir).resolve(user.id.user+".json")
         file.writeText(json)
     } catch (e: IOException) {
     }

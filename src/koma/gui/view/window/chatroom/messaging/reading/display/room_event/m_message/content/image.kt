@@ -11,8 +11,8 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.ImageElement
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.network.media.MHUrl
-import koma.storage.config.settings.AppSettings
 import koma.util.result.ok
+import koma_app.appState
 import tornadofx.*
 
 class MImageViewNode(val content: ImageMessage): ViewNode {
@@ -26,7 +26,9 @@ class MImageViewNode(val content: ImageMessage): ViewNode {
             ImageElement(url).node
         } else {
             menuItems = listOf()
-            MaterialIconFactory.get().createIcon(MaterialIcon.BROKEN_IMAGE, AppSettings.scale_em(1f))
+            val s = appState.koma.appSettings.scale_em(1f)
+            MaterialIconFactory.get().createIcon(MaterialIcon.BROKEN_IMAGE,
+                    s)
         }
         node.add(cnode)
         node.tooltip(content.body)

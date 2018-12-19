@@ -7,7 +7,7 @@ import javafx.scene.control.TextField
 import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendImageMessage
 import koma.gui.element.emoji.keyboard.EmojiKeyboard
-import koma.storage.config.settings.AppSettings
+import koma_app.AppSettings
 import model.Room
 import tornadofx.*
 import kotlin.math.roundToInt

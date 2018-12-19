@@ -7,6 +7,7 @@ import koma.gui.element.control.NullableIndexRange
 import koma.gui.view.window.chatroom.messaging.reading.display.supportedByDisplay
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.room.naming.RoomId
+import koma.storage.config.ConfigPaths
 import koma.storage.message.fetch.fetchEarlier
 import koma.storage.message.file.SegmentsDirectory
 import koma.storage.message.file.get_log_path
@@ -24,11 +25,11 @@ import kotlinx.coroutines.launch as corolaunch
 
 private val logger = KotlinLogging.logger {}
 
-class MessageManager(val roomId: RoomId) {
+class MessageManager(val roomId: RoomId, private val paths: ConfigPaths) {
     // added to UI, needs to be modified on FX thread
     private val concatList = TreeConcatList<Long, RoomEvent>()
     val shownList = FilteredList(concatList, { it.supportedByDisplay() })
-    private val segDir = SegmentsDirectory(roomId)
+    private val segDir = SegmentsDirectory(roomId, paths)
     // points to the segment containing newest messages being received
     private var current: Long? = null
 
@@ -135,7 +136,7 @@ class MessageManager(val roomId: RoomId) {
             return null
         }
         val key = newElements.first().origin_server_ts
-        val path = get_log_path(key, roomId)
+        val path = paths.get_log_path(key, roomId)
         path ?: return null
         val newsegment = Segment(path, key, newElements)
         if (leftTrimmed) gap.low?.setFollowedBy(newsegment)

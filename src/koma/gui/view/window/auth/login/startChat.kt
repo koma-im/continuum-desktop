@@ -1,6 +1,7 @@
 package koma.gui.view.window.auth.login
 
 import controller.ChatController
+import koma.Koma
 import koma.matrix.UserId
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
@@ -14,11 +15,11 @@ import view.RootLayoutView
 /**
  * show the chat window after login is done
  */
-fun startChat(authedUser: Profile, serverConf: ServerConf) {
+fun Koma.startChat(authedUser: Profile, serverConf: ServerConf) {
     val userid = authedUser.userId
     saveLastUsed(userid)
 
-    val apiClient = ApiClient(authedUser, serverConf)
+    val apiClient = ApiClient(authedUser, serverConf, appState.koma)
     appState.apiClient = apiClient
     appState.serverConf = serverConf
 
@@ -33,7 +34,7 @@ fun startChat(authedUser: Profile, serverConf: ServerConf) {
     chatctrl.start()
 }
 
-fun startChatWithIdToken(userId: UserId, token: String, serverConf: ServerConf) {
+fun Koma.startChatWithIdToken(userId: UserId, token: String, serverConf: ServerConf) {
     val p = Profile(userId, token)
     startChat(p, serverConf)
 }

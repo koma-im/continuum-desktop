@@ -10,7 +10,7 @@ import javafx.scene.layout.HBox
 import javafx.util.Callback
 import koma.gui.element.icon.AvatarAlways
 import koma.model.user.UserState
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import tornadofx.*
 
 fun get_cell_property(noname: SimpleBooleanProperty): ObjectBinding<Callback<ListView<UserState>, ListCell<UserState>>?> {
@@ -49,11 +49,11 @@ class UserFullCell : ListCell<UserState>() {
 }
 
 private fun get_node(item: UserState?, showName: Boolean): Node {
-    val avsize = AppSettings.scaling * 32.0
+    val scale = appState.koma.appSettings.settings.scaling
+    val avsize = scale * 32.0
     val root = HBox( 5.0)
     if (item == null)
         return root
-    val scale = AppSettings.settings.scaling
     root.apply {
         minWidth = 1.0
         prefWidth = 1.0

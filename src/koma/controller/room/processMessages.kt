@@ -5,7 +5,6 @@ import koma.matrix.epemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
-import koma.storage.users.UserStore
 import koma_app.appState
 import koma_app.appState.apiClient
 import model.Room
@@ -43,7 +42,7 @@ fun Room.updateMember(update: MRoomMember) {
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
-            val user = UserStore.getOrCreateUserId(senderid)
+            val user = appState.userStore.getOrCreateUserId(senderid)
             update.content.avatar_url?.let { user.avatar = it }
             update.content.displayname?.let { user.name=it }
             this.makeUserJoined(user)
@@ -51,8 +50,7 @@ fun Room.updateMember(update: MRoomMember) {
         Membership.leave -> {
             this.removeMember(update.sender)
             if (apiClient?.userId == update.sender) {
-                val roomStore = appState.apiClient?.profile?.roomStore
-                roomStore?.remove(this.id)
+                appState.accountRoomStore()?.remove(this.id)
             }
         }
         Membership.ban -> {

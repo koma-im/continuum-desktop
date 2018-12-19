@@ -8,7 +8,7 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import tornadofx.*
 
 /**
@@ -20,7 +20,7 @@ class RootLayoutView(val controller: ChatController): View() {
     init {
         with(root) {
             style {
-                fontSize= AppSettings.settings.scaling.em
+                fontSize= appState.koma.appSettings.settings.scaling.em
             }
             top = menubar {
                 menu("File") {

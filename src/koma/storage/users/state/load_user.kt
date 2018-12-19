@@ -3,13 +3,14 @@ package koma.storage.users.state
 import com.squareup.moshi.Moshi
 import koma.matrix.UserId
 import koma.model.user.UserState
+import koma.storage.config.ConfigPaths
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
-fun load_user(userId: UserId): UserState {
+fun load_user(userId: UserId, paths: ConfigPaths): UserState {
     val us = UserState(userId)
-    val dir = user_save_path(userId)
+    val dir = paths.user_save_path(userId)
     dir?: return us
     val sf = File(dir).resolve(userId.user+".json")
     val jsonAdapter = Moshi.Builder()

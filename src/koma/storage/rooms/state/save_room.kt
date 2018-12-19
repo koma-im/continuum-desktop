@@ -8,7 +8,7 @@ import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
-import koma.storage.config.config_paths
+import koma.storage.config.ConfigPaths
 import model.Room
 import java.io.File
 import java.io.IOException
@@ -16,27 +16,24 @@ import java.io.IOException
 val statefilename = "room_state.json"
 val usersfilename = "users.txt"
 
-fun state_save_path(vararg paths: String): String? {
-    return config_paths.getOrCreate("state", *paths)
+fun ConfigPaths.state_save_path(vararg paths: String): String? {
+    return getOrCreate("state", *paths)
 }
 
-fun Room.save() {
-    synchronized(this) { this.saveUnsync() }
-}
 
-private fun Room.saveUnsync(){
+fun ConfigPaths.saveRoom(room: Room){
     val dir = state_save_path(
-            this.id.servername,
-            this.id.localstr)
+            room.id.servername,
+            room.id.localstr)
     dir?: return
     val data = SavedRoomState(
-            this.aliases,
-            this.visibility,
-            this.joinRule,
-            this.histVisibility,
-            this.name.get(),
-            this.iconURL,
-            this.power_levels
+            room.aliases,
+            room.visibility,
+            room.joinRule,
+            room.histVisibility,
+            room.name.get(),
+            room.iconURL,
+            room.power_levels
     )
     val moshi = Moshi.Builder()
             .add(NewTypeStringAdapterFactory())
@@ -54,7 +51,7 @@ private fun Room.saveUnsync(){
         file.writeText(json)
     } catch (e: IOException) {
     }
-    save_room_members(dir, this.members.sorted())
+    save_room_members(dir, room.members.sorted())
 }
 
 class SavedRoomState (

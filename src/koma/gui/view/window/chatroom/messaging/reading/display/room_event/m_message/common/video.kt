@@ -9,7 +9,7 @@ import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
 import javafx.scene.media.MediaView
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -20,9 +20,10 @@ class VideoElement(val url: HttpUrl): ViewNode {
     private val mediaView = MediaView()
     init {
         val playButton = Button()
+        val s = appState.koma.appSettings.scale_em(3.0f)
         playButton.graphic = MaterialIconFactory.get().createIcon(
                 MaterialIcon.PLAY_ARROW,
-                AppSettings.scale_em(3.0f))
+                s)
         playButton.action {
             node.children.remove(playButton)
             playVideo()
@@ -32,9 +33,10 @@ class VideoElement(val url: HttpUrl): ViewNode {
             e.mediaError.printStackTrace()
             //println("media error ${e.mediaError}")
         }
-        mediaView.fitWidth = 200.0 * AppSettings.settings.scaling
+        val s1 = appState.koma.appSettings.scaling
+        mediaView.fitWidth = 200.0 * s1
 
-        node.minHeight = 100.0 * AppSettings.settings.scaling
+        node.minHeight = 100.0 * s1
         node.add(mediaView)
         node.add(playButton)
 

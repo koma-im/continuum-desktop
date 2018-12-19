@@ -2,7 +2,7 @@ package koma.gui.view.window.preferences.tab
 
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
-import koma.storage.config.settings.AppSettings
+import koma_app.AppSettings
 import tornadofx.*
 
 class AppearanceTab(parent: View): View() {

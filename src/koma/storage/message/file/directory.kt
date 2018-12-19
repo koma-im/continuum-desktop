@@ -2,6 +2,7 @@ package koma.storage.message.file
 
 import koma.koma_app.SaveJobs
 import koma.matrix.room.naming.RoomId
+import koma.storage.config.ConfigPaths
 import koma.storage.message.piece.Segment
 import java.nio.file.Path
 import java.util.*
@@ -9,7 +10,7 @@ import java.util.*
 /**
  * what are available on disk
  */
-class SegmentsDirectory(private val roomId: RoomId){
+class SegmentsDirectory(private val roomId: RoomId, val paths: ConfigPaths){
     private val map by lazy { findEntries() }
 
     fun put(key: Long, value: Segment) {
@@ -86,7 +87,7 @@ class SegmentsDirectory(private val roomId: RoomId){
 
     private fun findEntries(): TreeMap<Long, DirItem> {
         val t = TreeMap<Long, DirItem>()
-        val dir = disc_save_path(
+        val dir = paths.disc_save_path(
                 roomId.servername,
                 roomId.localstr)
         dir ?: return t

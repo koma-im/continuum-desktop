@@ -10,7 +10,7 @@ import koma.gui.element.emoji.icon.EmojiIcon
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.mediaViewConstructors
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -57,7 +57,7 @@ class WebContentNode(private val link: String): FlowElement() {
             linknode.prefWidthProperty().bind(prefWide)
             setUpPrevie(preview)
         } else {
-            linknode.maxWidth = 200.0 * AppSettings.scaling
+            linknode.maxWidth = 200.0 * appState.koma.appSettings.scaling
             multiLine = false
         }
 

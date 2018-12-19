@@ -7,7 +7,7 @@ import koma.gui.view.window.preferences.tab.network.AddProxyField
 import koma.gui.view.window.preferences.tab.network.ExistingProxy
 import koma.gui.view.window.preferences.tab.network.NewProxy
 import koma.gui.view.window.preferences.tab.network.ProxyOption
-import koma.storage.config.settings.AppSettings
+import koma_app.appState
 import tornadofx.*
 
 
@@ -19,7 +19,7 @@ class NetworkSettingsTab(parent: View): View() {
     private val proxyField: AddProxyField by inject()
 
     init {
-        val proxyOptions: List<ProxyOption> =  AppSettings.settings.proxies.map { ExistingProxy(it) } + NewProxy()
+        val proxyOptions: List<ProxyOption> =  appState.settings.settings.proxies.map { ExistingProxy(it) } + NewProxy()
         select = ComboBox(FXCollections.observableArrayList(
                 proxyOptions
         ))
@@ -53,8 +53,8 @@ class NetworkSettingsTab(parent: View): View() {
         } else {
             proxyField.getProxy()
         }
-        AppSettings.set_preferred_proxy(proxy)
-        AppSettings.save()
+        appState.settings.set_preferred_proxy(proxy)
+        appState.settings.save()
     }
 }
 

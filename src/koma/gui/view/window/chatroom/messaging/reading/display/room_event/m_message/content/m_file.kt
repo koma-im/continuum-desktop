@@ -10,8 +10,8 @@ import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.network.media.MHUrl
-import koma.storage.config.settings.AppSettings
 import koma.util.result.ok
+import koma_app.appState
 import tornadofx.*
 
 class MFileViewNode(val content: FileMessage): ViewNode {
@@ -21,7 +21,9 @@ class MFileViewNode(val content: FileMessage): ViewNode {
 
     init {
         val faicon = guessIconForMime(content.info?.mimetype)
-        val icon_node = FontAwesomeIconFactory.get().createIcon(faicon, AppSettings.scale_em(2.0f))
+        val s = appState.koma.appSettings.scale_em(2f)
+        val icon_node = FontAwesomeIconFactory.get().createIcon(faicon,
+                s)
 
         with(node) {
             add(icon_node)

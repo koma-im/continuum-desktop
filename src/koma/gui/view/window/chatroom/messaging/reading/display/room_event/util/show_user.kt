@@ -4,11 +4,11 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import koma.gui.element.icon.AvatarAlways
 import koma.matrix.UserId
-import koma.storage.users.UserStore
+import koma_app.appState
 import tornadofx.*
 
 fun showUser(node: Node, userId: UserId) {
-    val user = UserStore.getOrCreateUserId(userId)
+    val user = appState.userStore.getOrCreateUserId(userId)
     node.apply {
         hbox(spacing = 5.0) {
             add(AvatarAlways(user.avatarURL, user.displayName, user.color))

@@ -6,7 +6,6 @@ import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
-import koma.storage.config.settings.AppSettings
 import koma_app.appState
 import model.Room
 import tornadofx.*
@@ -32,7 +31,7 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
     }
 
     private fun setup(node: ListView<Room>) {
-        val scale = AppSettings.settings.scaling
+        val scale = appState.koma.appSettings.settings.scaling
         node.style {
             fontSize= scale.em
         }

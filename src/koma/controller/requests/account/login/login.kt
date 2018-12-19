@@ -3,10 +3,11 @@ package koma.controller.requests.account.login
 import com.github.kittinunf.result.Result
 import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
+import koma.Koma
 import koma.gui.view.window.auth.login.startChat
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.Profile
-import koma.storage.config.server.serverConfWithAddr
+import koma.storage.config.profile.newProfile
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,11 +20,11 @@ import tornadofx.*
 /**
  * accept text of text fields as parameters
  */
-suspend fun doLogin(user: String, password: String, server: String) {
+suspend fun Koma.doLogin(user: String, password: String, server: String) {
     val userid = UserId_new(user)
-    val servCon = serverConfWithAddr(userid.server, server)
+    val servCon = this.servers.serverConfWithAddr(userid.server, server)
     val authedProfile: Profile = if (!password.isBlank()) {
-        val authResu = login(UserPassword(user = userid.user, password = password), servCon).awaitMatrix()
+        val authResu = login(UserPassword(user = userid.user, password = password), servCon, this.http).awaitMatrix()
         val auth: Profile =  when (authResu) {
             is Result.Success -> Profile(authResu.value.user_id, authResu.value.access_token)
             is Result.Failure -> {
@@ -42,7 +43,7 @@ suspend fun doLogin(user: String, password: String, server: String) {
         }
         auth
     } else {
-        val p = Profile.new(userid)
+        val p = this.newProfile(userid)
         if (p == null) {
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Failed to login as $userid",

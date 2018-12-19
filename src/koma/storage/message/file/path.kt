@@ -1,11 +1,11 @@
 package koma.storage.message.file
 
 import koma.matrix.room.naming.RoomId
-import koma.storage.config.config_paths
+import koma.storage.config.ConfigPaths
 import koma.util.time.utcDateFrom
 import java.nio.file.Path
 
-fun get_log_path(key: Long, roomId: RoomId): Path? {
+fun ConfigPaths.get_log_path(key: Long, roomId: RoomId): Path? {
     val date = utcDateFrom(key)
     val year = "%04d".format(date.year)
     val month = "%02d".format(date.monthValue)
@@ -17,8 +17,8 @@ fun get_log_path(key: Long, roomId: RoomId): Path? {
     return dir?.resolve(key.toString())
 }
 
-fun disc_save_path(vararg paths: String): Path? {
-    val f = config_paths.getCreateDir(
+fun ConfigPaths.disc_save_path(vararg paths: String): Path? {
+    val f = this.getCreateDir(
             "discussion", *paths
     )
     return f?.toPath()

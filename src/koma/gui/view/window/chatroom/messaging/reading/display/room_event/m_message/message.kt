@@ -12,7 +12,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.render_node
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showDatetime
 import koma.matrix.event.room_message.MRoomMessage
-import koma.storage.users.UserStore
+import koma_app.appState
 import tornadofx.*
 
 class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
@@ -21,7 +21,7 @@ class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
 
     init {
 
-        val sus = UserStore.getOrCreateUserId(item.sender)
+        val sus = appState.userStore.getOrCreateUserId(item.sender)
         val sender = sus.displayName
         val color = sus.color
 

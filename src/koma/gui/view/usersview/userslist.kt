@@ -10,6 +10,7 @@ import koma.gui.view.usersview.fragment.get_cell_property
 import koma.model.user.UserState
 import koma.storage.config.settings.AppSettings
 import koma.gui.element.control.PrettyListView
+import koma_app.appState
 import tornadofx.*
 import kotlin.math.roundToInt
 
@@ -19,7 +20,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
 
     init {
         with(root) {
-            val scale = AppSettings.settings.scaling
+            val scale = appState.koma.appSettings.settings.scaling
             val size: String = "${scale.roundToInt()}em"
             style {
                 fontSize= scale.em

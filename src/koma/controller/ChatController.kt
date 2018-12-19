@@ -3,6 +3,7 @@ package controller
 import com.github.kittinunf.result.Result
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
+import koma_app.appState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import matrix.ApiClient
@@ -22,7 +23,8 @@ class ChatController(
     }
 
     fun start() {
-        val start = if (apiClient.profile.hasRooms) apiClient.next_batch else null
+        val initialized = appState.accountRooms()?.isNotEmpty() == true
+        val start = if (initialized) apiClient.next_batch else null
         sync.since = start
         GlobalScope.launch(Dispatchers.JavaFx) {
             for (s in sync.events) {

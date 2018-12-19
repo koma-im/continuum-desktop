@@ -15,7 +15,9 @@ import tornadofx.*
 fun leaveRoom(mxroom: Room) {
     val api = appState.apiClient
     api ?: return
-    val removeLocally = { GlobalScope.launch(Dispatchers.JavaFx) { api.profile.roomStore.remove(mxroom.id) } }
+    val removeLocally = { GlobalScope.launch(Dispatchers.JavaFx) {
+        appState.accountRoomStore()?.remove(mxroom.id) }
+    }
     GlobalScope.launch {
         val roomname = mxroom.displayName.get()
         println("Leaving $roomname")

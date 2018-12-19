@@ -5,7 +5,7 @@ import javafx.scene.control.Hyperlink
 import javafx.scene.control.Tooltip
 import javafx.scene.input.MouseButton
 import javafx.scene.text.Font
-import koma.storage.config.settings.AppSettings
+import koma_app.AppSettings
 import tornadofx.*
 import java.awt.Desktop
 import java.io.IOException

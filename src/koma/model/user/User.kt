@@ -8,7 +8,8 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.SaveJobs
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
-import koma.storage.users.state.save
+import koma.storage.users.state.saveUser
+import koma_app.appState
 
 /**
  * Created by developer on 2017/6/25.
@@ -40,7 +41,7 @@ data class UserState(val id: UserId) {
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
     init {
-        SaveJobs.addJob { if (this.modified) this.save() }
+        SaveJobs.addJob { if (this.modified) appState.koma.paths.saveUser(this) }
     }
 
     fun weight(): Int {

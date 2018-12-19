@@ -18,7 +18,7 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
-import koma.storage.users.UserStore
+import koma_app.appState
 import tornadofx.*
 
 
@@ -35,7 +35,7 @@ class Room(val id: RoomId) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    val messageManager by lazy { MessageManager(id) }
+    val messageManager by lazy { MessageManager(id, appState.koma.paths) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 
     // whether it's listed in the public directory
@@ -86,7 +86,7 @@ class Room(val id: RoomId) {
     }
 
     fun removeMember(mid: UserId) {
-        val us = UserStore.getOrCreateUserId(mid)
+        val us = appState.userStore.getOrCreateUserId(mid)
         if (members.remove(us)) {
         } else {
         }
