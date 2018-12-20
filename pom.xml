@@ -4,7 +4,7 @@
     <groupId>io.github.koma-im.koma</groupId>
     <artifactId>koma-desktop</artifactId>
     <packaging>jar</packaging>
-    <version>0.7.3</version>
+    <version>0.7.3.1</version>
     <name>koma-desktop</name>
     <dependencies>
         <dependency>

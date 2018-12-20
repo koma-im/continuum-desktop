@@ -200,11 +200,13 @@ class MessageManager(val roomId: RoomId, private val paths: ConfigPaths) {
         return newelements.size < n_all
     }
 
-    private fun appendTo(key: Long, elements: List<RoomEvent>): Boolean {
+    private suspend fun appendTo(key: Long, elements: List<RoomEvent>): Boolean {
         val n_req = elements.size
         val newelements = filterNext(key, elements)
         val p = this.segDir[key]!!
-        p.list.addAll(newelements)
+        withContext(Dispatchers.JavaFx) {
+            p.list.addAll(newelements)
+        }
         return newelements.size < n_req
     }
 
