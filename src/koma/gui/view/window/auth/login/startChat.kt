@@ -6,6 +6,7 @@ import koma.matrix.UserId
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
+import koma.storage.persistence.account.saveToken
 import koma_app.appState
 import matrix.ApiClient
 import tornadofx.*
@@ -36,5 +37,6 @@ fun Koma.startChat(authedUser: Profile, serverConf: ServerConf) {
 
 fun Koma.startChatWithIdToken(userId: UserId, token: String, serverConf: ServerConf) {
     val p = Profile(userId, token)
+    this.saveToken(userId, token)
     startChat(p, serverConf)
 }

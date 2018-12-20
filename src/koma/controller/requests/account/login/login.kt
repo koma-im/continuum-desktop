@@ -8,6 +8,7 @@ import koma.gui.view.window.auth.login.startChat
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.newProfile
+import koma.storage.persistence.account.saveToken
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -26,7 +27,12 @@ suspend fun Koma.doLogin(user: String, password: String, server: String) {
     val authedProfile: Profile = if (!password.isBlank()) {
         val authResu = login(UserPassword(user = userid.user, password = password), servCon, this.http).awaitMatrix()
         val auth: Profile =  when (authResu) {
-            is Result.Success -> Profile(authResu.value.user_id, authResu.value.access_token)
+            is Result.Success -> {
+                val u = authResu.value.user_id
+                val t = authResu.value.access_token
+                this.saveToken(u, t)
+                Profile(u, t)
+            }
             is Result.Failure -> {
                 val ex = authResu.error
                 val mes = ex.message
