@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
-import koma.koma_app.SaveJobs
+import koma.koma_app.SaveToDiskTasks
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import koma.storage.users.state.saveUser
@@ -41,7 +41,7 @@ data class UserState(val id: UserId) {
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
     init {
-        SaveJobs.addJob { if (this.modified) appState.koma.paths.saveUser(this) }
+        SaveToDiskTasks.addJob { if (this.modified) appState.koma.paths.saveUser(this) }
     }
 
     fun weight(): Int {

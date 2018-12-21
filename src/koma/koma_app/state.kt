@@ -3,9 +3,9 @@ package koma_app
 import controller.ChatController
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
+import koma.koma_app.appData
 import koma.matrix.UserId
 import koma.storage.config.server.ServerConf
-import koma.storage.config.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
@@ -19,7 +19,6 @@ object appState {
     lateinit var chatController: ChatController
     var apiClient: ApiClient? = null
     lateinit var serverConf: ServerConf
-    val settings: AppSettings by lazy { koma.appSettings }
     val roomStore by lazy { RoomStore(koma.paths) }
     private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
     val userStore by lazy { UserStore(koma.paths) }
@@ -43,4 +42,4 @@ object appState {
     }
 }
 
-val AppSettings by lazy { appState.koma.appSettings }
+val AppSettings by lazy { appData.settings }

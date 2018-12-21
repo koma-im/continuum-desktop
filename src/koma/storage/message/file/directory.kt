@@ -1,6 +1,6 @@
 package koma.storage.message.file
 
-import koma.koma_app.SaveJobs
+import koma.koma_app.SaveToDiskTasks
 import koma.matrix.room.naming.RoomId
 import koma.storage.config.ConfigPaths
 import koma.storage.message.piece.Segment
@@ -38,7 +38,7 @@ class SegmentsDirectory(private val roomId: RoomId, val paths: ConfigPaths){
     }
 
     init {
-        SaveJobs.addJob {
+        SaveToDiskTasks.addJob {
             for (item in this.map.values) {
                 if (item is InMemory) {
                     item.segment.save()

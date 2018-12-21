@@ -9,6 +9,7 @@ import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
+import koma.koma_app.appData
 import koma.storage.config.profile.Profile
 import koma_app.appState
 import koma_app.appState.apiClient
@@ -59,7 +60,7 @@ class RoomFragment: ListCellFragment<Room>() {
     val iconUrl = room.select { it.iconURLProperty }
 
     override val root = hbox(spacing = 10.0) {
-        val scale = appState.koma.appSettings.settings.scaling
+        val scale = appData.settings.scaling
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT

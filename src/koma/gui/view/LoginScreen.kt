@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox
 import koma.controller.requests.account.login.doLogin
 import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
+import koma.koma_app.appData
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import koma_app.appState
@@ -58,7 +59,7 @@ class LoginScreen(): View() {
         }
         with(root) {
             style {
-                fontSize= appState.koma.appSettings.settings.scaling.em
+                fontSize= appData.settings.scaling.em
             }
             add(grid)
 

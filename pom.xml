@@ -96,7 +96,7 @@
         <dependency>
             <groupId>io.github.koma-im.koma</groupId>
             <artifactId>koma-library</artifactId>
-            <version>0.7.4.7</version>
+            <version>0.7.4.10</version>
         </dependency>
     </dependencies>
     <properties>

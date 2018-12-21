@@ -9,10 +9,10 @@ import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
 import koma.gui.element.icon.user.extract_key_chars
-import koma_app.appState
+import koma.koma_app.appData
 
 fun getImageForName(name: String, bgcolor: Color): Image {
-    val scale = appState.koma.appSettings.settings.scaling
+    val scale = appData.settings.scaling
     val isize = 32.0 * scale
     val canva = Canvas(isize, isize)
     val graphc = canva.graphicsContext2D

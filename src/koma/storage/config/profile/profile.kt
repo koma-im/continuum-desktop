@@ -1,7 +1,7 @@
 package koma.storage.config.profile
 
 import koma.Koma
-import koma.koma_app.SaveJobs
+import koma.koma_app.SaveToDiskTasks
 import koma.matrix.UserId
 import koma.matrix.json.MoshiInstance
 import koma.storage.persistence.account.getToken
@@ -27,7 +27,7 @@ fun Koma.newProfile(userId: UserId): Profile?  {
 
         }
     }
-    SaveJobs.addJob {
+    SaveToDiskTasks.addJob {
         synchronized(this) {this.saveProfile(profile) }
     }
     return profile

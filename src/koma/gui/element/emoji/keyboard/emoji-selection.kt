@@ -13,7 +13,7 @@ import javafx.util.Callback
 import koma.gui.element.control.PrettyListView
 import koma.gui.element.emoji.category.emojiCategories
 import koma.gui.element.emoji.icon.EmojiIcon
-import koma_app.appState
+import koma.koma_app.appData
 import org.controlsfx.control.PopOver
 import tornadofx.*
 
@@ -98,7 +98,8 @@ object EmojiKeyboard {
             for (i in 0..8) {
                 val node = EmojiIcon()
                 val tip = Tooltip()
-                tip.font = Font.font(appState.koma.appSettings.fontSize)
+                val size = appData.settings.fontSize
+                tip.font = Font.font(size)
                 node.tooltip = (tip)
                 node.action { node.emojiProperty.get()?.let{cb(it)} }
                 node.relocate(node.size * 1.1 * i, 0.0)

@@ -6,7 +6,7 @@ import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
-import koma_app.appState
+import koma.koma_app.appData
 import tornadofx.*
 
 class RoomFinder(): Fragment() {
@@ -32,7 +32,7 @@ class RoomFinder(): Fragment() {
             vgrow = Priority.ALWAYS
             style {
                 paddingAll = 10
-                fontSize = appState.settings.scaling.em
+                fontSize = appData.settings.scaling.em
             }
             add(pubs.ui)
         }

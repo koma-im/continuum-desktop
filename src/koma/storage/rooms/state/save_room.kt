@@ -1,8 +1,7 @@
 package koma.storage.rooms.state
 
-import com.squareup.moshi.Moshi
 import koma.matrix.event.room_message.state.RoomPowerLevelsContent
-import koma.matrix.json.NewTypeStringAdapterFactory
+import koma.matrix.json.MoshiInstance
 import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
@@ -35,9 +34,7 @@ fun ConfigPaths.saveRoom(room: Room){
             room.iconURL,
             room.power_levels
     )
-    val moshi = Moshi.Builder()
-            .add(NewTypeStringAdapterFactory())
-            .build()
+    val moshi = MoshiInstance.moshi
     val jsonAdapter = moshi.adapter(SavedRoomState::class.java).indent("    ")
     val json = try {
         jsonAdapter.toJson(data)

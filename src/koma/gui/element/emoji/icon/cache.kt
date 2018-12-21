@@ -2,9 +2,9 @@ package koma.gui.element.emoji.icon
 
 import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
+import koma.koma_app.appData
 import koma.network.media.ImgCacheProc
 import koma.network.media.MHUrl
-import koma_app.appState
 import okhttp3.HttpUrl
 import java.io.InputStream
 import kotlin.streams.toList
@@ -30,7 +30,7 @@ private fun getCdnEmojiUrl(code: String): HttpUrl {
 }
 
 private fun processEmoji(bytes: InputStream): Image {
-    val size = appState.koma.appSettings.fontSize
+    val size = appData.settings.fontSize
     val im = Image(bytes, size, size, true , true)
     return im
 }

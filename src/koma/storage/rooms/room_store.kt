@@ -1,7 +1,7 @@
 package koma.storage.rooms
 
 import javafx.collections.FXCollections
-import koma.koma_app.SaveJobs
+import koma.koma_app.SaveToDiskTasks
 import koma.matrix.room.naming.RoomId
 import koma.storage.config.ConfigPaths
 import koma.storage.rooms.state.loadRoom
@@ -46,7 +46,7 @@ class RoomStore(private val paths: ConfigPaths){
 
     init {
 
-        SaveJobs.addJob {
+        SaveToDiskTasks.addJob {
             this.store.forEach { _, u: Room -> paths.saveRoom(u) }
         }
     }

@@ -6,11 +6,10 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.gui.view.usersview.fragment.get_cell_property
-import koma.model.user.UserState
-import koma.storage.config.settings.AppSettings
 import koma.gui.element.control.PrettyListView
-import koma_app.appState
+import koma.gui.view.usersview.fragment.get_cell_property
+import koma.koma_app.appData
+import koma.model.user.UserState
 import tornadofx.*
 import kotlin.math.roundToInt
 
@@ -20,7 +19,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
 
     init {
         with(root) {
-            val scale = appState.koma.appSettings.settings.scaling
+            val scale = appData.settings.scaling
             val size: String = "${scale.roundToInt()}em"
             style {
                 fontSize= scale.em

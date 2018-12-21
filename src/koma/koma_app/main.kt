@@ -18,10 +18,13 @@ import kotlinx.coroutines.javafx.JavaFx as UI
 fun main(args: Array<String>) {
     val arg = args.firstOrNull()
     val data_dir = arg ?: getConfigDir()
-    appState.koma = Koma(data_dir)
+    val koma = Koma(data_dir)
+    appData = DataOnDisk(koma.paths)
+    appState.koma = koma
     Application.launch(KomaApp::class.java, *args)
     appState.chatController.shutdown()
-    SaveJobs.finishUp()
+    koma.saveToDisk()
+    SaveToDiskTasks.saveToDisk()
 }
 
 
