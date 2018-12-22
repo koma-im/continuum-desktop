@@ -4,7 +4,9 @@ import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
 import domain.DiscoveredRoom
 import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.FXCollections
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
@@ -23,10 +25,15 @@ import kotlinx.coroutines.launch
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
+private fun<E> listToProperty(list: List<E>): SimpleListProperty<E> {
+    val l = list ?: listOf()
+    return SimpleListProperty(FXCollections.observableArrayList(l))
+}
+
 class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
     : ItemViewModel<DiscoveredRoom>(itemProperty = property) {
     val name = bind {item?.name.toProperty()}
-    val aliases = bind {item?.aliasesProperty()}
+    val aliases = bind {item?.aliases?.let { listToProperty(it) } }
     val displayName = bind { item?.dispName().toProperty() }
     val avatar_url = bind {item?.avatar_url.toProperty()}
     val guest = bind {item?.guest_can_join.toProperty()}

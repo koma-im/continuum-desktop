@@ -94,9 +94,9 @@
             <version>1.8.0-beta2</version>
         </dependency>
         <dependency>
-            <groupId>io.github.koma-im.koma</groupId>
+            <groupId>io.github.koma-im</groupId>
             <artifactId>koma-library</artifactId>
-            <version>0.7.4.11</version>
+            <version>0.7.4.12</version>
         </dependency>
     </dependencies>
     <properties>
