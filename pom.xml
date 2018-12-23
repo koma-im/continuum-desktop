@@ -18,6 +18,16 @@
             <version>${kotlin.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>11.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>11.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>no.tornado</groupId>
             <artifactId>tornadofx</artifactId>
             <version>1.7.17</version>
