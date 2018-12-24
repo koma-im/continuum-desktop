@@ -110,7 +110,7 @@
         </dependency>
     </dependencies>
     <properties>
-        <kotlin.version>1.3.10</kotlin.version>
+        <kotlin.version>1.3.11</kotlin.version>
         <kotlinx.coroutine.version>1.0.1</kotlinx.coroutine.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
         <maven.compiler.source>1.9</maven.compiler.source>
@@ -165,7 +165,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-		<version>3.7.0</version>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <id>compile</id>
