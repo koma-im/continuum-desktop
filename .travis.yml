@@ -1,0 +1,24 @@
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+    - os: osx
+      osx_image: xcode10.1
+language: java
+sudo: false
+git:
+  depth: 1
+cache:
+  directories:
+  - "$HOME/.m2"
+jdk:
+  - openjdk11
+before_deploy:
+  - mv target/$APPNAME-desktop-$TRAVIS_TAG-jar-with-dependencies.jar $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  skip_cleanup: true
+  file: $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+  on:
+    tags: true
