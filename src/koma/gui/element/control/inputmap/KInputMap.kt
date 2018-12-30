@@ -202,7 +202,7 @@ class KInputMap<N: Node>(private val node: Node): EventHandler<Event> {
 
     private fun addMapping(mapping: MappingType) {
         val rootInputMap = getRootInputMap();
-        rootInputMap.addEventHandler(mapping.eventType!!)
+        rootInputMap.addEventHandler(mapping.eventType)
 
         // we maintain a separate map of all mappings, which maps from the
         // mapping event type into a list of mappings. This allows for easier
@@ -222,7 +222,7 @@ class KInputMap<N: Node>(private val node: Node): EventHandler<Event> {
     }
 
     private fun addEventHandler(et: EventType<out Event>) {
-        val eventHandlers = installedEventHandlers.computeIfAbsent(et) { f -> mutableListOf() }
+        val eventHandlers = installedEventHandlers.computeIfAbsent(et) { _ -> mutableListOf() }
 
         val eventHandler = EventHandler<Event> { this.handle(it) }
 

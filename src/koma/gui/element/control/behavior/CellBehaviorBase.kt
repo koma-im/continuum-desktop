@@ -71,11 +71,15 @@ abstract class CellBehaviorBase<T : Cell<*>>
     }
 
     protected abstract fun edit(cell: T?)
-    protected fun handleDisclosureNode(x: Double, y: Double): Boolean {
+    protected fun handleDisclosureNode(
+            @Suppress("UNUSED_PARAMETER") _x: Double,
+            @Suppress("UNUSED_PARAMETER")_y: Double): Boolean {
         return false
     }
 
-    protected fun isClickPositionValid(x: Double, y: Double): Boolean {
+    protected fun isClickPositionValid(
+            @Suppress("UNUSED_PARAMETER") _x: Double,
+            @Suppress("UNUSED_PARAMETER")_y: Double): Boolean {
         return true
     }
 
@@ -99,7 +103,7 @@ abstract class CellBehaviorBase<T : Cell<*>>
         }
     }
 
-    fun mouseDragged(e: MouseEvent) {
+    fun mouseDragged(@Suppress("UNUSED_PARAMETER") mouseEvent: MouseEvent) {
         latePress = false
     }
 
@@ -266,6 +270,7 @@ abstract class CellBehaviorBase<T : Cell<*>>
         private val IS_DEFAULT_ANCHOR_KEY = "isDefaultAnchor"
 
         fun <T> getAnchor(control: Control, defaultResponse: T): T {
+            @Suppress("UNCHECKED_CAST")
             return if (hasNonDefaultAnchor(control))
                 control.properties[ANCHOR_PROPERTY_KEY] as T
             else

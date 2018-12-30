@@ -146,12 +146,12 @@ abstract class Mapping<T : Event>(
 
         val that = other as Mapping<*>?
 
-        return if (if (eventType != null) !eventType!!.equals(that!!.eventType) else that!!.eventType != null) false else true
+        return !if (eventType != null) !eventType.equals(that!!.eventType) else that!!.eventType != null
 
     }
 
     /** {@inheritDoc}  */
     override fun hashCode(): Int {
-        return if (eventType != null) eventType!!.hashCode() else 0
+        return if (eventType != null) eventType.hashCode() else 0
     }
 }

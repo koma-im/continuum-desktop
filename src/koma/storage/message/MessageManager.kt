@@ -13,11 +13,9 @@ import koma.storage.message.file.SegmentsDirectory
 import koma.storage.message.file.get_log_path
 import koma.storage.message.piece.Segment
 import koma.util.observable.list.concat.TreeConcatList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.withContext
 import matrix.room.Timeline
 import mu.KotlinLogging
 import tornadofx.*
@@ -25,6 +23,8 @@ import kotlinx.coroutines.launch as corolaunch
 
 private val logger = KotlinLogging.logger {}
 
+@ExperimentalCoroutinesApi
+@ObsoleteCoroutinesApi
 class MessageManager(val roomId: RoomId, private val paths: ConfigPaths) {
     // added to UI, needs to be modified on FX thread
     private val concatList = TreeConcatList<Long, RoomEvent>()
@@ -44,6 +44,8 @@ class MessageManager(val roomId: RoomId, private val paths: ConfigPaths) {
         value?.endInclusive?.let { concatList.locateKey(it)?.key } ?: -1
     }
 
+    @ExperimentalCoroutinesApi
+    @ObsoleteCoroutinesApi
     val chan = GlobalScope.actor<MessageManagerMsg>(capacity = 3) {
         for (msg in channel) {
             when (msg) {
@@ -67,6 +69,7 @@ class MessageManager(val roomId: RoomId, private val paths: ConfigPaths) {
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun startFetchEarlierOnce(key: Long) {
         val s = segDir.get(key)
         s?:return

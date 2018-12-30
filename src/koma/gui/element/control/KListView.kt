@@ -120,7 +120,7 @@ internal class KListViewFocusModel<T>(private val listView: ListView<T>) : Focus
         updateItemCount()
         updateDefaultFocus()
 
-        focusedIndexProperty().addListener { o -> listView.notifyAccessibleAttributeChanged(AccessibleAttribute.FOCUS_ITEM) }
+        focusedIndexProperty().addListener { _ -> listView.notifyAccessibleAttributeChanged(AccessibleAttribute.FOCUS_ITEM) }
     }
 
 

@@ -45,7 +45,8 @@ object FocusTraversalInputMap {
      * @param node The node to traverse on
      * @param dir The direction to traverse
      */
-    fun traverse(node: Node?, dir: Direction) {
+    fun traverse(node: Node?,
+                 @Suppress("UNUSED_PARAMETER") _d: Direction) {
         if (node == null) {
             throw IllegalArgumentException("Attempting to traverse on a null Node. " + "Most probably a KeyEvent has been fired with a null target specified.")
         }

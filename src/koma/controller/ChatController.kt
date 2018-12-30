@@ -4,11 +4,8 @@ import com.github.kittinunf.result.Result
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
 import koma_app.appState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import matrix.ApiClient
 import mu.KotlinLogging
 
@@ -24,6 +21,7 @@ class ChatController(
 
     }
 
+    @ObsoleteCoroutinesApi
     fun start() {
         val initialized = appState.accountRooms()?.isNotEmpty() == true
         val start = if (initialized) apiClient.next_batch else null

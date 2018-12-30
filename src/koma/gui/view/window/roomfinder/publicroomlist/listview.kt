@@ -133,7 +133,7 @@ class RoomListView(
             vgrow = Priority.ALWAYS
             cellFragment(DiscoveredRoomFragment::class)
         }
-        root.skinProperty().addListener { _o ->
+        root.skinProperty().addListener { _ ->
             val scrollBar = findScrollBar()
             if (scrollBar != null) {
                 enoughRooms.bind(scrollBar.visibleProperty())

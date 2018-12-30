@@ -45,7 +45,7 @@ class KListViewSkin<T>
      */
 
     private val propertiesMapListener = MapChangeListener<Any,Any> { c: MapChangeListener.Change<out Any, out Any> ->
-        val RECREATE = "recreateKey";
+        val RECREATE = "recreateKey"
         if (!c.wasAdded()) {
         } else if (RECREATE.equals(c.getKey())) {
             needCellsRebuilt = true
@@ -62,7 +62,7 @@ class KListViewSkin<T>
                 // This code was updated for RT-36714 to not update all cells,
                 // just those affected by the change
                 for (i in c.from until c.to) {
-                    flow!!.setCellDirty(i)
+                    flow.setCellDirty(i)
                 }
 
                 break
@@ -87,7 +87,8 @@ class KListViewSkin<T>
 
     private val weakListViewItemsListener = WeakListChangeListener(listViewItemsListener)
 
-    private val RECREATE = "recreateKey";
+    private val RECREATE = "recreateKey"
+
     init {
 
         // install default input map for the ListView control
@@ -110,7 +111,7 @@ class KListViewSkin<T>
         flow.id = "virtual-flow"
         flow.isPannable = IS_PANNABLE
         flow.isVertical = control.orientation == Orientation.VERTICAL
-        flow.setCellFactory(Callback { flow -> createCell() })
+        flow.setCellFactory(Callback { createCell() })
         flow.setFixedCellSize(control.fixedCellSize)
         children.add(flow)
 
@@ -143,18 +144,18 @@ class KListViewSkin<T>
         properties.addListener(propertiesMapListener)
 
         // Register listeners
-        registerChangeListener(control.itemsProperty()) { o -> updateListViewItems() }
+        registerChangeListener(control.itemsProperty()) { updateListViewItems() }
         registerChangeListener(control.orientationProperty()) {
             flow.isVertical = control.orientation == Orientation.VERTICAL }
-        registerChangeListener(control.cellFactoryProperty()) { o -> flow.recreateCells() }
-        registerChangeListener(control.parentProperty()) { o ->
+        registerChangeListener(control.cellFactoryProperty()) { _ -> flow.recreateCells() }
+        registerChangeListener(control.parentProperty()) { _ ->
             if (control.parent != null && control.isVisible) {
                 control.requestLayout()
             }
         }
-        registerChangeListener(control.placeholderProperty()) { o -> updatePlaceholderRegionVisibility() }
+        registerChangeListener(control.placeholderProperty()) { _ -> updatePlaceholderRegionVisibility() }
         registerChangeListener(control.fixedCellSizeProperty()
-        ) { o -> flow.setFixedCellSize(control.fixedCellSize) }
+        ) { _ -> flow.setFixedCellSize(control.fixedCellSize) }
     }
 
 
@@ -221,7 +222,6 @@ class KListViewSkin<T>
 
     /** {@inheritDoc}  */
     override fun updateItemCount() {
-        if (flow == null) return
 
         val oldCount = itemCount
         val newCount = if (listViewItems == null) 0 else listViewItems!!.size
@@ -254,13 +254,13 @@ class KListViewSkin<T>
                         return null
                     }
                 }
-                return flow!!.getPrivateCell(focusedIndex)
+                return flow.getPrivateCell(focusedIndex)
             }
             AccessibleAttribute.ITEM_COUNT -> return itemCount
             AccessibleAttribute.ITEM_AT_INDEX -> {
-                val rowIndex = parameters[0] as Int ?: return null
+                val rowIndex = parameters[0] as Int
                 return if (0 <= rowIndex && rowIndex < itemCount) {
-                    flow!!.getPrivateCell(rowIndex)
+                    flow.getPrivateCell(rowIndex)
                 } else null
             }
             AccessibleAttribute.SELECTED_ITEMS -> {
@@ -268,7 +268,7 @@ class KListViewSkin<T>
                 val indices = sm.selectedIndices
                 val selection = ArrayList<ListCell<T>>(indices.size)
                 for (i in indices) {
-                    val row = flow!!.getPrivateCell(i)
+                    val row = flow.getPrivateCell(i)
                     if (row != null) selection.add(row)
                 }
                 return FXCollections.observableArrayList<List<Node>>(selection)
@@ -286,24 +286,22 @@ class KListViewSkin<T>
                 val item = parameters[0] as Node
                 if (item is ListCell<*>) {
                     val cell = item as ListCell<T>
-                    flow!!.scrollTo(cell.index)
+                    flow.scrollTo(cell.index)
                 }
             }
           AccessibleAction.SET_SELECTED_ITEMS -> {
                 val items = parameters[0] as ObservableList<Node>
-                if (items != null) {
-                    val sm = skinnable.selectionModel
-                    if (sm != null) {
-                        sm.clearSelection()
-                        for (item in items!!) {
-                            if (item is ListCell<*>) {
-                                val cell = item as ListCell<T>
-                                sm.select(cell.index)
-                            }
-                        }
-                    }
-                }
-            }
+              val sm = skinnable.selectionModel
+              if (sm != null) {
+                  sm.clearSelection()
+                  for (item in items) {
+                      if (item is ListCell<*>) {
+                          val cell = item as ListCell<T>
+                          sm.select(cell.index)
+                      }
+                  }
+              }
+          }
             else -> super.executeAccessibleAction(action, parameters)
         }
     }
@@ -373,12 +371,12 @@ class KListViewSkin<T>
 
     private fun onFocusPreviousCell() {
         val fm = skinnable.focusModel ?: return
-        flow!!.scrollTo(fm.focusedIndex)
+        flow.scrollTo(fm.focusedIndex)
     }
 
     private fun onFocusNextCell() {
         val fm = skinnable.focusModel ?: return
-        flow!!.scrollTo(fm.focusedIndex)
+        flow.scrollTo(fm.focusedIndex)
     }
 
     private fun onSelectPreviousCell() {
@@ -400,7 +398,7 @@ class KListViewSkin<T>
         val sm = skinnable.selectionModel ?: return
 
         val pos = sm.selectedIndex
-        flow!!.scrollTo(pos)
+        flow.scrollTo(pos)
 
         // Fix for RT-11299
         val cell = flow.lastVisibleCell
@@ -420,7 +418,7 @@ class KListViewSkin<T>
         //
         val endPos = itemCount - 1
         //        sm.select(endPos);
-        flow!!.scrollTo(endPos)
+        flow.scrollTo(endPos)
         flow.setPosition(1.0)
     }
 
@@ -439,7 +437,7 @@ class KListViewSkin<T>
 
         //        boolean isSelected = sm.isSelected(lastVisibleCellIndex) || fm.isFocused(lastVisibleCellIndex) || lastVisibleCellIndex == anchor;
         // isSelected represents focus OR selection
-        var isSelected = false
+        val isSelected: Boolean
         if (isFocusDriven) {
             isSelected = lastVisibleCell.isFocused || fm.isFocused(lastVisibleCellIndex)
         } else {
@@ -473,7 +471,7 @@ class KListViewSkin<T>
      * if this is a horizontal container, then the scrolling will be to the left.
      */
     private fun onScrollPageUp(isFocusDriven: Boolean): Int {
-        var firstVisibleCell: ListCell<T>? = flow!!.firstVisibleCellWithinViewPort ?: return -1
+        var firstVisibleCell: ListCell<T>? = flow.firstVisibleCellWithinViewPort ?: return -1
 
         val sm = skinnable.selectionModel
         val fm = skinnable.focusModel
@@ -482,7 +480,7 @@ class KListViewSkin<T>
         val firstVisibleCellIndex = firstVisibleCell!!.index
 
         // isSelected represents focus OR selection
-        var isSelected = false
+        var isSelected: Boolean
         if (isFocusDriven) {
             isSelected = firstVisibleCell.isFocused || fm.isFocused(firstVisibleCellIndex)
         } else {

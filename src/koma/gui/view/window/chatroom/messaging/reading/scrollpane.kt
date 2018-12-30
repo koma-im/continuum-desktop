@@ -17,11 +17,13 @@ import koma.storage.message.ShowLatest
 import koma.storage.message.VisibleRange
 import koma_app.AppSettings
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import model.Room
 import tornadofx.*
 import kotlin.math.roundToInt
 
+@ObsoleteCoroutinesApi
 class MessagesListScrollPane(room: Room): View() {
     override val root = AnchorPane()
 

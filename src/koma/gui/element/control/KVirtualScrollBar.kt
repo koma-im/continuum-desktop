@@ -23,7 +23,7 @@ class KVirtualScrollBar<T :IndexedCell<*>>(private val flow: KVirtualFlow<T>) : 
 
     init {
 
-        super.valueProperty().addListener { valueModel ->
+        super.valueProperty().addListener { _ ->
             if (isVirtual/* && oldValue != newValue*/) {
                 if (adjusting) {
                     // no-op

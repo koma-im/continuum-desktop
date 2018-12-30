@@ -23,15 +23,13 @@ fun updateMyAlias() {
     api?:return
     GlobalScope.launch {
         val result = api.updateDisplayName(newname).awaitMatrix()
-        when (result) {
-            is Result.Failure -> {
-                launch(Dispatchers.JavaFx) {
-                    Notifications.create()
-                            .title("Failed to update nick name")
-                            .text(result.error.message.toString())
-                            .owner(FX.primaryStage)
-                            .showWarning()
-                }
+        if (result is Result.Failure) {
+            launch(Dispatchers.JavaFx) {
+                Notifications.create()
+                        .title("Failed to update nick name")
+                        .text(result.error.message.toString())
+                        .owner(FX.primaryStage)
+                        .showWarning()
             }
         }
     }

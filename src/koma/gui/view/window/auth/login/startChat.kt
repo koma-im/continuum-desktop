@@ -8,6 +8,7 @@ import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
 import koma.storage.persistence.account.saveToken
 import koma_app.appState
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import matrix.ApiClient
 import tornadofx.*
 import view.ChatView
@@ -16,6 +17,7 @@ import view.RootLayoutView
 /**
  * show the chat window after login is done
  */
+@ObsoleteCoroutinesApi
 fun Koma.startChat(authedUser: Profile, serverConf: ServerConf) {
     val userid = authedUser.userId
     saveLastUsed(userid)

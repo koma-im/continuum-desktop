@@ -26,7 +26,7 @@ import org.controlsfx.control.Notifications
 import tornadofx.*
 
 private fun<E> listToProperty(list: List<E>): SimpleListProperty<E> {
-    val l = list ?: listOf()
+    val l = list
     return SimpleListProperty(FXCollections.observableArrayList(l))
 }
 
@@ -89,8 +89,9 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
                 }
             }
             stackpane {
+                val h = hoverProperty()
                 button("Join") {
-                    visibleWhen { this@stackpane.hoverProperty() }
+                    visibleWhen { h }
                     action { joinById(droom.room_id.value, droom.displayName.value, root) }
                 }
                 alignment = Pos.CENTER_RIGHT

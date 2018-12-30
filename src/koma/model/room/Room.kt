@@ -19,6 +19,7 @@ import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import koma_app.appState
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import tornadofx.*
 
 
@@ -35,6 +36,7 @@ class Room(val id: RoomId) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
+    @ObsoleteCoroutinesApi
     val messageManager by lazy { MessageManager(id, appState.koma.paths) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 

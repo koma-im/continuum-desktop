@@ -46,39 +46,37 @@ class RegistrationWizard(): View() {
     }
     private suspend fun nextStage() {
         val cur = state
-        when (cur) {
-            is Start -> {
-                val (r, u) = cur.start()?:return
-                register = r
-                GlobalScope.launch(Dispatchers.JavaFx) {
-                    val a = Stage(r, u)
-                    state = a
-                    root.center = a.root
-                }
+        if (cur is Start) {
+            val (r, u) = cur.start()?:return
+            register = r
+            GlobalScope.launch(Dispatchers.JavaFx) {
+                val a = Stage(r, u)
+                state = a
+                root.center = a.root
             }
-            is Stage -> {
-                val res = cur.submit()?: return
-                res.success { newUser ->
-                    println("Successfully registered ${newUser.user_id}")
-                    val s = Success(newUser, register.serverConf, this)
-                    state = s
-                    uilaunch { root.center = s.root }
-                }
-                res.failure { ex ->
-                    when (ex) {
-                        is AuthException.AuthFail -> {
-                            GlobalScope.launch(Dispatchers.JavaFx) {
-                                val a = Stage(register, ex.status)
-                                state = a
-                                root.center = a.root
-                            }
+        }
+        else if (cur is Stage) {
+            val res = cur.submit()?: return
+            res.success { newUser ->
+                println("Successfully registered ${newUser.user_id}")
+                val s = Success(newUser, register.serverConf, this)
+                state = s
+                uilaunch { root.center = s.root }
+            }
+            res.failure { ex ->
+                when (ex) {
+                    is AuthException.AuthFail -> {
+                        GlobalScope.launch(Dispatchers.JavaFx) {
+                            val a = Stage(register, ex.status)
+                            state = a
+                            root.center = a.root
                         }
-                        else -> {
-                            GlobalScope.launch(Dispatchers.JavaFx) {
-                                alert(Alert.AlertType.ERROR, "Registration failed",
-                                        "Error $ex")
-                                this@RegistrationWizard.close()
-                            }
+                    }
+                    else -> {
+                        GlobalScope.launch(Dispatchers.JavaFx) {
+                            alert(Alert.AlertType.ERROR, "Registration failed",
+                                    "Error $ex")
+                            this@RegistrationWizard.close()
                         }
                     }
                 }
@@ -261,7 +259,7 @@ class FallbackWebviewAuth(
             }
         }
 
-        val app = JavaApplication()
+        // val app = JavaApplication()
         win.setMember("onAuthDone", "app.finishAuth()")
     }
 }

@@ -10,6 +10,8 @@ import koma.util.coroutine.adapter.retrofit.isTemporaryNetFailure
 import koma.util.coroutine.observable.updates
 import koma.util.observable.list.concat.TreeConcatList
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.filterNotNull
 import kotlinx.coroutines.delay
@@ -17,6 +19,8 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
+@ObsoleteCoroutinesApi
+@ExperimentalCoroutinesApi
 suspend fun fetchEarlier(
         replyChan: SendChannel<MessageManagerMsg>,
         fromSegment: Segment,

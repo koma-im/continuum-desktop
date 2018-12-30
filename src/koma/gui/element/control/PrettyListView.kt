@@ -12,7 +12,7 @@ class PrettyListView<T> : ListView<T>() {
 
     init {
 
-        skinProperty().addListener { it ->
+        skinProperty().addListener { _ ->
             // first bind, then add new scrollbars, otherwise the new bars will be found
             bindScrollBars()
             children.addAll(vBar, hBar)

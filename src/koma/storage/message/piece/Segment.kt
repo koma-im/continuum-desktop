@@ -71,7 +71,7 @@ class Segment(
 
     override fun hashCode(): Int {
         var result = list.hashCode()
-        result = 31 * result + (meta.hashCode() ?: 0)
+        result = 31 * result + meta.hashCode()
         return result
     }
 }

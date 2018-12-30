@@ -77,13 +77,13 @@ class KeyBinding @JvmOverloads constructor(val code: KeyCode?, type: EventType<K
     }
 
     fun getSpecificity(event: KeyEvent): Int {
-        var s = 0
+        var s: Int
         if (code != null && code != event.code) return 0 else s = 1
         if (!shift.equals(event.isShiftDown)) return 0 else if (shift != OptionalBoolean.ANY) s++
         if (!ctrl.equals(event.isControlDown)) return 0 else if (ctrl != OptionalBoolean.ANY) s++
         if (!alt.equals(event.isAltDown)) return 0 else if (alt != OptionalBoolean.ANY) s++
         if (!meta.equals(event.isMetaDown)) return 0 else if (meta != OptionalBoolean.ANY) s++
-        if (type != null && type != event.eventType) return 0 else s++
+        if (type != event.eventType) return 0 else s++
         // We can now trivially accept it
         return s
     }
@@ -96,10 +96,10 @@ class KeyBinding @JvmOverloads constructor(val code: KeyCode?, type: EventType<K
     }
 
     /** {@inheritDoc}  */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o !is KeyBinding) return false
-        val that = o as KeyBinding?
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is KeyBinding) return false
+        val that = other as KeyBinding?
         return code == that!!.code &&
                 type == that.type &&
                 shift == that.shift &&

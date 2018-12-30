@@ -86,7 +86,7 @@ class KeyRangeMap<K: Comparable<K>, V>{
         posMap.removeTail(fromPos)
         // starting from the next one
         keyMap.tailMap(key, false)
-                .forEach{k: K, vr: Entry ->
+                .forEach{ _: K, vr: Entry ->
                     vr.range.shift(delta)
                     registerEntryPos(vr)
                 }

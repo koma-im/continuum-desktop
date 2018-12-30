@@ -12,6 +12,7 @@ import koma.util.matrix.getUserState
 import koma_app.appState
 import koma_app.appState.sortMembersInEachRoom
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import matrix.room.InvitedRoom
 import matrix.room.JoinedRoom
@@ -30,6 +31,7 @@ fun process_presence(message: PresenceMessage) {
     }
 }
 
+@ObsoleteCoroutinesApi
 private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     val room = this.joinRoom(roomid)
 
@@ -47,14 +49,15 @@ fun Profile.joinRoom(roomid: RoomId): Room {
     return appState.getAccountRoomStore(this.userId)!!.add(roomid)
 }
 
-private fun Profile.leaveLeftRooms(roomid: RoomId, leftRoom: LeftRoom) {
+private fun Profile.leaveLeftRooms(roomid: RoomId, @Suppress("UNUSED_PARAMETER") _leftRoom: LeftRoom) {
     appState.getAccountRoomStore(this.userId)!!.remove(roomid)
 }
 
-private fun handle_invited_room(roomid: String, data: InvitedRoom) {
+private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, data: InvitedRoom) {
     println("TODO: handle room invitation $data")
 }
 
+@ObsoleteCoroutinesApi
 fun Profile.processEventsResult(syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data

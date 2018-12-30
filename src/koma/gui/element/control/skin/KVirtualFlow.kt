@@ -509,7 +509,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         ** whereas in a horizontal ScrollBar it can scroll horizontally.
         */
         // block the event from being passed down to children
-        val blockEventDispatcher = { event: Event, tail: EventDispatchChain -> event }
+        val blockEventDispatcher = { event: Event, _: EventDispatchChain -> event }
         // block ScrollEvent from being passed down to scrollbar's skin
         val oldHsbEventDispatcher = hbar.eventDispatcher
         hbar.setEventDispatcher { event, t ->
@@ -548,6 +548,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
              */
             var virtualDelta = 0.0
             if (isVertical) {
+                @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
                 when (event.textDeltaYUnits) {
                     ScrollEvent.VerticalTextScrollUnits.PAGES -> virtualDelta = event.textDeltaY * lastHeight
                     ScrollEvent.VerticalTextScrollUnits.LINES -> {
@@ -571,6 +572,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
                     ScrollEvent.VerticalTextScrollUnits.NONE -> virtualDelta = event.deltaY
                 }
             } else { // horizontal
+                @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
                 when (event.textDeltaXUnits) {
                     ScrollEvent.HorizontalTextScrollUnits.CHARACTERS,
                         // can we get character size here?
@@ -654,7 +656,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
             // code, leading to flicker
             isPanning = !(vbar.boundsInParent.contains(e.x, e.y) || hbar.boundsInParent.contains(e.x, e.y))
         }
-        addEventFilter(MouseEvent.MOUSE_RELEASED) { e ->
+        addEventFilter(MouseEvent.MOUSE_RELEASED) { _ ->
             mouseDown = false
             if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
                 startSBReleasedAnimation()
@@ -735,7 +737,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
 
         // initBinds
         // clipView binds
-        val listenerX = { valueModel: Observable -> updateHbar() }
+        val listenerX = { _: Observable -> updateHbar() }
         verticalProperty().addListener(listenerX)
         hbar.valueProperty().addListener(listenerX)
         hbar.visibleProperty().addListener(listenerX)
@@ -747,7 +749,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         }
         vbar.valueProperty().addListener(listenerY)
 
-        super.heightProperty().addListener { observable, oldHeight, newHeight ->
+        super.heightProperty().addListener { _, oldHeight, newHeight ->
             // Fix for RT-8480, where the VirtualFlow does not show its content
             // after changing size to 0 and back.
             if (oldHeight.toDouble() == 0.0 && newHeight.toDouble() > 0) {
@@ -760,12 +762,12 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         ** there are certain animations that need to know if the touch is
         ** happening.....
         */
-        setOnTouchPressed { e ->
+        setOnTouchPressed { _ ->
             touchDetected = true
             scrollBarOn()
         }
 
-        setOnTouchReleased { e ->
+        setOnTouchReleased { _ ->
             touchDetected = false
             startSBReleasedAnimation()
         }
@@ -804,20 +806,12 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         return vertical!!
     }
 
-    fun pannableProperty(): BooleanProperty {
-        return pannable
-    }
-
     fun getCellCount(): Int {
         return cellCount.get()
     }
 
     fun setCellCount(value: Int) {
         cellCount.set(value)
-    }
-
-    fun cellCountProperty(): IntegerProperty {
-        return cellCount
     }
 
     fun getPosition(): Double {
@@ -828,20 +822,12 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         position.set(value)
     }
 
-    fun positionProperty(): DoubleProperty {
-        return position
-    }
-
     fun setFixedCellSize(value: Double) {
         fixedCellSize.set(value)
     }
 
     fun getFixedCellSize(): Double {
         return fixedCellSize.get()
-    }
-
-    fun fixedCellSizeProperty(): DoubleProperty {
-        return fixedCellSize
     }
 
     /**
@@ -1135,10 +1121,10 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
                 setPosition(1.0)
                 //                setItemCount(cellCount);
             } else if (lastCell != null) {
-                val lastCellOffset = getCellPosition(lastCell)
+                getCellPosition(lastCell)
                 val lastCellIndex = getCellIndex(lastCell)
                 adjustPositionToIndex(lastCellIndex)
-                val viewportTopToCellTop = -computeOffsetForCell(lastCellIndex)
+                -computeOffsetForCell(lastCellIndex)
                 // ToDO figure out whether or how to adjust
                 // adjustByPixelAmount(viewportTopToCellTop - lastCellOffset)
             }
@@ -1564,7 +1550,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
                 // The accumCell, and its children, should be ignored by the
                 // screen reader.
                 accumCell!!.accessibleRole = AccessibleRole.NODE
-                accumCell!!.childrenUnmodifiable.addListener { c: Observable ->
+                accumCell!!.childrenUnmodifiable.addListener { _: Observable ->
                     for (n in accumCell!!.childrenUnmodifiable) {
                         n.accessibleRole = AccessibleRole.NODE
                     }
@@ -1694,10 +1680,6 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         }
     }
 
-    private fun getCells(): List<T> {
-        return cells
-    }
-
     /**
      * Adds all the cells prior to and including the given currentIndex, until
      * no more can be added without falling off the flow. The startOffset
@@ -1721,7 +1703,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         // offset is our indication of whether we can lay out additional
         // cells. If the offset is ever < 0, except in the case of the very
         // first cell, then we must quit.
-        var cell: T? = null
+        var cell: T?
 
         // special case for the position == 1.0, skip adding last invisible cell
         if (index == getCellCount() && offset == viewportLength) {
@@ -1901,19 +1883,14 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         requestLayout()
     }
 
-    internal fun requestCellLayout() {
-        needsCellsLayout = true
-        requestLayout()
-    }
-
     internal fun setCellDirty(index: Int) {
         dirtyCells.set(index)
         requestLayout()
     }
 
     private fun startSBReleasedAnimation() {
-         var sbTouchKF1: KeyFrame
-         var sbTouchKF2: KeyFrame
+         val sbTouchKF1: KeyFrame
+         val sbTouchKF2: KeyFrame
         if (sbTouchTimeline == null) {
             /*
             ** timeline to leave the scrollbars visible for a short
@@ -2580,8 +2557,8 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
             clip = clipRect
             // --- clipping
 
-            super.widthProperty().addListener { valueModel -> clipRect.width = width }
-            super.heightProperty().addListener { valueModel -> clipRect.height = height }
+            super.widthProperty().addListener { _ -> clipRect.width = width }
+            super.heightProperty().addListener { _ -> clipRect.height = height }
         }
     }
 

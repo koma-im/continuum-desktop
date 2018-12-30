@@ -30,7 +30,7 @@ class KeyMapping
 constructor(private val keyBinding: KeyBinding,
             eventHandler: EventHandler<KeyEvent>,
             interceptor: Predicate<KeyEvent>? = null)
-    : Mapping<KeyEvent>(if (keyBinding == null) null else keyBinding!!.type, eventHandler) {
+    : Mapping<KeyEvent>(keyBinding.type, eventHandler) {
 
     constructor(keyBinding: KeyBinding,
                 eventHandler: (KeyEvent) -> Unit,
@@ -77,18 +77,18 @@ constructor(private val keyBinding: KeyBinding,
         interceptor?.let { setInterceptor(it) }
     }
 
-    override fun getSpecificity(e: Event): Int {
+    override fun getSpecificity(event: Event): Int {
         if (isDisabled) return 0
-        return if (e !is KeyEvent) 0 else keyBinding.getSpecificity(e as KeyEvent)
+        return if (event !is KeyEvent) 0 else keyBinding.getSpecificity(event)
     }
 
     /** {@inheritDoc}  */
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o !is KeyMapping) return false
-        if (!super.equals(o)) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is KeyMapping) return false
+        if (!super.equals(other)) return false
 
-        val that = o as KeyMapping?
+        val that = other as KeyMapping?
 
         // we know keyBinding is non-null here
         return keyBinding.equals(that!!.keyBinding)

@@ -37,22 +37,22 @@ class MouseMapping
     }
 
     /** {@inheritDoc}  */
-    override fun getSpecificity(e: Event): Int {
+    override fun getSpecificity(event: Event): Int {
         if (isDisabled) return 0
-        if (e !is MouseEvent) return 0
+        if (event !is MouseEvent) return 0
         val et = eventType
 
         // FIXME naive
         var s = 0
-        if (e.eventType == MouseEvent.MOUSE_CLICKED && et != MouseEvent.MOUSE_CLICKED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_DRAGGED && et != MouseEvent.MOUSE_DRAGGED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_ENTERED && et != MouseEvent.MOUSE_ENTERED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_ENTERED_TARGET && et != MouseEvent.MOUSE_ENTERED_TARGET) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_EXITED && et != MouseEvent.MOUSE_EXITED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_EXITED_TARGET && et != MouseEvent.MOUSE_EXITED_TARGET) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_MOVED && et != MouseEvent.MOUSE_MOVED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_PRESSED && et != MouseEvent.MOUSE_PRESSED) return 0 else s++
-        if (e.eventType == MouseEvent.MOUSE_RELEASED && et != MouseEvent.MOUSE_RELEASED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_CLICKED && et != MouseEvent.MOUSE_CLICKED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_DRAGGED && et != MouseEvent.MOUSE_DRAGGED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_ENTERED && et != MouseEvent.MOUSE_ENTERED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_ENTERED_TARGET && et != MouseEvent.MOUSE_ENTERED_TARGET) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_EXITED && et != MouseEvent.MOUSE_EXITED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_EXITED_TARGET && et != MouseEvent.MOUSE_EXITED_TARGET) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_MOVED && et != MouseEvent.MOUSE_MOVED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_PRESSED && et != MouseEvent.MOUSE_PRESSED) return 0 else s++
+        if (event.eventType == MouseEvent.MOUSE_RELEASED && et != MouseEvent.MOUSE_RELEASED) return 0 else s++
 
         // TODO handle further checks
 

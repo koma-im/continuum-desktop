@@ -28,7 +28,7 @@ class ListViewBehavior<T>
 (val node: ListView<T>) {
     private val installedDefaultMappings = mutableListOf<MappingType>()
     private val childInputMapDisposalHandlers = mutableListOf<Runnable>()
-    val inputMap: KInputMap<ListView<T>> = createInputMap(node)
+    private val inputMap: KInputMap<ListView<T>> = createInputMap(node)
 
     private val keyEventListener = { e: KeyEvent ->
         if (!e.isConsumed) {
@@ -87,7 +87,7 @@ class ListViewBehavior<T>
             // case, we set a new anchor to be the selected index
             if (newAnchor == -1) {
                 val addedSize = c.addedSize
-                newAnchor = if (addedSize > 0) c.addedSubList.get(addedSize - 1) else newAnchor
+                newAnchor = if (addedSize > 0) c.addedSubList[addedSize - 1] else newAnchor
             }
         }
 
@@ -112,12 +112,12 @@ class ListViewBehavior<T>
         }
     }
 
-    private val itemsListener = ChangeListener<ObservableList<T>> { observable, oldValue, newValue ->
+    private val itemsListener = ChangeListener<ObservableList<T>> { _, oldValue, newValue ->
         oldValue?.removeListener(weakItemsListListener)
         newValue?.addListener(weakItemsListListener)
     }
 
-    private val selectionModelListener = ChangeListener<MultipleSelectionModel<T>> { observable, oldValue, newValue ->
+    private val selectionModelListener = ChangeListener<MultipleSelectionModel<T>> { _, oldValue, newValue ->
         oldValue?.selectedIndices?.removeListener(weakSelectedIndicesListener)
         newValue?.selectedIndices?.addListener(weakSelectedIndicesListener)
     }
@@ -144,31 +144,31 @@ class ListViewBehavior<T>
         // add focus traversal mappings
         addDefaultMapping(inputMap, FocusTraversalInputMap.mappings.map { MappingType.Key(it) })
         addDefaultMapping(inputMap, listOf(
-                KeyMapping(HOME, { e -> selectFirstRow() }),
-                KeyMapping(END, { e -> selectLastRow() }),
-                KeyMapping(KeyBinding(HOME).shift(), { e -> selectAllToFirstRow() }),
-                KeyMapping(KeyBinding(END).shift(), { e -> selectAllToLastRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shift(), { e -> selectAllPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shift(), { e -> selectAllPageDown() }),
+                KeyMapping(HOME, { _ -> selectFirstRow() }),
+                KeyMapping(END, { _ -> selectLastRow() }),
+                KeyMapping(KeyBinding(HOME).shift(), { _ -> selectAllToFirstRow() }),
+                KeyMapping(KeyBinding(END).shift(), { _ -> selectAllToLastRow() }),
+                KeyMapping(KeyBinding(PAGE_UP).shift(), { _ -> selectAllPageUp() }),
+                KeyMapping(KeyBinding(PAGE_DOWN).shift(), { _ -> selectAllPageDown() }),
 
-                KeyMapping(KeyBinding(SPACE).shift(), { e -> selectAllToFocus(false) }),
-                KeyMapping(KeyBinding(SPACE).shortcut().shift(), { e -> selectAllToFocus(true) }),
+                KeyMapping(KeyBinding(SPACE).shift(), { _ -> selectAllToFocus() }),
+                KeyMapping(KeyBinding(SPACE).shortcut().shift(), { _ -> selectAllToFocus() }),
 
-                KeyMapping(PAGE_UP, { e -> scrollPageUp() }),
-                KeyMapping(PAGE_DOWN, { e -> scrollPageDown() }),
+                KeyMapping(PAGE_UP, { _ -> scrollPageUp() }),
+                KeyMapping(PAGE_DOWN, { _ -> scrollPageDown() }),
 
-                KeyMapping(ENTER, { e -> activate() }),
-                KeyMapping(SPACE, { e -> activate() }),
-                KeyMapping(F2, { e -> activate() }),
-                KeyMapping(ESCAPE, { e -> cancelEdit() }),
+                KeyMapping(ENTER, { _ -> activate() }),
+                KeyMapping(SPACE, { _ -> activate() }),
+                KeyMapping(F2, { _ -> activate() }),
+                KeyMapping(ESCAPE, { _ -> cancelEdit() }),
 
-                KeyMapping(KeyBinding(A).shortcut(), { e -> selectAll() }),
-                KeyMapping(KeyBinding(HOME).shortcut(), { e -> focusFirstRow() }),
-                KeyMapping(KeyBinding(END).shortcut(), { e -> focusLastRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shortcut(), { e -> focusPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shortcut(), { e -> focusPageDown() }),
+                KeyMapping(KeyBinding(A).shortcut(), { _ -> selectAll() }),
+                KeyMapping(KeyBinding(HOME).shortcut(), { _ -> focusFirstRow() }),
+                KeyMapping(KeyBinding(END).shortcut(), { _ -> focusLastRow() }),
+                KeyMapping(KeyBinding(PAGE_UP).shortcut(), { _ -> focusPageUp() }),
+                KeyMapping(KeyBinding(PAGE_DOWN).shortcut(), { _ -> focusPageDown() }),
 
-                KeyMapping(KeyBinding(BACK_SLASH).shortcut(), { e -> clearSelection() })
+                KeyMapping(KeyBinding(BACK_SLASH).shortcut(), { _ -> clearSelection() })
         ).map { MappingType.Key(it) })
 
         addDefaultMapping(inputMap, MouseMapping(MouseEvent.MOUSE_PRESSED, EventHandler { this.mousePressed(it) }))
@@ -177,64 +177,64 @@ class ListViewBehavior<T>
         // --- mac OS
         val macInputMap = KInputMap<ListView<T>>(control)
         macInputMap.interceptor = Predicate { _ -> !Utils.MAC }
-        addDefaultMapping(macInputMap, KeyMapping(KeyBinding(SPACE).shortcut().ctrl(), { e -> toggleFocusOwnerSelection() }))
+        addDefaultMapping(macInputMap, KeyMapping(KeyBinding(SPACE).shortcut().ctrl(), { _ -> toggleFocusOwnerSelection() }))
         addDefaultChildMap(inputMap, macInputMap)
 
         // --- all other platforms
         val otherOsInputMap = KInputMap<ListView<T>>(control)
-        otherOsInputMap.interceptor = Predicate{ event -> Utils.MAC }
-        addDefaultMapping(otherOsInputMap, KeyMapping(KeyBinding(SPACE).ctrl(), { e -> toggleFocusOwnerSelection() }))
+        otherOsInputMap.interceptor = Predicate{ _ -> Utils.MAC }
+        addDefaultMapping(otherOsInputMap, KeyMapping(KeyBinding(SPACE).ctrl(), { _ -> toggleFocusOwnerSelection() }))
         addDefaultChildMap(inputMap, otherOsInputMap)
 
         // create two more child maps, one for vertical listview and one for horizontal listview
         // --- vertical listview
         val verticalListInputMap = KInputMap<ListView<T>>(control)
-        verticalListInputMap.interceptor = Predicate { event -> control.orientation != Orientation.VERTICAL }
+        verticalListInputMap.interceptor = Predicate { _ -> control.orientation != Orientation.VERTICAL }
 
         addDefaultKeyMapping(verticalListInputMap, listOf(
-                KeyMapping(UP, { e -> selectPreviousRow() }),
-                KeyMapping(KP_UP, { e -> selectPreviousRow() }),
-                KeyMapping(DOWN, { e -> selectNextRow() }),
-                KeyMapping(KP_DOWN, { e -> selectNextRow() }),
+                KeyMapping(UP, { _ -> selectPreviousRow() }),
+                KeyMapping(KP_UP, { _ -> selectPreviousRow() }),
+                KeyMapping(DOWN, { _ -> selectNextRow() }),
+                KeyMapping(KP_DOWN, { _ -> selectNextRow() }),
 
-                KeyMapping(KeyBinding(UP).shift(), { e -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(KP_UP).shift(), { e -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(DOWN).shift(), { e -> alsoSelectNextRow() }),
-                KeyMapping(KeyBinding(KP_DOWN).shift(), { e -> alsoSelectNextRow() }),
+                KeyMapping(KeyBinding(UP).shift(), { _ -> alsoSelectPreviousRow() }),
+                KeyMapping(KeyBinding(KP_UP).shift(), { _ -> alsoSelectPreviousRow() }),
+                KeyMapping(KeyBinding(DOWN).shift(), { _ -> alsoSelectNextRow() }),
+                KeyMapping(KeyBinding(KP_DOWN).shift(), { _ -> alsoSelectNextRow() }),
 
-                KeyMapping(KeyBinding(UP).shortcut(), { e -> focusPreviousRow() }),
-                KeyMapping(KeyBinding(DOWN).shortcut(), { e -> focusNextRow() }),
+                KeyMapping(KeyBinding(UP).shortcut(), { _ -> focusPreviousRow() }),
+                KeyMapping(KeyBinding(DOWN).shortcut(), { _ -> focusNextRow() }),
 
-                KeyMapping(KeyBinding(UP).shortcut().shift(), { e -> discontinuousSelectPreviousRow() }),
-                KeyMapping(KeyBinding(DOWN).shortcut().shift(), { e -> discontinuousSelectNextRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shortcut().shift(), { e -> discontinuousSelectPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shortcut().shift(), { e -> discontinuousSelectPageDown() }),
-                KeyMapping(KeyBinding(HOME).shortcut().shift(), { e -> discontinuousSelectAllToFirstRow() }),
-                KeyMapping(KeyBinding(END).shortcut().shift(), { e -> discontinuousSelectAllToLastRow() })
+                KeyMapping(KeyBinding(UP).shortcut().shift(), { _ -> discontinuousSelectPreviousRow() }),
+                KeyMapping(KeyBinding(DOWN).shortcut().shift(), { _ -> discontinuousSelectNextRow() }),
+                KeyMapping(KeyBinding(PAGE_UP).shortcut().shift(), { _ -> discontinuousSelectPageUp() }),
+                KeyMapping(KeyBinding(PAGE_DOWN).shortcut().shift(), { _ -> discontinuousSelectPageDown() }),
+                KeyMapping(KeyBinding(HOME).shortcut().shift(), { _ -> discontinuousSelectAllToFirstRow() }),
+                KeyMapping(KeyBinding(END).shortcut().shift(), { _ -> discontinuousSelectAllToLastRow() })
         ))
 
         addDefaultChildMap(inputMap, verticalListInputMap)
 
         // --- horizontal listview
         val horizontalListInputMap = KInputMap<ListView<T>>(control)
-        horizontalListInputMap.interceptor = Predicate { event -> control.orientation != Orientation.HORIZONTAL }
+        horizontalListInputMap.interceptor = Predicate { _ -> control.orientation != Orientation.HORIZONTAL }
 
         addDefaultKeyMapping(horizontalListInputMap, listOf(
-                KeyMapping(LEFT, { e -> selectPreviousRow() }),
-                KeyMapping(KP_LEFT, { e -> selectPreviousRow() }),
-                KeyMapping(RIGHT, { e -> selectNextRow() }),
-                KeyMapping(KP_RIGHT, { e -> selectNextRow() }),
+                KeyMapping(LEFT, { _ -> selectPreviousRow() }),
+                KeyMapping(KP_LEFT, { _ -> selectPreviousRow() }),
+                KeyMapping(RIGHT, { _ -> selectNextRow() }),
+                KeyMapping(KP_RIGHT, { _ -> selectNextRow() }),
 
-                KeyMapping(KeyBinding(LEFT).shift(), { e -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(KP_LEFT).shift(), { e -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shift(), { e -> alsoSelectNextRow() }),
-                KeyMapping(KeyBinding(KP_RIGHT).shift(), { e -> alsoSelectNextRow() }),
+                KeyMapping(KeyBinding(LEFT).shift(), { _ -> alsoSelectPreviousRow() }),
+                KeyMapping(KeyBinding(KP_LEFT).shift(), { _ -> alsoSelectPreviousRow() }),
+                KeyMapping(KeyBinding(RIGHT).shift(), { _ -> alsoSelectNextRow() }),
+                KeyMapping(KeyBinding(KP_RIGHT).shift(), { _ -> alsoSelectNextRow() }),
 
-                KeyMapping(KeyBinding(LEFT).shortcut(), { e -> focusPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shortcut(), { e -> focusNextRow() }),
+                KeyMapping(KeyBinding(LEFT).shortcut(), { _ -> focusPreviousRow() }),
+                KeyMapping(KeyBinding(RIGHT).shortcut(), { _ -> focusNextRow() }),
 
-                KeyMapping(KeyBinding(LEFT).shortcut().shift(), { e -> discontinuousSelectPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shortcut().shift(), { e -> discontinuousSelectNextRow() })
+                KeyMapping(KeyBinding(LEFT).shortcut().shift(), { _ -> discontinuousSelectPreviousRow() }),
+                KeyMapping(KeyBinding(RIGHT).shortcut().shift(), { _ -> discontinuousSelectNextRow() })
         ))
 
         addDefaultChildMap(inputMap, horizontalListInputMap)
@@ -354,7 +354,7 @@ class ListViewBehavior<T>
     private fun focusPreviousRow() {
         val fm = node.focusModel ?: return
 
-        val sm = node.selectionModel ?: return
+        node.selectionModel ?: return
 
         fm.focusPrevious()
 
@@ -368,7 +368,7 @@ class ListViewBehavior<T>
     private fun focusNextRow() {
         val fm = node.focusModel ?: return
 
-        val sm = node.selectionModel ?: return
+        node.selectionModel ?: return
 
         fm.focusNext()
 
@@ -614,7 +614,7 @@ class ListViewBehavior<T>
         sm.selectAll()
     }
 
-    private fun selectAllToFocus(setAnchorToFocusIndex: Boolean) {
+    private fun selectAllToFocus() {
         // Fix for RT-31241
         val listView = node
         if (listView.editingIndex >= 0) return
@@ -624,13 +624,13 @@ class ListViewBehavior<T>
         val fm = listView.focusModel ?: return
 
         val focusIndex = fm.focusedIndex
-        var anchor = anchor
+        val anchor = anchor
 
         sm.clearSelection()
         val startPos = anchor
         val endPos = if (anchor > focusIndex) focusIndex - 1 else focusIndex + 1
         sm.selectRange(startPos, endPos)
-        anchor = if (setAnchorToFocusIndex) focusIndex else anchor
+        // anchor = if (setAnchorToFocusIndex) focusIndex else anchor
     }
 
     private fun cancelEdit() {
@@ -722,7 +722,7 @@ class ListViewBehavior<T>
     private fun discontinuousSelectPageUp() {
         val sm = node.selectionModel ?: return
 
-        val fm = node.focusModel ?: return
+        node.focusModel ?: return
 
         val anchor = anchor
         val leadSelectedIndex = onScrollPageUp!!.call(false)
@@ -732,7 +732,7 @@ class ListViewBehavior<T>
     private fun discontinuousSelectPageDown() {
         val sm = node.selectionModel ?: return
 
-        val fm = node.focusModel ?: return
+        node.focusModel ?: return
 
         val anchor = anchor
         val leadSelectedIndex = onScrollPageDown!!.call(false)
@@ -760,11 +760,6 @@ class ListViewBehavior<T>
         sm.selectRange(index, rowCount)
 
         if (onMoveToLastCell != null) onMoveToLastCell!!.run()
-    }
-
-    protected fun addDefaultMapping(newMapping: List<KeyMapping>) {
-        val m: List<MappingType> = newMapping.map { MappingType.Key(it) }
-        addDefaultMapping(inputMap, m)
     }
 
     protected fun addDefaultKeyMapping(i: KInputMap<ListView<T>>, newMapping: List<KeyMapping>) {

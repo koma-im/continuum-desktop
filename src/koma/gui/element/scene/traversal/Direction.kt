@@ -26,6 +26,7 @@ enum class Direction private constructor(val isForward: Boolean) {
             when (this) {
                 LEFT -> return RIGHT
                 RIGHT -> return LEFT
+                else -> {}
             }
         }
         return this

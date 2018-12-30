@@ -32,7 +32,7 @@ object appState {
         return getAccountRoomStore(u)
     }
     fun getAccountRoomStore(userId: UserId): UserRoomStore? {
-        return _accountRooms.computeIfAbsent(userId, { _u -> UserRoomStore(roomStore) })
+        return _accountRooms.computeIfAbsent(userId, { UserRoomStore(roomStore) })
     }
     fun accountRooms(): List<Room>? {
         return accountRoomStore()?.roomList
