@@ -12,7 +12,7 @@ import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
-import koma_app.appState.apiClient
+import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

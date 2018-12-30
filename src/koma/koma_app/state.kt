@@ -1,9 +1,8 @@
-package koma_app
+package koma.koma_app
 
 import controller.ChatController
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
-import koma.koma_app.appData
 import koma.matrix.UserId
 import koma.storage.config.server.ServerConf
 import koma.storage.rooms.RoomStore

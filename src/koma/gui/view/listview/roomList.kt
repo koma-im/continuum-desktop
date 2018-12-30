@@ -7,7 +7,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.koma_app.appData
-import koma_app.appState
+import koma.koma_app.appState
 import model.Room
 import tornadofx.*
 import view.RoomFragment

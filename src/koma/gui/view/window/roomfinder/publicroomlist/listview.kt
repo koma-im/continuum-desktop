@@ -21,7 +21,7 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel

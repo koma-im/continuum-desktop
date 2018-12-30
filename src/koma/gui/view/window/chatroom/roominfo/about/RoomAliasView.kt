@@ -22,7 +22,7 @@ import koma.matrix.room.naming.RoomAlias
 import koma.matrix.room.power.canUserSet
 import koma.matrix.room.power.canUserSetStates
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

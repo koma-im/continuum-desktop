@@ -12,7 +12,7 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.appData
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tornadofx.*

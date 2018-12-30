@@ -11,7 +11,7 @@ import koma.koma_app.appData
 import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.util.result.ok
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tornadofx.*

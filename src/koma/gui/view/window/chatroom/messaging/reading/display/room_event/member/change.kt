@@ -11,7 +11,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.s
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showUser
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
-import koma_app.AppSettings
+import koma.koma_app.AppSettings
 import tornadofx.*
 
 class MRoomMemberViewNode(message: MRoomMember): ViewNode {

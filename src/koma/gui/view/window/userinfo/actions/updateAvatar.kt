@@ -5,7 +5,7 @@ import domain.AvatarUrl
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

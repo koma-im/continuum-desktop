@@ -10,8 +10,8 @@ import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.storage.config.profile.Profile
-import koma_app.appState
-import koma_app.appState.apiClient
+import koma.koma_app.appState
+import koma.koma_app.appState.apiClient
 import model.Room
 import model.RoomItemModel
 import tornadofx.*

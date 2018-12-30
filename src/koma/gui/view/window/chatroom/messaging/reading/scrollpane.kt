@@ -15,7 +15,7 @@ import koma.gui.element.control.KListView
 import koma.matrix.event.room_message.RoomEvent
 import koma.storage.message.ShowLatest
 import koma.storage.message.VisibleRange
-import koma_app.AppSettings
+import koma.koma_app.AppSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch

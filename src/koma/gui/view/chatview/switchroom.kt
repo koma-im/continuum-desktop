@@ -4,7 +4,7 @@ import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
-import koma_app.appState
+import koma.koma_app.appState
 import model.Room
 import tornadofx.*
 import java.util.concurrent.ConcurrentHashMap

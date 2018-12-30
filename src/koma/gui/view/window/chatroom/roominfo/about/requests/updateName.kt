@@ -3,7 +3,7 @@ package koma.gui.view.window.chatroom.roominfo.about.requests
 import com.github.kittinunf.result.Result
 import koma.matrix.event.room_message.state.RoomNameContent
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

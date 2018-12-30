@@ -9,7 +9,7 @@ import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.storage.message.piece.Segment
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 
 suspend fun doFetch(piece: Segment, roomid: RoomId)
         : Result<FetchedBatch, Exception> {

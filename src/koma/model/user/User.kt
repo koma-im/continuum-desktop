@@ -9,7 +9,7 @@ import koma.koma_app.SaveToDiskTasks
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import koma.storage.users.state.saveUser
-import koma_app.appState
+import koma.koma_app.appState
 
 /**
  * Created by developer on 2017/6/25.

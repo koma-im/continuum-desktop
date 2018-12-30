@@ -3,7 +3,7 @@ package controller
 import com.github.kittinunf.result.Result
 import koma.controller.events_processing.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import matrix.ApiClient

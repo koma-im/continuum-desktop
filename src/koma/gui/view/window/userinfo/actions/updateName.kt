@@ -3,7 +3,7 @@ package koma.gui.view.window.userinfo.actions
 import com.github.kittinunf.result.Result
 import javafx.scene.control.TextInputDialog
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState.apiClient
+import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

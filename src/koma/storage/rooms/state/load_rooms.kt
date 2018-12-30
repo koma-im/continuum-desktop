@@ -7,7 +7,7 @@ import koma.matrix.room.visibility.HistoryVisibilityCaseInsensitiveAdapter
 import koma.matrix.room.visibility.RoomVisibilityCaseInsensitiveAdapter
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.ConfigPaths
-import koma_app.appState
+import koma.koma_app.appState
 import model.Room
 import mu.KotlinLogging
 import java.io.File

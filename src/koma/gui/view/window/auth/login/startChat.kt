@@ -7,7 +7,7 @@ import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
 import koma.storage.persistence.account.saveToken
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import matrix.ApiClient
 import tornadofx.*

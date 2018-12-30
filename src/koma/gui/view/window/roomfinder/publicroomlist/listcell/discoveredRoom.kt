@@ -17,7 +17,7 @@ import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

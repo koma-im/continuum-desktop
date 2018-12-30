@@ -18,7 +18,7 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import tornadofx.*
 

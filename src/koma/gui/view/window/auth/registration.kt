@@ -15,7 +15,7 @@ import koma.gui.view.window.auth.login.startChatWithIdToken
 import koma.matrix.user.auth.*
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getApiUrlBuilder
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

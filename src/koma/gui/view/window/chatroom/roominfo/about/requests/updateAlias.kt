@@ -4,7 +4,7 @@ import com.github.kittinunf.result.Result
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.room.naming.RoomAlias
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState
+import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

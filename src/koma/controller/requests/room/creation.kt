@@ -9,7 +9,7 @@ import javafx.scene.control.TextField
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState.apiClient
+import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

@@ -4,7 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import koma.gui.element.icon.AvatarAlways
 import koma.matrix.UserId
-import koma_app.appState
+import koma.koma_app.appState
 import tornadofx.*
 
 fun showUser(node: Node, userId: UserId) {

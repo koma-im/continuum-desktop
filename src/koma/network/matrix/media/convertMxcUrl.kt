@@ -3,7 +3,6 @@ package koma.network.matrix.media
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
 import koma.storage.config.server.getMediaPath
-import koma_app.appState
 import okhttp3.HttpUrl
 
 /**

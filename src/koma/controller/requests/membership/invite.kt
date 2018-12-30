@@ -6,7 +6,7 @@ import javafx.scene.layout.GridPane
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma_app.appState.apiClient
+import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx

@@ -5,7 +5,7 @@ import javafx.scene.control.TabPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.tab.AppearanceTab
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
-import koma_app.AppSettings
+import koma.koma_app.AppSettings
 import tornadofx.*
 
 class PreferenceWindow(): View() {
