@@ -15,13 +15,13 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
+import koma.koma_app.appState
 import koma.matrix.publicapi.rooms.findPublicRooms
 import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -108,6 +108,7 @@ class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
         private val input: StringProperty
 ): View() {
+    private val api = appState.apiClient!!
     private val matchRooms = FilteredList(roomlist)
 
     override val root = listview(matchRooms)
@@ -193,9 +194,9 @@ class RoomListView(
     private fun getRoomSource(term: String): RoomListingSource {
         return roomSources.computeIfAbsent(term.trim(), {
             if (it.isBlank())
-                RoomListingSource("", getPublicRooms())
+                RoomListingSource("", getPublicRooms(api))
             else
-                RoomListingSource(it, findPublicRooms(it))
+                RoomListingSource(it, findPublicRooms(it, api))
         })
     }
 

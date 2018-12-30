@@ -36,7 +36,7 @@ class ChatController(
                 }
             }
         }
-        sync.startSyncing()
+        sync.startSyncing(apiClient)
     }
 
     fun shutdown() {

@@ -8,10 +8,10 @@ import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appData
+import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.util.result.ok
-import koma.koma_app.appState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tornadofx.*
@@ -19,6 +19,7 @@ import tornadofx.*
 class ImageElement(val url: MHUrl): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
+    private val server = appState.serverConf
 
     init {
         val imageView = ImageView()
@@ -30,7 +31,7 @@ class ImageElement(val url: MHUrl): ViewNode {
         menuItems = menuItems()
 
         GlobalScope.launch {
-            val res = appState.koma.downloadMedia(url).ok() ?: return@launch
+            val res = appState.koma.downloadMedia(url, server).ok() ?: return@launch
             val image = Image(res.inputStream())
             if (image.width > imageSize) {
                 imageView.fitHeight = imageSize
@@ -45,7 +46,7 @@ class ImageElement(val url: MHUrl): ViewNode {
     private fun menuItems(): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.action {
-            url.toHttpUrl().success {
+            url.toHttpUrl(server).success {
                 downloadFileAs(it, title = "Save Image As")
             }
         }

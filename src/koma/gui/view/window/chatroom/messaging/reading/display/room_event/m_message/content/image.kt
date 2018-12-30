@@ -10,6 +10,7 @@ import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.ImageElement
 import koma.koma_app.appData
+import koma.koma_app.appState
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.network.media.MHUrl
 import koma.util.result.ok
@@ -18,6 +19,7 @@ import tornadofx.*
 class MImageViewNode(val content: ImageMessage): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
+    private val server = appState.serverConf
 
     init {
         val url = MHUrl.fromStr(content.url).ok()
@@ -37,14 +39,14 @@ class MImageViewNode(val content: ImageMessage): ViewNode {
     private fun createMenuItems(url: MHUrl, filename: String): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.action {
-            url.toHttpUrl().success {
+            url.toHttpUrl(server).success {
                 downloadFileAs(it, filename = filename, title = "Save Image As")
             }
         }
 
         val copyUrl = MenuItem("Copy Image Address")
         copyUrl.action { Clipboard.getSystemClipboard().putString(
-                url.toHttpUrl().fold({h -> h.toString()}, { _ -> url.toString()})
+                url.toHttpUrl(server).fold({h -> h.toString()}, { _ -> url.toString()})
         ) }
 
         return listOf(tm, copyUrl)

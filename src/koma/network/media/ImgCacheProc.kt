@@ -2,8 +2,8 @@ package koma.network.media
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
-import koma.util.result.ok
 import koma.koma_app.appState
+import koma.util.result.ok
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -24,6 +24,7 @@ typealias ImageProperty = SimpleObjectProperty<Image>
  */
 open class ImgCacheProc(val processing: (InputStream) -> Image) {
     private val cache: Cache<MHUrl, ImageProperty>
+    private val server = appState.serverConf
 
     init {
         cache = createCache()
@@ -35,7 +36,7 @@ open class ImgCacheProc(val processing: (InputStream) -> Image) {
     private fun createImageProperty(url: MHUrl): ImageProperty{
         val prop = ImageProperty()
         GlobalScope.launch {
-            val bs = appState.koma.downloadMedia(url).ok()
+            val bs = appState.koma.downloadMedia(url, server).ok()
             bs ?: return@launch
             val img = processing(bs.inputStream())
             withContext(Dispatchers.JavaFx) { prop.set(img) }
