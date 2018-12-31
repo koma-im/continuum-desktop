@@ -8,8 +8,9 @@ import koma.Koma
 import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
+import koma.storage.config.ConfigPaths
+import koma.storage.config.getConfigDir
 import tornadofx.*
-import util.getConfigDir
 import kotlinx.coroutines.javafx.JavaFx as UI
 
 
@@ -17,8 +18,10 @@ import kotlinx.coroutines.javafx.JavaFx as UI
 fun main(args: Array<String>) {
     val arg = args.firstOrNull()
     val data_dir = arg ?: getConfigDir()
-    val koma = Koma(data_dir)
-    appData = DataOnDisk(koma.paths)
+    val paths = ConfigPaths(data_dir)
+    appData = DataOnDisk(paths)
+    val proxy = appData.settings.getProxy()
+    val koma = Koma(paths, proxy)
     appState.koma = koma
     Application.launch(KomaApp::class.java, *args)
     appState.chatController.shutdown()
