@@ -2,11 +2,12 @@ package koma.storage.config.profile
 
 import koma.Koma
 import koma.koma_app.SaveToDiskTasks
+import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.json.MoshiInstance
 import koma.storage.persistence.account.getToken
 import koma.storage.persistence.account.saveToken
-import koma.koma_app.appState
+import koma.storage.persistence.account.userProfileDir
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -33,6 +34,7 @@ fun Koma.newProfile(userId: UserId): Profile?  {
     return profile
 }
 
+fun Koma.userProfileDir(userId: UserId) = this.paths.userProfileDir(userId)
 
 fun Koma.saveProfile(profile: Profile) {
     val userId = profile.userId

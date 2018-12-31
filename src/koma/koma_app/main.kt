@@ -25,7 +25,6 @@ fun main(args: Array<String>) {
     appState.koma = koma
     Application.launch(KomaApp::class.java, *args)
     appState.chatController.shutdown()
-    koma.saveToDisk()
     SaveToDiskTasks.saveToDisk()
 }
 
