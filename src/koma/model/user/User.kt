@@ -6,10 +6,10 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.SaveToDiskTasks
+import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import koma.storage.users.state.saveUser
-import koma.koma_app.appState
 
 /**
  * Created by developer on 2017/6/25.

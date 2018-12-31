@@ -10,10 +10,13 @@ import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
 import matrix.ApiClient
 import model.Room
+import mu.KotlinLogging
 
+private val logger = KotlinLogging.logger {}
 
 object appState {
     val currRoom = SimpleObjectProperty<Room>()
+    var currentUser: UserId? = null
     lateinit var koma: Koma
     lateinit var chatController: ChatController
     var apiClient: ApiClient? = null
@@ -26,8 +29,11 @@ object appState {
         rs?.forEach {  room: Room -> room.sortMembers() }
     }
     fun accountRoomStore(): UserRoomStore? {
-        val u = apiClient?.profile?.userId
-        u?:return null
+        val u = currentUser
+        if (u == null) {
+            logger.warn { "user id not set, can't manage joined rooms" }
+            return null
+        }
         return getAccountRoomStore(u)
     }
     fun getAccountRoomStore(userId: UserId): UserRoomStore? {

@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
 import koma.Koma
 import koma.gui.view.window.auth.login.startChat
+import koma.koma_app.appState
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.Profile
 import koma.storage.config.profile.newProfile
@@ -23,6 +24,7 @@ import tornadofx.*
  */
 suspend fun Koma.doLogin(user: String, password: String, server: String) {
     val userid = UserId_new(user)
+    appState.currentUser = userid
     val servCon = this.servers.serverConfWithAddr(userid.server, server)
     val authedProfile: Profile = if (!password.isBlank()) {
         val authResu = login(UserPassword(user = userid.user, password = password), servCon, this.http).awaitMatrix()

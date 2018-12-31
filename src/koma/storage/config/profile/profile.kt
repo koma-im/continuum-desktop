@@ -8,13 +8,14 @@ import koma.matrix.json.MoshiInstance
 import koma.storage.persistence.account.getToken
 import koma.storage.persistence.account.saveToken
 import koma.storage.persistence.account.userProfileDir
+import mu.KotlinLogging
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
 val userProfileFilename = "profile.json"
 
-
+private val logger = KotlinLogging.logger {}
 
 fun Koma.newProfile(userId: UserId): Profile?  {
     val token = getToken(userId)
@@ -22,10 +23,14 @@ fun Koma.newProfile(userId: UserId): Profile?  {
     val profile = Profile(userId, token.access_token)
     val s = loadUserState(userId)
     val store = appState.accountRoomStore()
-    if (s!= null && store != null) {
+    if (s == null) {
+        logger.warn { "no saved state is loaded from disk for user $userId" }
+    } else if (store == null) {
+        logger.warn { "Failed to get room store for user $userId" }
+    } else {
+        logger.debug { "$userId is known to be in ${s.joinedRooms.size} rooms" }
         for (r in s.joinedRooms) {
             store.add(r)
-
         }
     }
     SaveToDiskTasks.addJob {
@@ -50,14 +55,15 @@ fun Koma.saveProfile(profile: Profile) {
     val jsonAdapter = moshi.adapter(SavedUserState::class.java).indent("    ")
     val json = try {
         jsonAdapter.toJson(data)
-    } catch (e: ClassCastException) {
-        e.printStackTrace()
+    } catch (e: Exception) {
+        logger.error { "failed to encode user $userId data $data: $e" }
         return
     }
     val file = File(dir).resolve(userProfileFilename)
     try {
         file.writeText(json)
     } catch (e: IOException) {
+        logger.error { "failed to save user $userId data $data: $e" }
     }
 }
 
@@ -70,10 +76,10 @@ fun Koma.loadUserState(userId: UserId): SavedUserState? {
     val savedRoomState = try {
         jsonAdapter.fromJson(file.readText())
     } catch (e: FileNotFoundException) {
-        println("$file not found")
+        logger.warn { "User $userId has no saved state at $file" }
         return null
     } catch (e: IOException) {
-        e.printStackTrace()
+        logger.warn { "User $userId's saved state $file failed to load: $e" }
         return null
     }
     return savedRoomState
