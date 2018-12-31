@@ -25,4 +25,5 @@ module koma {
     requires okio;
     requires org.slf4j;
     requires de.jensd.fx.glyphs.commons;
+    requires java.logging;
 }

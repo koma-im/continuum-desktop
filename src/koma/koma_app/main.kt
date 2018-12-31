@@ -10,12 +10,16 @@ import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.storage.config.ConfigPaths
 import koma.storage.config.getConfigDir
+import okhttp3.OkHttpClient
 import tornadofx.*
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlinx.coroutines.javafx.JavaFx as UI
 
 
 
 fun main(args: Array<String>) {
+    Logger.getLogger(OkHttpClient::class.java.name).setLevel(Level.FINE)
     val arg = args.firstOrNull()
     val data_dir = arg ?: getConfigDir()
     val paths = ConfigPaths(data_dir)
