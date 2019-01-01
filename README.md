@@ -1,6 +1,10 @@
-# koma
+Matrix client built for desktop platforms based on the [koma library](https://github.com/koma-im/koma-library)
 
-# Features
+[![Build Status](https://travis-ci.org/koma-im/continuum-desktop.svg?branch=master)](https://travis-ci.org/koma-im/continuum-desktop)
+
+# Introduction
+
+![screenshot](https://continuum.link/screenshots/primary-preview.png)
 
 * designed to bridge existing chat apps, so you can switch to an open platform _at now_, thanks to the [Matrix](https://matrix.org/) project:
   * matrix.org provides bridge for Gitter, Slack, the whole freenode IRC network
@@ -10,7 +14,6 @@
   * Links in plaintext messages are identified and preview is shown whenever applicable
   * Known services are treated in the most reasonable way, for a Github repo, this could be the number of stars, forks, the README.md
   * Known media type are auto-loaded, image links are converted to images
-  * Koma is going to save you quite a few clicks
 
 * Display Emoji on all OS using [Emoji One](https://github.com/emojione/emojione/)
   * Built-in virtual emoji keyboard
@@ -21,31 +24,16 @@
 
 * GUI created using [tornadofx](https://github.com/edvin/tornadofx), uses much less resouces than packaged html and js
 
-# Getting the application
+# Download and run
 
-## Requirements
+The Kotlin code currently runs on JVM, make sure you have Java runtime environment not older than version 11.
 
-Java runtime version 9 or higher.
+Precompiled packages are built for Mac and Linux platforms, download the latest version from
+[Releases page](https://github.com/koma-im/continuum-desktop/releases).
 
-##### Notes for Linux users
-
-JavaFx 9 may not be included if Java is installed using the package manager.
-Usually, the easiest solution is to install Java
-from the
-[official site](http://www.oracle.com/technetwork/java/javase/downloads/index.html),
-which has JavaFx bundled.
-
-## Get a compiled package
-
-[Click to download](https://github.com/koma-im/koma/releases/download/0.7.3/koma-0.7.3-standalone.jar)
-
-## Alternatively, use the source
-
-Clone this repo: `git clone https://github.com/koma-im/koma.git`
-
-Build a package using maven: `mvn package`
-
-Find the jar file in the target folder
+For convenience, all dependencies all packaged in a single file,
+just double-click to run it.
+Alternatively, you can also use a command like `java -jar filename.jar`.
 
 # Usage
 
@@ -55,29 +43,33 @@ If the server allows it, you can also enter a new ID and click register to get a
 
 A token will be saved so the next time you login, password doesn't need to be entered.
 
-![screenshot](https://raw.githubusercontent.com/koma-im/koma/master/koma-preview.png)
 
-# Todo List
+# Feature development progress
 
-Notifications
+## In progress
 
-Tab completion for nicks
+- [ ] Support more types of multimedia messages
+  - [x] video
+  - [ ] audio
 
-Internationalization, support multiple languages
+- [ ] Parse plain text messages and display some content in a better way. Display known kinds of links in line.
+  - [x] Preview links to images
+  - [ ] Preview for Github repo
 
-Remember all positions where the user finished reading previously, to make it easy to read all history messages, without manually finding previous unread messages.
+## To be implemented
 
-Support more types of messages, such as audio and video
+- [ ] Notifications
 
-Parse plain text messages and display some content in a better way. Display known kinds of links in line, save clicks. Such as replace links to images with actual images, use webview to display a tweet.
+- [ ] Tab completion for nicks
 
-Advanced filtering operations based on any combination of keyword, chatroom, user name and more to reduce distraction and help focusing
+- [ ] Internationalization, support multiple languages
 
-Smart notification based on big data and artificial intelligence
+- [ ]Remember all positions where the user finished reading previously, to make it easy to read all history messages, without manually finding previous unread messages.
 
-Support for blockchains
+- [ ]Advanced filtering operations based on any combination of keyword, chatroom, user name and more to reduce distraction and help focusing
 
-If you find any of the above a bad idea, or if you would like to suggest new ideas, feel free to open an issue.
+- [ ]Smart notification to help people focus on what's important and don't get distracted
+
 
 # Contributing
 
