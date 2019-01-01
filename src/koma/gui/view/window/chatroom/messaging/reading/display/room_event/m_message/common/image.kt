@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.MouseButton
 import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
@@ -29,8 +30,10 @@ class ImageElement(val url: MHUrl): ViewNode {
         val imageProperty = SimpleObjectProperty<Image>()
         val imageView = ImageView()
         node.add(imageView)
-        node.setOnMouseClicked {
-            viewBiggerPicture(imageProperty, url)
+        node.setOnMouseClicked { event ->
+            if (event.button == MouseButton.PRIMARY) {
+                viewBiggerPicture(imageProperty, url)
+            }
         }
 
         val scale = appData.settings.scaling
