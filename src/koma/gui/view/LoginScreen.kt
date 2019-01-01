@@ -10,9 +10,9 @@ import koma.controller.requests.account.login.doLogin
 import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.appData
+import koma.koma_app.appState
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
-import koma.koma_app.appState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import tornadofx.*
@@ -70,7 +70,8 @@ class LoginScreen(): View() {
             buttonbar {
                 button("Register") {
                     action {
-                        openInternalWindow(RegistrationWizard(), owner = this@LoginScreen.root.parent.parent)
+                        val o2 = FX.primaryStage.scene.root
+                        openInternalWindow(RegistrationWizard(), owner = o2)
                     }
                 }
                 button("Login") {

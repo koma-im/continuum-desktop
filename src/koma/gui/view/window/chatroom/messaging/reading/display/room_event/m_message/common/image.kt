@@ -1,6 +1,7 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common
 
 import com.github.kittinunf.result.success
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
@@ -12,8 +13,11 @@ import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.util.result.ok
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import tornadofx.*
 
 class ImageElement(val url: MHUrl): ViewNode {
@@ -22,8 +26,12 @@ class ImageElement(val url: MHUrl): ViewNode {
     private val server = appState.serverConf
 
     init {
+        val imageProperty = SimpleObjectProperty<Image>()
         val imageView = ImageView()
         node.add(imageView)
+        node.setOnMouseClicked {
+            viewBiggerPicture(imageProperty, url)
+        }
 
         val scale = appData.settings.scaling
         val imageSize = 200.0 * scale
@@ -40,6 +48,9 @@ class ImageElement(val url: MHUrl): ViewNode {
                 imageView.isSmooth = true
             }
             imageView.image = image
+            withContext(Dispatchers.JavaFx) {
+                imageProperty.set(image)
+            }
         }
     }
 
@@ -54,4 +65,38 @@ class ImageElement(val url: MHUrl): ViewNode {
     }
 }
 
+/**
+ * Display an overlay showing a picture occupying most of the entire window
+ */
+fun viewBiggerPicture(
+        image: SimpleObjectProperty<Image>,
+        url: MHUrl
+) {
+    val owner = FX.primaryStage.scene.root
+    val win = InternalWindow(
+            icon = null,
+            modal = true,
+            escapeClosesWindow = true,
+            closeButton = true,
+            overlayPaint = c("#000", 0.4))
+    win.open(view = BiggerPictureView(image, url), owner = owner)
+}
 
+private class BiggerPictureView(
+        image: SimpleObjectProperty<Image>,
+        url: MHUrl
+): View() {
+    override val root = StackPane()
+    init {
+        title = url.toString()
+
+        with(root) {
+            imageview(image) {
+                fitHeight = FX.primaryStage.height * 0.9
+                fitWidth = FX.primaryStage.width * 0.9
+                isPreserveRatio = true
+                isSmooth = true
+            }
+        }
+    }
+}
