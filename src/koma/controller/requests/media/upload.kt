@@ -3,13 +3,13 @@ package koma.controller.requests.media
 import com.github.kittinunf.result.Result
 import domain.UploadResponse
 import javafx.scene.control.Alert
+import koma.matrix.MatrixApi
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import matrix.ApiClient
 import okhttp3.MediaType
 import tornadofx.*
 import java.io.File
@@ -17,7 +17,7 @@ import java.io.File
 /**
  * upload file, displays alerts if failed
  */
-suspend fun uploadFile(api: ApiClient, file: File, filetype: MediaType? = null): Result<UploadResponse, Exception> {
+suspend fun uploadFile(api: MatrixApi, file: File, filetype: MediaType? = null): Result<UploadResponse, Exception> {
     val type = filetype ?: file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
     val uploadResult = api.uploadFile(file, type).awaitMatrix()
     if (uploadResult is Result.Failure ) {

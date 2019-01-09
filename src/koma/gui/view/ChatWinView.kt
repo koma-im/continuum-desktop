@@ -9,9 +9,9 @@ import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
-import koma.storage.config.profile.Profile
 import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
+import koma.matrix.UserId
 import model.Room
 import model.RoomItemModel
 import tornadofx.*
@@ -21,7 +21,7 @@ import tornadofx.*
  * Created by developer on 2017/6/21.
  */
 
-class ChatView(profile: Profile): View() {
+class ChatView(owner: UserId): View() {
 
     override val root = vbox (spacing = 5.0)
 
@@ -29,7 +29,7 @@ class ChatView(profile: Profile): View() {
     val switchableRoomView: SwitchableRoomView by inject()
 
     init {
-        val roomList = appState.getAccountRoomStore(profile.userId)!!.roomList
+        val roomList = appState.getAccountRoomStore(owner)!!.roomList
         roomListView = RoomListView(roomList)
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->

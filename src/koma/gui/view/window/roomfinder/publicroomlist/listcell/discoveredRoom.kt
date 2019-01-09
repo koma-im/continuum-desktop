@@ -12,12 +12,12 @@ import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import koma.controller.events_processing.joinRoom
+import koma.controller.events.addJoinedRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -106,7 +106,7 @@ fun joinById(roomid: RoomId, name: String, owner: Node) {
     GlobalScope.launch {
         val rs = api.joinRoom(roomid).awaitMatrix()
         rs.success {
-            launch(Dispatchers.JavaFx) { api.profile.joinRoom(roomid) }
+            launch(Dispatchers.JavaFx) { addJoinedRoom(api.userId, roomid) }
         }
         rs.failure {
             launch(Dispatchers.JavaFx) {

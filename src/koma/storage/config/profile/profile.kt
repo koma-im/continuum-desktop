@@ -5,6 +5,8 @@ import koma.koma_app.SaveToDiskTasks
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.json.MoshiInstance
+import koma.storage.config.ConfigPaths
+import koma.storage.persistence.account.Token
 import koma.storage.persistence.account.getToken
 import koma.storage.persistence.account.saveToken
 import koma.storage.persistence.account.userProfileDir
@@ -17,11 +19,14 @@ val userProfileFilename = "profile.json"
 
 private val logger = KotlinLogging.logger {}
 
-fun Koma.newProfile(userId: UserId): Profile?  {
-    val token = getToken(userId)
-    token?: return null
-    val profile = Profile(userId, token.access_token)
-    val s = loadUserState(userId)
+/**
+ * loads token and joined rooms from disk
+ * adds the rooms to a global object
+ */
+fun loadUser(koma: Koma, userId: UserId): Token?  {
+    val paths = koma.paths
+    val token = getToken(paths, userId)
+    val s = loadUserState(paths, userId)
     val store = appState.accountRoomStore()
     if (s == null) {
         logger.warn { "no saved state is loaded from disk for user $userId" }
@@ -34,20 +39,16 @@ fun Koma.newProfile(userId: UserId): Profile?  {
         }
     }
     SaveToDiskTasks.addJob {
-        synchronized(this) {this.saveProfile(profile) }
+        synchronized(koma) { saveProfile(paths, userId, token) }
     }
-    return profile
+    return token
 }
 
-fun Koma.userProfileDir(userId: UserId) = this.paths.userProfileDir(userId)
-
-fun Koma.saveProfile(profile: Profile) {
-    val userId = profile.userId
-    val access_token = profile.access_token
-    val dir = userProfileDir(userId)
+fun saveProfile(paths: ConfigPaths, userId: UserId, token: Token?) {
+    val dir = paths.userProfileDir(userId)
     dir?: return
-    saveToken(userId, access_token)
-    val rooms = appState.getAccountRoomStore(profile.userId)!!.roomList
+    if (token != null) saveToken(paths, userId, token)
+    val rooms = appState.getAccountRoomStore(userId)!!.roomList
     val data = SavedUserState(
             joinedRooms = rooms.map { it.id }
     )
@@ -68,8 +69,8 @@ fun Koma.saveProfile(profile: Profile) {
 }
 
 
-fun Koma.loadUserState(userId: UserId): SavedUserState? {
-    val dir = userProfileDir(userId)
+fun loadUserState(paths: ConfigPaths, userId: UserId): SavedUserState? {
+    val dir = paths.userProfileDir(userId)
     dir?:return null
     val file = File(dir).resolve(userProfileFilename)
     val jsonAdapter = MoshiInstance.moshi.adapter(SavedUserState::class.java)

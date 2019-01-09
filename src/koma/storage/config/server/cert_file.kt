@@ -1,5 +1,7 @@
-package koma.storage.config.server.cert_trust
+package koma.storage.config.server
 
+import koma.storage.config.server.cert_trust.CompositeX509TrustManager
+import koma.storage.config.server.cert_trust.createKeyStore
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException

@@ -6,17 +6,17 @@ import javafx.scene.control.Alert
 import koma.Koma
 import koma.gui.view.window.auth.login.startChat
 import koma.koma_app.appState
+import koma.matrix.UserPassword
+import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.profile.Profile
-import koma.storage.config.profile.newProfile
+import koma.storage.config.profile.loadUser
+import koma.storage.persistence.account.Token
 import koma.storage.persistence.account.saveToken
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import matrix.UserPassword
-import matrix.login
 import tornadofx.*
 
 /**
@@ -26,14 +26,15 @@ suspend fun Koma.doLogin(user: String, password: String, server: String) {
     val userid = UserId_new(user)
     appState.currentUser = userid
     val servCon = this.servers.serverConfWithAddr(userid.server, server)
-    val authedProfile: Profile = if (!password.isBlank()) {
+    if (!password.isBlank()) {
         val authResu = login(UserPassword(user = userid.user, password = password), servCon, this.http).awaitMatrix()
-        val auth: Profile =  when (authResu) {
+        when (authResu) {
             is Result.Success -> {
                 val u = authResu.value.user_id
                 val t = authResu.value.access_token
-                this.saveToken(u, t)
-                Profile(u, t)
+                saveToken(this.paths, u, Token(t))
+                loadUser(this, userid)
+                startChat(this, userid, t, servCon)
             }
             is Result.Failure -> {
                 val ex = authResu.error
@@ -49,9 +50,8 @@ suspend fun Koma.doLogin(user: String, password: String, server: String) {
                 return
             }
         }
-        auth
     } else {
-        val p = this.newProfile(userid)
+        val p = loadUser(this, userid)
         if (p == null) {
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Failed to login as $userid",
@@ -59,7 +59,6 @@ suspend fun Koma.doLogin(user: String, password: String, server: String) {
             }
             return
         }
-        p
+        startChat(this, userid, p.token, servCon)
     }
-    startChat(authedProfile, servCon)
 }

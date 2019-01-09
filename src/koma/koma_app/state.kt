@@ -3,12 +3,12 @@ package koma.koma_app
 import controller.ChatController
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
+import koma.matrix.MatrixApi
 import koma.matrix.UserId
 import koma.storage.config.server.ServerConf
 import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
-import matrix.ApiClient
 import model.Room
 import mu.KotlinLogging
 
@@ -19,7 +19,7 @@ object appState {
     var currentUser: UserId? = null
     lateinit var koma: Koma
     lateinit var chatController: ChatController
-    var apiClient: ApiClient? = null
+    var apiClient: MatrixApi? = null
     lateinit var serverConf: ServerConf
     val roomStore by lazy { RoomStore(koma.paths) }
     private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
@@ -36,6 +36,11 @@ object appState {
         }
         return getAccountRoomStore(u)
     }
+
+    /**
+     * only creates an object
+     * does not load rooms from disk
+     */
     fun getAccountRoomStore(userId: UserId): UserRoomStore? {
         return _accountRooms.computeIfAbsent(userId, { UserRoomStore(roomStore) })
     }

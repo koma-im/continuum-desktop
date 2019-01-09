@@ -4,29 +4,29 @@ import controller.ChatController
 import koma.Koma
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.storage.config.profile.Profile
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.config.server.ServerConf
-import koma.storage.persistence.account.saveToken
+import koma.storage.config.server.getAddress
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import matrix.ApiClient
+import okhttp3.HttpUrl
 import tornadofx.*
 import view.ChatView
 import view.RootLayoutView
 
 /**
  * show the chat window after login is done
+ * updates the list of recently used accounts
  */
 @ObsoleteCoroutinesApi
-fun Koma.startChat(authedUser: Profile, serverConf: ServerConf) {
-    val userid = authedUser.userId
-    saveLastUsed(userid)
+fun startChat(koma: Koma, userId: UserId, token: String, serverConf: ServerConf) {
+    koma.saveLastUsed(userId)
 
-    val apiClient = ApiClient(authedUser, serverConf, appState.koma)
+    val url = serverConf.getAddress().let { HttpUrl.parse(it) }
+    val apiClient  = koma.createApi(token, userId, url!!)
     appState.apiClient = apiClient
     appState.serverConf = serverConf
 
-    val chatview = ChatView(authedUser)
+    val chatview = ChatView(userId)
     val chatctrl = ChatController(apiClient)
     appState.chatController = chatctrl
     val rootView = RootLayoutView(chatctrl)
@@ -35,11 +35,4 @@ fun Koma.startChat(authedUser: Profile, serverConf: ServerConf) {
     stage.scene.root = rootView.root
 
     chatctrl.start()
-}
-
-fun Koma.startChatWithIdToken(userId: UserId, token: String, serverConf: ServerConf) {
-    appState.currentUser = userId
-    val p = Profile(userId, token)
-    this.saveToken(userId, token)
-    startChat(p, serverConf)
 }

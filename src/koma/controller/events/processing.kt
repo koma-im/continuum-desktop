@@ -1,16 +1,16 @@
-package koma.controller.events_processing
+package koma.controller.events
 
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
+import koma.koma_app.appState
+import koma.koma_app.appState.sortMembersInEachRoom
+import koma.matrix.UserId
 import koma.matrix.epemeral.parse
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
-import koma.storage.config.profile.Profile
 import koma.storage.message.AppendSync
 import koma.util.matrix.getUserState
-import koma.koma_app.appState
-import koma.koma_app.appState.sortMembersInEachRoom
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
@@ -32,8 +32,8 @@ fun process_presence(message: PresenceMessage) {
 }
 
 @ObsoleteCoroutinesApi
-private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
-    val room = this.joinRoom(roomid)
+private fun handle_joined_room(owner: UserId, roomid: RoomId, data: JoinedRoom) {
+    val room = addJoinedRoom(owner, roomid)
 
     data.state.events.forEach { room.applyUpdate(it) }
     val timeline = data.timeline
@@ -45,12 +45,16 @@ private fun Profile.handle_joined_room(roomid: RoomId, data: JoinedRoom) {
     // TODO:  account_data
 }
 
-fun Profile.joinRoom(roomid: RoomId): Room {
-    return appState.getAccountRoomStore(this.userId)!!.add(roomid)
+/**
+ * add a room to the list of joined rooms locally
+ * usually used after getting information from the server
+ */
+fun addJoinedRoom(userId: UserId, roomid: RoomId): Room {
+    return appState.getAccountRoomStore(userId)!!.add(roomid)
 }
 
-private fun Profile.leaveLeftRooms(roomid: RoomId, @Suppress("UNUSED_PARAMETER") _leftRoom: LeftRoom) {
-    appState.getAccountRoomStore(this.userId)!!.remove(roomid)
+private fun leaveLeftRooms(owner: UserId, roomid: RoomId, @Suppress("UNUSED_PARAMETER") _leftRoom: LeftRoom) {
+    appState.getAccountRoomStore(owner)!!.remove(roomid)
 }
 
 private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, data: InvitedRoom) {
@@ -58,12 +62,12 @@ private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, d
 }
 
 @ObsoleteCoroutinesApi
-fun Profile.processEventsResult(syncRes: SyncResponse) {
+fun processEventsResult(owner: UserId, syncRes: SyncResponse) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
-    syncRes.rooms.join.forEach{ rid, data -> this.handle_joined_room(RoomId(rid), data)}
-    syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data)}
-    syncRes.rooms.leave.forEach { id, leftroom -> this.leaveLeftRooms(id, leftroom) }
+    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(owner, RoomId(rid), data)}
+    syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data) }
+    syncRes.rooms.leave.forEach { id, leftroom -> leaveLeftRooms(owner, id, leftroom) }
     // there's also left rooms
 
     sortMembersInEachRoom()
