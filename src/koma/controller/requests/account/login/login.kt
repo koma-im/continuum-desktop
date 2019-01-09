@@ -9,7 +9,7 @@ import koma.koma_app.appState
 import koma.matrix.UserPassword
 import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.profile.loadUser
+import koma.storage.persistence.account.loadUser
 import koma.storage.persistence.account.Token
 import koma.storage.persistence.account.saveToken
 import koma.util.coroutine.adapter.retrofit.awaitMatrix

@@ -16,7 +16,7 @@ import koma.gui.view.window.auth.login.startChat
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.user.auth.*
-import koma.storage.config.profile.loadUser
+import koma.storage.persistence.account.loadUser
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getApiUrlBuilder
 import koma.storage.persistence.account.Token

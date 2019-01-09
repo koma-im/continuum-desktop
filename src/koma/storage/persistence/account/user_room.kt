@@ -1,4 +1,4 @@
-package koma.storage.config.profile
+package koma.storage.persistence.account
 
 import koma.Koma
 import koma.koma_app.SaveToDiskTasks
@@ -6,10 +6,7 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.json.MoshiInstance
 import koma.storage.config.ConfigPaths
-import koma.storage.persistence.account.Token
-import koma.storage.persistence.account.getToken
-import koma.storage.persistence.account.saveToken
-import koma.storage.persistence.account.userProfileDir
+import koma.storage.config.profile.SavedUserState
 import mu.KotlinLogging
 import java.io.File
 import java.io.FileNotFoundException
