@@ -1,10 +1,11 @@
 package koma.controller.requests
 
 import com.github.kittinunf.result.Result
-import domain.UploadResponse
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
+import koma.koma_app.appState.apiClient
+import koma.matrix.UploadResponse
 import koma.matrix.event.room_message.chat.FileInfo
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
@@ -12,7 +13,6 @@ import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
-import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

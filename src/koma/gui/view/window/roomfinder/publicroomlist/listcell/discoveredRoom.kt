@@ -2,7 +2,6 @@ package koma.gui.view.window.roomfinder.publicroomlist.listcell
 
 import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
-import domain.DiscoveredRoom
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -16,6 +15,7 @@ import koma.controller.events.addJoinedRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
+import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers

@@ -1,12 +1,12 @@
 package koma.gui.view.window.roomfinder
 
-import domain.DiscoveredRoom
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.koma_app.appData
+import koma.matrix.DiscoveredRoom
 import tornadofx.*
 
 class RoomFinder(): Fragment() {

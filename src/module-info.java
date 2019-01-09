@@ -1,4 +1,4 @@
-module koma {
+module link.continuum.desktop {
     requires javafx.controls;
     requires result;
     requires koma.library;

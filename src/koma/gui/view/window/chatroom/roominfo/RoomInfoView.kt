@@ -11,8 +11,8 @@ import koma.gui.view.window.chatroom.roominfo.about.RoomAliasForm
 import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIcon
 import koma.gui.view.window.chatroom.roominfo.about.requests.requestUpdateRoomName
 import koma.matrix.UserId
+import koma.matrix.event.room_message.RoomEventType
 import koma.matrix.room.power.canUserSet
-import matrix.event.room_message.RoomEventType
 import model.Room
 import tornadofx.*
 

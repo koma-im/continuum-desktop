@@ -2,7 +2,6 @@ package koma.storage.message.fetch
 
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.map
-import domain.Chunked
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.pagination.FetchDirection
@@ -10,6 +9,7 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.message.piece.Segment
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
+import koma.matrix.Chunked
 
 suspend fun doFetch(piece: Segment, roomid: RoomId)
         : Result<FetchedBatch, Exception> {

@@ -2,7 +2,6 @@ package koma.gui.view.window.roomfinder.publicroomlist
 
 import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
-import domain.DiscoveredRoom
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.StringProperty
@@ -16,6 +15,7 @@ import javafx.scene.layout.VBox
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.koma_app.appState
+import koma.matrix.DiscoveredRoom
 import koma.matrix.publicapi.rooms.findPublicRooms
 import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.matrix.room.naming.RoomId

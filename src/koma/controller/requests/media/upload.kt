@@ -1,9 +1,9 @@
 package koma.controller.requests.media
 
 import com.github.kittinunf.result.Result
-import domain.UploadResponse
 import javafx.scene.control.Alert
 import koma.matrix.MatrixApi
+import koma.matrix.UploadResponse
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import kotlinx.coroutines.Dispatchers

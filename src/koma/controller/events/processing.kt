@@ -5,7 +5,10 @@ import koma.controller.room.handle_ephemeral
 import koma.koma_app.appState
 import koma.koma_app.appState.sortMembersInEachRoom
 import koma.matrix.UserId
-import koma.matrix.epemeral.parse
+import koma.matrix.event.ephemeral.parse
+import koma.matrix.room.InvitedRoom
+import koma.matrix.room.JoinedRoom
+import koma.matrix.room.LeftRoom
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
@@ -14,9 +17,6 @@ import koma.util.matrix.getUserState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
-import matrix.room.InvitedRoom
-import matrix.room.JoinedRoom
-import matrix.room.LeftRoom
 import model.Room
 import mu.KotlinLogging
 

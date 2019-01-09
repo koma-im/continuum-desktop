@@ -1,12 +1,12 @@
 package koma.controller.room
 
-import koma.matrix.epemeral.EphemeralEvent
-import koma.matrix.epemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
 import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
+import koma.matrix.event.ephemeral.EphemeralEvent
+import koma.matrix.event.ephemeral.TypingEvent
 import model.Room
 
 fun Room.handle_ephemeral(events: List<EphemeralEvent>) {

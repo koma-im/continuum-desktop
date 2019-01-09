@@ -6,6 +6,7 @@ import javafx.collections.transformation.FilteredList
 import koma.gui.element.control.NullableIndexRange
 import koma.gui.view.window.chatroom.messaging.reading.display.supportedByDisplay
 import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.room.Timeline
 import koma.matrix.room.naming.RoomId
 import koma.storage.config.ConfigPaths
 import koma.storage.message.fetch.fetchEarlier
@@ -16,7 +17,6 @@ import koma.util.observable.list.concat.TreeConcatList
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.javafx.JavaFx
-import matrix.room.Timeline
 import mu.KotlinLogging
 import tornadofx.*
 import kotlinx.coroutines.launch as corolaunch
