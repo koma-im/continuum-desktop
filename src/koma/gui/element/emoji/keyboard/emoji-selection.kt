@@ -58,7 +58,7 @@ object EmojiKeyboard {
                 for (cat in categories) {
                     val rows = cat.rows
                     val first = rows[0][0]
-                    togglebutton {
+                    togglebutton("") {
                         style {
                             paddingAll = 0.0
                         }
