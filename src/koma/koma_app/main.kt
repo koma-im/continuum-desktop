@@ -9,7 +9,7 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.storage.config.ConfigPaths
-import koma.storage.config.getConfigDir
+import link.continuum.desktop.util.disk.path.getConfigDir
 import okhttp3.OkHttpClient
 import tornadofx.*
 import java.util.logging.Level

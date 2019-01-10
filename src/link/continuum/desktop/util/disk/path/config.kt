@@ -1,4 +1,4 @@
-package koma.storage.config
+package link.continuum.desktop.util.disk.path
 
 import java.io.File
 
