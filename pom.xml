@@ -28,6 +28,11 @@
             <version>11.0.1</version>
         </dependency>
         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>11.0.1</version>
+        </dependency>
+        <dependency>
             <groupId>no.tornado</groupId>
             <artifactId>tornadofx</artifactId>
             <version>1.7.17</version>
@@ -106,7 +111,7 @@
         <dependency>
             <groupId>io.github.koma-im</groupId>
             <artifactId>koma-library</artifactId>
-            <version>0.7.5.2.6</version>
+            <version>0.7.5.2.8</version>
         </dependency>
     </dependencies>
     <properties>

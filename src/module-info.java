@@ -26,4 +26,7 @@ module link.continuum.desktop {
     requires org.slf4j;
     requires de.jensd.fx.glyphs.commons;
     requires java.logging;
+    // Error occurred during initialization of boot layer
+    // java.lang.module.FindException: Module javafx.fxml not found, required by de.jensd.fx.glyphs.commons
+    requires javafx.fxml;
 }
