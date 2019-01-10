@@ -2,7 +2,7 @@ package koma.gui.dialog.file.save
 
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
-import koma.network.media.saveUrlToFile
+import link.continuum.desktop.util.download.saveUrlToFile
 import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

@@ -3,7 +3,7 @@ package koma.gui.element.emoji.icon
 import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
 import koma.koma_app.appData
-import koma.network.media.ImgCacheProc
+import link.continuum.desktop.util.cache.ImgCacheProc
 import koma.network.media.MHUrl
 import okhttp3.HttpUrl
 import java.io.InputStream

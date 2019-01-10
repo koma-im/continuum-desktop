@@ -1,6 +1,7 @@
-package koma.network.media
+package link.continuum.desktop.util.download
 
 import koma.Koma
+import koma.network.media.getResponse
 import koma.util.result.ok
 import okhttp3.HttpUrl
 import okio.Okio
