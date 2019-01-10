@@ -103,7 +103,7 @@ class RoomAliasCell(
         private val editAllowedDef: Boolean): ListCell<RoomAlias>() {
 
     private val roomAlias = SimpleObjectProperty<RoomAlias>()
-    private val cell: HBox
+    private val cell = HBox(5.0)
 
     init {
         val text = stringBinding(roomAlias) { value?.str }
@@ -112,14 +112,14 @@ class RoomAliasCell(
         val star = MaterialIconFactory.get().createIcon(MaterialIcon.STAR)
         val notstar = MaterialIconFactory.get().createIcon(MaterialIcon.STAR_BORDER)
         val deleteIcon = MaterialIconFactory.get().createIcon(MaterialIcon.DELETE)
-        cell = hbox(5) {
+        with(cell) {
             prefWidth = 1.0
             minWidth = 1.0
             alignment = Pos.CENTER_LEFT
             stackpane {
                 hyperlink(graphic = notstar) {
                     tooltip("Set as Canonical Alias")
-                    visibleWhen { this@hbox.hoverProperty().and(canonEditAllowed) }
+                    visibleWhen { cell.hoverProperty().and(canonEditAllowed) }
                     action { requestSetRoomCanonicalAlias(room, roomAlias.value) }
                 }
                 hyperlink(graphic = star) {
@@ -144,7 +144,7 @@ class RoomAliasCell(
                 }
             }
             hyperlink(graphic = deleteIcon) {
-                visibleWhen { this@hbox.hoverProperty().and(editAllowedDef) }
+                visibleWhen { cell.hoverProperty().and(editAllowedDef) }
                 action { deleteRoomAlias(room, roomAlias.value) }
             }
         }
