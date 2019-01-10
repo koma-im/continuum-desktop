@@ -2,6 +2,8 @@ package koma.gui.view.window.auth.login
 
 import controller.ChatController
 import koma.Koma
+import koma.gui.view.ChatView
+import koma.gui.view.RootLayoutView
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.config.profile.saveLastUsed
@@ -10,8 +12,6 @@ import koma.storage.config.server.getAddress
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import okhttp3.HttpUrl
 import tornadofx.*
-import view.ChatView
-import view.RootLayoutView
 
 /**
  * show the chat window after login is done

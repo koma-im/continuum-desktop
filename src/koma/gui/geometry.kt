@@ -1,7 +1,7 @@
 package koma.gui
 
 import javafx.stage.Stage
-import view.ChatView
+import koma.gui.view.ChatView
 import java.awt.GraphicsEnvironment
 import java.util.prefs.Preferences
 

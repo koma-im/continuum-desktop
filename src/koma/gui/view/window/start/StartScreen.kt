@@ -3,7 +3,7 @@ package koma.gui.view.window.start
 import javafx.geometry.Pos
 import javafx.scene.layout.VBox
 import tornadofx.*
-import view.LoginScreen
+import koma.gui.view.LoginScreen
 
 class StartScreen(): View() {
 

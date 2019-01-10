@@ -1,4 +1,4 @@
-package view
+package koma.gui.view
 
 import controller.ChatController
 import koma.controller.requests.membership.ask_invite_member

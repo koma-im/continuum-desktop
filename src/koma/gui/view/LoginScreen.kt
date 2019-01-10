@@ -1,4 +1,4 @@
-package view
+package koma.gui.view
 
 import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox

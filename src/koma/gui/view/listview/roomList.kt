@@ -10,7 +10,7 @@ import koma.koma_app.appData
 import koma.koma_app.appState
 import model.Room
 import tornadofx.*
-import view.RoomFragment
+import koma.gui.view.RoomFragment
 
 class RoomListView(roomlist: ObservableList<Room>): View() {
     override val root = listview(roomlist)
