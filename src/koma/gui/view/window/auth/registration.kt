@@ -11,12 +11,9 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import javafx.util.StringConverter
-import koma.Koma
-import koma.gui.view.window.auth.login.startChat
+import link.continuum.desktop.action.startChat
 import koma.koma_app.appState
-import koma.matrix.UserId
 import koma.matrix.user.auth.*
-import koma.storage.persistence.account.loadUser
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getApiUrlBuilder
 import koma.storage.persistence.account.Token
@@ -64,6 +61,8 @@ class RegistrationWizard(): View() {
             val res = cur.submit()?: return
             res.success { newUser ->
                 println("Successfully registered ${newUser.user_id}")
+                val k = appState.koma
+                saveToken(k.paths, newUser.user_id, Token(newUser.access_token))
                 val s = Success(newUser, register.serverConf, this)
                 state = s
                 uilaunch { root.center = s.root }
@@ -157,7 +156,7 @@ private class Success(user: RegisterdUser, serverConf: ServerConf, window: Regis
                     action {
                         window.close()
                         val k = appState.koma
-                        startChatWithIdToken(k, user.user_id, user.access_token, serverConf)
+                        startChat(k, user.user_id, user.access_token, serverConf)
                     }
                 }
             }
@@ -309,15 +308,4 @@ private class Start(): WizardState() {
 
 fun uilaunch(eval: suspend CoroutineScope.()->Unit) {
     GlobalScope.launch(Dispatchers.JavaFx, block = eval)
-}
-
-/**
- * currently only used after registration
- * it does not load a list of joined chat rooms from disk
- */
-fun startChatWithIdToken(k: Koma, userId: UserId, token: String, serverConf: ServerConf) {
-    appState.currentUser = userId
-    saveToken(k.paths, userId, Token(token))
-    loadUser(k, userId)
-    startChat(k, userId, token, serverConf)
 }

@@ -1,6 +1,5 @@
 package koma.koma_app
 
-import controller.ChatController
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
 import koma.matrix.MatrixApi
@@ -18,7 +17,7 @@ object appState {
     val currRoom = SimpleObjectProperty<Room>()
     var currentUser: UserId? = null
     lateinit var koma: Koma
-    lateinit var chatController: ChatController
+    var stopSync: (()-> Unit)? = null
     var apiClient: MatrixApi? = null
     lateinit var serverConf: ServerConf
     val roomStore by lazy { RoomStore(koma.paths) }

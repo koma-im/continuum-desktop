@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     val koma = Koma(paths, proxy)
     appState.koma = koma
     Application.launch(KomaApp::class.java, *args)
-    appState.chatController.shutdown()
+    appState.stopSync?.invoke()
     SaveToDiskTasks.saveToDisk()
 }
 

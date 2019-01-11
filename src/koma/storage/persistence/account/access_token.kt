@@ -31,6 +31,9 @@ class Token (
         val token: String
 )
 
+/**
+ * loads access token from disk
+ */
 fun getToken(paths: ConfigPaths, userId: UserId): Token? {
     val dir = paths.userProfileDir(userId)
     dir?: return null

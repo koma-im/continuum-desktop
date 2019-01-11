@@ -1,12 +1,11 @@
 package koma.storage.persistence.account
 
-import koma.Koma
 import koma.koma_app.SaveToDiskTasks
-import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.json.MoshiInstance
 import koma.storage.config.ConfigPaths
 import koma.storage.config.profile.SavedUserState
+import koma.storage.rooms.UserRoomStore
 import mu.KotlinLogging
 import java.io.File
 import java.io.FileNotFoundException
@@ -17,35 +16,36 @@ val userProfileFilename = "profile.json"
 private val logger = KotlinLogging.logger {}
 
 /**
- * loads token and joined rooms from disk
+ * loads joined rooms from disk
  * adds the rooms to a global object
  */
-fun loadUser(koma: Koma, userId: UserId): Token?  {
-    val paths = koma.paths
-    val token = getToken(paths, userId)
-    val s = loadUserState(paths, userId)
-    val store = appState.accountRoomStore()
-    if (s == null) {
-        logger.warn { "no saved state is loaded from disk for user $userId" }
-    } else if (store == null) {
-        logger.warn { "Failed to get room store for user $userId" }
-    } else {
+fun loadJoinedRooms(
+        paths: ConfigPaths,
+        store: UserRoomStore,
+        userId: UserId
+) {
+    val dir = paths.userProfileDir(userId)
+    dir ?: return
+    SaveToDiskTasks.addJob {
+        saveJoinedRooms(dir, store)
+    }
+
+    val s = loadUserState(dir, userId)
+    if (s != null) {
         logger.debug { "$userId is known to be in ${s.joinedRooms.size} rooms" }
         for (r in s.joinedRooms) {
             store.add(r)
         }
+    } else {
+        logger.warn { "no saved state is loaded from disk for user $userId" }
     }
-    SaveToDiskTasks.addJob {
-        synchronized(koma) { saveProfile(paths, userId, token) }
-    }
-    return token
 }
 
-fun saveProfile(paths: ConfigPaths, userId: UserId, token: Token?) {
-    val dir = paths.userProfileDir(userId)
-    dir?: return
-    if (token != null) saveToken(paths, userId, token)
-    val rooms = appState.getAccountRoomStore(userId)!!.roomList
+/**
+ * save joined rooms to disk
+ */
+private fun saveJoinedRooms(dir: String, user: UserRoomStore) {
+    val rooms = user.roomList
     val data = SavedUserState(
             joinedRooms = rooms.map { it.id }
     )
@@ -54,21 +54,21 @@ fun saveProfile(paths: ConfigPaths, userId: UserId, token: Token?) {
     val json = try {
         jsonAdapter.toJson(data)
     } catch (e: Exception) {
-        logger.error { "failed to encode user $userId data $data: $e" }
+        logger.error { "failed to encode user data $data: $e" }
         return
     }
     val file = File(dir).resolve(userProfileFilename)
     try {
         file.writeText(json)
     } catch (e: IOException) {
-        logger.error { "failed to save user $userId data $data: $e" }
+        logger.error { "failed to save user data $data: $e" }
     }
 }
 
-
-fun loadUserState(paths: ConfigPaths, userId: UserId): SavedUserState? {
-    val dir = paths.userProfileDir(userId)
-    dir?:return null
+/**
+ * load joined rooms
+ */
+private fun loadUserState(dir: String, userId: UserId): SavedUserState? {
     val file = File(dir).resolve(userProfileFilename)
     val jsonAdapter = MoshiInstance.moshi.adapter(SavedUserState::class.java)
     val savedRoomState = try {

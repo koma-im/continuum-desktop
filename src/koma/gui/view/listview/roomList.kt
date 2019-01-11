@@ -6,11 +6,11 @@ import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import koma.gui.view.RoomFragment
 import koma.koma_app.appData
 import koma.koma_app.appState
 import model.Room
 import tornadofx.*
-import koma.gui.view.RoomFragment
 
 class RoomListView(roomlist: ObservableList<Room>): View() {
     override val root = listview(roomlist)

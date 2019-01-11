@@ -1,5 +1,6 @@
 package koma.gui.view
 
+import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -9,9 +10,7 @@ import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
-import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
-import koma.matrix.UserId
 import model.Room
 import model.RoomItemModel
 import tornadofx.*
@@ -21,17 +20,14 @@ import tornadofx.*
  * Created by developer on 2017/6/21.
  */
 
-class ChatView(owner: UserId): View() {
+class ChatView(roomList: ObservableList<Room>): View() {
 
     override val root = vbox (spacing = 5.0)
 
-    val roomListView: RoomListView
+    val roomListView = RoomListView(roomList)
     val switchableRoomView: SwitchableRoomView by inject()
 
     init {
-        val roomList = appState.getAccountRoomStore(owner)!!.roomList
-        roomListView = RoomListView(roomList)
-
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
             if (e.code == KeyCode.PAGE_DOWN) switchableRoomView.scroll(true)
             else if (e.code == KeyCode.PAGE_UP) switchableRoomView.scroll(false)

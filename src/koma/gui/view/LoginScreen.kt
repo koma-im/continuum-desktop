@@ -6,7 +6,7 @@ import javafx.scene.control.PasswordField
 import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.VBox
-import koma.controller.requests.account.login.doLogin
+import koma.controller.requests.account.login.onClickLogin
 import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.appData
@@ -78,7 +78,8 @@ class LoginScreen(): View() {
                     isDefaultButton = true
                     action {
                         GlobalScope.launch {
-                            appState.koma.doLogin(userId.value, password.text, serverCombo.editor.text)
+                            val k = appState.koma
+                            onClickLogin(k, userId.value, password.text, serverCombo.editor.text)
                         }
                     }
                 }
