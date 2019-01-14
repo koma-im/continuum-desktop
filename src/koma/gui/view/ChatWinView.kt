@@ -17,6 +17,8 @@ import tornadofx.*
 
 
 /**
+ * a list of joined rooms used for switching
+ * and a view of the actual chat room showing messages and members
  * Created by developer on 2017/6/21.
  */
 

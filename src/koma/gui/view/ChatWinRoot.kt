@@ -13,6 +13,9 @@ import model.Room
 import tornadofx.*
 
 /**
+ * everything inside the app window after login
+ * including a menu bar at the top
+ *
  * Created by developer on 2017/6/17.
  */
 class RootLayoutView(roomList: ObservableList<Room>): View() {

@@ -1,12 +1,15 @@
 package koma.gui.view.listview
 
 import javafx.collections.ObservableList
-import javafx.scene.control.Label
+import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
+import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appData
 import koma.koma_app.appState
 import model.Room
@@ -17,7 +20,29 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
 
     init {
         root.isFocusTraversable = false
-        root.placeholder = Label("Join a room to start")
+        val gettingStarted = VBox(15.0)
+        with(gettingStarted) {
+            alignment = Pos.CENTER
+            hgrow = Priority.ALWAYS
+            vgrow = Priority.ALWAYS
+            label("Join a room to start")
+            button("Find") {
+                hgrow= Priority.ALWAYS
+                // using a large value to make it as wide as the widest
+                maxWidth = 200.0
+                action {
+                    RoomFinder().open()
+                }
+            }
+            button("Create") {
+                hgrow= Priority.ALWAYS
+                maxWidth = 200.0
+                action {
+                    createRoomInteractive()
+                }
+            }
+        }
+        root.placeholder = gettingStarted
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
             // these keys are only used to scroll chat messages
             if (e.code == KeyCode.PAGE_UP || e.code == KeyCode.PAGE_DOWN) {
@@ -36,7 +61,7 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
         node.style {
             fontSize= scale.em
         }
-        node.minWidth = 48.0 * scale
+        node.minWidth = 178.0 * scale
         node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
         node.cellFragment(RoomFragment::class)
