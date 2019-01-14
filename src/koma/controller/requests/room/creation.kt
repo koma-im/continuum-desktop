@@ -6,10 +6,10 @@ import javafx.scene.control.ButtonBar
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Dialog
 import javafx.scene.control.TextField
+import koma.koma_app.appState.apiClient
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -29,7 +29,7 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
                     .owner(FX.primaryStage)
                     .position(Pos.CENTER)
                     .title("Failure to create room ${settings.room_alias_name}")
-                    .text(result.error.message)
+                    .text(result.error.toString())
                     .showWarning()
         }
     } else {
