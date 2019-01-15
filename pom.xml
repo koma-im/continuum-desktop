@@ -4,7 +4,7 @@
     <groupId>link.continuum</groupId>
     <artifactId>continuum-desktop</artifactId>
     <packaging>jar</packaging>
-    <version>0.7.9.8</version>
+    <version>0.7.9.9</version>
     <name>continuum-desktop</name>
     <dependencies>
         <dependency>
@@ -111,7 +111,7 @@
         <dependency>
             <groupId>io.github.koma-im</groupId>
             <artifactId>koma-library</artifactId>
-            <version>0.7.5.3.1</version>
+            <version>0.7.5.3.2</version>
         </dependency>
     </dependencies>
     <properties>

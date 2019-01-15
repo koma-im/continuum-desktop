@@ -1,7 +1,8 @@
 package link.continuum.desktop.action
 
 import koma.Koma
-import koma.gui.view.RootLayoutView
+import koma.gui.view.ChatWindowBars
+import koma.gui.view.SyncStatusBar
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.config.profile.saveLastUsed
@@ -31,10 +32,20 @@ fun startChat(koma: Koma, userId: UserId, token: String, serverConf: ServerConf)
     val userRooms = app.getAccountRoomStore(userId)!!
     loadJoinedRooms(koma.paths, userRooms, userId)
 
-    FX.primaryStage.scene.root = RootLayoutView(userRooms.roomList).root
+    val primary = ChatWindowBars(userRooms.roomList)
+    val statusBar = SyncStatusBar()
+    primary.statusBar.add(statusBar.root)
+    FX.primaryStage.scene.root = primary.root
 
     val fullSync = userRooms.roomList.isEmpty()
     if (fullSync) logger.warn { "Doing a full sync because there " +
             "are no known rooms $userId has joined" }
-    ChatController(apiClient, userId, fullSync).start()
+    val sync = SyncControl(
+            apiClient,
+            userId,
+            statusChan = statusBar.status,
+            full_sync =  fullSync
+    )
+
+    sync.start()
 }
