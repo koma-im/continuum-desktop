@@ -30,8 +30,16 @@ module link.continuum.desktop {
     // java.lang.module.FindException: Module javafx.fxml not found, required by de.jensd.fx.glyphs.commons
     requires javafx.fxml;
     opens koma.storage.persistence.settings to com.squareup.moshi;
+    exports koma.storage.persistence.settings.encoding to com.squareup.moshi;
     opens koma.storage.persistence.account to com.squareup.moshi;
     opens koma.storage.rooms.state to com.squareup.moshi;
     opens koma.storage.users.state to com.squareup.moshi;
+    exports koma.storage.message.piece to com.squareup.moshi;
     opens koma.storage.message.piece to com.squareup.moshi;
+    exports koma.koma_app to javafx.graphics;
+    exports koma.gui.view to tornadofx;
+    exports koma.gui.view.window.roomfinder.publicroomlist.listcell to tornadofx;
+    exports koma.gui.view.window.start to tornadofx;
+    exports koma.gui.view.window.preferences.tab.network to tornadofx;
+    exports koma.gui.view.chatview to tornadofx;
 }
