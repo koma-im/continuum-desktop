@@ -73,8 +73,8 @@ class ChatWindowBars(roomList: ObservableList<Room>) {
 class SyncStatusBar() {
     val root = HBox()
     val status = Channel<Variants>(Channel.CONFLATED)
-    private val hideStatus = SimpleBooleanProperty(false)
-    private val hideButton = SimpleBooleanProperty(false)
+    private val hideStatus = SimpleBooleanProperty(true)
+    private val hideButton = SimpleBooleanProperty(true)
     private val text = SimpleStringProperty()
     private val button = Button()
     init {
