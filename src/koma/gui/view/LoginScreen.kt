@@ -15,7 +15,10 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import tornadofx.*
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Created by developer on 2017/6/21.
@@ -32,7 +35,11 @@ class LoginScreen(): View() {
         title = "Koma"
 
         val iconstream = javaClass.getResourceAsStream("/icon/koma.png");
-        FX.primaryStage.icons.add(Image(iconstream))
+        if (iconstream != null) {
+            FX.primaryStage.icons.add(Image(iconstream))
+        } else {
+            logger.error { "Failed to load app icon from resources" }
+        }
 
         val grid = GridPane()
         with(grid) {
