@@ -14,7 +14,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.filterNotNull
-import kotlinx.coroutines.delay
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -36,9 +35,8 @@ suspend fun fetchEarlier(
                     logger.error { "Can't fetch messages before $segment: ${r.error} ${r.error.message}" }
                     return
                 } else {
-                    logger.warn { "Warning fetching messages before $segment: ${r.error} ${r.error.message}" }
-                    delay(1000)
-                    continue@fetch
+                    logger.error { "Warning fetching messages before $segment: ${r.error} ${r.error.message}" }
+                    return
                 }
             }
             is Result.Success -> {
