@@ -30,13 +30,6 @@ javafx {
     modules = [ "javafx.controls", "javafx.web", "javafx.media", "javafx.fxml" ]
 }
 
-sourceSets {
-    main {
-        main.java.srcDirs = ["src"]
-        main.kotlin.srcDirs = ["src"]
-    }
-}
-
 repositories {
     mavenLocal()
     mavenCentral()
