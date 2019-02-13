@@ -11,20 +11,22 @@ import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType
+import org.controlsfx.control.Notifications
 import tornadofx.*
 import kotlinx.coroutines.javafx.JavaFx as UI
 
 fun sendMessage(room: RoomId, message: String) {
     val msg = textToMessage(message)
-    val resultsend = apiClient!!.sendRoomMessage(room, msg)
     GlobalScope.launch(Dispatchers.UI) {
-        val result = resultsend.awaitMatrix()
+        val result = apiClient!!.sendMessageRobust(room, msg, retry = 100, timeout = 200)
+
         if (result is Result.Failure) {
             val content = result.error.message
             alert(Alert.AlertType.ERROR, "failed to send message", content)
@@ -49,7 +51,16 @@ fun sendFileMessage(room: RoomId) {
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
-            api.sendRoomMessage(room, message).awaitMatrix()
+            val r = api.sendMessageRobust(room, message)
+            if (r is Result.Failure) {
+                withContext(Dispatchers.JavaFx) {
+                    Notifications.create()
+                            .title("Failed to send file $file")
+                            .text("Error ${r.error}")
+                            .showError()
+                }
+            }
+
         }
     }
 }
@@ -70,7 +81,15 @@ fun sendImageMessage(room: RoomId) {
             val up: UploadResponse = uploadResult.value
             println("sending image $file ${up.content_uri}")
             val msg = ImageMessage(file.name, up.content_uri)
-            api.sendRoomMessage(room, msg).awaitMatrix()
+            val r = api.sendMessageRobust(room, msg)
+            if (r is Result.Failure) {
+                withContext(Dispatchers.JavaFx) {
+                    Notifications.create()
+                            .title("Failed to send image $file")
+                            .text("Error ${r.error}")
+                            .showError()
+                }
+            }
         }
     }
 }

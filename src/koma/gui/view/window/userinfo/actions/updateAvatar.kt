@@ -4,7 +4,7 @@ import com.github.kittinunf.result.Result
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.koma_app.appState
-import koma.matrix.AvatarUrl
+import koma.matrix.user.AvatarUrl
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
