@@ -15,16 +15,6 @@ plugins {
 
 ext.moduleName = "link.continuum.desktop"
 
-compileJava {
-    inputs.property('moduleName', moduleName)
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath
-        ]
-        classpath = files()
-    }
-}
-
 javafx {
     version = "11.0.+"
     modules = [ "javafx.controls", "javafx.web", "javafx.media", "javafx.fxml" ]
