@@ -3,6 +3,7 @@ package koma.storage.message
 import io.requery.Persistable
 import io.requery.kotlin.asc
 import io.requery.kotlin.desc
+import io.requery.kotlin.eq
 import io.requery.kotlin.lte
 import io.requery.sql.KotlinEntityDataStore
 import javafx.collections.FXCollections
@@ -46,7 +47,8 @@ class MessageManager(val roomId: RoomId,
      */
     fun getPrecedingRows(row: RoomEventRow) {
         val rows = data.select(RoomEventRow::class)
-                .where(RoomEventRow::server_time.lte(row.server_time))
+                .where(RoomEventRow::server_time.lte(row.server_time)
+                        .and(RoomEventRow::room_id.eq(roomId.id)))
                 .orderBy(RoomEventRow::server_time.asc()).limit(100).get().toList()
         GlobalScope.launch(Dispatchers.JavaFx) {
             addToUi(rows)
@@ -80,7 +82,10 @@ class MessageManager(val roomId: RoomId,
      * load and add latest messages to ui
      */
     private suspend fun showLatest() {
-        val latest = data.select(RoomEventRow::class).orderBy(RoomEventRow::server_time.desc()).limit(100).get().reversed()
+        val latest = data.select(RoomEventRow::class)
+                .where(RoomEventRow::room_id.eq(roomId.id))
+                .orderBy(RoomEventRow::server_time.desc()).limit(100).get().reversed()
+        logger.debug { "loaded latest ${latest.size} messages in $roomId" }
         addToUi(latest)
     }
 
@@ -89,7 +94,10 @@ class MessageManager(val roomId: RoomId,
      */
     private suspend fun addToUi(rows: List<RoomEventRow>) {
         val exist = this.eventAll.map { it.event_id }.toHashSet()
-        val new = rows.filter { exist.contains(it.event_id) }
+        val new = rows.filter { !exist.contains(it.event_id) }
+        if (new.size < rows.size) {
+            logger.debug { "added ${new.size} new messages of ${rows.size} messages to ui" }
+        }
         withContext(Dispatchers.JavaFx) {
             eventAll.addAll(new)
         }
@@ -122,6 +130,7 @@ class MessageManager(val roomId: RoomId,
         val rows = timeline.events.toEventRowList(roomId)
         rows.firstOrNull()?.preceding_batch = timeline.prev_batch
         rows.firstOrNull()?.preceding_stored = timeline.limited == false
+        logger.debug { "timeline with ${rows.size} messages, limited=${timeline.limited}" }
 
         insert(rows)
 

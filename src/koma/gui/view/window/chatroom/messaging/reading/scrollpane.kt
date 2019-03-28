@@ -12,15 +12,13 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.util.Callback
 import koma.gui.element.control.KListView
-import koma.matrix.event.room_message.RoomEvent
 import koma.koma_app.AppSettings
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.launch
+import link.continuum.desktop.database.models.RoomEventRow
+import link.continuum.desktop.database.models.getEvent
 import model.Room
 import tornadofx.*
 import kotlin.math.roundToInt
-import link.continuum.desktop.database.models.RoomEventRow
 
 typealias EventItem = RoomEventRow
 
@@ -111,7 +109,7 @@ class MessagesListScrollPane(room: Room): View() {
         if (followingLatest.get()) {
             if (e.next() && e.wasAdded()) {
                 val added = e.addedSubList
-                val lastAdd = added.lastOrNull()?.event?.origin_server_ts
+                val lastAdd = added.lastOrNull()?.getEvent()?.origin_server_ts
                 if (lastAdd != null && lastAdd > lastTime - 5000) {
                     //roughly latest
                     lastTime = lastAdd

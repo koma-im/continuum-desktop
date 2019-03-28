@@ -16,8 +16,9 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
-import tornadofx.*
 import link.continuum.desktop.database.models.RoomEventRow
+import link.continuum.desktop.database.models.getEvent
+import tornadofx.*
 
 class MessageCell(val message: RoomEventRow) {
     val node
@@ -26,7 +27,7 @@ class MessageCell(val message: RoomEventRow) {
     private val _node: Node
 
     init {
-        val ev = message.event
+        val ev = message.getEvent()
         val vn = when(ev) {
             is MRoomMember -> MRoomMemberViewNode(ev)
             is MRoomCreate -> MRoomCreationViewNode(ev)
