@@ -17,18 +17,20 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
 import tornadofx.*
+import link.continuum.desktop.database.models.RoomEventRow
 
-class MessageCell(val message: RoomEvent) {
+class MessageCell(val message: RoomEventRow) {
     val node
         get() = _node
 
     private val _node: Node
 
     init {
-        val vn = when(message) {
-            is MRoomMember -> MRoomMemberViewNode(message)
-            is MRoomCreate -> MRoomCreationViewNode(message)
-            is MRoomMessage -> MRoomMessageViewNode(message)
+        val ev = message.event
+        val vn = when(ev) {
+            is MRoomMember -> MRoomMemberViewNode(ev)
+            is MRoomCreate -> MRoomCreationViewNode(ev)
+            is MRoomMessage -> MRoomMessageViewNode(ev)
             else -> null
         }
         if (vn == null) {
@@ -56,8 +58,8 @@ interface ViewNode {
     val menuItems: List<MenuItem>
 }
 
-fun showSource(roomEvent: RoomEvent) {
-    val src = roomEvent.toJson(indent = true)
+fun showSource(roomEvent: RoomEventRow) {
+    val src = roomEvent.json
 
     val dialog = Dialog<Unit>()
     dialog.title = "Room Event Source"

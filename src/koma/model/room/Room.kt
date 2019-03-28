@@ -37,7 +37,7 @@ class Room(val id: RoomId) {
     val colorProperty = SimpleObjectProperty<Color>(color)
 
     @ObsoleteCoroutinesApi
-    val messageManager by lazy { MessageManager(id, appState.koma.paths) }
+    val messageManager by lazy { MessageManager(id, appState.data) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 
     // whether it's listed in the public directory

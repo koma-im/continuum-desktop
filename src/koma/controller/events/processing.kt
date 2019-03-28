@@ -12,7 +12,6 @@ import koma.matrix.room.LeftRoom
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
-import koma.storage.message.AppendSync
 import koma.util.matrix.getUserState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -38,8 +37,9 @@ private fun handle_joined_room(owner: UserId, roomid: RoomId, data: JoinedRoom) 
     data.state.events.forEach { room.applyUpdate(it) }
     val timeline = data.timeline
     timeline.events.forEach { room.applyUpdate(it) }
+
     GlobalScope.launch {
-        room.messageManager.chan.send(AppendSync(timeline))
+        room.messageManager.appendTimeline(timeline)
     }
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
     // TODO:  account_data

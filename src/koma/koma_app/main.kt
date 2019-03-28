@@ -2,6 +2,7 @@ package koma.koma_app
 
 import javafx.application.Application
 import javafx.event.EventHandler
+import javafx.scene.control.Alert
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import koma.Koma
@@ -9,6 +10,7 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.storage.config.ConfigPaths
+import link.continuum.desktop.database.openMainDb
 import link.continuum.desktop.util.disk.path.getConfigDir
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -26,7 +28,13 @@ fun main(args: Array<String>) {
     appData = DataOnDisk(paths)
     val proxy = appData.settings.getProxy()
     val koma = Koma(paths, proxy)
+    val data = openMainDb(paths)
+    if (data == null) {
+        alert(Alert.AlertType.ERROR, "couldn't open configuration directory")
+        return
+    }
     appState.koma = koma
+    appState.data = data
     Application.launch(KomaApp::class.java, *args)
     appState.stopSync?.invoke()
     SaveToDiskTasks.saveToDisk()

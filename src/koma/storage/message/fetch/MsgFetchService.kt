@@ -2,30 +2,35 @@ package koma.storage.message.fetch
 
 import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.map
+import koma.koma_app.appState
+import koma.matrix.Chunked
+import koma.matrix.event.EventId
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
-import koma.storage.message.piece.Segment
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.koma_app.appState
-import koma.matrix.Chunked
+import link.continuum.desktop.database.models.RoomEventRow
+import mu.KotlinLogging
 
-suspend fun doFetch(piece: Segment, roomid: RoomId)
+private val logger = KotlinLogging.logger {}
+
+suspend fun fetchPreceding(
+        row: RoomEventRow)
         : Result<FetchedBatch, Exception> {
     val service = appState.apiClient
     if (service == null) {
         return Result.error(NullPointerException("no service for loading messages"))
     }
-    val fetchkey = piece.meta.prev_batch
+    val fetchkey = row.preceding_batch
     return if (fetchkey == null) {
-        val eventid = piece.list.first().event_id
-        println("Warning: trying to get pagination token by getting the context of $eventid")
-        service.getEventContext(roomid, eventid).awaitMatrix().map { res ->
+        val eventid = row.event_id
+        logger.warn { "trying to get pagination token by getting the context of $eventid" }
+        service.getEventContext(RoomId(row.room_id), EventId(eventid)).awaitMatrix().map { res ->
             FetchedBatch.fromContextBackward(res)
         }
     } else {
-        service.getRoomMessages(roomid, fetchkey, FetchDirection.Backward).awaitMatrix().map { res ->
+        service.getRoomMessages(RoomId(row.room_id), fetchkey, FetchDirection.Backward).awaitMatrix().map { res ->
             FetchedBatch.fromChunkedBackward(res)
         }
     }

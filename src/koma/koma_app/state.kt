@@ -1,5 +1,7 @@
 package koma.koma_app
 
+import io.requery.Persistable
+import io.requery.sql.KotlinEntityDataStore
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
 import koma.matrix.MatrixApi
@@ -17,6 +19,7 @@ object appState {
     val currRoom = SimpleObjectProperty<Room>()
     var currentUser: UserId? = null
     lateinit var koma: Koma
+    lateinit var data: KotlinEntityDataStore<Persistable>
     var stopSync: (()-> Unit)? = null
     var apiClient: MatrixApi? = null
     lateinit var serverConf: ServerConf
