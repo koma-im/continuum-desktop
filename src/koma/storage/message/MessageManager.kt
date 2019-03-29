@@ -32,7 +32,9 @@ class MessageManager(val roomId: RoomId,
     // added to UI, needs to be modified on FX thread
     private val eventAll = FXCollections.observableArrayList<RoomEventRow>()
     private val eventVisible = FilteredList(eventAll) { it.getEvent()?.supportedByDisplay() == true }
-    val shownList = SortedList(eventVisible)
+    val shownList = SortedList(eventVisible) { e1: RoomEventRow, e2: RoomEventRow ->
+        e1.server_time.compareTo(e2.server_time)
+    }
 
     private var prevLatestRow: RoomEventRow? = null
 
@@ -93,14 +95,14 @@ class MessageManager(val roomId: RoomId,
      * add events that are new
      */
     private suspend fun addToUi(rows: List<RoomEventRow>) {
+        val s = this.eventAll.size
         val exist = this.eventAll.map { it.event_id }.toHashSet()
         val new = rows.filter { !exist.contains(it.event_id) }
-        if (new.size < rows.size) {
-            logger.debug { "added ${new.size} new messages of ${rows.size} messages to ui" }
-        }
         withContext(Dispatchers.JavaFx) {
             eventAll.addAll(new)
         }
+        logger.debug { "added ${new.size}/${rows.size} messages." +
+                " total messages $s to ${eventAll.size}. shown ${eventVisible.size}" }
     }
 
     /**
