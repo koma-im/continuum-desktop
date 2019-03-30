@@ -10,10 +10,12 @@ import javafx.scene.layout.VBox
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
-import koma.koma_app.appData
 import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import model.Room
 import tornadofx.*
+
+private val settings: AppSettings = appState.store.settings
 
 class RoomListView(roomlist: ObservableList<Room>): View() {
     override val root = listview(roomlist)
@@ -57,7 +59,7 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
     }
 
     private fun setup(node: ListView<Room>) {
-        val scale = appData.settings.scaling
+        val scale = settings.scaling
         node.style {
             fontSize= scale.em
         }

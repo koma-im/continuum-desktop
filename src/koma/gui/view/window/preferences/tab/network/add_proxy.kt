@@ -5,8 +5,10 @@ import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
+import koma.storage.persistence.settings.encoding.KProxy
+import link.continuum.desktop.util.ErrorMsg
+import link.continuum.desktop.util.KResult
 import tornadofx.*
-import java.net.InetSocketAddress
 import java.net.Proxy
 
 
@@ -19,9 +21,8 @@ class AddProxyField(): View() {
 
     val isValid: BooleanBinding
 
-    fun getProxy(): Proxy {
-        val isa = InetSocketAddress.createUnresolved(host.text, port.text.toInt())
-        return Proxy(type.value, isa)
+    fun getProxy(): KResult<KProxy, ErrorMsg> {
+        return KProxy.parse(type.value, host.text, port.text)
     }
 
     init {

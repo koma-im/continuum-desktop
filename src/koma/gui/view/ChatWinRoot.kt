@@ -15,12 +15,15 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
-import koma.koma_app.appData
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
 import model.Room
 import tornadofx.*
+
+private val settings: AppSettings = appState.store.settings
 
 /**
  * everything inside the app window after login
@@ -36,7 +39,7 @@ class ChatWindowBars(roomList: ObservableList<Room>) {
     init {
         with(root) {
             style {
-                fontSize= appData.settings.scaling.em
+                fontSize= settings.scaling.em
             }
             center = ChatView(roomList).root
             top = menubar {

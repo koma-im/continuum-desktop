@@ -10,11 +10,9 @@ import link.continuum.desktop.database.models.Models
 import org.h2.jdbcx.JdbcConnectionPool
 import org.h2.jdbcx.JdbcDataSource
 
-typealias KResult<T, E> = com.github.kittinunf.result.Result<T, E>
-
 fun openMainDb(paths: ConfigPaths): KotlinEntityDataStore<Persistable>? {
     val fp = paths.getCreateDir("desktop") ?: return null
-    val dbPath = fp.resolve("maindatabase").canonicalPath
+    val dbPath = fp.resolve("continuum-desktop").canonicalPath
     return openStore(dbPath)
 }
 

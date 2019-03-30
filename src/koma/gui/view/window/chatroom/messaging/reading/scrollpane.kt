@@ -12,7 +12,7 @@ import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.util.Callback
 import koma.gui.element.control.KListView
-import koma.koma_app.AppSettings
+import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
@@ -20,10 +20,14 @@ import model.Room
 import tornadofx.*
 import kotlin.math.roundToInt
 
+private val settings = appState.store.settings
+
 typealias EventItem = RoomEventRow
 
 @ObsoleteCoroutinesApi
-class MessagesListScrollPane(room: Room): View() {
+class MessagesListScrollPane(
+        room: Room
+): View() {
     override val root = AnchorPane()
 
     private val virtualList: KListView<EventItem>
@@ -87,7 +91,7 @@ class MessagesListScrollPane(room: Room): View() {
     }
 
     private fun addScrollBottomButton() {
-        val scale = AppSettings.settings.scaling
+        val scale = settings.scaling
         val button = button() {
             removeWhen(followingLatest)
             graphic = MaterialIconFactory.get().createIcon(MaterialIcon.VERTICAL_ALIGN_BOTTOM, "${(scale*1.5).roundToInt()}em")

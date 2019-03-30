@@ -9,10 +9,12 @@ import javafx.scene.layout.StackPane
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showDatetime
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showUser
+import koma.koma_app.appState
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
-import koma.koma_app.AppSettings
 import tornadofx.*
+
+private val AppSettings = appState.store.settings
 
 class MRoomMemberViewNode(message: MRoomMember): ViewNode {
     override val node = StackPane()

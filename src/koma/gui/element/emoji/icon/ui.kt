@@ -12,10 +12,13 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import koma.koma_app.appData
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import tornadofx.*
 
-class EmojiIcon (): ButtonBase() {
+class EmojiIcon (
+        private val settings: AppSettings = appState.store.settings
+): ButtonBase() {
 
     constructor(emoji: ObservableValue<String>): this() {
         bindEmojiSymbol(emoji)
@@ -34,7 +37,7 @@ class EmojiIcon (): ButtonBase() {
         return EmojiIconSkin(this)
     }
 
-    val size = appData.settings.fontSize
+    val size = settings.fontSize
     val emojiProperty = SimpleStringProperty()
 
     private val imageView = ImageView()

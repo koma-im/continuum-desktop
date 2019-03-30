@@ -10,7 +10,6 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.storage.config.ConfigPaths
-import link.continuum.desktop.database.openMainDb
 import link.continuum.desktop.util.disk.path.getConfigDir
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -18,23 +17,9 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import kotlinx.coroutines.javafx.JavaFx as UI
 
-
-
 fun main(args: Array<String>) {
     Logger.getLogger(OkHttpClient::class.java.name).setLevel(Level.FINE)
-    val arg = args.firstOrNull()
-    val data_dir = arg ?: getConfigDir()
-    val paths = ConfigPaths(data_dir)
-    appData = DataOnDisk(paths)
-    val proxy = appData.settings.getProxy()
-    val koma = Koma(paths, proxy)
-    val data = openMainDb(paths)
-    if (data == null) {
-        alert(Alert.AlertType.ERROR, "couldn't open configuration directory")
-        return
-    }
-    appState.koma = koma
-    appState.data = data
+
     Application.launch(KomaApp::class.java, *args)
     appState.stopSync?.invoke()
     SaveToDiskTasks.saveToDisk()
@@ -48,7 +33,24 @@ class KomaApp : App(StartScreen::class) {
         reloadStylesheetsOnFocus()
     }
 
+    private fun load() {
+        val args = parameters.raw
+        val arg = args.firstOrNull()
+        val data_dir = arg ?: getConfigDir()
+        val paths = ConfigPaths(data_dir)
+        appState.store = AppStore(data_dir)
+        val proxy = appState.store.settings.proxyList.default()
+        appState.koma = Koma(paths, proxy.toJavaNet())
+    }
+
   override fun start(stage: Stage) {
+      try {
+          load()
+      } catch (e: Exception) {
+          alert(Alert.AlertType.ERROR, "couldn't open configuration directory: $e")
+          return
+      }
+
       super.start(stage)
       setSaneStageSize(stage)
       stage.hide()

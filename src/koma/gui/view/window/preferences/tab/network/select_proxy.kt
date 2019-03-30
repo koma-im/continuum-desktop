@@ -1,7 +1,10 @@
 package koma.gui.view.window.preferences.tab.network
 
-import java.net.InetSocketAddress
+import koma.storage.persistence.settings.encoding.KProxy
+import mu.KotlinLogging
 import java.net.Proxy
+
+private val logger = KotlinLogging.logger {}
 
 sealed class ProxyOption() {
     override fun toString(): String {
@@ -16,26 +19,18 @@ sealed class ProxyOption() {
     }
 }
 
-class ExistingProxy(val proxy: Proxy): ProxyOption()
+class ExistingProxy(val proxy: KProxy): ProxyOption()
 
 class NewProxy(): ProxyOption()
 
 
 
 
-private fun Proxy.toAddrStr(): String {
-    if (this == Proxy.NO_PROXY) {
-        return "No Proxy"
+private fun KProxy.toAddrStr(): String {
+    logger.debug { "proxy $this" }
+    return when(this) {
+        is KProxy.Direct -> "No Proxy"
+        is KProxy.Socks -> "socks://${this.addr}"
+        is KProxy.Http -> "http://${this.addr}"
     }
-
-    val proto = this.type().toString().toLowerCase()
-    val sb = StringBuilder(proto)
-    val addr = this.address() as InetSocketAddress?
-    if (addr != null) {
-        val host = addr.hostString
-        if (host != null) sb.append("://" + host)
-        val port = addr.port
-        sb.append(":" + port)
-    }
-    return sb.toString()
 }

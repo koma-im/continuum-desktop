@@ -5,10 +5,12 @@ import javafx.scene.control.TabPane
 import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.tab.AppearanceTab
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
-import koma.koma_app.AppSettings
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import tornadofx.*
 
-class PreferenceWindow(): View() {
+class PreferenceWindow(
+        private val settings: AppSettings = appState.store.settings): View() {
     override val root = VBox()
 
     private val nettab = NetworkSettingsTab(this)
@@ -27,7 +29,7 @@ class PreferenceWindow(): View() {
         }
         with(root) {
             style {
-                fontSize= AppSettings.settings.scaling.em
+                fontSize= settings.scaling.em
             }
             add(tabs)
         }

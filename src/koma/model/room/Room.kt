@@ -9,6 +9,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.room.naming.RoomAlias
@@ -18,7 +19,6 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
-import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import tornadofx.*
 
@@ -37,7 +37,7 @@ class Room(val id: RoomId) {
     val colorProperty = SimpleObjectProperty<Color>(color)
 
     @ObsoleteCoroutinesApi
-    val messageManager by lazy { MessageManager(id, appState.data) }
+    val messageManager by lazy { MessageManager(id, appState.store.database ) }
     val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
 
     // whether it's listed in the public directory

@@ -7,11 +7,16 @@ import koma.gui.view.window.preferences.tab.network.AddProxyField
 import koma.gui.view.window.preferences.tab.network.ExistingProxy
 import koma.gui.view.window.preferences.tab.network.NewProxy
 import koma.gui.view.window.preferences.tab.network.ProxyOption
-import koma.koma_app.appData
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.util.isOk
 import tornadofx.*
 
 
-class NetworkSettingsTab(parent: View): View() {
+class NetworkSettingsTab(
+        parent: View,
+        private val settings: AppSettings = appState.store.settings
+): View() {
     override val root = VBox()
 
     private val select: ComboBox<ProxyOption>
@@ -19,7 +24,7 @@ class NetworkSettingsTab(parent: View): View() {
     private val proxyField: AddProxyField by inject()
 
     init {
-        val proxyOptions: List<ProxyOption> =  appData.settings.settings.proxies.map { ExistingProxy(it) } + NewProxy()
+        val proxyOptions: List<ProxyOption> =  settings.proxyList.list().map { ExistingProxy(it) } + NewProxy()
         select = ComboBox(FXCollections.observableArrayList(
                 proxyOptions
         ))
@@ -51,10 +56,14 @@ class NetworkSettingsTab(parent: View): View() {
         val proxy = if ( selection is ExistingProxy) {
             selection.proxy
         } else {
-            proxyField.getProxy()
+            val p = proxyField.getProxy()
+            if (p.isOk()) {
+                p.get()
+            } else {
+                return
+            }
         }
-        appData.settings.set_preferred_proxy(proxy)
-        appData.settings.save()
+        settings.proxyList = settings.proxyList.setDefault(proxy)
     }
 }
 

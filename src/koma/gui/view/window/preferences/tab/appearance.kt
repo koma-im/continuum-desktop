@@ -2,16 +2,20 @@ package koma.gui.view.window.preferences.tab
 
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
-import koma.koma_app.AppSettings
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import tornadofx.*
 
-class AppearanceTab(parent: View): View() {
+class AppearanceTab(
+        parent: View,
+        private val settings: AppSettings = appState.store.settings
+): View() {
     override val root: Parent = Fieldset()
 
     val scalingSetting: ComboBox<String>
 
     init {
-        val scales = listOf(AppSettings.settings.scaling, 1.0, 2.0)
+        val scales = listOf(settings.scaling, 1.0, 2.0)
                 .map {
                     String.format("%.2f", it)
                 }
@@ -48,8 +52,7 @@ class AppearanceTab(parent: View): View() {
 
     private fun save() {
         scalingSetting.value?.toFloat()?.let {
-            AppSettings.settings.scaling = it
-            AppSettings.save()
+            settings.scaling = it
         }
     }
 }

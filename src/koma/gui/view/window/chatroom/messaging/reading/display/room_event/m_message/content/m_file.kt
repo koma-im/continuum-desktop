@@ -8,12 +8,14 @@ import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.koma_app.appData
 import koma.koma_app.appState
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.network.media.MHUrl
+import koma.storage.persistence.settings.AppSettings
 import koma.util.result.ok
 import tornadofx.*
+
+private val settings: AppSettings = appState.store.settings
 
 class MFileViewNode(val content: FileMessage): ViewNode {
     override val node = HBox(5.0)
@@ -23,7 +25,7 @@ class MFileViewNode(val content: FileMessage): ViewNode {
 
     init {
         val faicon = guessIconForMime(content.info?.mimetype)
-        val s = appData.settings.scale_em(2f)
+        val s = settings.scale_em(2f)
         val icon_node = FontAwesomeIconFactory.get().createIcon(faicon,
                 s)
 

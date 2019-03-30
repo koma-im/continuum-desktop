@@ -13,7 +13,8 @@ import javafx.util.Callback
 import koma.gui.element.control.PrettyListView
 import koma.gui.element.emoji.category.emojiCategories
 import koma.gui.element.emoji.icon.EmojiIcon
-import koma.koma_app.appData
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import org.controlsfx.control.PopOver
 import tornadofx.*
 
@@ -90,7 +91,10 @@ object EmojiKeyboard {
         onEmojiChosen?.invoke(emojiSymbol)
     }
 
-    class EmojiRowCell(val cb: (em: String) -> Unit) : ListCell<List<String>>() {
+    class EmojiRowCell(
+            val cb: (em: String) -> Unit,
+            settings: AppSettings = appState.store.settings
+            ) : ListCell<List<String>>() {
         private val icons = mutableListOf<EmojiIcon>()
 
         init {
@@ -98,7 +102,7 @@ object EmojiKeyboard {
             for (i in 0..8) {
                 val node = EmojiIcon()
                 val tip = Tooltip()
-                val size = appData.settings.fontSize
+                val size = settings.fontSize
                 tip.font = Font.font(size)
                 node.tooltip = (tip)
                 node.action { node.emojiProperty.get()?.let{cb(it)} }

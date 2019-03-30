@@ -9,16 +9,17 @@ import javafx.scene.layout.VBox
 import koma.controller.requests.account.login.onClickLogin
 import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
-import koma.koma_app.appData
 import koma.koma_app.appState
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.profile.getRecentUsers
+import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
+private val settings: AppSettings = appState.store.settings
 
 /**
  * Created by developer on 2017/6/21.
@@ -66,7 +67,7 @@ class LoginScreen(): View() {
         }
         with(root) {
             style {
-                fontSize= appData.settings.scaling.em
+                fontSize= settings.scaling.em
             }
             add(grid)
 

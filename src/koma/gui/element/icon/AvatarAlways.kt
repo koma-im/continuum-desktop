@@ -8,11 +8,13 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import koma.gui.element.icon.avatar.AvatarProvider
 import koma.gui.element.icon.placeholder.AvatarPlaceholder
-import koma.koma_app.appData
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import koma.util.result.ok
 import tornadofx.*
 
-val avatarSize by lazy { appData.settings.scaling * 32.0 }
+private val settings: AppSettings = appState.store.settings
+val avatarSize by lazy { settings.scaling * 32.0 }
 
 class AvatarAlways private constructor(urlV: ObservableValue<String>, ap: AvatarPlaceholder): StackPane() {
     constructor(

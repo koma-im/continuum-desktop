@@ -5,17 +5,21 @@ import javafx.scene.control.Hyperlink
 import javafx.scene.control.Tooltip
 import javafx.scene.input.MouseButton
 import javafx.scene.text.Font
-import koma.koma_app.AppSettings
+import koma.koma_app.appState
+import koma.storage.persistence.settings.AppSettings
 import tornadofx.*
 import java.awt.Desktop
 import java.io.IOException
 import java.net.URI
 
 
-fun hyperlinkNode(text: String): Hyperlink {
+fun hyperlinkNode(
+        text: String,
+        settings: AppSettings = appState.store.settings
+): Hyperlink {
     val node = Hyperlink(text)
     val tip = Tooltip(text)
-    tip.font = Font.font(AppSettings.fontSize)
+    tip.font = Font.font(settings.fontSize)
     node.tooltip = tip
     node.setOnMouseClicked { e ->
         if (e.button == MouseButton.PRIMARY) openInBrowser(text)

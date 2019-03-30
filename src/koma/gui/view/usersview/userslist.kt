@@ -8,10 +8,13 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.element.control.PrettyListView
 import koma.gui.view.usersview.fragment.get_cell_property
-import koma.koma_app.appData
+import koma.koma_app.appState
 import koma.model.user.UserState
+import koma.storage.persistence.settings.AppSettings
 import tornadofx.*
 import kotlin.math.roundToInt
+
+private val settings: AppSettings = appState.store.settings
 
 class RoomMemberListView(memList: ObservableList<UserState>): View() {
 
@@ -19,7 +22,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
 
     init {
         with(root) {
-            val scale = appData.settings.scaling
+            val scale = settings.scaling
             val size: String = "${scale.roundToInt()}em"
             style {
                 fontSize= scale.em
