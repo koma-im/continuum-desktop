@@ -29,8 +29,6 @@ module link.continuum.desktop {
     // Error occurred during initialization of boot layer
     // java.lang.module.FindException: Module javafx.fxml not found, required by de.jensd.fx.glyphs.commons
     requires javafx.fxml;
-    opens koma.storage.persistence.settings to com.squareup.moshi;
-    exports koma.storage.persistence.settings.encoding to com.squareup.moshi;
     opens koma.storage.persistence.account to com.squareup.moshi;
     opens koma.storage.rooms.state to com.squareup.moshi;
     opens koma.storage.users.state to com.squareup.moshi;
