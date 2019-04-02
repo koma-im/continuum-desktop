@@ -87,7 +87,8 @@ class LoginScreen(): View() {
                     action {
                         GlobalScope.launch {
                             val k = appState.koma
-                            onClickLogin(k, userId.value, password.text, serverCombo.editor.text)
+                            val d = appState.store.database
+                            onClickLogin(k, d, userId.value, password.text, serverCombo.editor.text)
                         }
                     }
                 }

@@ -5,16 +5,11 @@ import io.requery.sql.KotlinConfiguration
 import io.requery.sql.KotlinEntityDataStore
 import io.requery.sql.SchemaModifier
 import io.requery.sql.TableCreationMode
-import koma.storage.config.ConfigPaths
 import link.continuum.desktop.database.models.Models
 import org.h2.jdbcx.JdbcConnectionPool
 import org.h2.jdbcx.JdbcDataSource
 
-fun openMainDb(paths: ConfigPaths): KotlinEntityDataStore<Persistable>? {
-    val fp = paths.getCreateDir("desktop") ?: return null
-    val dbPath = fp.resolve("continuum-desktop").canonicalPath
-    return openStore(dbPath)
-}
+typealias KDataStore = KotlinEntityDataStore<Persistable>
 
 internal fun openStore(dbPath: String): KotlinEntityDataStore<Persistable> {
     val ds = JdbcDataSource()

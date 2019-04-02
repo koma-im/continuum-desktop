@@ -11,18 +11,17 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.web.WebView
 import javafx.util.StringConverter
-import link.continuum.desktop.action.startChat
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getApiUrlBuilder
-import koma.storage.persistence.account.Token
-import koma.storage.persistence.account.saveToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.action.startChat
+import link.continuum.desktop.database.models.saveToken
 import netscape.javascript.JSObject
 import tornadofx.*
 
@@ -61,8 +60,8 @@ class RegistrationWizard(): View() {
             val res = cur.submit()?: return
             res.success { newUser ->
                 println("Successfully registered ${newUser.user_id}")
-                val k = appState.koma
-                saveToken(k.paths, newUser.user_id, Token(newUser.access_token))
+                val k = appState.store.database
+                saveToken(k, newUser.user_id, newUser.access_token)
                 val s = Success(newUser, register.serverConf, this)
                 state = s
                 uilaunch { root.center = s.root }

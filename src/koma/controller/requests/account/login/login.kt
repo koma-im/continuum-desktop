@@ -8,63 +8,55 @@ import koma.matrix.UserId
 import koma.matrix.UserPassword
 import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.ConfigPaths
 import koma.storage.config.server.ServerConf
 import koma.storage.config.server.getAddress
-import koma.storage.persistence.account.Token
-import koma.storage.persistence.account.getToken
-import koma.storage.persistence.account.saveToken
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getToken
+import link.continuum.desktop.database.models.saveToken
 import tornadofx.*
 
 /**
  * when the login button is clicked
  * accept text of text fields as parameters
  */
-suspend fun onClickLogin(koma: Koma, user: String, password: String, server: String) {
+suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: String, server: String) {
     val userid = UserId_new(user)
     val servCon = koma.servers.serverConfWithAddr(userid.server, server)
     val token = if (!password.isBlank()) {
-        getTokenWithPassword(userid, password, koma, servCon)
+        getTokenWithPassword(userid, password, koma, data, servCon)
     } else {
-        getTokenFromDisk(koma.paths, userid)
+        val t = getToken(data, userid)
+        if (t == null) {
+            GlobalScope.launch(Dispatchers.JavaFx) {
+                alert(Alert.AlertType.ERROR, "Failed to login as $userid",
+                        "No access token")
+            }
+        }
+        t
     }
     token ?: return
     startChat(koma, userid, token, servCon)
 }
 
 /**
- * try to load saved token
- * show alert if it fails
- */
-private fun getTokenFromDisk(paths: ConfigPaths, userid: UserId): String? {
-    val p = getToken(paths, userid)
-    if (p == null) {
-        GlobalScope.launch(Dispatchers.JavaFx) {
-            alert(Alert.AlertType.ERROR, "Failed to login as $userid",
-                    "No access token")
-        }
-        return null
-    }
-    return p.token
-}
-
-/**
  * get token from server
  * saves the token to disk
  */
-private suspend fun getTokenWithPassword(userid: UserId, password: String, koma: Koma, servCon: ServerConf): String? {
+private suspend fun getTokenWithPassword(userid: UserId, password: String, koma: Koma,
+                                         data: KDataStore,
+                                         servCon: ServerConf): String? {
     val authResu = login(UserPassword(user = userid.user, password = password), servCon, koma.http).awaitMatrix()
     when (authResu) {
         is Result.Success -> {
             val u = authResu.value.user_id
             val t = authResu.value.access_token
-            saveToken(koma.paths, u, Token(t))
+            saveToken(data, u, t)
             return t
         }
         is Result.Failure -> {
