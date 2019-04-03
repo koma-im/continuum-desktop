@@ -13,11 +13,13 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import model.Room
+import okhttp3.HttpUrl
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
 
-class RoomListView(roomlist: ObservableList<Room>): View() {
+class RoomListView(
+        roomlist: ObservableList<Room>, server: HttpUrl): View() {
     override val root = listview(roomlist)
 
     init {
@@ -33,7 +35,7 @@ class RoomListView(roomlist: ObservableList<Room>): View() {
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder().open()
+                    RoomFinder(server).open()
                 }
             }
             button("Create") {

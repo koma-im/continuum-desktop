@@ -13,22 +13,23 @@ import javafx.scene.web.WebView
 import javafx.util.StringConverter
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
-import koma.storage.config.server.ServerConf
-import koma.storage.config.server.getApiUrlBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.saveServerAddr
 import link.continuum.desktop.database.models.saveToken
 import netscape.javascript.JSObject
+import okhttp3.HttpUrl
 import tornadofx.*
 
-class RegistrationWizard(): View() {
+class RegistrationWizard(private val data: KDataStore): View() {
 
     override val root = BorderPane()
-    private var state: WizardState = Start()
+    private var state: WizardState = Start(data)
     lateinit var register: Register
     init {
         title = "Join the Matrix network"
@@ -62,7 +63,7 @@ class RegistrationWizard(): View() {
                 println("Successfully registered ${newUser.user_id}")
                 val k = appState.store.database
                 saveToken(k, newUser.user_id, newUser.access_token)
-                val s = Success(newUser, register.serverConf, this)
+                val s = Success(newUser, register.server, this)
                 state = s
                 uilaunch { root.center = s.root }
             }
@@ -143,7 +144,7 @@ class Stage(
     }
 }
 
-private class Success(user: RegisterdUser, serverConf: ServerConf, window: RegistrationWizard): WizardState() {
+private class Success(user: RegisterdUser, server: HttpUrl, window: RegistrationWizard): WizardState() {
 
     override val root = HBox()
     init {
@@ -155,7 +156,7 @@ private class Success(user: RegisterdUser, serverConf: ServerConf, window: Regis
                     action {
                         window.close()
                         val k = appState.koma
-                        startChat(k, user.user_id, user.access_token, serverConf)
+                        startChat(k, user.user_id, user.access_token, server)
                     }
                 }
             }
@@ -245,7 +246,8 @@ class FallbackWebviewAuth(
         }
     }
     init {
-        val url = register.serverConf.getApiUrlBuilder()!!
+        val url = register.server.newBuilder()
+                .addPathSegments("_matrix/media/r0/download")
                 .addEncodedPathSegment("auth")
                 .addEncodedPathSegment(type)
                 .addEncodedPathSegment("fallback")
@@ -268,14 +270,15 @@ class FallbackWebviewAuth(
     }
 }
 
-private class Start(): WizardState() {
+private class Start(private val data: KDataStore): WizardState() {
     suspend fun start(): Pair<Register, Unauthorized>? {
         val addr = serverCombo.editor.text
-        val s = appState.koma.servers.serverConfFromAddr(addr)
+        val s = HttpUrl.parse(addr)
         if (s == null) {
             alert(Alert.AlertType.ERROR, "$addr isn't valid server")
             return null
         }
+        saveServerAddr(data, s.host(), addr)
         val r = Register(s, appState.koma.http)
         val f = r.getFlows()
         when (f) {

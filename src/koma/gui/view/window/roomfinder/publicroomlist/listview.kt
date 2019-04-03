@@ -12,6 +12,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.util.Callback
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.koma_app.appState
@@ -28,6 +29,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import okhttp3.HttpUrl
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
@@ -35,7 +37,9 @@ import tornadofx.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
-class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
+class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
+                      server: HttpUrl
+) {
 
     val ui = VBox(5.0)
 
@@ -45,7 +49,7 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
     init {
         val field = TextFields.createClearableTextField() as CustomTextField
         input = field.textProperty()
-        roomlist = RoomListView(publicRoomList, input)
+        roomlist = RoomListView(publicRoomList, input, server)
         createui(field)
         ui.vgrow = Priority.ALWAYS
     }
@@ -106,7 +110,8 @@ class PublicRoomsView(val publicRoomList: ObservableList<DiscoveredRoom>) {
 
 class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
-        private val input: StringProperty
+        input: StringProperty,
+        server: HttpUrl
 ): View() {
     private val api = appState.apiClient!!
     private val matchRooms = FilteredList(roomlist)
@@ -132,7 +137,9 @@ class RoomListView(
         }
         with(root) {
             vgrow = Priority.ALWAYS
-            cellFragment(DiscoveredRoomFragment::class)
+            cellFactory = Callback{
+                DiscoveredRoomFragment(server)
+            }
         }
         root.skinProperty().addListener { _ ->
             val scrollBar = findScrollBar()

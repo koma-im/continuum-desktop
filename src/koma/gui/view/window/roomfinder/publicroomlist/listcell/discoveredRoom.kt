@@ -2,12 +2,14 @@ package koma.gui.view.window.roomfinder.publicroomlist.listcell
 
 import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.collections.FXCollections
+import javafx.beans.property.SimpleStringProperty
+import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.control.ListCell
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
@@ -17,46 +19,64 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
+import koma.network.media.MHUrl
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.result.ok
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
+import okhttp3.HttpUrl
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
-private fun<E> listToProperty(list: List<E>): SimpleListProperty<E> {
-    val l = list
-    return SimpleListProperty(FXCollections.observableArrayList(l))
-}
+private val logger = KotlinLogging.logger {}
 
-class DiscoveredRoomItemModel(property: ObjectProperty<DiscoveredRoom>)
-    : ItemViewModel<DiscoveredRoom>(itemProperty = property) {
-    val name = bind {item?.name.toProperty()}
-    val aliases = bind {item?.aliases?.let { listToProperty(it) } }
-    val displayName = bind { item?.dispName().toProperty() }
-    val avatar_url = bind {item?.avatar_url.toProperty()}
-    val guest = bind {item?.guest_can_join.toProperty()}
-    val n_mems = bind {item?.num_joined_members.toProperty()}
-    val room_id = bind {item?.room_id.toProperty()}
-    val topic = bind {item?.topic.toProperty()}
-    val world_read = bind {item?.world_readable.toProperty()}
-}
+class DiscoveredRoomFragment(private val server: HttpUrl): ListCell<DiscoveredRoom>() {
+    val root = hbox(spacing = 10.0)
+    val avUrl = SimpleObjectProperty<HttpUrl>()
+    val name = SimpleStringProperty()
+    val avColor = SimpleObjectProperty<Color>()
+    val worldRead = SimpleBooleanProperty(false)
+    val guestJoin = SimpleBooleanProperty(false)
+    val members = SimpleIntegerProperty(-1)
+    private val topic = SimpleStringProperty("")
+    private val roomId =  SimpleObjectProperty<RoomId>()
+    private val aliasesLabel = label() {
+        style {
+            opacity = 0.6
+        }
+    }
 
-class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
-    override val root = hbox(spacing = 10.0)
-    val droom = DiscoveredRoomItemModel(itemProperty)
-    private val avatar: AvatarAlways
-
+    override fun updateItem(item: DiscoveredRoom?, empty: Boolean) {
+        logger.debug { "discovered room $item, empty=$empty" }
+        super.updateItem(item, empty)
+        if (empty || item == null) {
+            text = null
+            graphic = null
+            return
+        }
+        avColor.set(hashStringColorDark(item.room_id.id))
+        val avU = item.avatar_url?.let { MHUrl.fromStr(it).ok() }?.toHttpUrl(server)?.ok()
+        avU ?.let { avUrl.set(avU) }
+        name.set(item.dispName())
+        worldRead.set(item.world_readable)
+        guestJoin.set(item.guest_can_join)
+        members.set(item.num_joined_members)
+        item.topic?.let { topic.set(it) }
+        item.aliases?.let {
+            aliasesLabel.text = it.joinToString(", ")
+        }
+        roomId.set(item.room_id)
+        graphic = root
+    }
     init {
-        val color = SimpleObjectProperty<Color>()
-        color.bind(objectBinding(droom.room_id) { value ?.let { hashStringColorDark( it.id)}} )
-        avatar = AvatarAlways(droom.avatar_url, droom.displayName, color)
         with(root) { setUpCell() }
     }
 
-    private fun setUpCell(){
-        add(avatar)
+    private fun EventTarget.setUpCell(){
+        add(AvatarAlways(avUrl, name, avColor))
         stackpane {
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
@@ -66,33 +86,27 @@ class DiscoveredRoomFragment: ListCellFragment<DiscoveredRoom>() {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
                 hbox(9.0) {
-                    label(droom.displayName) {
+                    label(name) {
                         style {
                             fontWeight = FontWeight.EXTRA_BOLD
                         }
                     }
-                    label("World Readable") { removeWhen { droom.world_read.toBinding().not() } }
-                    label("Guest Joinable") { removeWhen { droom.guest.toBinding().not() } }
+                    label("World Readable") { removeWhen { worldRead.not() } }
+                    label("Guest Joinable") { removeWhen { guestJoin.not() } }
                     text("Members: ") { style { opacity = 0.5 } }
                     text() {
-                        textProperty().bind(stringBinding(droom.n_mems) { "$value" })
+                        textProperty().bind(stringBinding(members) { "$value" })
                     }
                 }
-                val topicLess = booleanBinding(droom.topic) { value?.isEmpty() ?: true }
-                text(droom.topic) { removeWhen { topicLess } }
-                val aliases = stringBinding(droom.aliases) { value?.joinToString(", ") }
-                label() {
-                    textProperty().bind(aliases)
-                    style {
-                        opacity = 0.6
-                    }
-                }
+                val topicLess = booleanBinding(topic) { value?.isEmpty() ?: true }
+                text(topic) { removeWhen { topicLess } }
+                add(aliasesLabel)
             }
             stackpane {
                 val h = hoverProperty()
                 button("Join") {
                     visibleWhen { h }
-                    action { joinById(droom.room_id.value, droom.displayName.value, root) }
+                    action { joinById(roomId.value, name.value, root) }
                 }
                 alignment = Pos.CENTER_RIGHT
             }

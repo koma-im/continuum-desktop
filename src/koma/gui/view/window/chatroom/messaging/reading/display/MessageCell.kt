@@ -18,9 +18,10 @@ import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
+import okhttp3.HttpUrl
 import tornadofx.*
 
-class MessageCell(val message: RoomEventRow) {
+class MessageCell(val message: RoomEventRow, server: HttpUrl) {
     val node
         get() = _node
 
@@ -31,7 +32,7 @@ class MessageCell(val message: RoomEventRow) {
         val vn = when(ev) {
             is MRoomMember -> MRoomMemberViewNode(ev)
             is MRoomCreate -> MRoomCreationViewNode(ev)
-            is MRoomMessage -> MRoomMessageViewNode(ev)
+            is MRoomMessage -> MRoomMessageViewNode(ev, server)
             else -> null
         }
         if (vn == null) {

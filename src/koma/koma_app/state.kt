@@ -7,7 +7,6 @@ import koma.Koma
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
 import koma.storage.config.ConfigPaths
-import koma.storage.config.server.ServerConf
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
@@ -25,7 +24,7 @@ object appState {
     lateinit var store: AppStore
     var stopSync: (()-> Unit)? = null
     var apiClient: MatrixApi? = null
-    lateinit var serverConf: ServerConf
+
     val roomStore by lazy { RoomStore(koma.paths) }
     private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
     val userStore by lazy { UserStore(koma.paths) }

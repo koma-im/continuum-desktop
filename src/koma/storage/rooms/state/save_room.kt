@@ -31,7 +31,7 @@ fun ConfigPaths.saveRoom(room: Room){
             room.joinRule,
             room.histVisibility,
             room.name.get(),
-            room.iconURL,
+            room.iconURL.toString(),
             room.power_levels
     )
     val moshi = MoshiInstance.moshi

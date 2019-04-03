@@ -1,6 +1,5 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common
 
-import com.github.kittinunf.result.success
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
@@ -10,8 +9,6 @@ import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
-import koma.network.media.MHUrl
-import koma.network.media.downloadMedia
 import koma.storage.persistence.settings.AppSettings
 import koma.util.result.ok
 import kotlinx.coroutines.Dispatchers
@@ -19,14 +16,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import link.continuum.desktop.util.http.downloadHttp
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
 
-class ImageElement(val url: MHUrl): ViewNode {
+class ImageElement(
+        val url: HttpUrl,
+        private val client: OkHttpClient,
+        val mxcUrl: String? = null
+): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
-    private val server = appState.serverConf
 
     init {
         val imageProperty = SimpleObjectProperty<Image>()
@@ -34,7 +37,8 @@ class ImageElement(val url: MHUrl): ViewNode {
         node.add(imageView)
         node.setOnMouseClicked { event ->
             if (event.button == MouseButton.PRIMARY) {
-                viewBiggerPicture(imageProperty, url)
+                val title = mxcUrl ?: url.toString()
+                viewBiggerPicture(imageProperty, title)
             }
         }
 
@@ -44,7 +48,7 @@ class ImageElement(val url: MHUrl): ViewNode {
         menuItems = menuItems()
 
         GlobalScope.launch {
-            val res = appState.koma.downloadMedia(url, server).ok() ?: return@launch
+            val res = downloadHttp(url, client).ok() ?: return@launch
             val image = Image(res.inputStream())
             if (image.width > imageSize) {
                 imageView.fitHeight = imageSize
@@ -62,9 +66,7 @@ class ImageElement(val url: MHUrl): ViewNode {
     private fun menuItems(): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.action {
-            url.toHttpUrl(server).success {
-                downloadFileAs(it, title = "Save Image As")
-            }
+            downloadFileAs(url, title = "Save Image As")
         }
         return listOf(tm)
     }
@@ -75,7 +77,7 @@ class ImageElement(val url: MHUrl): ViewNode {
  */
 fun viewBiggerPicture(
         image: SimpleObjectProperty<Image>,
-        url: MHUrl
+        title: String
 ) {
     val owner = FX.primaryStage.scene.root
     val win = InternalWindow(
@@ -84,16 +86,16 @@ fun viewBiggerPicture(
             escapeClosesWindow = true,
             closeButton = true,
             overlayPaint = c("#000", 0.4))
-    win.open(view = BiggerPictureView(image, url), owner = owner)
+    win.open(view = BiggerPictureView(image, title), owner = owner)
 }
 
 private class BiggerPictureView(
         image: SimpleObjectProperty<Image>,
-        url: MHUrl
+        url: String
 ): View() {
     override val root = StackPane()
     init {
-        title = url.toString()
+        title = url
 
         with(root) {
             imageview(image) {

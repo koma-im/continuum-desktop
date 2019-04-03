@@ -8,8 +8,6 @@ import koma.matrix.UserId
 import koma.matrix.UserPassword
 import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.server.ServerConf
-import koma.storage.config.server.getAddress
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -18,8 +16,11 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.models.getToken
+import link.continuum.desktop.database.models.saveServerAddr
 import link.continuum.desktop.database.models.saveToken
-import tornadofx.*
+import link.continuum.desktop.util.gui.alert
+import okhttp3.HttpUrl
+
 
 /**
  * when the login button is clicked
@@ -27,9 +28,15 @@ import tornadofx.*
  */
 suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: String, server: String) {
     val userid = UserId_new(user)
-    val servCon = koma.servers.serverConfWithAddr(userid.server, server)
+    val url = HttpUrl.parse(server)
+    if (url == null) {
+        alert(Alert.AlertType.ERROR, "Invalid server url",
+                "$server not parsed")
+        return
+    }
+    saveServerAddr(data, userid.server, server)
     val token = if (!password.isBlank()) {
-        getTokenWithPassword(userid, password, koma, data, servCon)
+        getTokenWithPassword(userid, password, koma, data, server)
     } else {
         val t = getToken(data, userid)
         if (t == null) {
@@ -41,7 +48,7 @@ suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: S
         t
     }
     token ?: return
-    startChat(koma, userid, token, servCon)
+    startChat(koma, userid, token, url)
 }
 
 /**
@@ -50,8 +57,8 @@ suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: S
  */
 private suspend fun getTokenWithPassword(userid: UserId, password: String, koma: Koma,
                                          data: KDataStore,
-                                         servCon: ServerConf): String? {
-    val authResu = login(UserPassword(user = userid.user, password = password), servCon, koma.http).awaitMatrix()
+                                         server: String): String? {
+    val authResu = login(UserPassword(user = userid.user, password = password), server, koma.http).awaitMatrix()
     when (authResu) {
         is Result.Success -> {
             val u = authResu.value.user_id
@@ -64,7 +71,7 @@ private suspend fun getTokenWithPassword(userid: UserId, password: String, koma:
             val mes = ex.message
             System.err.println(mes)
             val message = if (ex is JsonEncodingException) {
-                "Does ${servCon.getAddress()} have a valid JSON API?"
+                "Does ${server} have a valid JSON API?"
             } else mes
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Login Fail with Error",

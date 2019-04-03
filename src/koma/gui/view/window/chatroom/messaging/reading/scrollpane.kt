@@ -17,6 +17,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
 import model.Room
+import okhttp3.HttpUrl
 import tornadofx.*
 import kotlin.math.roundToInt
 
@@ -26,7 +27,8 @@ typealias EventItem = RoomEventRow
 
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
-        room: Room
+        room: Room,
+        server: HttpUrl
 ): View() {
     override val root = AnchorPane()
 
@@ -64,7 +66,8 @@ class MessagesListScrollPane(
         virtualList.hgrow = Priority.ALWAYS
 
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell() }
+            RoomEventCell(server)
+        }
 
         addVirtualScrollPane()
         addScrollBottomButton()

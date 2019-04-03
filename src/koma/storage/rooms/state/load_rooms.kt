@@ -1,15 +1,16 @@
 package koma.storage.rooms.state
 
 import com.squareup.moshi.JsonDataException
+import koma.koma_app.appState
 import koma.matrix.json.MoshiInstance
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.visibility.HistoryVisibilityCaseInsensitiveAdapter
 import koma.matrix.room.visibility.RoomVisibilityCaseInsensitiveAdapter
 import koma.matrix.user.identity.UserId_new
 import koma.storage.config.ConfigPaths
-import koma.koma_app.appState
 import model.Room
 import mu.KotlinLogging
+import okhttp3.HttpUrl
 import java.io.File
 import java.io.IOException
 import java.util.stream.Stream
@@ -47,7 +48,7 @@ private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     val room = Room(roomId)
     room.aliases.setAll(savedRoomState.aliases)
     room.name.set(savedRoomState.name)
-    room.iconURL=savedRoomState.icon_Url
+    room.iconURL= HttpUrl.parse(savedRoomState.icon_Url)
     room.histVisibility = savedRoomState.history_visibility
     room.joinRule = savedRoomState.join_rule
     room.visibility = savedRoomState.visibility

@@ -58,7 +58,7 @@ class RoomAliasForm(room: Room, user: UserId): Fragment() {
                     removeWhen(SimpleBooleanProperty(canEdit).not())
                     val field = TextField()
                     field.promptText = "additional-alias"
-                    val servername = appState.serverConf.servername
+                    val servername = room.id.servername
                     hbox {
                         alignment = Pos.CENTER
                         label("#")

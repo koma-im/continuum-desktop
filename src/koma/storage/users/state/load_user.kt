@@ -4,6 +4,7 @@ import com.squareup.moshi.Moshi
 import koma.matrix.UserId
 import koma.model.user.UserState
 import koma.storage.config.ConfigPaths
+import okhttp3.HttpUrl
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -25,7 +26,7 @@ fun load_user(userId: UserId, paths: ConfigPaths): UserState {
         null
     }
     savedUser?: return us
-    us.avatar = savedUser.avatarUrl
+    us.avatar = HttpUrl.parse(savedUser.avatarUrl)
     us.name = savedUser.name
     us.modified = false
 

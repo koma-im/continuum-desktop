@@ -13,6 +13,7 @@ import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.appState.apiClient
 import model.Room
 import model.RoomItemModel
+import okhttp3.HttpUrl
 import tornadofx.*
 
 
@@ -22,12 +23,14 @@ import tornadofx.*
  * Created by developer on 2017/6/21.
  */
 
-class ChatView(roomList: ObservableList<Room>): View() {
+class ChatView(roomList: ObservableList<Room>,
+               server: HttpUrl
+): View() {
 
     override val root = vbox (spacing = 5.0)
 
-    val roomListView = RoomListView(roomList)
-    val switchableRoomView: SwitchableRoomView by inject()
+    val roomListView = RoomListView(roomList, server)
+    val switchableRoomView = SwitchableRoomView(server)
 
     init {
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->

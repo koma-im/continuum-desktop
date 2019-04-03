@@ -12,6 +12,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.s
 import koma.koma_app.appState
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
+import okhttp3.HttpUrl
 import tornadofx.*
 
 private val AppSettings = appState.store.settings
@@ -91,7 +92,7 @@ private fun EventTarget.addAvatar(url: String?) {
     val avatarsize = AppSettings.scaling * 32.0
     val minWid = AppSettings.scaling * 40.0
     this.stackpane {
-        url?.let { add(koma.gui.element.icon.avatar.AvatarView(it)) }
+        url?.let { HttpUrl.parse(it) }?.let { add(koma.gui.element.icon.avatar.AvatarView(it)) }
         minHeight = avatarsize
         minWidth = minWid
     }

@@ -1,17 +1,16 @@
 package koma.gui.element.icon.avatar
 
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.map
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import koma.gui.element.icon.avatar.processing.processAvatar
+import koma.koma_app.appState
 import link.continuum.desktop.util.cache.ImgCacheProc
-import koma.network.media.MHUrl
+import okhttp3.HttpUrl
 
 
-object AvatarProvider: ImgCacheProc({ i -> processAvatar(i)}) {
+object AvatarProvider: ImgCacheProc({ i -> processAvatar(i)}, appState.koma.http.client) {
 
-    fun getAvatar(uri: String): Result<SimpleObjectProperty<Image>, Exception>
-            = MHUrl.fromStr(uri).map { getProcImg(it) }
-
+    fun getAvatar(url: HttpUrl): SimpleObjectProperty<Image> {
+         return getImg(url)
+    }
 }

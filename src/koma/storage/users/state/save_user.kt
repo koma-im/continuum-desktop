@@ -17,7 +17,7 @@ fun ConfigPaths.saveUser(user: UserState) {
     dir?: return
     val data = SavedUserState(
             user.name,
-            user.avatar
+            user.avatar.toString()
     )
     val moshi = Moshi.Builder()
             .build()

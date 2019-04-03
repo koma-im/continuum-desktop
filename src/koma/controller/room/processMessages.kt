@@ -1,13 +1,14 @@
 package koma.controller.room
 
-import koma.matrix.event.room_message.RoomEvent
-import koma.matrix.event.room_message.state.*
-import koma.matrix.room.participation.Membership
 import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
+import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.event.room_message.state.*
+import koma.matrix.room.participation.Membership
 import model.Room
+import okhttp3.HttpUrl
 
 fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     events.forEach { message ->
@@ -24,7 +25,7 @@ fun Room.applyUpdate(update: RoomEvent) {
         is MRoomAliases -> {
             this.aliases.setAll(update.content.aliases)
         }
-        is MRoomAvatar -> this.iconURL=update.content.url
+        is MRoomAvatar -> HttpUrl.parse(update.content.url)?.let { this.iconURL = it }
         is MRoomCanonAlias -> this.setCanonicalAlias(update.content.alias)
         is MRoomJoinRule -> this.joinRule = update.content.join_rule
         is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility
@@ -43,7 +44,7 @@ fun Room.updateMember(update: MRoomMember) {
         Membership.join -> {
             val senderid = update.sender
             val user = appState.userStore.getOrCreateUserId(senderid)
-            update.content.avatar_url?.let { user.avatar = it }
+            update.content.avatar_url?.let { HttpUrl.parse(it)}?.let {  user.avatar = it  }
             update.content.displayname?.let { user.name=it }
             this.makeUserJoined(user)
         }

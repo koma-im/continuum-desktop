@@ -20,6 +20,7 @@ import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import okhttp3.HttpUrl
 import tornadofx.*
 
 
@@ -50,8 +51,8 @@ class Room(val id: RoomId) {
     // fallback in order: name, first alias, id
     val displayName = SimpleStringProperty(id.toString())
 
-    val iconURLProperty = SimpleStringProperty("")
-    var iconURL: String
+    val iconURLProperty = SimpleObjectProperty<HttpUrl>(null)
+    var iconURL: HttpUrl?
         get() = iconURLProperty.get()
         set(value) {
             iconURLProperty.set(value)

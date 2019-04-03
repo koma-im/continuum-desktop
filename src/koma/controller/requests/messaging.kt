@@ -25,7 +25,7 @@ import kotlinx.coroutines.javafx.JavaFx as UI
 fun sendMessage(room: RoomId, message: String) {
     val msg = textToMessage(message)
     GlobalScope.launch(Dispatchers.UI) {
-        val result = apiClient!!.sendMessageRobust(room, msg, retry = 100, timeout = 200)
+        val result = apiClient!!.sendMessage(room, msg)
 
         if (result is Result.Failure) {
             val content = result.error.message
@@ -51,7 +51,7 @@ fun sendFileMessage(room: RoomId) {
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
-            val r = api.sendMessageRobust(room, message)
+            val r = api.sendMessage(room, message)
             if (r is Result.Failure) {
                 withContext(Dispatchers.JavaFx) {
                     Notifications.create()
@@ -81,7 +81,7 @@ fun sendImageMessage(room: RoomId) {
             val up: UploadResponse = uploadResult.value
             println("sending image $file ${up.content_uri}")
             val msg = ImageMessage(file.name, up.content_uri)
-            val r = api.sendMessageRobust(room, msg)
+            val r = api.sendMessage(room, msg)
             if (r is Result.Failure) {
                 withContext(Dispatchers.JavaFx) {
                     Notifications.create()

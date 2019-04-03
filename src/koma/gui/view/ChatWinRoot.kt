@@ -21,6 +21,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
 import model.Room
+import okhttp3.HttpUrl
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
@@ -31,7 +32,9 @@ private val settings: AppSettings = appState.store.settings
  *
  * Created by developer on 2017/6/17.
  */
-class ChatWindowBars(roomList: ObservableList<Room>) {
+class ChatWindowBars(
+        roomList: ObservableList<Room>, server: HttpUrl
+) {
     val root = BorderPane()
     // used to show sync errors and allow user intervention
     val statusBar = VBox()
@@ -41,12 +44,12 @@ class ChatWindowBars(roomList: ObservableList<Room>) {
             style {
                 fontSize= settings.scaling.em
             }
-            center = ChatView(roomList).root
+            center = ChatView(roomList, server).root
             top = menubar {
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }
                     item("Join Room") {
-                        action { RoomFinder().open() }
+                        action { RoomFinder(server).open() }
                     }
                     item("Preferences").action {
                         find(PreferenceWindow::class).openModal()

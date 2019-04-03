@@ -10,6 +10,7 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import koma.storage.users.state.saveUser
+import okhttp3.HttpUrl
 
 /**
  * Created by developer on 2017/6/25.
@@ -30,13 +31,13 @@ data class UserState(val id: UserId) {
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    var avatar: String
+    var avatar: HttpUrl?
         set(value) {
             this.modified = true
             this.avatarURL.set(value)
         }
         get() = this.avatarURL.get()
-    val avatarURL = SimpleStringProperty("");
+    val avatarURL = SimpleObjectProperty<HttpUrl>(null);
 
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 

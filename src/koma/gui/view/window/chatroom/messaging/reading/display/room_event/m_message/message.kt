@@ -11,11 +11,15 @@ import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.render_node
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.showDatetime
-import koma.matrix.event.room_message.MRoomMessage
 import koma.koma_app.appState
+import koma.matrix.event.room_message.MRoomMessage
+import okhttp3.HttpUrl
 import tornadofx.*
 
-class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
+class MRoomMessageViewNode(
+        val item: MRoomMessage,
+        server: HttpUrl
+): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
@@ -25,7 +29,7 @@ class MRoomMessageViewNode(val item: MRoomMessage): ViewNode {
         val sender = sus.displayName
         val color = sus.color
 
-        val mcontent = item.render_node()
+        val mcontent = item.render_node(server)
         val items = mcontent?.menuItems ?: listOf()
         val mi = MenuItem("Copy text")
         with(mi){

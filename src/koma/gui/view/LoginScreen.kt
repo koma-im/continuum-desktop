@@ -15,6 +15,8 @@ import koma.storage.config.profile.getRecentUsers
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getServerAddrs
 import mu.KotlinLogging
 import tornadofx.*
 
@@ -24,7 +26,9 @@ private val settings: AppSettings = appState.store.settings
 /**
  * Created by developer on 2017/6/21.
  */
-class LoginScreen(): View() {
+class LoginScreen(
+        private val data: KDataStore = appState.store.database
+): View() {
 
     override val root = VBox()
 
@@ -79,7 +83,7 @@ class LoginScreen(): View() {
                 button("Register") {
                     action {
                         val o2 = FX.primaryStage.scene.root
-                        openInternalWindow(RegistrationWizard(), owner = o2)
+                        openInternalWindow(RegistrationWizard(data), owner = o2)
                     }
                 }
                 button("Login") {
@@ -100,7 +104,7 @@ class LoginScreen(): View() {
 
     private fun setServerAddr(input: String){
         val id = UserId_new(input)
-        val addrs = appState.koma.servers.serverConf(id.server).addresses
+        val addrs = getServerAddrs(data, id.server)
         serverCombo.items = FXCollections.observableArrayList(addrs)
         serverCombo.selectionModel.selectFirst()
     }
