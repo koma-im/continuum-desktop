@@ -8,11 +8,12 @@ import koma.koma_app.SaveToDiskTasks
 import koma.koma_app.appState
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
-import koma.storage.persistence.account.loadSyncBatchToken
-import koma.storage.persistence.account.saveSyncBatchToken
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getSyncBatchKey
+import link.continuum.desktop.database.models.saveSyncBatchKey
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -28,17 +29,20 @@ class SyncControl(
          * used to show sync status
          */
         private val statusChan: Channel<SyncStatusBar.Variants>,
+        private val data: KDataStore,
         full_sync: Boolean = false
 ) {
     private val sync: MatrixSyncReceiver
-    private val data = appState.koma.paths
+
     init{
         val batch_key = if (full_sync) {
             GlobalScope.launch {
                 statusChan.send(SyncStatusBar.Variants.FullSync())
             }
             null
-        }  else data.loadSyncBatchToken(user)
+        }  else {
+            getSyncBatchKey(data, user)
+        }
         sync = MatrixSyncReceiver(apiClient, batch_key)
 
         appState.stopSync = {
@@ -71,7 +75,9 @@ class SyncControl(
         SaveToDiskTasks.addJob {
             val nb = sync.since
             logger.debug { "Saving batch key $nb" }
-            nb?.let { data.saveSyncBatchToken(user, nb) }
+            nb?.let {
+                saveSyncBatchKey(data, user, nb)
+            }
         }
     }
 

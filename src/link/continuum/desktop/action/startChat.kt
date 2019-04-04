@@ -7,6 +7,7 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.config.profile.saveLastUsed
 import koma.storage.persistence.account.loadJoinedRooms
+import link.continuum.desktop.database.KDataStore
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -17,7 +18,7 @@ private val logger = KotlinLogging.logger {}
  * show the chat window after login is done
  * updates the list of recently used accounts
  */
-fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl) {
+fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDataStore) {
     koma.saveLastUsed(userId)
 
     val app = appState
@@ -40,7 +41,8 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl) {
             apiClient,
             userId,
             statusChan = statusBar.status,
-            full_sync =  fullSync
+            full_sync =  fullSync,
+            data = data
     )
 
     sync.start()

@@ -48,7 +48,7 @@ suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: S
         t
     }
     token ?: return
-    startChat(koma, userid, token, url)
+    startChat(koma, userid, token, url, data)
 }
 
 /**
