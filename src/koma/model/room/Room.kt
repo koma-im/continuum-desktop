@@ -89,7 +89,7 @@ class Room(val id: RoomId) {
     }
 
     fun removeMember(mid: UserId) {
-        val us = appState.userStore.getOrCreateUserId(mid)
+        val us = appState.store.userStore.getOrCreateUserId(mid)
         if (members.remove(us)) {
         } else {
         }

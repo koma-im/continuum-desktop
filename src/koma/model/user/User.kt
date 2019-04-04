@@ -1,48 +1,42 @@
 package koma.model.user
 
-import javafx.beans.property.SimpleLongProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
-import koma.koma_app.SaveToDiskTasks
-import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
-import koma.storage.users.state.saveUser
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.saveUserAvatar
+import link.continuum.desktop.database.models.saveUserNick
 import okhttp3.HttpUrl
 
 /**
  * Created by developer on 2017/6/25.
  */
-data class UserState(val id: UserId) {
-    var modified = true
-
+data class UserState(val id: UserId,
+                     private val data: KDataStore
+) {
     val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
 
-    var name: String
-        set(value) {
-            this.modified = true
-            this.displayName.set(value)
-        }
-        get() = this.displayName.get()
-    val displayName = SimpleStringProperty(id.toString())
+    private val _name = ReadOnlyStringWrapper(id.str)
+    val name: ReadOnlyStringProperty =  _name.readOnlyProperty
 
     val color = hashStringColorDark(id.toString())
     val colorProperty = SimpleObjectProperty<Color>(color)
 
-    var avatar: HttpUrl?
-        set(value) {
-            this.modified = true
-            this.avatarURL.set(value)
-        }
-        get() = this.avatarURL.get()
-    val avatarURL = SimpleObjectProperty<HttpUrl>(null);
+    private val _avatar = ReadOnlyObjectWrapper<HttpUrl>()
+    val avatar = _avatar.readOnlyProperty
 
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
-    init {
-        SaveToDiskTasks.addJob { if (this.modified) appState.koma.paths.saveUser(this) }
+    fun setName(name: String, timestamp: Long) {
+        _name.set(name)
+        saveUserNick(data, id, name, timestamp)
+    }
+
+    fun setAvatar(url: HttpUrl, timestamp: Long) {
+        _avatar.set(url)
+        saveUserAvatar(data, id, url.toString(), timestamp)
     }
 
     fun weight(): Int {

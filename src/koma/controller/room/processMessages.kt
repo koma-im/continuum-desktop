@@ -8,7 +8,10 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
 import model.Room
+import mu.KotlinLogging
 import okhttp3.HttpUrl
+
+private val logger = KotlinLogging.logger {}
 
 fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     events.forEach { message ->
@@ -43,9 +46,17 @@ fun Room.updateMember(update: MRoomMember) {
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
-            val user = appState.userStore.getOrCreateUserId(senderid)
-            update.content.avatar_url?.let { HttpUrl.parse(it)}?.let {  user.avatar = it  }
-            update.content.displayname?.let { user.name=it }
+            val user = appState.store.userStore.getOrCreateUserId(senderid)
+            update.content.avatar_url?.let {
+                val u = HttpUrl.parse(it)
+                if (u == null) logger.error { "invalid avatar url in ${update.content}"}
+                u
+            }?.let {
+                user.setAvatar(it, update.origin_server_ts)
+            }
+            update.content.displayname?.let {
+                user.setName(it, update.origin_server_ts)
+            }
             this.makeUserJoined(user)
         }
         Membership.leave -> {

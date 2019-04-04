@@ -57,7 +57,7 @@ private fun loadRoomAt(roomId: RoomId, roomDir: File): Room? {
     val members = load_members(roomDir.resolve(usersfilename))
     for (m in members) {
         val u = UserId_new(m.first)
-        room.members.add(appState.userStore.getOrCreateUserId(u))
+        room.members.add(appState.store.userStore.getOrCreateUserId(u))
     }
     return room
 }

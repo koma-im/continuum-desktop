@@ -25,8 +25,8 @@ class MRoomMessageViewNode(
 
     init {
 
-        val sus = appState.userStore.getOrCreateUserId(item.sender)
-        val sender = sus.displayName
+        val sus = appState.store.userStore.getOrCreateUserId(item.sender)
+        val sender = sus.name
         val color = sus.color
 
         val mcontent = item.render_node(server)
@@ -47,7 +47,7 @@ class MRoomMessageViewNode(
                     paddingAll = 2.0
                     backgroundColor = multi(Color.WHITE)
                 }
-                add(AvatarAlways(sus.avatarURL, sus.displayName, sus.color))
+                add(AvatarAlways(sus.avatar, sus.name, sus.color))
 
                 vbox(spacing = 2.0) {
                     hgrow = Priority.ALWAYS

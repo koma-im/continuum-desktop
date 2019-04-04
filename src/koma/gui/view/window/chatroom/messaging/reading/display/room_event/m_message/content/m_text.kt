@@ -37,7 +37,7 @@ class MEmoteViewNode(val content: EmoteMessage, val event: MRoomMessage): ViewNo
     init {
         val user = event.sender.getState()
         with(node) {
-            label(user.displayName) {
+            label(user.name) {
                 textFill = user.color
             }
             text(" ")

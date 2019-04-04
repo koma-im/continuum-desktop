@@ -65,12 +65,12 @@ private fun get_node(item: UserState?, showName: Boolean): Node {
             fontSize= scale.em
         }
         stackpane {
-            add(AvatarAlways(item.avatarURL, item.displayName, item.color))
+            add(AvatarAlways(item.avatar, item.name, item.color))
             minHeight = avsize
             minWidth = avsize
         }
         if (showName) {
-            label(item.displayName) {
+            label(item.name) {
                 this.textFillProperty().bind(item.colorProperty)
             }
         }

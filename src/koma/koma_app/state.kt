@@ -27,7 +27,7 @@ object appState {
 
     val roomStore by lazy { RoomStore(koma.paths) }
     private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
-    val userStore by lazy { UserStore(koma.paths) }
+
     fun sortMembersInEachRoom(){
         val rs = accountRooms()
         rs?.forEach {  room: Room -> room.sortMembers() }
@@ -58,11 +58,13 @@ object appState {
 
 class AppStore(dir: String) {
     val database: KotlinEntityDataStore<Persistable>
+
     init {
         val paths = ConfigPaths(dir)
         val fp = paths.getCreateDir("desktop") ?: throw Exception("can't create configuration directory in $dir")
         val dbPath = fp.resolve("continuum-desktop").canonicalPath
         database = openStore(dbPath)
     }
+    val userStore = UserStore(database)
     val settings = AppSettings(database)
 }
