@@ -22,6 +22,8 @@ import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.models.saveServerAddr
 import link.continuum.desktop.database.models.saveToken
+import link.continuum.desktop.util.Err
+import link.continuum.desktop.util.getErrOr
 import netscape.javascript.JSObject
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -188,22 +190,13 @@ class PasswordAuthView(
      * if it's other exceptions, registration has failed
      */
     override suspend fun finish(): Result<RegisterdUser, Exception>? {
-        val result = register.registerByPassword(user.text, pass.text)
-        when (result) {
-            is Result.Success -> return result
-            is Result.Failure -> {
-                when (result.error) {
-                    is AuthException.AuthFail -> return result
-                    else -> {
-                        uilaunch {
-                            alert(Alert.AlertType.WARNING,
-                                    "Registration hasn't succeeded",
-                                    "Error: ${result.error.message}"
-                            )
-                        }
-                    }
-                }
-            }
+        val f = register.registerByPassword(user.text, pass.text).getErrOr { return it }
+        if (f is AuthException.AuthFail) return Err(f)
+        uilaunch {
+            alert(Alert.AlertType.WARNING,
+                    "Registration hasn't succeeded",
+                    "Error: ${f.message}"
+            )
         }
         return null
     }
