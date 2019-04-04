@@ -1,7 +1,6 @@
 package koma.model.user
 
 import javafx.beans.property.*
-import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
@@ -22,7 +21,6 @@ data class UserState(val id: UserId,
     val name: ReadOnlyStringProperty =  _name.readOnlyProperty
 
     val color = hashStringColorDark(id.toString())
-    val colorProperty = SimpleObjectProperty<Color>(color)
 
     private val _avatar = ReadOnlyObjectWrapper<HttpUrl>()
     val avatar = _avatar.readOnlyProperty

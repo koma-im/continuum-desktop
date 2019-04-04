@@ -7,7 +7,7 @@ import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.element.control.PrettyListView
-import koma.gui.view.usersview.fragment.get_cell_property
+import koma.gui.view.usersview.fragment.MemberCell
 import koma.koma_app.appState
 import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
@@ -46,7 +46,9 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
                 val ulwidth = doubleBinding(showavataronly) { scale * if(value) 50.0 else 138.0}
                 maxWidthProperty().bind(ulwidth)
                 prefWidthProperty().bind(ulwidth)
-                cellFactoryProperty().bind(get_cell_property(showavataronly))
+                setCellFactory {
+                    MemberCell(showavataronly)
+                }
             }
             add(userlist)
         }
