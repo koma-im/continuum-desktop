@@ -1,10 +1,7 @@
 package link.continuum.desktop.util
 
 import com.github.kittinunf.result.Result
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertNotSame
-import kotlin.test.assertSame
+import kotlin.test.*
 
 internal class ResultKtTest {
 
@@ -23,6 +20,16 @@ internal class ResultKtTest {
         assertNotSame(ex, Ok<Int, Exception>(5).getErrOr { Exception() })
         assertNotSame(ex, Err<Int, Exception>(Exception("ex2")).getErrOr { Exception() })
         assertSame(ex, e.getErrOr { Exception() })
+    }
+
+    @Test
+    fun nullableGetOr() {
+        assertEquals(1, null as Int? `?or` { 1 })
+        assertEquals(null, null as Int? `?or?` { null })
+        assertEquals(2, null as Int? `?or?` { null } `?or?` { 2 })
+        assertEquals(3, null as Int? `?or?` { 3 } `?or?` { null })
+        assertEquals(4, 4 as Int? `?or?` { 3 } `?or?` { null })
+        assertEquals(6, 6 as Int? `?or?` { 3 } `?or` { 5 })
     }
 }
 

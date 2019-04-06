@@ -11,9 +11,9 @@ import org.h2.jdbcx.JdbcDataSource
 
 typealias KDataStore = KotlinEntityDataStore<Persistable>
 
-internal fun openStore(dbPath: String): KotlinEntityDataStore<Persistable> {
+internal fun openStore(dbPath: String, level: Int=1): KotlinEntityDataStore<Persistable> {
     val ds = JdbcDataSource()
-    ds.setURL("jdbc:h2:$dbPath;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=1")
+    ds.setURL("jdbc:h2:$dbPath;TRACE_LEVEL_FILE=0;TRACE_LEVEL_SYSTEM_OUT=$level")
     val dsp = JdbcConnectionPool.create(ds)
     val conf = KotlinConfiguration(dataSource = dsp, model = Models.DEFAULT)
     val s = KotlinEntityDataStore<Persistable>(conf)

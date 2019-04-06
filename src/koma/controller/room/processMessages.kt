@@ -28,8 +28,8 @@ fun Room.applyUpdate(update: RoomEvent) {
         is MRoomAliases -> {
             this.aliases.setAll(update.content.aliases)
         }
-        is MRoomAvatar -> HttpUrl.parse(update.content.url)?.let { this.iconURL = it }
-        is MRoomCanonAlias -> this.setCanonicalAlias(update.content.alias)
+        is MRoomAvatar -> HttpUrl.parse(update.content.url)?.let { this.avatar.set(it) }
+        is MRoomCanonAlias -> this.canonicalAlias.set(update.content.alias)
         is MRoomJoinRule -> this.joinRule = update.content.join_rule
         is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility
         is MRoomPowerLevels -> this.updatePowerLevels(update.content)
@@ -62,7 +62,7 @@ fun Room.updateMember(update: MRoomMember) {
         Membership.leave -> {
             this.removeMember(update.sender)
             if (apiClient?.userId == update.sender) {
-                appState.accountRoomStore()?.remove(this.id)
+                appState.store.getAccountRoomStore(update.sender).remove(this.id)
             }
         }
         Membership.ban -> {

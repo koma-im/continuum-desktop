@@ -131,10 +131,8 @@ class RoomListView(
     private val existing = ConcurrentHashMap.newKeySet<RoomId>()
 
     init {
-        val rooms = appState.accountRooms()?.map { it.id }
-        if (rooms != null) {
-            existing.addAll(rooms)
-        }
+        appState.currentUser?.let { appState.store.getAccountRoomStore(it).roomList
+        }?.map { it.id } ?.let { existing.addAll(it) }
         with(root) {
             vgrow = Priority.ALWAYS
             cellFactory = Callback{

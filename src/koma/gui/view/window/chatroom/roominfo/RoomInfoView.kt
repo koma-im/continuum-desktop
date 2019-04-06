@@ -12,19 +12,23 @@ import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIco
 import koma.gui.view.window.chatroom.roominfo.about.requests.requestUpdateRoomName
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
-import koma.matrix.room.power.canUserSet
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getChangeStateAllowed
 import model.Room
 import tornadofx.*
 
-class RoomInfoDialog(room: Room, user: UserId): Fragment() {
+class RoomInfoDialog(
+        room: Room, user: UserId,
+        data: KDataStore
+): Fragment() {
     override val root= VBox(10.0)
 
     init {
-        val canEditName = room.power_levels.canUserSet(user, RoomEventType.Name)
-        val canEditAvatar =room.power_levels.canUserSet(user, RoomEventType.Avatar)
+        val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
+        val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())
 
         this.title = "Update Info of Room ${room.displayName.value}"
-        val aliasDialog = RoomAliasForm(room, user)
+        val aliasDialog = RoomAliasForm(room, user, data)
         with(root) {
             paddingAll = 5
             hbox(5) {
@@ -46,7 +50,7 @@ class RoomInfoDialog(room: Room, user: UserId): Fragment() {
                 vbox(5.0) {
                     paddingAll = 5
                     alignment = Pos.CENTER
-                    val roomicon = AvatarAlways(room.iconURLProperty, room.displayName, room.color)
+                    val roomicon = AvatarAlways(room.avatar, room.displayName, room.color)
                     add(roomicon)
                     val camera = MaterialIconFactory.get().createIcon(MaterialIcon.PHOTO_CAMERA)
                     hyperlink(graphic = camera) {

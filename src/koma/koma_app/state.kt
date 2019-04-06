@@ -25,33 +25,6 @@ object appState {
     var stopSync: (()-> Unit)? = null
     var apiClient: MatrixApi? = null
 
-    val roomStore by lazy { RoomStore(koma.paths) }
-    private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
-
-    fun sortMembersInEachRoom(){
-        val rs = accountRooms()
-        rs?.forEach {  room: Room -> room.sortMembers() }
-    }
-    fun accountRoomStore(): UserRoomStore? {
-        val u = currentUser
-        if (u == null) {
-            logger.warn { "user id not set, can't manage joined rooms" }
-            return null
-        }
-        return getAccountRoomStore(u)
-    }
-
-    /**
-     * only creates an object
-     * does not load rooms from disk
-     */
-    fun getAccountRoomStore(userId: UserId): UserRoomStore? {
-        return _accountRooms.computeIfAbsent(userId, { UserRoomStore(roomStore) })
-    }
-    fun accountRooms(): List<Room>? {
-        return accountRoomStore()?.roomList
-    }
-
     init {
     }
 }
@@ -66,5 +39,10 @@ class AppStore(dir: String) {
         database = openStore(dbPath)
     }
     val userStore = UserStore(database)
+    val roomStore = RoomStore(database)
     val settings = AppSettings(database)
+    private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
+    fun getAccountRoomStore(userId: UserId): UserRoomStore {
+        return _accountRooms.computeIfAbsent(userId, { UserRoomStore(roomStore) })
+    }
 }

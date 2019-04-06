@@ -1,18 +1,23 @@
 package koma.gui.view
 
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
+import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
+import koma.gui.element.icon.AvatarUrl
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.appState.apiClient
+import link.continuum.desktop.database.KDataStore
 import model.Room
-import model.RoomItemModel
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -24,12 +29,13 @@ import tornadofx.*
  */
 
 class ChatView(roomList: ObservableList<Room>,
-               server: HttpUrl
+               server: HttpUrl,
+               data: KDataStore
 ): View() {
 
     override val root = vbox (spacing = 5.0)
 
-    val roomListView = RoomListView(roomList, server)
+    val roomListView = RoomListView(roomList, server, data)
     val switchableRoomView = SwitchableRoomView(server)
 
     init {
@@ -54,12 +60,26 @@ class ChatView(roomList: ObservableList<Room>,
 
 }
 
-class RoomFragment: ListCellFragment<Room>() {
+class RoomFragment(private val data: KDataStore): ListCell<Room>() {
+    var room: Room? = null
+    private val icon = SimpleObjectProperty<AvatarUrl>(null)
+    private val name = SimpleStringProperty()
+    private val color = SimpleObjectProperty<Color>(null)
 
-    val room = RoomItemModel(itemProperty)
-    val iconUrl = room.select { it.iconURLProperty }
+    override fun updateItem(item: Room?, empty: Boolean) {
+        super.updateItem(item, empty)
+        if (empty || item == null) {
+            graphic = null
+            return
+        }
+        room = item
+        icon.cleanBind(item.avatar)
+        name.cleanBind(item.displayName)
+        color.set(item.color)
+        graphic = root
+    }
 
-    override val root = hbox(spacing = 10.0) {
+    private val root = hbox(spacing = 10.0) {
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT
@@ -67,23 +87,21 @@ class RoomFragment: ListCellFragment<Room>() {
             item("Room Info").action { openInfoView() }
             separator()
             item("Leave").action {
-                leaveRoom(itemProperty.value)
+                room ?.let { leaveRoom(it) }
             }
 
         }
-        add(AvatarAlways(iconUrl, room.name, room.color))
-
-        label(room.name) {
-            textFillProperty().bind(room.color)
+        add(AvatarAlways(icon, name, color))
+        label(name) {
+            textFillProperty().bind(color)
         }
+
     }
 
     private fun openInfoView() {
-        val room = itemProperty.value
-        val user = apiClient?.userId
-        if (room != null && user != null) {
-            RoomInfoDialog(room, user).openWindow()
-        }
+        val room = item ?: return
+        val user = apiClient?.userId ?: return
+        RoomInfoDialog(room, user, data).openWindow()
     }
 }
 

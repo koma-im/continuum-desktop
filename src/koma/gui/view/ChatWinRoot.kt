@@ -20,6 +20,7 @@ import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -33,7 +34,7 @@ private val settings: AppSettings = appState.store.settings
  * Created by developer on 2017/6/17.
  */
 class ChatWindowBars(
-        roomList: ObservableList<Room>, server: HttpUrl
+        roomList: ObservableList<Room>, server: HttpUrl, kDataStore: KDataStore
 ) {
     val root = BorderPane()
     // used to show sync errors and allow user intervention
@@ -44,7 +45,7 @@ class ChatWindowBars(
             style {
                 fontSize= settings.scaling.em
             }
-            center = ChatView(roomList, server).root
+            center = ChatView(roomList, server, kDataStore).root
             top = menubar {
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }

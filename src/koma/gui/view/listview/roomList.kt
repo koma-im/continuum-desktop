@@ -12,6 +12,7 @@ import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -19,7 +20,9 @@ import tornadofx.*
 private val settings: AppSettings = appState.store.settings
 
 class RoomListView(
-        roomlist: ObservableList<Room>, server: HttpUrl): View() {
+        roomlist: ObservableList<Room>, server: HttpUrl,
+        private val data: KDataStore
+        ): View() {
     override val root = listview(roomlist)
 
     init {
@@ -68,7 +71,9 @@ class RoomListView(
         node.minWidth = 178.0 * scale
         node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
-        node.cellFragment(RoomFragment::class)
+        node.setCellFactory {
+            RoomFragment(data)
+        }
         node.selectionModel.selectedItemProperty().onChange { room ->
             if (room != null) appState.currRoom.set(room)
         }

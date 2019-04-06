@@ -21,24 +21,26 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import koma.matrix.room.naming.RoomAlias
-import koma.matrix.room.power.canUserSet
-import koma.matrix.room.power.canUserSetStates
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getChangeStateAllowed
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
 import java.util.concurrent.Callable
 
-class RoomAliasForm(room: Room, user: UserId): Fragment() {
+class RoomAliasForm(room: Room, user: UserId,
+                    data: KDataStore
+                    ): Fragment() {
     override val root: Fieldset
 
     init {
-        val canEditCanonAlias = room.power_levels.canUserSet(user, RoomEventType.CanonAlias)
-        val canEdit = room.power_levels.canUserSetStates(user)
+        val canEditCanonAlias = getChangeStateAllowed(data, room.id, user, RoomEventType.CanonAlias.toString())
+        val canEdit = getChangeStateAllowed(data, room.id, user)
 
         this.title = "Update Aliases of Room ${room.displayName.value}"
 

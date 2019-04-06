@@ -1,9 +1,9 @@
 package koma.controller.requests.membership
 
 import com.github.kittinunf.result.Result
+import koma.koma_app.appState
 import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.koma_app.appState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -16,8 +16,9 @@ fun leaveRoom(mxroom: Room) {
     val api = appState.apiClient
     api ?: return
     val removeLocally = { GlobalScope.launch(Dispatchers.JavaFx) {
-        appState.accountRoomStore()?.remove(mxroom.id) }
-    }
+        val u = appState.currentUser ?: return@launch
+        appState.store.getAccountRoomStore(u).remove(mxroom.id)
+    } }
     GlobalScope.launch {
         val roomname = mxroom.displayName.get()
         println("Leaving $roomname")

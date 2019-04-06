@@ -1,11 +1,10 @@
 package koma.storage.rooms
 
 import javafx.collections.FXCollections
-import koma.koma_app.SaveToDiskTasks
 import koma.matrix.room.naming.RoomId
-import koma.storage.config.ConfigPaths
-import koma.storage.rooms.state.loadRoom
-import koma.storage.rooms.state.saveRoom
+import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.loadRoom
+import link.continuum.desktop.util.`?or`
 import model.Room
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -36,19 +35,16 @@ class UserRoomStore(private val roomStore: RoomStore) {
     }
 }
 
-class RoomStore(private val paths: ConfigPaths){
+class RoomStore(private val data: KDataStore){
     private val store = ConcurrentHashMap<RoomId, Room>()
 
     fun getOrCreate(roomId: RoomId): Room {
-        val newRoom = store.computeIfAbsent(roomId, { paths.loadRoom(roomId)?: Room(roomId)})
+        val newRoom = store.computeIfAbsent(roomId) {
+            loadRoom(data, roomId) `?or` {
+                logger.info { "Room $roomId not in database" }
+                Room(roomId, data)
+            }}
         return newRoom
-    }
-
-    init {
-
-        SaveToDiskTasks.addJob {
-            this.store.forEach { _, u: Room -> paths.saveRoom(u) }
-        }
     }
 }
 

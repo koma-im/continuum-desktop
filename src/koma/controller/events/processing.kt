@@ -3,7 +3,6 @@ package koma.controller.events
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
 import koma.koma_app.appState
-import koma.koma_app.appState.sortMembersInEachRoom
 import koma.matrix.UserId
 import koma.matrix.event.ephemeral.parse
 import koma.matrix.room.InvitedRoom
@@ -50,11 +49,11 @@ private fun handle_joined_room(owner: UserId, roomid: RoomId, data: JoinedRoom) 
  * usually used after getting information from the server
  */
 fun addJoinedRoom(userId: UserId, roomid: RoomId): Room {
-    return appState.getAccountRoomStore(userId)!!.add(roomid)
+    return appState.store.getAccountRoomStore(userId).add(roomid)
 }
 
 private fun leaveLeftRooms(owner: UserId, roomid: RoomId, @Suppress("UNUSED_PARAMETER") _leftRoom: LeftRoom) {
-    appState.getAccountRoomStore(owner)!!.remove(roomid)
+    appState.store.getAccountRoomStore(owner).remove(roomid)
 }
 
 private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, data: InvitedRoom) {
@@ -69,6 +68,4 @@ fun processEventsResult(owner: UserId, syncRes: SyncResponse) {
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data) }
     syncRes.rooms.leave.forEach { id, leftroom -> leaveLeftRooms(owner, id, leftroom) }
     // there's also left rooms
-
-    sortMembersInEachRoom()
 }

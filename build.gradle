@@ -74,7 +74,7 @@ dependencies {
 }
 
 group = 'link.continuum'
-version = '0.7.9.9'
+version = '0.7.9.9.1'
 description = 'continuum-desktop'
 sourceCompatibility = "9"
 
@@ -85,7 +85,6 @@ tasks.withType(JavaCompile) {
 }
 
 compileKotlin {
-    kotlinOptions.suppressWarnings = true
     kotlinOptions.jvmTarget = "1.8"
 }
 
