@@ -16,7 +16,6 @@ module link.continuum.desktop {
     requires de.jensd.fx.glyphs.materialicons;
     requires javafx.media;
     requires controlsfx;
-    requires com.squareup.moshi;
     requires kotlin.stdlib.jdk8;
     requires org.junit.jupiter.api;
     requires emoji.java;

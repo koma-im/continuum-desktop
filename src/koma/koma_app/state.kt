@@ -6,7 +6,6 @@ import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
-import koma.storage.config.ConfigPaths
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
@@ -14,6 +13,7 @@ import koma.storage.users.UserStore
 import link.continuum.desktop.database.openStore
 import model.Room
 import mu.KotlinLogging
+import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
@@ -33,9 +33,9 @@ class AppStore(dir: String) {
     val database: KotlinEntityDataStore<Persistable>
 
     init {
-        val paths = ConfigPaths(dir)
-        val fp = paths.getCreateDir("desktop") ?: throw Exception("can't create configuration directory in $dir")
-        val dbPath = fp.resolve("continuum-desktop").canonicalPath
+        val desktop = File(dir).resolve("desktop")
+        desktop.mkdirs()
+        val dbPath = desktop.resolve("continuum-desktop").canonicalPath
         database = openStore(dbPath)
     }
     val userStore = UserStore(database)

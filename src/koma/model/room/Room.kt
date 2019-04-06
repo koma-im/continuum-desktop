@@ -59,10 +59,6 @@ class Room(
 
     val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
 
-    fun sortMembers(){
-        FXCollections.sort(members, { a, b -> b.weight() - a.weight() })
-    }
-
     init {
         this.avatar.set(avatar)
         historyVisibility?.let { histVisibility = it }

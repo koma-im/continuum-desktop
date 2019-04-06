@@ -62,7 +62,7 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.6.22'
     implementation 'org.slf4j:slf4j-api:1.8.0-beta2'
     implementation 'org.slf4j:slf4j-simple:1.8.0-beta2'
-    implementation 'io.github.koma-im:koma-library:0.7.6.6'
+    implementation 'io.github.koma-im:koma-library:0.7.6.8'
     implementation 'io.requery:requery-kotlin:1.5.1'
     implementation 'io.requery:requery:1.5.1'
     implementation 'com.h2database:h2:1.4.198'

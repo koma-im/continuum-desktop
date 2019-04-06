@@ -1,7 +1,10 @@
 package link.continuum.desktop.util.disk.path
 
+import mu.KotlinLogging
 import java.io.File
+import java.io.InputStream
 
+private val logger = KotlinLogging.logger {}
 private const val app_name = "continuum"
 
 fun getConfigDir(): String {
@@ -13,5 +16,20 @@ fun getConfigDir(): String {
         dir.mkdir()
     }
     return config_dir
+}
+
+/**
+ * if there is a certificate file at the given path
+ * it will be trusted
+ */
+fun loadOptionalCert(base: File): InputStream? {
+    val f = base.resolve("settings").resolve("self-cert.crt")
+    if (!f.isFile) return null
+    try {
+        return  f.inputStream()
+    } catch (e: Exception) {
+        logger.warn { "Loaded no certificate from ${f.path}: $e" }
+    }
+    return null
 }
 

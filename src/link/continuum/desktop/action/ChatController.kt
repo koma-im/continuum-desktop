@@ -4,7 +4,6 @@ import com.github.kittinunf.result.Result
 import koma.controller.events.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
 import koma.gui.view.SyncStatusBar
-import koma.koma_app.SaveToDiskTasks
 import koma.koma_app.appState
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
@@ -62,6 +61,10 @@ class SyncControl(
                 if (s is Result.Success) {
                     statusChan.send(SyncStatusBar.Variants.Normal())
                     processEventsResult(user, s.value)
+                    val nb = sync.since
+                    nb?.let {
+                        saveSyncBatchKey(data, user, nb)
+                    }
                 } else if (s is Result.Failure) {
                     val deferred = CompletableDeferred<Unit>()
                     statusChan.send(SyncStatusBar.Variants.NeedRetry(s.error, deferred))
@@ -70,13 +73,6 @@ class SyncControl(
                     logger.info { "Retrying sync" }
                     start()
                 }
-            }
-        }
-        SaveToDiskTasks.addJob {
-            val nb = sync.since
-            logger.debug { "Saving batch key $nb" }
-            nb?.let {
-                saveSyncBatchKey(data, user, nb)
             }
         }
     }

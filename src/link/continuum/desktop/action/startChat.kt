@@ -5,8 +5,8 @@ import koma.gui.view.ChatWindowBars
 import koma.gui.view.SyncStatusBar
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.storage.config.profile.saveLastUsed
 import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.updateAccountUsage
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -18,7 +18,7 @@ private val logger = KotlinLogging.logger {}
  * updates the list of recently used accounts
  */
 fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDataStore) {
-    koma.saveLastUsed(userId)
+    updateAccountUsage(data, userId)
 
     val app = appState
     val apiClient  = koma.createApi(token, userId, url)

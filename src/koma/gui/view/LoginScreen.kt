@@ -11,11 +11,11 @@ import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.appState
 import koma.matrix.user.identity.UserId_new
-import koma.storage.config.profile.getRecentUsers
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.models.getRecentUsers
 import link.continuum.desktop.database.models.getServerAddrs
 import mu.KotlinLogging
 import tornadofx.*
@@ -50,7 +50,7 @@ class LoginScreen(
         with(grid) {
             paddingAll = 5.0
             row("Username") {
-                val recentUsers = appState.koma.getRecentUsers().map { it.toString() }
+                val recentUsers = getRecentUsers(data).map { it.str }
                 userId = combobox(values = recentUsers) {
                     isEditable = true
                     selectionModel.selectFirst()

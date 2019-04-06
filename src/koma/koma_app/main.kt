@@ -9,10 +9,11 @@ import koma.Koma
 import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
-import koma.storage.config.ConfigPaths
 import link.continuum.desktop.util.disk.path.getConfigDir
+import link.continuum.desktop.util.disk.path.loadOptionalCert
 import okhttp3.OkHttpClient
 import tornadofx.*
+import java.io.File
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlinx.coroutines.javafx.JavaFx as UI
@@ -22,7 +23,6 @@ fun main(args: Array<String>) {
 
     Application.launch(KomaApp::class.java, *args)
     appState.stopSync?.invoke()
-    SaveToDiskTasks.saveToDisk()
 }
 
 
@@ -37,10 +37,10 @@ class KomaApp : App(StartScreen::class) {
         val args = parameters.raw
         val arg = args.firstOrNull()
         val data_dir = arg ?: getConfigDir()
-        val paths = ConfigPaths(data_dir)
         appState.store = AppStore(data_dir)
         val proxy = appState.store.settings.proxyList.default()
-        appState.koma = Koma(paths, proxy.toJavaNet())
+        appState.koma = Koma(proxy.toJavaNet(), path = data_dir,
+                addTrust = loadOptionalCert(File(data_dir)))
     }
 
   override fun start(stage: Stage) {
