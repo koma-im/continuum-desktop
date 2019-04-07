@@ -21,12 +21,13 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDa
     updateAccountUsage(data, userId)
 
     val app = appState
+    val store = app.store
     val apiClient  = koma.createApi(token, userId, url)
     app.currentUser = userId
     app.apiClient = apiClient
-    val userRooms = app.store.getAccountRoomStore(userId)
+    val userRooms = store.getAccountRoomStore(userId)
 
-    val primary = ChatWindowBars(userRooms.roomList, url, data)
+    val primary = ChatWindowBars(userRooms.roomList, url, data, store, koma.http.client)
     val statusBar = SyncStatusBar()
     primary.statusBar.add(statusBar.root)
     FX.primaryStage.scene.root = primary.root
@@ -39,7 +40,8 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDa
             userId,
             statusChan = statusBar.status,
             full_sync =  fullSync,
-            data = data
+            data = data,
+            userDataStore = store.userData
     )
 
     sync.start()

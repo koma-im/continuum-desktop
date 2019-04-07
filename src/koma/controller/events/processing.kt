@@ -15,8 +15,10 @@ import koma.util.matrix.getUserState
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import mu.KotlinLogging
+import okhttp3.HttpUrl
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,12 +32,16 @@ fun process_presence(message: PresenceMessage) {
 }
 
 @ObsoleteCoroutinesApi
-private fun handle_joined_room(owner: UserId, roomid: RoomId, data: JoinedRoom) {
+private suspend fun handle_joined_room(
+        owner: UserId, roomid: RoomId, data: JoinedRoom,
+        userData: UserDataStore,
+        server: HttpUrl
+) {
     val room = addJoinedRoom(owner, roomid)
 
-    data.state.events.forEach { room.applyUpdate(it) }
+    data.state.events.forEach { room.applyUpdate(it, userData, server) }
     val timeline = data.timeline
-    timeline.events.forEach { room.applyUpdate(it) }
+    timeline.events.forEach { room.applyUpdate(it, userData, server) }
 
     GlobalScope.launch {
         room.messageManager.appendTimeline(timeline)
@@ -61,10 +67,14 @@ private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, d
 }
 
 @ObsoleteCoroutinesApi
-fun processEventsResult(owner: UserId, syncRes: SyncResponse) {
+fun processEventsResult(owner: UserId, syncRes: SyncResponse, userData: UserDataStore, server: HttpUrl) {
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
-    syncRes.rooms.join.forEach{ rid, data -> handle_joined_room(owner, RoomId(rid), data)}
+    syncRes.rooms.join.forEach{ rid, data ->
+        GlobalScope.launch {
+            handle_joined_room(owner, RoomId(rid), data, userData, server)
+        }
+    }
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data) }
     syncRes.rooms.leave.forEach { id, leftroom -> leaveLeftRooms(owner, id, leftroom) }
     // there's also left rooms

@@ -10,7 +10,9 @@ import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.database.openStore
+import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import mu.KotlinLogging
 import java.io.File
@@ -29,6 +31,7 @@ object appState {
     }
 }
 
+@ExperimentalCoroutinesApi
 class AppStore(dir: String) {
     val database: KotlinEntityDataStore<Persistable>
 
@@ -39,6 +42,7 @@ class AppStore(dir: String) {
         database = openStore(dbPath)
     }
     val userStore = UserStore(database)
+    val userData = UserDataStore(database)
     val roomStore = RoomStore(database)
     val settings = AppSettings(database)
     private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()

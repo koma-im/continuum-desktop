@@ -1,5 +1,6 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message
 
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
@@ -26,7 +27,7 @@ class MRoomMessageViewNode(
     init {
 
         val sus = appState.store.userStore.getOrCreateUserId(item.sender)
-        val sender = sus.name
+        val sender = sus.id.str
         val color = sus.color
 
         val mcontent = item.render_node(server)
@@ -47,7 +48,7 @@ class MRoomMessageViewNode(
                     paddingAll = 2.0
                     backgroundColor = multi(Color.WHITE)
                 }
-                add(AvatarAlways(sus.avatar, sus.name, sus.color))
+                add(AvatarAlways(sus.avatar, SimpleStringProperty(sender), sus.color))
 
                 vbox(spacing = 2.0) {
                     hgrow = Priority.ALWAYS

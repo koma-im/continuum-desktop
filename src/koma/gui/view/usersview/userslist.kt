@@ -11,12 +11,20 @@ import koma.gui.view.usersview.fragment.MemberCell
 import koma.koma_app.appState
 import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.list.user.UserDataStore
+import okhttp3.OkHttpClient
 import tornadofx.*
 import kotlin.math.roundToInt
 
 private val settings: AppSettings = appState.store.settings
 
-class RoomMemberListView(memList: ObservableList<UserState>): View() {
+@ExperimentalCoroutinesApi
+class RoomMemberListView(
+        memList: ObservableList<UserState>,
+        userData: UserDataStore,
+        client: OkHttpClient
+): View() {
 
     override val root = VBox(10.0)
 
@@ -47,7 +55,7 @@ class RoomMemberListView(memList: ObservableList<UserState>): View() {
                 maxWidthProperty().bind(ulwidth)
                 prefWidthProperty().bind(ulwidth)
                 setCellFactory {
-                    MemberCell(showavataronly)
+                    MemberCell(showavataronly, userData, client)
                 }
             }
             add(userlist)

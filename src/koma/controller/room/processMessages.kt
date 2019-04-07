@@ -7,6 +7,8 @@ import koma.matrix.event.ephemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
+import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.http.mapMxc
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -21,10 +23,10 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     }
 }
 
-fun Room.applyUpdate(update: RoomEvent) {
+suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server: HttpUrl) {
     if (update !is RoomStateEvent) return
     when (update) {
-        is MRoomMember -> this.updateMember(update)
+        is MRoomMember -> this.updateMember(update, userData, server)
         is MRoomAliases -> {
             this.aliases.setAll(update.content.aliases)
         }
@@ -42,20 +44,20 @@ fun Room.applyUpdate(update: RoomEvent) {
 }
 
 
-fun Room.updateMember(update: MRoomMember) {
+suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, server: HttpUrl) {
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
             val user = appState.store.userStore.getOrCreateUserId(senderid)
             update.content.avatar_url?.let {
-                val u = HttpUrl.parse(it)
-                if (u == null) logger.error { "invalid avatar url in ${update.content}"}
+                val u = mapMxc(it, server)
+                if (u == null) logger.error { "invalid avatar url in ${update.content.avatar_url}"}
                 u
             }?.let {
                 user.setAvatar(it, update.origin_server_ts)
             }
             update.content.displayname?.let {
-                user.setName(it, update.origin_server_ts)
+                userData.updateName(update.sender, it, update.origin_server_ts)
             }
             this.makeUserJoined(user)
         }

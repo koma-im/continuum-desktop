@@ -9,6 +9,7 @@ import koma.Koma
 import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import okhttp3.OkHttpClient
@@ -26,6 +27,7 @@ fun main(args: Array<String>) {
 }
 
 
+@ExperimentalCoroutinesApi
 class KomaApp : App(StartScreen::class) {
 
     init {
@@ -37,8 +39,9 @@ class KomaApp : App(StartScreen::class) {
         val args = parameters.raw
         val arg = args.firstOrNull()
         val data_dir = arg ?: getConfigDir()
-        appState.store = AppStore(data_dir)
-        val proxy = appState.store.settings.proxyList.default()
+        val s = AppStore(data_dir)
+        appState.store = s
+        val proxy = s.settings.proxyList.default()
         appState.koma = Koma(proxy.toJavaNet(), path = data_dir,
                 addTrust = loadOptionalCert(File(data_dir)))
     }

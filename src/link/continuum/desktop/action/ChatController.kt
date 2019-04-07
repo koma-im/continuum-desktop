@@ -13,6 +13,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.models.getSyncBatchKey
 import link.continuum.desktop.database.models.saveSyncBatchKey
+import link.continuum.desktop.gui.list.user.UserDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -29,6 +30,7 @@ class SyncControl(
          */
         private val statusChan: Channel<SyncStatusBar.Variants>,
         private val data: KDataStore,
+        private val userDataStore: UserDataStore,
         full_sync: Boolean = false
 ) {
     private val sync: MatrixSyncReceiver
@@ -60,7 +62,7 @@ class SyncControl(
             for (s in sync.events) {
                 if (s is Result.Success) {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(user, s.value)
+                    processEventsResult(user, s.value, userDataStore, apiClient.server)
                     val nb = sync.since
                     nb?.let {
                         saveSyncBatchKey(data, user, nb)

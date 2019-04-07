@@ -92,7 +92,7 @@ fun saveUserNick(data: KDataStore, userId: UserId, nick: String, timestamp: Long
             and UserNickname::since.eq(timestamp)
             )
     if (d.get().firstOrNull() != null) {
-        logger.debug { "already saved nickname $nick of user $userId with time $timestamp" }
+        logger.trace { "already saved nickname $nick of user $userId with time $timestamp" }
         return
     }
     val t: UserNickname = UserNicknameEntity()
@@ -135,7 +135,7 @@ fun updateAccountUsage(data: KDataStore, userId: UserId) {
 }
 
 fun saveSyncBatchKey(data: KDataStore, userId: UserId, batch: String) {
-    logger.debug { "saving sync batch key of user $userId" }
+    logger.trace { "saving sync batch key of user $userId" }
     val t = SyncBatchKeyEntity()
     t.owner = userId.str
     t.batch = batch
@@ -155,7 +155,7 @@ fun saveUserAvatar(data: KDataStore, userId: UserId, avatar: String, timestamp: 
             and UserAvatar::since.eq(timestamp)
             )
     if (d.get().firstOrNull() != null) {
-        logger.debug { "already saved Avatar $avatar of user $userId with time $timestamp" }
+        logger.trace { "already saved Avatar $avatar of user $userId with time $timestamp" }
         return
     }
     val t: UserAvatar = UserAvatarEntity()

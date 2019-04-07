@@ -15,6 +15,7 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
@@ -23,6 +24,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
@@ -34,7 +36,9 @@ private val settings: AppSettings = appState.store.settings
  * Created by developer on 2017/6/17.
  */
 class ChatWindowBars(
-        roomList: ObservableList<Room>, server: HttpUrl, kDataStore: KDataStore
+        roomList: ObservableList<Room>, server: HttpUrl, kDataStore: KDataStore,
+        store: AppStore,
+        httpClient: OkHttpClient
 ) {
     val root = BorderPane()
     // used to show sync errors and allow user intervention
@@ -45,7 +49,7 @@ class ChatWindowBars(
             style {
                 fontSize= settings.scaling.em
             }
-            center = ChatView(roomList, server, kDataStore).root
+            center = ChatView(roomList, server, kDataStore, store, httpClient).root
             top = menubar {
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }
@@ -69,6 +73,10 @@ class ChatWindowBars(
                 }
                 menu("Me") {
                     item("Update avatar").action { chooseUpdateUserAvatar() }
+                    item("Update my name").action { updateMyAlias() }
+                }
+                contextmenu {
+                    item("Update my avatar").action { chooseUpdateUserAvatar() }
                     item("Update my name").action { updateMyAlias() }
                 }
             }

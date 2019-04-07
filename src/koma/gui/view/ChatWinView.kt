@@ -15,10 +15,13 @@ import koma.gui.element.icon.AvatarUrl
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
+import koma.koma_app.AppStore
 import koma.koma_app.appState.apiClient
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import tornadofx.*
 
 
@@ -28,15 +31,18 @@ import tornadofx.*
  * Created by developer on 2017/6/21.
  */
 
+@ExperimentalCoroutinesApi
 class ChatView(roomList: ObservableList<Room>,
                server: HttpUrl,
-               data: KDataStore
+               data: KDataStore,
+               storage: AppStore,
+               httpClient: OkHttpClient
 ): View() {
 
     override val root = vbox (spacing = 5.0)
 
     val roomListView = RoomListView(roomList, server, data)
-    val switchableRoomView = SwitchableRoomView(server)
+    val switchableRoomView = SwitchableRoomView(server, storage.userData, httpClient)
 
     init {
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->

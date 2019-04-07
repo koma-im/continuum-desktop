@@ -1,12 +1,13 @@
 package koma.model.user
 
-import javafx.beans.property.*
+import javafx.beans.property.ReadOnlyObjectWrapper
+import javafx.beans.property.SimpleLongProperty
+import javafx.beans.property.SimpleObjectProperty
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.models.saveUserAvatar
-import link.continuum.desktop.database.models.saveUserNick
 import okhttp3.HttpUrl
 
 /**
@@ -17,20 +18,12 @@ data class UserState(val id: UserId,
 ) {
     val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
 
-    private val _name = ReadOnlyStringWrapper(id.str)
-    val name: ReadOnlyStringProperty =  _name.readOnlyProperty
-
     val color = hashStringColorDark(id.toString())
 
     private val _avatar = ReadOnlyObjectWrapper<HttpUrl>()
     val avatar = _avatar.readOnlyProperty
 
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
-
-    fun setName(name: String, timestamp: Long) {
-        _name.set(name)
-        saveUserNick(data, id, name, timestamp)
-    }
 
     fun setAvatar(url: HttpUrl, timestamp: Long) {
         _avatar.set(url)

@@ -30,14 +30,16 @@ class MNoticeViewNode(val content: NoticeMessage): ViewNode {
 }
 
 
-class MEmoteViewNode(val content: EmoteMessage, val event: MRoomMessage): ViewNode {
+class MEmoteViewNode(
+        val content: EmoteMessage, val event: MRoomMessage
+): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     init {
         val user = event.sender.getState()
         with(node) {
-            label(user.name) {
+            label(user.id.str) {
                 textFill = user.color
             }
             text(" ")
