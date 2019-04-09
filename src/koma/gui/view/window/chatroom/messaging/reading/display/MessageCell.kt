@@ -1,11 +1,8 @@
 package koma.gui.view.window.chatroom.messaging.reading.display
 
+import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
-import javafx.scene.text.Text
+import javafx.scene.layout.*
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
@@ -13,6 +10,7 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
+import koma.matrix.json.MoshiInstance
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.database.models.RoomEventRow
@@ -32,7 +30,7 @@ class MessageCell(
     private val contextMenu: ContextMenu
     private val contextMenuShowSource = MenuItem("View Source").apply {
         action { current?.let {
-            showSource(roomEvent = it)
+            sourceViewer.showAndWait(it)
         }
         }
     }
@@ -78,19 +76,54 @@ interface ViewNode {
     val menuItems: List<MenuItem>
 }
 
-fun showSource(roomEvent: RoomEventRow) {
-    val src = roomEvent.json
-    val fmt = formatJson(src)
-    val dialog = Dialog<Unit>()
-    dialog.title = "Room Event Source"
+private val sourceViewer by lazy { EventSourceViewer() }
 
-    val head = Text("Room Event Source")
-    val textArea = TextArea(fmt)
-    textArea.isEditable = false
-    textArea.hgrow = Priority.ALWAYS
-    val content = VBox(head, textArea)
-    dialog.dialogPane.content = content
+class EventSourceViewer{
+    private val dialog = Dialog<Unit>()
+    private val textArea = TextArea()
+    private var raw: String = ""
+    private var processed: String = ""
+    fun showAndWait(roomEvent: RoomEventRow) {
+        raw = formatJson(roomEvent.json)
+        processed = formatJson(MoshiInstance.roomEventAdapter.toJson(roomEvent.getEvent()))
+        textArea.text = raw
+        dialog.showAndWait()
+    }
 
-    dialog.dialogPane.buttonTypes.add(ButtonType.CLOSE)
-    dialog.showAndWait()
+    init {
+        textArea.isEditable = false
+        textArea.hgrow = Priority.ALWAYS
+        textArea.vgrow = Priority.ALWAYS
+        val head = HBox().apply {
+            vbox {
+                text("Room Event Source")
+                alignment = Pos.CENTER_LEFT
+                hgrow = Priority.ALWAYS
+            }
+            buttonbar {
+                button("Raw") {
+                    tooltip = Tooltip("Json string from server")
+                    setOnAction {
+                        textArea.text = raw
+                    }
+                }
+                button("Processed") {
+                    tooltip = Tooltip("Portion of json that is supported")
+                    setOnAction {
+                        textArea.text = processed
+                    }
+                }
+            }
+        }
+        dialog.apply {
+            title = "Room Event Source"
+            isResizable = true
+            dialogPane.apply {
+                content = VBox(5.0, head, textArea).apply {
+                    vgrow = Priority.ALWAYS
+                }
+                buttonTypes.add(ButtonType.CLOSE)
+            }
+        }
+    }
 }
