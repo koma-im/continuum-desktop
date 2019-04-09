@@ -15,6 +15,11 @@ sealed class Option<out T> {
         is Some -> Some(f(this.value))
         is None -> None()
     }
+
+    override fun toString(): String = when(this) {
+        is Some -> "Some(${this.value})"
+        is None -> "None"
+    }
 }
 
 fun<T> T?.toOption(): Option<T> = this?.let { Some(it) }?:None()

@@ -45,7 +45,7 @@ class MessageCell(
         val ev = message.getEvent()
         val vn = when(ev) {
             is MRoomMember -> {
-                memberView.update(ev)
+                memberView.update(ev, server)
                 memberView
             }
             is MRoomCreate -> MRoomCreationViewNode(ev)

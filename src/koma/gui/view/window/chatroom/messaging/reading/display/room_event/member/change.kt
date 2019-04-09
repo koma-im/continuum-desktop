@@ -27,6 +27,7 @@ import link.continuum.desktop.gui.showIf
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import link.continuum.desktop.util.Some
+import link.continuum.desktop.util.http.mapMxc
 import link.continuum.desktop.util.http.urlChannelDownload
 import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
@@ -55,19 +56,22 @@ class MRoomMemberViewNode(
     private val joinedContent = Text("joined this room.")
     private val userUpdate = UserAppearanceUpdateView(client, avatarsize = avatarsize, minWid = minWid)
 
-    fun update(message: MRoomMember) {
+    fun update(message: MRoomMember, server: HttpUrl) {
         userView.updateUser(message.sender)
         timeView.updateTime(message.origin_server_ts)
         contentPane.children.clear()
         if (message.content.membership != Membership.join) {
             return
         }
-        val pc = message.prev_content
+        val pc = message.prev_content ?: message.unsigned?.prev_content
         if (pc == null) {
             contentPane.children.addAll(joinedContent)
         } else {
             userUpdate.updateName(pc.displayname, message.content.displayname)
-            userUpdate.updateAvatar(pc.avatar_url, message.content.avatar_url)
+
+            userUpdate.updateAvatar(
+                    pc.avatar_url?.let { mapMxc(it, server) },
+                    message.content.avatar_url?.let{ mapMxc(it, server) })
             contentPane.children.addAll(userUpdate.root)
         }
     }
@@ -151,10 +155,10 @@ class UserAppearanceUpdateView(
     private val oldName = Text()
     private val newName = Text()
 
-    fun updateAvatar(old: String?, new: String?) {
+    fun updateAvatar(old: HttpUrl?, new: HttpUrl?) {
         avatarChangeView.showIf(old != new)
-        oldAvatar.updateUrl(old?.let { HttpUrl.parse(it) }.toOption())
-        newAvatar.updateUrl(new?.let { HttpUrl.parse(it) }.toOption())
+        oldAvatar.updateUrl(old.toOption())
+        newAvatar.updateUrl(new.toOption())
     }
     fun updateName(old: String?, new: String?) {
         nameChangeView.showIf(old != new)
@@ -205,6 +209,7 @@ class ImageViewAsync(client: OkHttpClient) {
     val root = ImageView()
     private val urlChannel: SendChannel<Option<HttpUrl>>
     fun updateUrl(url: Option<HttpUrl>) {
+        logger.debug { "ImageViewAsync update url $url" }
         if (!urlChannel.offer(url)) {
             logger.error { "url $url not offered successfully" }
         }
