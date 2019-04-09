@@ -1,14 +1,22 @@
 package link.continuum.desktop.gui
 
+import javafx.scene.Node
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.selects.select
+import link.continuum.desktop.util.None
+import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
+
+fun<T: Node> T.showIf(show: Boolean) {
+    this.isManaged = show
+    this.isVisible = show
+}
 
 /**
  * convert a channel of unordered updates with timestamps
@@ -71,6 +79,39 @@ fun<T, U, C: SendChannel<U>> CoroutineScope.switchGetDeferred(
                 break
             } else {
                 current = next
+            }
+        }
+        logger.debug { "closing switchMapDeferred" }
+        input.cancel()
+        output.close()
+    }
+}
+
+
+fun<T, U, C: SendChannel<Option<U>>> CoroutineScope.switchGetDeferredOption(
+        input: ReceiveChannel<Option<T>>,
+        getDeferred: (T)->Deferred<Option<U>>,
+        output: C
+) {
+    launch {
+        var current = input.receive()
+        while (isActive) {
+            val next = select<Option<T>?> {
+                input.onReceiveOrNull { it }
+                current.map { getDeferred(it) }.map {
+                    it.onAwait {
+                        output.send(it)
+                        input.receiveOrNull()
+                    }
+                }
+            }
+            if (next == null) {
+                logger.debug { "no more input after $current" }
+                break
+            } else {
+                current = next
+                if (current.isNone())
+                    output.send(None())
             }
         }
         logger.debug { "closing switchMapDeferred" }

@@ -16,8 +16,10 @@ import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
+import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import tornadofx.*
 import kotlin.math.roundToInt
 
@@ -28,7 +30,9 @@ typealias EventItem = RoomEventRow
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
         room: Room,
-        server: HttpUrl
+        server: HttpUrl,
+        store: UserDataStore,
+        client: OkHttpClient
 ): View() {
     override val root = AnchorPane()
 
@@ -66,7 +70,7 @@ class MessagesListScrollPane(
         virtualList.hgrow = Priority.ALWAYS
 
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(server)
+            RoomEventCell(server, store, client)
         }
 
         addVirtualScrollPane()

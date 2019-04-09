@@ -19,7 +19,7 @@ class JoinedRoomView(room: Room, server: HttpUrl, userData: UserDataStore,
                      httpClient: OkHttpClient): View() {
     override val root = HBox()
 
-    val messageRecvSendView = ChatRecvSendView(room, server)
+    val messageRecvSendView = ChatRecvSendView(room, server, userData, httpClient)
     val usersListView = RoomMemberListView(room.members, userData, httpClient)
 
     @ObsoleteCoroutinesApi

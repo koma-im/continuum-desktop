@@ -1,12 +1,9 @@
 package koma.gui.view.window.chatroom.messaging.reading.display
 
-import javafx.scene.Node
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Dialog
-import javafx.scene.control.MenuItem
-import javafx.scene.control.TextArea
+import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
@@ -16,34 +13,55 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
+import koma.util.formatJson
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
+import link.continuum.desktop.gui.list.user.UserDataStore
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import tornadofx.*
 
-class MessageCell(val message: RoomEventRow, server: HttpUrl) {
-    val node
-        get() = _node
+@ExperimentalCoroutinesApi
+class MessageCell(
+        private val server: HttpUrl,
+        store: UserDataStore,
+        client: OkHttpClient
+) {
+    val node = StackPane()
+    private val contextMenu: ContextMenu
+    private val contextMenuShowSource = MenuItem("View Source").apply {
+        action { current?.let {
+            showSource(roomEvent = it)
+        }
+        }
+    }
+    private var current: RoomEventRow? = null
 
-    private val _node: Node
+    private val memberView = MRoomMemberViewNode(store, client)
 
-    init {
+    fun updateEvent(message: RoomEventRow) {
+        current = message
+        node.children.clear()
+        contextMenu.items.clear()
         val ev = message.getEvent()
         val vn = when(ev) {
-            is MRoomMember -> MRoomMemberViewNode(ev)
+            is MRoomMember -> {
+                memberView.update(ev)
+                memberView
+            }
             is MRoomCreate -> MRoomCreationViewNode(ev)
             is MRoomMessage -> MRoomMessageViewNode(ev, server)
             else -> null
         }
-        if (vn == null) {
-            _node = Region()
-        } else {
-            _node = vn.node
-            _node.contextmenu {
-                this.items.addAll(vn.menuItems)
-                item("View Source").action { showSource(roomEvent = message) }
-            }
+        if (vn!= null) {
+            node.children.add(vn.node)
+            contextMenu.items.addAll(vn.menuItems)
+            contextMenu.items.add(contextMenuShowSource)
         }
+    }
+    init {
+        contextMenu = node.contextmenu()
     }
 }
 
@@ -62,12 +80,12 @@ interface ViewNode {
 
 fun showSource(roomEvent: RoomEventRow) {
     val src = roomEvent.json
-
+    val fmt = formatJson(src)
     val dialog = Dialog<Unit>()
     dialog.title = "Room Event Source"
 
     val head = Text("Room Event Source")
-    val textArea = TextArea(src)
+    val textArea = TextArea(fmt)
     textArea.isEditable = false
     textArea.hgrow = Priority.ALWAYS
     val content = VBox(head, textArea)
