@@ -17,7 +17,6 @@ module link.continuum.desktop {
     requires javafx.media;
     requires controlsfx;
     requires kotlin.stdlib.jdk8;
-    requires org.junit.jupiter.api;
     requires emoji.java;
     requires cache2k.api;
     requires retrofit2;

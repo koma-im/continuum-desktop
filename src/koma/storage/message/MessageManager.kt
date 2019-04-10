@@ -6,8 +6,6 @@ import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import io.requery.kotlin.lte
 import io.requery.sql.KotlinEntityDataStore
-import javafx.collections.FXCollections
-import javafx.collections.transformation.FilteredList
 import javafx.collections.transformation.SortedList
 import koma.gui.view.window.chatroom.messaging.reading.display.supportedByDisplay
 import koma.matrix.event.room_message.RoomEvent
@@ -20,6 +18,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.database.models.RoomEventRow
 import link.continuum.desktop.database.models.getEvent
 import link.continuum.desktop.database.models.toEventRowList
+import link.continuum.desktop.gui.list.DedupList
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 
@@ -30,9 +29,8 @@ private val logger = KotlinLogging.logger {}
 class MessageManager(val roomId: RoomId,
                      private val data: KotlinEntityDataStore<Persistable>) {
     // added to UI, needs to be modified on FX thread
-    private val eventAll = FXCollections.observableArrayList<RoomEventRow>()
-    private val eventVisible = FilteredList(eventAll) { it.getEvent()?.supportedByDisplay() == true }
-    val shownList = SortedList(eventVisible) { e1: RoomEventRow, e2: RoomEventRow ->
+    private val eventAll = DedupList<RoomEventRow, String>({it.event_id})
+    val shownList = SortedList(eventAll.list) { e1: RoomEventRow, e2: RoomEventRow ->
         e1.server_time.compareTo(e2.server_time)
     }
 
@@ -95,14 +93,15 @@ class MessageManager(val roomId: RoomId,
      * add events that are new
      */
     private suspend fun addToUi(rows: List<RoomEventRow>) {
-        val s = this.eventAll.size
-        val exist = this.eventAll.map { it.event_id }.toHashSet()
-        val new = rows.filter { !exist.contains(it.event_id) }
+        val disp = rows.filter { it.getEvent()?.supportedByDisplay() == true }
+        val old = eventAll.size()
         withContext(Dispatchers.JavaFx) {
-            eventAll.addAll(new)
+            eventAll.addAll(rows)
         }
-        logger.debug { "added ${new.size}/${rows.size} messages." +
-                " total messages $s to ${eventAll.size}. shown ${eventVisible.size}" }
+        val newSize = eventAll.size()
+        val add = newSize - old
+        logger.debug { "added ${add}/${rows.size} messages." +
+                " total messages $old to $newSize" }
     }
 
     /**
