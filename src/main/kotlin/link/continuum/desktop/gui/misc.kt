@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
@@ -17,6 +18,8 @@ fun<T: Node> T.showIf(show: Boolean) {
     this.isManaged = show
     this.isVisible = show
 }
+
+val UiDispatcher = Dispatchers.JavaFx
 
 /**
  * convert a channel of unordered updates with timestamps
