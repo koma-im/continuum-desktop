@@ -135,17 +135,21 @@ fun <T, U> CoroutineScope.switchUpdates(
     launch {
         var key = input.receive()
         var updates = getUpdates(key)
+        var latest: U? = null
         loop@ while (isActive) {
             val state = select<UpdateState<T>> {
                 input.onReceiveOrNull { k ->
                     k?.let {
-                        logger.debug { "switching to updates for $k" }
+                        logger.trace { "switching to updates for $k" }
                         UpdateState.Switch<T>(it)
                     } ?: UpdateState.Close()
                 }
                 updates.onReceive {
-                    logger.debug { "got update for $key: $it" }
-                    output.send(it)
+                    if (it!= latest) {
+                        latest = it
+                        logger.trace { "got update for $key: $it" }
+                        output.send(it)
+                    }
                     UpdateState.Continue()
                 }
             }

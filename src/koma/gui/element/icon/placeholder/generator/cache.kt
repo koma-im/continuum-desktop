@@ -6,7 +6,7 @@ import org.cache2k.Cache
 import org.cache2k.Cache2kBuilder
 import org.cache2k.configuration.Cache2kConfiguration
 
-class ColoredName(
+data class ColoredName(
         val color: Color,
         val name: String
 )

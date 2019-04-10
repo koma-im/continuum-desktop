@@ -209,7 +209,7 @@ class ImageViewAsync(client: OkHttpClient) {
     val root = ImageView()
     private val urlChannel: SendChannel<Option<HttpUrl>>
     fun updateUrl(url: Option<HttpUrl>) {
-        logger.debug { "ImageViewAsync update url $url" }
+        logger.trace { "ImageViewAsync update url $url" }
         if (!urlChannel.offer(url)) {
             logger.error { "url $url not offered successfully" }
         }

@@ -57,7 +57,7 @@ class AvatarView(
                 val noMore = select<Boolean> {
                     input.onReceiveOrNull { k ->
                         k?.let {
-                            logger.debug { "switching to avatar for $k" }
+                            logger.trace { "switching to avatar for $k" }
                             current = it
                             hasImage = false
                             name.cancel()
@@ -68,7 +68,7 @@ class AvatarView(
                         } ?: true
                     }
                     image.onReceive {
-                        logger.debug { "got updated ${it.isSome()} image for $current" }
+                        logger.trace { "got updated ${it.isSome()} image for $current" }
                         it.onSome {
                             hasImage = true
                             withContext(Dispatchers.JavaFx) {
@@ -79,13 +79,13 @@ class AvatarView(
                     }
                     name.onReceive {
                         if (!hasImage) {
-                            logger.debug { "generating avatar for $current with name $it" }
+                            logger.trace { "getting generated avatar for $current with name $it" }
                             withContext(Dispatchers.JavaFx) {
                                 val av = AvatarGeneratorCache.generateAvatar(ColoredName(userData.getUserColor(current), it))
                                 imageView.image = av
                             }
                         } else {
-                            logger.debug { "$current has avatar image, ignoring updated name $it" }
+                            logger.trace { "$current has avatar image, ignoring updated name $it" }
                         }
                         false
                     }

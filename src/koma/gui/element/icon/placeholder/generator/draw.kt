@@ -11,10 +11,13 @@ import javafx.scene.text.TextAlignment
 import koma.gui.element.icon.user.extract_key_chars
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import mu.KotlinLogging
 
 private val settings: AppSettings = appState.store.settings
+private val logger = KotlinLogging.logger {}
 
 fun getImageForName(name: String, bgcolor: Color): Image {
+    logger.debug { "generating image name=$name, color=$bgcolor" }
     val scale = settings.scaling
     val isize = 32.0 * scale
     val canva = Canvas(isize, isize)
