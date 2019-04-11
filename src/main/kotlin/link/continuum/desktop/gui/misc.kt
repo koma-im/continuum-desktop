@@ -91,7 +91,7 @@ fun<T, U, C: SendChannel<U>> CoroutineScope.switchGetDeferred(
 }
 
 
-fun<T, U, C: SendChannel<Option<U>>> CoroutineScope.switchGetDeferredOption(
+fun<T: Any, U: Any, C: SendChannel<Option<U>>> CoroutineScope.switchGetDeferredOption(
         input: ReceiveChannel<Option<T>>,
         getDeferred: (T)->Deferred<Option<U>>,
         output: C
@@ -113,7 +113,7 @@ fun<T, U, C: SendChannel<Option<U>>> CoroutineScope.switchGetDeferredOption(
                 break
             } else {
                 current = next
-                if (current.isNone())
+                if (current.isNone)
                     output.send(None())
             }
         }

@@ -68,7 +68,7 @@ class AvatarView(
                         } ?: true
                     }
                     image.onReceive {
-                        logger.trace { "got updated ${it.isSome()} image for $current" }
+                        logger.trace { "got updated ${it.isSome} image for $current" }
                         it.onSome {
                             hasImage = true
                             withContext(Dispatchers.JavaFx) {

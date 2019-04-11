@@ -24,9 +24,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
-import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
-import link.continuum.desktop.util.Some
 import link.continuum.desktop.util.http.mapMxc
 import link.continuum.desktop.util.http.urlChannelDownload
 import link.continuum.desktop.util.toOption
@@ -220,18 +218,15 @@ class ImageViewAsync(client: OkHttpClient) {
         urlChannel = tx
         GlobalScope.launch {
             for (i in rx) {
-                when (i) {
-                    is Some -> {
-                        i.value.inputStream().use {
-                            val im = processAvatar(it)
-                            withContext(Dispatchers.JavaFx) {
-                                root.image = im
-                            }
+                i.onSome {
+                    it.inputStream().use {
+                        val im = processAvatar(it)
+                        withContext(Dispatchers.JavaFx) {
+                            root.image = im
                         }
                     }
-                    is None -> {
-                        root.image = null
-                    }
+                }.onNone {
+                    root.image = null
                 }
             }
         }
