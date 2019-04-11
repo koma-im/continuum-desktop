@@ -1,7 +1,7 @@
 package koma.gui.element.emoji.icon
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 internal class CacheKtTest {
     @Test

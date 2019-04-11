@@ -1,4 +1,4 @@
-package koma.gui.view.window.roomfinder.publicroomlist.listcell
+package koma.gui.element.emoji.icon.koma
 
 import javafx.beans.property.SimpleListProperty
 import koma.matrix.room.naming.RoomAlias
