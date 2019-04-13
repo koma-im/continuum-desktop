@@ -4,24 +4,17 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.ImageElement
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.VideoElement
 import koma.koma_app.appState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.HttpUrl
 
-
-val mediaViewConstructors = constructConstructors()
-
-private fun constructConstructors(): Map<String, (HttpUrl) -> ViewNode?> {
-    val map = mutableMapOf<String, (HttpUrl) -> ViewNode?>()
-
-    val imageView = { link: HttpUrl -> ImageElement(link, appState.koma.http.client) }
-    val imageExts = listOf("jpg", "jpeg", "gif", "png")
-    for (i in imageExts) {
-        map.put(i, imageView)
+@ExperimentalCoroutinesApi
+class MediaViewers {
+    private val imageViewer by lazy { ImageElement(appState.koma.http.client)  }
+    private val imageExts = setOf("jpg", "jpeg", "gif", "png")
+    private val videoExts = setOf("mp4")
+    fun get(ext: String, url: HttpUrl): ViewNode? {
+        if (ext in imageExts) return imageViewer.apply { update(url) }
+        if (ext in videoExts) return VideoElement(url)
+        return null
     }
-
-    val videoFormats = listOf("mp4")
-    for (i in videoFormats) {
-        map.put(i, { link: HttpUrl -> VideoElement(link) })
-    }
-
-    return map
 }

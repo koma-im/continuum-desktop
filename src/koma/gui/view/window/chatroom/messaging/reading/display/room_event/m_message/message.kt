@@ -46,7 +46,7 @@ class MRoomMessageViewNode(
     private val senderLabel = Text()
     private val senderId = Channel<UserId>(Channel.CONFLATED)
     private val contentBox = HBox(5.0)
-    private val content = MessageView(server)
+    private val content by  lazy { MessageView(store, server) }
 
     init {
         with(node) {

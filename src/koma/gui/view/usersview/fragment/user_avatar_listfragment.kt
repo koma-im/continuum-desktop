@@ -84,7 +84,7 @@ class MemberCell(
             return
         }
         itemId.offer(item.id)
-        name.textFill = item.color
+        name.textFill = store.getUserColor(item.id)
 
         graphic = root
     }

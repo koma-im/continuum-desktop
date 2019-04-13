@@ -8,10 +8,11 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.mediaViewConstructors
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.MediaViewers
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.HttpUrl
 import tornadofx.*
 private val settings: AppSettings = appState.store.settings
@@ -42,12 +43,13 @@ private fun makeEmojiElement(emoji: String): InlineElement {
 /**
  * link with optional preview
  */
+@ExperimentalCoroutinesApi
 class WebContentNode(private val link: String): FlowElement() {
     override val node = VBox()
     val multiLine: Boolean
 
     private val menuItems = mutableListOf<MenuItem>()
-
+    private val mediaViewers = MediaViewers()
     init {
         val linknode = hyperlinkNode(link)
         node.add(linknode)
@@ -74,7 +76,7 @@ class WebContentNode(private val link: String): FlowElement() {
 
         val filename = url.pathSegments().last()
         val ext = filename.substringAfter('.')
-        val view = sview ?: mediaViewConstructors.get(ext)?.let { vc -> vc(url) }
+        val view = sview ?: mediaViewers.get(ext, url)
         return view
     }
 

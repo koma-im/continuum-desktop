@@ -1,6 +1,5 @@
 package koma.model.user
 
-import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
@@ -20,13 +19,9 @@ data class UserState(val id: UserId,
 
     val color = hashStringColorDark(id.toString())
 
-    private val _avatar = ReadOnlyObjectWrapper<HttpUrl>()
-    val avatar = _avatar.readOnlyProperty
-
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
 
     fun setAvatar(url: HttpUrl, timestamp: Long) {
-        _avatar.set(url)
         saveUserAvatar(data, id, url.toString(), timestamp)
     }
 
