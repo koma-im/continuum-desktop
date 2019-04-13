@@ -7,6 +7,7 @@ import koma.matrix.event.ephemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.mapMxc
 import model.Room
@@ -44,6 +45,7 @@ suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server:
 }
 
 
+@ExperimentalCoroutinesApi
 suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, server: HttpUrl) {
     when(update.content.membership)  {
         Membership.join -> {

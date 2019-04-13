@@ -38,6 +38,8 @@ class MessageCell(
 
     private val memberView = MRoomMemberViewNode(store, client)
     private val messageView by lazy { MRoomMessageViewNode(server, store, client) }
+    private val creationView by lazy { MRoomCreationViewNode(store, client) }
+
 
     fun updateEvent(message: RoomEventRow) {
         current = message
@@ -49,7 +51,10 @@ class MessageCell(
                 memberView.update(ev, server)
                 memberView
             }
-            is MRoomCreate -> MRoomCreationViewNode(ev)
+            is MRoomCreate -> {
+                creationView.update(ev)
+                creationView
+            }
             is MRoomMessage -> {
                 messageView.update(ev)
                 messageView
