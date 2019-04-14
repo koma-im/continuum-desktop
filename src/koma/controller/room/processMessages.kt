@@ -56,7 +56,7 @@ suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, serv
                 if (u == null) logger.error { "invalid avatar url in ${update.content.avatar_url}"}
                 u
             }?.let {
-                user.setAvatar(it, update.origin_server_ts)
+                userData.updateAvatarUrl(senderid, it, update.origin_server_ts)
             }
             update.content.displayname?.let {
                 userData.updateName(update.sender, it, update.origin_server_ts)

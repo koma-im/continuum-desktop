@@ -20,6 +20,7 @@ import link.continuum.desktop.gui.icon.avatar.DeferredImage
 import link.continuum.desktop.gui.switchGetDeferred
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.concurrent.ConcurrentHashMap
 
@@ -56,15 +57,15 @@ class UserDataStore(private val data: KDataStore) {
         return c
     }
     val avatarFetcher = DeferredImage({ i -> processAvatar(i)})
-    private val avatarUrlUpdates = ConcurrentHashMap<UserId, UpdateConflater<String>>()
+    private val avatarUrlUpdates = ConcurrentHashMap<UserId, UpdateConflater<HttpUrl>>()
     private val avatarImageUpdates = ConcurrentHashMap<UserId, ConflatedBroadcastChannel<Option<Image>>>()
-    suspend fun updateAvatarUrl(userId: UserId, avatarUrl: String, time: Long) {
+    suspend fun updateAvatarUrl(userId: UserId, avatarUrl: HttpUrl, time: Long) {
         val c = avatarUrlUpdates.get(userId)
         if (c!= null) {
             logger.debug { "sending user avatarUrl update, $userId, $avatarUrl" }
             c.update(time, avatarUrl)
         }
-        saveUserAvatar(data, userId, avatarUrl, time)
+        saveUserAvatar(data, userId, avatarUrl.toString(), time)
     }
     fun getAvatarImageUpdates(userId: UserId, client: OkHttpClient): ReceiveChannel<Option<Image>> {
         val imageBroadcast = avatarImageUpdates.computeIfAbsent(userId) {
@@ -76,13 +77,18 @@ class UserDataStore(private val data: KDataStore) {
         return imageBroadcast.openSubscription()
     }
 
-    fun getAvatarUrlUpdates(userId: UserId): ReceiveChannel<String> {
+    fun getAvatarUrlUpdates(userId: UserId): ReceiveChannel<HttpUrl> {
         val u = avatarUrlUpdates.computeIfAbsent(userId) {
-            val up = UpdateConflater<String>()
+            val up = UpdateConflater<HttpUrl>()
             GlobalScope.launch {
                 val n = getLatestAvatar(data, userId)
                 if (n != null) {
-                    up.update(n.since, n.avatar)
+                    val avatar = HttpUrl.parse(n.avatar)
+                    if (avatar != null) {
+                        up.update(n.since, avatar)
+                    } else {
+                        logger.warn { "avatarUrl of $userId, ${n.avatar} not valid" }
+                    }
                 } else {
                     logger.trace { "avatarUrl of $userId is not in database" }
                 }

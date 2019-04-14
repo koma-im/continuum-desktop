@@ -2,12 +2,9 @@ package koma.model.user
 
 import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
-import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
 import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.saveUserAvatar
-import okhttp3.HttpUrl
 
 /**
  * Created by developer on 2017/6/25.
@@ -17,13 +14,7 @@ data class UserState(val id: UserId,
 ) {
     val present = SimpleObjectProperty<UserPresenceType>(UserPresenceType.Offline)
 
-    val color = hashStringColorDark(id.toString())
-
     val lastActiveAgo = SimpleLongProperty(Long.MAX_VALUE)
-
-    fun setAvatar(url: HttpUrl, timestamp: Long) {
-        saveUserAvatar(data, id, url.toString(), timestamp)
-    }
 
     fun weight(): Int {
         val la = lastActiveAgo.get()
