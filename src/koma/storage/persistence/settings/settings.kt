@@ -4,7 +4,7 @@ import io.requery.Persistable
 import io.requery.sql.KotlinEntityDataStore
 import javafx.scene.text.Font
 import koma.storage.persistence.settings.encoding.ProxyList
-import link.continuum.desktop.database.models.dbkv
+import link.continuum.database.models.dbkv
 import kotlin.math.roundToInt
 
 

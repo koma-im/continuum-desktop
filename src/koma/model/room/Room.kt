@@ -19,8 +19,8 @@ import koma.matrix.room.visibility.RoomVisibility
 import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.*
+import link.continuum.database.KDataStore
+import link.continuum.database.models.*
 import okhttp3.HttpUrl
 import tornadofx.*
 

@@ -2,8 +2,12 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.scene.image.Image
 import kotlinx.coroutines.*
-import link.continuum.desktop.util.*
+import link.continuum.desktop.util.None
+import link.continuum.desktop.util.Option
+import link.continuum.desktop.util.Some
+import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.downloadHttp
+import link.continuum.libutil.`?or`
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

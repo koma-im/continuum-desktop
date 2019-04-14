@@ -4,7 +4,7 @@ import javafx.beans.property.SimpleLongProperty
 import javafx.beans.property.SimpleObjectProperty
 import koma.matrix.UserId
 import koma.matrix.user.presence.UserPresenceType
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 
 /**
  * Created by developer on 2017/6/25.

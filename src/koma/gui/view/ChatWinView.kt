@@ -18,7 +18,7 @@ import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.AppStore
 import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

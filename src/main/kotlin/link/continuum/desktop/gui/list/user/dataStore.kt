@@ -10,11 +10,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.getLatestAvatar
-import link.continuum.desktop.database.models.getLatestNick
-import link.continuum.desktop.database.models.saveUserAvatar
-import link.continuum.desktop.database.models.saveUserNick
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getLatestAvatar
+import link.continuum.database.models.getLatestNick
+import link.continuum.database.models.saveUserAvatar
+import link.continuum.database.models.saveUserNick
 import link.continuum.desktop.gui.UpdateConflater
 import link.continuum.desktop.gui.icon.avatar.DeferredImage
 import link.continuum.desktop.gui.switchGetDeferred

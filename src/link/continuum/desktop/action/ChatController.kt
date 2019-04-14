@@ -10,9 +10,9 @@ import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.getSyncBatchKey
-import link.continuum.desktop.database.models.saveSyncBatchKey
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getSyncBatchKey
+import link.continuum.database.models.saveSyncBatchKey
 import link.continuum.desktop.gui.list.user.UserDataStore
 import mu.KotlinLogging
 

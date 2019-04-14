@@ -19,9 +19,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.action.startChat
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.saveServerAddr
-import link.continuum.desktop.database.models.saveToken
+import link.continuum.database.KDataStore
+import link.continuum.database.models.saveServerAddr
+import link.continuum.database.models.saveToken
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.getErrOr
 import netscape.javascript.JSObject

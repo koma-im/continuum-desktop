@@ -21,7 +21,7 @@ import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

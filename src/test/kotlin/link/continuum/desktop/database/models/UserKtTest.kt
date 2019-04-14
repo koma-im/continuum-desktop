@@ -1,7 +1,8 @@
 package link.continuum.desktop.database.models
 
 import koma.matrix.UserId
-import link.continuum.desktop.database.openStore
+import link.continuum.database.models.*
+import link.continuum.database.openStore
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals

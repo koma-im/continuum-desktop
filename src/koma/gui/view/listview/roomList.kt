@@ -12,7 +12,7 @@ import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
 import tornadofx.*

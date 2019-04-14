@@ -1,8 +1,8 @@
 package koma.storage.persistence.settings
 
 import koma.storage.persistence.settings.encoding.KProxy
-import link.continuum.desktop.database.models.deserialize
-import link.continuum.desktop.database.models.serialize
+import link.continuum.database.models.deserialize
+import link.continuum.database.models.serialize
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

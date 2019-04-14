@@ -5,8 +5,8 @@ import koma.gui.view.ChatWindowBars
 import koma.gui.view.SyncStatusBar
 import koma.koma_app.appState
 import koma.matrix.UserId
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.updateAccountUsage
+import link.continuum.database.KDataStore
+import link.continuum.database.models.updateAccountUsage
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*

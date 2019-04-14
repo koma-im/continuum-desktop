@@ -2,7 +2,7 @@ package koma.gui.view.window.chatroom.messaging.reading
 
 import javafx.scene.control.ListCell
 import koma.gui.view.window.chatroom.messaging.reading.display.MessageCell
-import link.continuum.desktop.database.models.RoomEventRow
+import link.continuum.database.models.RoomEventRow
 import link.continuum.desktop.gui.list.user.UserDataStore
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

@@ -34,16 +34,6 @@ inline infix fun<T: Any, E: Exception> KResult<T, E>.getOr(action: (Result.Failu
     }
 }
 
-inline infix fun<T: Any?> T.`?or?`(action: () -> T?): T? {
-    if (this != null) return this
-    return action()
-}
-
-inline infix fun<T: Any> T?.`?or`(action: () -> T): T {
-    if (this != null) return this
-    return action()
-}
-
 inline infix fun<T: Any, E: Exception> KResult<T, E>.getErrOr(action: (Result.Success<T, E>) -> E): E {
     return when(this) {
         is Result.Success -> action(this)

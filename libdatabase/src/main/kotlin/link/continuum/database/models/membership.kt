@@ -1,4 +1,4 @@
-package link.continuum.desktop.database.models
+package link.continuum.database.models
 
 import io.requery.Column
 import io.requery.Entity
@@ -6,7 +6,7 @@ import io.requery.Index
 import io.requery.Persistable
 import io.requery.kotlin.eq
 import koma.matrix.room.naming.RoomId
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 
 @Entity
 interface Membership: Persistable {

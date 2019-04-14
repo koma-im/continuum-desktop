@@ -11,7 +11,7 @@ import koma.storage.rooms.RoomStore
 import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.database.openStore
+import link.continuum.database.openStore
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import mu.KotlinLogging

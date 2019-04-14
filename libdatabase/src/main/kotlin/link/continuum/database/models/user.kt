@@ -1,10 +1,10 @@
-package link.continuum.desktop.database.models
+package link.continuum.database.models
 
 import io.requery.*
 import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import koma.matrix.UserId
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

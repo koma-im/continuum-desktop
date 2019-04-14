@@ -1,5 +1,7 @@
 package link.continuum.desktop.database.models
 
+import link.continuum.database.models.deserialize
+import link.continuum.database.models.serialize
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -14,8 +14,8 @@ import javafx.util.Callback
 import koma.gui.element.control.KListView
 import koma.koma_app.appState
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import link.continuum.desktop.database.models.RoomEventRow
-import link.continuum.desktop.database.models.getEvent
+import link.continuum.database.models.RoomEventRow
+import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import okhttp3.HttpUrl

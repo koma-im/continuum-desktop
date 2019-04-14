@@ -3,3 +3,5 @@
  */
 
 rootProject.name = 'continuum-desktop'
+include 'libdatabase'
+include 'libutil'

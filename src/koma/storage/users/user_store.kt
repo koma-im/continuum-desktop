@@ -2,7 +2,7 @@ package koma.storage.users
 
 import koma.matrix.UserId
 import koma.model.user.UserState
-import link.continuum.desktop.database.KDataStore
+import link.continuum.database.KDataStore
 import java.util.concurrent.ConcurrentHashMap
 
 class UserStore(private val data: KDataStore) {

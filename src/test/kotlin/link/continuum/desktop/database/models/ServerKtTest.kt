@@ -1,8 +1,10 @@
 package link.continuum.desktop.database.models
 
 import io.requery.kotlin.eq
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.openStore
+import link.continuum.database.KDataStore
+import link.continuum.database.models.ServerAddress
+import link.continuum.database.models.ServerAddressEntity
+import link.continuum.database.openStore
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals

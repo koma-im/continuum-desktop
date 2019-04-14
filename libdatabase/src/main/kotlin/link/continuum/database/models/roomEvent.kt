@@ -1,9 +1,10 @@
-package link.continuum.desktop.database.models
+package link.continuum.database.models
 
 import io.requery.*
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.MoshiInstance
 import koma.matrix.room.naming.RoomId
+import link.continuum.database.models.RoomEventRowEntity
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

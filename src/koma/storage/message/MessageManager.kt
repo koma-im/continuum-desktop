@@ -15,9 +15,9 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.message.fetch.fetchPreceding
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.database.models.RoomEventRow
-import link.continuum.desktop.database.models.getEvent
-import link.continuum.desktop.database.models.toEventRowList
+import link.continuum.database.models.RoomEventRow
+import link.continuum.database.models.getEvent
+import link.continuum.database.models.toEventRowList
 import link.continuum.desktop.gui.list.DedupList
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap

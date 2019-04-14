@@ -6,7 +6,9 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
-import link.continuum.desktop.database.openStore
+import link.continuum.database.models.*
+import link.continuum.database.openStore
+import link.continuum.database.openStore
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals

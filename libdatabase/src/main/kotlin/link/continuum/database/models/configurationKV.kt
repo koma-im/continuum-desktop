@@ -1,4 +1,4 @@
-package link.continuum.desktop.database.models
+package link.continuum.database.models
 
 import io.requery.Column
 import io.requery.Entity

@@ -2,6 +2,8 @@ package link.continuum.desktop.util
 
 import com.github.kittinunf.result.Result
 import koma.util.given
+import link.continuum.libutil.`?or?`
+import link.continuum.libutil.`?or`
 import kotlin.test.*
 
 internal class ResultKtTest {

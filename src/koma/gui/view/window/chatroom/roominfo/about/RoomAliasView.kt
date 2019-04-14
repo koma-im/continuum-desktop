@@ -26,8 +26,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.getChangeStateAllowed
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getChangeStateAllowed
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*

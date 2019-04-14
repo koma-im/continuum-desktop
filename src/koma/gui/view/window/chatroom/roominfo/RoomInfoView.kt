@@ -12,8 +12,8 @@ import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIco
 import koma.gui.view.window.chatroom.roominfo.about.requests.requestUpdateRoomName
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.getChangeStateAllowed
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getChangeStateAllowed
 import model.Room
 import tornadofx.*
 

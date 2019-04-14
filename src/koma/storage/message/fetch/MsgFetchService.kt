@@ -10,7 +10,7 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import link.continuum.desktop.database.models.RoomEventRow
+import link.continuum.database.models.RoomEventRow
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

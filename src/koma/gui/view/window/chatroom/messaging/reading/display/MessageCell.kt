@@ -13,8 +13,8 @@ import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.json.MoshiInstance
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.database.models.RoomEventRow
-import link.continuum.desktop.database.models.getEvent
+import link.continuum.database.models.RoomEventRow
+import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.list.user.UserDataStore
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

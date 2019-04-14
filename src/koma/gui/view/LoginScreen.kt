@@ -14,9 +14,9 @@ import koma.matrix.user.identity.UserId_new
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.models.getRecentUsers
-import link.continuum.desktop.database.models.getServerAddrs
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getRecentUsers
+import link.continuum.database.models.getServerAddrs
 import mu.KotlinLogging
 import tornadofx.*
 
