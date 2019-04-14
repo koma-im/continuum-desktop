@@ -18,12 +18,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import link.continuum.desktop.action.startChat
 import link.continuum.database.KDataStore
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
+import link.continuum.desktop.action.startChat
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.getErrOr
+import link.continuum.desktop.util.getOr
 import netscape.javascript.JSObject
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -273,17 +274,14 @@ private class Start(private val data: KDataStore): WizardState() {
         }
         saveServerAddr(data, s.host(), addr)
         val r = Register(s, appState.koma.http)
-        val f = r.getFlows()
-        when (f) {
-            is Result.Failure -> {
-                GlobalScope.launch(Dispatchers.JavaFx) {
-                    alert(Alert.AlertType.ERROR,
-                            "Failed to get authentication flows from server: ${f.error}")
-                }
-                return null
+        val f = r.getFlows() getOr {
+            GlobalScope.launch(Dispatchers.JavaFx) {
+                alert(Alert.AlertType.ERROR,
+                        "Failed to get authentication flows from server: ${it.error}")
             }
-            is Result.Success -> return Pair(r, f.value)
+            return null
         }
+        return r to f
     }
 
     private val serverCombo: ComboBox<String>
