@@ -2,8 +2,7 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
-import koma.gui.element.icon.placeholder.generator.AvatarGeneratorCache
-import koma.gui.element.icon.placeholder.generator.ColoredName
+import koma.gui.element.icon.user.extract_key_chars
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -26,6 +25,7 @@ class AvatarView(
         avatarSize: Double
 ) {
     val root = StackPane()
+    private val initialIcon = InitialIcon(avatarSize)
     private val imageView = ImageView()
 
     private val user = Channel<UserId>(Channel.CONFLATED)
@@ -34,6 +34,7 @@ class AvatarView(
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
         root.minHeight = avatarSize
         root.minWidth = avatarSize
+        root.add(initialIcon.root)
         root.add(imageView)
 
         GlobalScope.launch {
@@ -52,16 +53,16 @@ class AvatarView(
             var current = input.receive()
             var name = userData.getNameUpdates(current)
             var image = userData.getAvatarImageUpdates(current, client)
-            var hasImage = false
             loop@ while (isActive) {
                 val noMore = select<Boolean> {
                     input.onReceiveOrNull { k ->
                         k?.let {
                             logger.trace { "switching to avatar for $k" }
                             current = it
-                            hasImage = false
                             name.cancel()
                             image.cancel()
+                            initialIcon.show()
+                            imageView.image = null
                             name = userData.getNameUpdates(current)
                             image = userData.getAvatarImageUpdates(current, client)
                             false
@@ -69,23 +70,23 @@ class AvatarView(
                     }
                     image.onReceive {
                         logger.trace { "got updated ${it.isSome} image for $current" }
-                        it.onSome {
-                            hasImage = true
-                            withContext(Dispatchers.JavaFx) {
+                        withContext(Dispatchers.JavaFx) {
+                            it.onSome {
                                 imageView.image = it
+                                initialIcon.hide()
+                            }.onNone {
+                                initialIcon.show()
+                                imageView.image = null
                             }
                         }
                         false
                     }
                     name.onReceive {
-                        if (!hasImage) {
-                            logger.trace { "getting generated avatar for $current with name $it" }
-                            withContext(Dispatchers.JavaFx) {
-                                val av = AvatarGeneratorCache.generateAvatar(ColoredName(userData.getUserColor(current), it))
-                                imageView.image = av
-                            }
-                        } else {
-                            logger.trace { "$current has avatar image, ignoring updated name $it" }
+                        logger.trace { "getting generated avatar for $current with name $it" }
+                        withContext(Dispatchers.JavaFx) {
+                            val color = userData.getUserColor(current)
+                            val (c1, c2) = extract_key_chars(it)
+                            initialIcon.updateItem(c1, c2, color)
                         }
                         false
                     }

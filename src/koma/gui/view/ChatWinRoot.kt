@@ -44,6 +44,7 @@ class ChatWindowBars(
     // used to show sync errors and allow user intervention
     val statusBar = VBox()
 
+    private val roomFinder by lazy { RoomFinder(server) }
     init {
         with(root) {
             style {
@@ -54,7 +55,7 @@ class ChatWindowBars(
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }
                     item("Join Room") {
-                        action { RoomFinder(server).open() }
+                        action { roomFinder.open() }
                     }
                     item("Preferences").action {
                         find(PreferenceWindow::class).openModal()
@@ -78,6 +79,7 @@ class ChatWindowBars(
                 contextmenu {
                     item("Update my avatar").action { chooseUpdateUserAvatar() }
                     item("Update my name").action { updateMyAlias() }
+                    item("Join Room").action { roomFinder.open() }
                 }
             }
             bottom = statusBar

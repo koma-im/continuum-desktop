@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority
 import javafx.util.Callback
 import koma.gui.element.control.KListView
 import koma.koma_app.appState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
@@ -27,6 +28,7 @@ private val settings = appState.store.settings
 
 typealias EventItem = RoomEventRow
 
+@ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
         room: Room,
