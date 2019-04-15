@@ -1,6 +1,9 @@
 package link.continuum.desktop.gui
 
 import javafx.scene.Node
+import javafx.scene.control.Alert
+import javafx.scene.control.ButtonType
+import javafx.stage.Window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -20,6 +23,25 @@ fun<T: Node> T.showIf(show: Boolean) {
 }
 
 val UiDispatcher = Dispatchers.JavaFx
+
+fun uialert(type: Alert.AlertType,
+            header: String,
+            content: String? = null,
+            vararg buttons: ButtonType,
+            owner: Window? = null,
+            title: String? = null,
+            actionFn: Alert.(ButtonType) -> Unit = {}) {
+    GlobalScope.launch(UiDispatcher) {
+        val alert = Alert(type, content ?: "", *buttons)
+        title?.let { alert.title = it }
+        alert.headerText = header
+        owner?.also { alert.initOwner(it) }
+        val buttonClicked = alert.showAndWait()
+        if (buttonClicked.isPresent) {
+            alert.actionFn(buttonClicked.get())
+        }
+    }
+}
 
 /**
  * convert a channel of unordered updates with timestamps

@@ -22,6 +22,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.gui.uialert
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.getErrOr
 import link.continuum.desktop.util.getOr
@@ -269,7 +270,7 @@ private class Start(private val data: KDataStore): WizardState() {
         val addr = serverCombo.editor.text
         val s = HttpUrl.parse(addr)
         if (s == null) {
-            alert(Alert.AlertType.ERROR, "$addr isn't valid server")
+            uialert(Alert.AlertType.ERROR, "$addr isn't valid server")
             return null
         }
         saveServerAddr(data, s.host(), addr)
