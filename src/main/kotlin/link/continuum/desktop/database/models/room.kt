@@ -2,7 +2,6 @@ package link.continuum.desktop.database.models
 
 import io.requery.kotlin.desc
 import io.requery.kotlin.eq
-import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import link.continuum.database.KDataStore
@@ -40,9 +39,6 @@ fun loadRoom(data: KDataStore, roomId: RoomId): Room? {
     val members = data.select(Membership::class).where(
             Membership::room.eq(roomId.id)
     ).orderBy(Membership::lastActive.desc()).limit(200).get().toList()
-    room.members.addAll(members.map {
-        val u = UserId_new(it.person)
-        appState.store.userStore.getOrCreateUserId(u)
-    })
+    room.members.addAll(members.map { UserId_new(it.person) })
     return room
 }

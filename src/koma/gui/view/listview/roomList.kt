@@ -59,7 +59,6 @@ class RoomListView(
             }
         })
         setup(root)
-
         if (roomlist.isNotEmpty()) {
             root.selectionModel.selectFirst()
         }

@@ -8,7 +8,6 @@ import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -31,7 +30,7 @@ class MemberCell(
         client: OkHttpClient,
         scale: Float = settings.scaling,
         avsize: Double = scale * 32.0
-) : ListCell<UserState>() {
+) : ListCell<UserId>() {
     private val root = HBox( 5.0)
     private val toolTip = Tooltip()
     private val avatarView = AvatarView(store, client, avsize)
@@ -77,14 +76,14 @@ class MemberCell(
         }
     }
 
-    override fun updateItem(item: UserState?, empty: Boolean) {
+    override fun updateItem(item: UserId?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
             graphic = null
             return
         }
-        itemId.offer(item.id)
-        name.textFill = store.getUserColor(item.id)
+        itemId.offer(item)
+        name.textFill = store.getUserColor(item)
 
         graphic = root
     }

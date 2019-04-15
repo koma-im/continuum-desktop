@@ -9,6 +9,7 @@ import javafx.scene.layout.VBox
 import koma.gui.element.control.PrettyListView
 import koma.gui.view.usersview.fragment.MemberCell
 import koma.koma_app.appState
+import koma.matrix.UserId
 import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +22,7 @@ private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
-        memList: ObservableList<UserState>,
+        memList: ObservableList<UserId>,
         userData: UserDataStore,
         client: OkHttpClient
 ): View() {
@@ -45,7 +46,7 @@ class RoomMemberListView(
                     showavataronly.set(showavataronly.not().get())
                 }
             }
-            val userlist = PrettyListView<UserState>()
+            val userlist = PrettyListView<UserId>()
             userlist.apply {
                 isFocusTraversable = false
                 items = memList

@@ -2,11 +2,8 @@ package model
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ReadOnlyStringWrapper
-import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.UserId
@@ -16,11 +13,12 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
-import koma.model.user.UserState
 import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
+import link.continuum.desktop.gui.checkUiThread
+import link.continuum.desktop.gui.list.DedupList
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -36,18 +34,17 @@ class Room(
         var powerLevels: RoomPowerSettings = defaultRoomPowerSettings(id)
 ) {
     val canonicalAlias = SimpleObjectProperty<RoomAlias>()
-    val aliases = SimpleListProperty<RoomAlias>(FXCollections.observableArrayList())
+    val aliases = DedupList<RoomAlias, RoomAlias>({it})
     val color = hashStringColorDark(id.toString())
 
     @ObsoleteCoroutinesApi
     val messageManager by lazy { MessageManager(id, appState.store.database ) }
-    val members: ObservableList<UserState> = FXCollections.observableArrayList<UserState>()
+    val members = DedupList<UserId, UserId>({it})
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
     var joinRule: RoomJoinRules = RoomJoinRules.Invite
     var histVisibility = HistoryVisibility.Shared
-
 
     val name = SimpleStringProperty()
 
@@ -56,8 +53,6 @@ class Room(
     val displayName = _displayName.readOnlyProperty
 
     val avatar = SimpleObjectProperty<HttpUrl>(null)
-
-    val users_typing = SimpleListProperty<String>(FXCollections.observableArrayList())
 
     init {
         this.avatar.set(avatar)
@@ -68,7 +63,9 @@ class Room(
         aliases.find { it.canonical }?.let { this.canonicalAlias.set(RoomAlias(it.alias)) }
         name?.let { this.name.set(it) }
 
-        val alias0 = stringBinding(this.aliases) { value.getOrNull(0)?.toString() }
+        val alias0 = stringBinding(this.aliases.list) {
+            this.getOrNull(0)?.toString()
+        }
         val alias_id = Bindings.`when`(alias0.isNotEmpty).then(alias0).otherwise(id.toString())
         val canonstr = stringBinding(canonicalAlias) { value?.str }
         val canonAlias = Bindings.`when`(canonstr.isNotEmpty)
@@ -80,28 +77,20 @@ class Room(
         _displayName.bind(n)
     }
 
-    /**
-     * sometimes a join messages just updates an existing user and nothing needs to be done here
-     */
-    @Synchronized
-    fun makeUserJoined(us: UserState) {
-        if (!members.contains(us))
-            members.add(us)
+
+    fun makeUserJoined(us: UserId) {
+        checkUiThread()
+        members.add(us)
     }
 
     fun removeMember(mid: UserId) {
-        val us = appState.store.userStore.getOrCreateUserId(mid)
-        if (members.remove(us)) {
-        } else {
-        }
+        checkUiThread()
+        members.remove(mid)
     }
 
     fun addAlias(alias: RoomAlias) {
-        synchronized(aliases) {
-            if (!aliases.contains(alias)) {
-                aliases.add(alias)
-            }
-        }
+        checkUiThread()
+        aliases.add(alias)
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {

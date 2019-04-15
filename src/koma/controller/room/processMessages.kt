@@ -8,6 +8,8 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.withContext
+import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.mapMxc
 import model.Room
@@ -19,20 +21,27 @@ private val logger = KotlinLogging.logger {}
 fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     events.forEach { message ->
         when (message) {
-            is TypingEvent -> this.users_typing.setAll(message.user_ids)
+            is TypingEvent -> {}
         }
     }
 }
 
 suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server: HttpUrl) {
+    val room = this
     if (update !is RoomStateEvent) return
     when (update) {
         is MRoomMember -> this.updateMember(update, userData, server)
         is MRoomAliases -> {
-            this.aliases.setAll(update.content.aliases)
+            withContext(UiDispatcher) {
+                room.aliases.addAll(0, update.content.aliases)
+            }
         }
         is MRoomAvatar -> HttpUrl.parse(update.content.url)?.let { this.avatar.set(it) }
-        is MRoomCanonAlias -> this.canonicalAlias.set(update.content.alias)
+        is MRoomCanonAlias -> {
+            withContext(UiDispatcher) {
+                room.canonicalAlias.set(update.content.alias)
+            }
+        }
         is MRoomJoinRule -> this.joinRule = update.content.join_rule
         is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility
         is MRoomPowerLevels -> this.updatePowerLevels(update.content)
@@ -47,10 +56,10 @@ suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server:
 
 @ExperimentalCoroutinesApi
 suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, server: HttpUrl) {
+    val room = this
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
-            val user = appState.store.userStore.getOrCreateUserId(senderid)
             update.content.avatar_url?.let {
                 val u = mapMxc(it, server)
                 if (u == null) logger.error { "invalid avatar url in ${update.content.avatar_url}"}
@@ -61,19 +70,26 @@ suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, serv
             update.content.displayname?.let {
                 userData.updateName(update.sender, it, update.origin_server_ts)
             }
-            this.makeUserJoined(user)
+            withContext(UiDispatcher) {
+                room.makeUserJoined(senderid)
+            }
         }
         Membership.leave -> {
-            this.removeMember(update.sender)
-            if (apiClient?.userId == update.sender) {
-                appState.store.getAccountRoomStore(update.sender).remove(this.id)
+            withContext(UiDispatcher) {
+                room.removeMember(update.sender)
+                if (apiClient?.userId == update.sender) {
+                    appState.store.getAccountRoomStore(update.sender).remove(room.id)
+                }
             }
         }
         Membership.ban -> {
-            this.removeMember(update.sender)
+            withContext(UiDispatcher) {
+                room.removeMember(update.sender)
+            }
         }
         else -> {
             println("todo: handle membership ${update.content}")
         }
     }
 }
+

@@ -46,7 +46,7 @@ class RoomAliasForm(room: Room, user: UserId,
 
         root = fieldset("Room Aliases") {
             vbox(5) {
-                listview(room.aliases) {
+                listview(room.aliases.list) {
                     prefHeight = 200.0
                     selectionModel = NoSelectionModel()
                     cellFactory = object : Callback<ListView<RoomAlias>, ListCell<RoomAlias>> {

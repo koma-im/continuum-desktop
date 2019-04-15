@@ -18,4 +18,12 @@ class DedupList<T, U>(private val identify: (T)->U) {
     fun addAll(elements: List<T>) {
         rwList.addAll(elements.filter { elementSet.add(identify(it)) })
     }
+    fun addAll(index: Int, elements: List<T>) {
+        rwList.addAll(index, elements.filter { elementSet.add(identify(it)) })
+    }
+    fun remove(element: T) {
+        if (elementSet.remove(identify(element))) {
+            rwList.remove(element)
+        }
+    }
 }

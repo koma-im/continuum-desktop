@@ -20,7 +20,7 @@ class JoinedRoomView(room: Room, server: HttpUrl, userData: UserDataStore,
     override val root = HBox()
 
     val messageRecvSendView = ChatRecvSendView(room, server, userData, httpClient)
-    val usersListView = RoomMemberListView(room.members, userData, httpClient)
+    val usersListView = RoomMemberListView(room.members.list, userData, httpClient)
 
     @ObsoleteCoroutinesApi
     fun scroll(down: Boolean) = messageRecvSendView.scroll(down)

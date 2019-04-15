@@ -1,5 +1,6 @@
 package link.continuum.desktop.gui
 
+import com.sun.javafx.tk.Toolkit
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
@@ -23,6 +24,10 @@ fun<T: Node> T.showIf(show: Boolean) {
 }
 
 val UiDispatcher = Dispatchers.JavaFx
+
+fun checkUiThread() {
+    Toolkit.getToolkit().checkFxUserThread()
+}
 
 fun uialert(type: Alert.AlertType,
             header: String,
