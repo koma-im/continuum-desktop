@@ -39,7 +39,8 @@ class AvatarAlways(
 
         this.minHeight = avatarSize
         this.minWidth = avatarSize
-        name.addListener { _, _, n ->
+        name.addListener { _, _, n: String? ->
+            n?:return@addListener
             val c = extract_key_chars(n)
             this.initialIcon.updateItem(c.first, c.second, color)
         }

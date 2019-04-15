@@ -48,7 +48,11 @@ suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server:
         is MRoomCreate -> { }
         is MRoomPinnedEvents -> {}
         is MRoomTopic -> {}
-        is MRoomName -> { this.name.set(update.content.name) }
+        is MRoomName -> {
+            withContext(UiDispatcher) {
+                room.name.set(update.content.name)
+            }
+        }
         is MRoomGuestAccess -> {}
     }
 }
