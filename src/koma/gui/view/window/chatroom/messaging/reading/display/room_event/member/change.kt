@@ -186,13 +186,3 @@ private fun EventTarget.addArrowIcon() {
     arrowico.opacity = 0.3
     this.add(arrowico)
 }
-
-private fun EventTarget.addAvatar(url: String?) {
-    val avatarsize = AppSettings.scaling * 32.0
-    val minWid = AppSettings.scaling * 40.0
-    this.stackpane {
-        url?.let { HttpUrl.parse(it) }?.let { add(koma.gui.element.icon.avatar.AvatarView(it)) }
-        minHeight = avatarsize
-        minWidth = minWid
-    }
-}

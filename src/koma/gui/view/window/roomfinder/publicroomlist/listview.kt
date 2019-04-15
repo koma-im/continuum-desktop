@@ -30,6 +30,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
@@ -38,7 +39,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
 class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
-                      server: HttpUrl
+                      server: HttpUrl,
+                      client: OkHttpClient
 ) {
 
     val ui = VBox(5.0)
@@ -49,7 +51,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
     init {
         val field = TextFields.createClearableTextField() as CustomTextField
         input = field.textProperty()
-        roomlist = RoomListView(publicRoomList, input, server)
+        roomlist = RoomListView(publicRoomList, input, server, client = client)
         createui(field)
         ui.vgrow = Priority.ALWAYS
     }
@@ -111,7 +113,8 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
 class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
         input: StringProperty,
-        server: HttpUrl
+        server: HttpUrl,
+        client: OkHttpClient
 ): View() {
     private val api = appState.apiClient!!
     private val matchRooms = FilteredList(roomlist)
@@ -136,7 +139,7 @@ class RoomListView(
         with(root) {
             vgrow = Priority.ALWAYS
             cellFactory = Callback{
-                DiscoveredRoomFragment(server)
+                DiscoveredRoomFragment(server, client = client)
             }
         }
         root.skinProperty().addListener { _ ->

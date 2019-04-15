@@ -1,7 +1,9 @@
 package link.continuum.desktop.gui.icon.avatar
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import kotlinx.coroutines.*
+import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import link.continuum.desktop.util.Some
@@ -60,4 +62,22 @@ class DeferredImage(
                 .entryCapacity(100)
         return cache.build()
     }
+}
+
+
+private typealias ImageProperty = SimpleObjectProperty<Image>
+
+fun downloadImageResized(url: HttpUrl, size: Double, client: OkHttpClient): ImageProperty {
+    val prop = ImageProperty()
+    GlobalScope.launch {
+        val bs = downloadHttp(url, client) getOr  {
+            logger.error { "download of $url fails with ${it.error}" }
+            return@launch
+        }
+        val img = bs.inputStream().use {
+            Image(it, size, size, true , true)
+        }
+        withContext(UiDispatcher) { prop.set(img) }
+    }
+    return prop
 }

@@ -1,17 +1,14 @@
 package koma.gui.view
 
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
+import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
-import koma.gui.element.icon.AvatarUrl
 import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
@@ -41,7 +38,7 @@ class ChatView(roomList: ObservableList<Room>,
 
     override val root = vbox (spacing = 5.0)
 
-    val roomListView = RoomListView(roomList, server, data)
+    val roomListView = RoomListView(roomList, server, data, client = httpClient)
     val switchableRoomView = SwitchableRoomView(server, storage.userData, httpClient)
 
     init {
@@ -66,11 +63,10 @@ class ChatView(roomList: ObservableList<Room>,
 
 }
 
-class RoomFragment(private val data: KDataStore): ListCell<Room>() {
+class RoomFragment(private val data: KDataStore, private val client: OkHttpClient): ListCell<Room>() {
     var room: Room? = null
-    private val icon = SimpleObjectProperty<AvatarUrl>(null)
-    private val name = SimpleStringProperty()
-    private val color = SimpleObjectProperty<Color>(null)
+    private val avatar = AvatarAlways(client = client)
+    private val nameLabel = Label()
 
     override fun updateItem(item: Room?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -79,9 +75,10 @@ class RoomFragment(private val data: KDataStore): ListCell<Room>() {
             return
         }
         room = item
-        icon.cleanBind(item.avatar)
-        name.cleanBind(item.displayName)
-        color.set(item.color)
+        avatar.bind(item.displayName, item.color, item.avatar)
+        nameLabel.textProperty().cleanBind(item.displayName)
+        nameLabel.textFill = item.color
+
         graphic = root
     }
 
@@ -97,17 +94,14 @@ class RoomFragment(private val data: KDataStore): ListCell<Room>() {
             }
 
         }
-        add(AvatarAlways(icon, name, color))
-        label(name) {
-            textFillProperty().bind(color)
-        }
-
+        add(avatar)
+        add(nameLabel)
     }
 
     private fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(room, user, data).openWindow()
+        RoomInfoDialog(room, user, data, client = client).openWindow()
     }
 }
 

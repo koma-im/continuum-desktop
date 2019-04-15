@@ -1,6 +1,5 @@
 package link.continuum.desktop.gui.icon.avatar
 
-import com.sun.javafx.tk.Toolkit
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Background
@@ -11,17 +10,14 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
-import koma.koma_app.appState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import mu.KotlinLogging
 import tornadofx.*
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-@ExperimentalCoroutinesApi
 class InitialIcon(
-        private val iSize: Double = appState.store.settings.scaling * 32.0
+        private val iSize: Double
 ) {
     private val radii =  CornerRadii(iSize * 0.2)
     private var color: Color? = null
@@ -67,7 +63,6 @@ class InitialIcon(
     }
 
     fun updateItem(charL: Char, charR: Char, color: Color) {
-        Toolkit.getToolkit().checkFxUserThread()
         this.color = color
         root.background = backgrounds.computeIfAbsent(color) {
             logger.debug { "initial icon $charL $charR $color" }

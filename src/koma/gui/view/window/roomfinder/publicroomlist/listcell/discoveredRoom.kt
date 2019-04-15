@@ -10,34 +10,46 @@ import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.ListCell
+import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import koma.controller.events.addJoinedRoom
-import koma.gui.element.icon.AvatarAlways
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.gui.element.icon.user.extract_key_chars
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
-import koma.network.media.MHUrl
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
-import koma.util.result.ok
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.icon.avatar.InitialIcon
+import link.continuum.desktop.gui.icon.avatar.downloadImageResized
+import link.continuum.desktop.util.http.mapMxc
+import link.continuum.libutil.`?or`
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
-class DiscoveredRoomFragment(private val server: HttpUrl): ListCell<DiscoveredRoom>() {
+@ExperimentalCoroutinesApi
+class DiscoveredRoomFragment(
+        private val server: HttpUrl,
+        private val client: OkHttpClient,
+        private val avatarSize: Double = appState.store.settings.scaling * 32.0
+): ListCell<DiscoveredRoom>() {
     val root = hbox(spacing = 10.0)
-    val avUrl = SimpleObjectProperty<HttpUrl>()
-    val name = SimpleStringProperty()
-    val avColor = SimpleObjectProperty<Color>()
+    private val imageView = ImageView()
+    private val initialIcon = InitialIcon(avatarSize).apply {
+        this.root.removeWhen(imageView.imageProperty().isNotNull)
+    }
+    var name = ""
+
     val worldRead = SimpleBooleanProperty(false)
     val guestJoin = SimpleBooleanProperty(false)
     val members = SimpleIntegerProperty(-1)
@@ -57,10 +69,19 @@ class DiscoveredRoomFragment(private val server: HttpUrl): ListCell<DiscoveredRo
             graphic = null
             return
         }
-        avColor.set(hashStringColorDark(item.room_id.id))
-        val avU = item.avatar_url?.let { MHUrl.fromStr(it).ok() }?.toHttpUrl(server)?.ok()
-        avU ?.let { avUrl.set(avU) }
-        name.set(item.dispName())
+        name = item.dispName()
+        val (c1, c2) = extract_key_chars(name)
+        initialIcon.updateItem(c1, c2, hashStringColorDark(item.room_id.id))
+        imageView.image = null
+        item.avatar_url?.let {
+            val u = mapMxc(it, server) `?or` {
+                logger.warn { "invalid avatar url $it" }
+                return@let
+            }
+            val i = downloadImageResized(u, avatarSize, client = client)
+            imageView.imageProperty().cleanBind(i)
+        }
+
         worldRead.set(item.world_readable)
         guestJoin.set(item.guest_can_join)
         members.set(item.num_joined_members)
@@ -76,7 +97,10 @@ class DiscoveredRoomFragment(private val server: HttpUrl): ListCell<DiscoveredRo
     }
 
     private fun EventTarget.setUpCell(){
-        add(AvatarAlways(avUrl, name, avColor))
+        stackpane {
+            add(initialIcon.root)
+            add(imageView)
+        }
         stackpane {
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
@@ -106,7 +130,7 @@ class DiscoveredRoomFragment(private val server: HttpUrl): ListCell<DiscoveredRo
                 val h = hoverProperty()
                 button("Join") {
                     visibleWhen { h }
-                    action { joinById(roomId.value, name.value, root) }
+                    action { joinById(roomId.value, name, root) }
                 }
                 alignment = Pos.CENTER_RIGHT
             }

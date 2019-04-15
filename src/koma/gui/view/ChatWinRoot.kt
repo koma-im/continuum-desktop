@@ -44,7 +44,7 @@ class ChatWindowBars(
     // used to show sync errors and allow user intervention
     val statusBar = VBox()
 
-    private val roomFinder by lazy { RoomFinder(server) }
+    private val roomFinder by lazy { RoomFinder(server, client = httpClient) }
     init {
         with(root) {
             style {
