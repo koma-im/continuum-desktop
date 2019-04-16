@@ -28,12 +28,12 @@ Matrix client built for desktop platforms based on the [koma library](https://gi
 
 The Kotlin code currently runs on JVM, make sure you have Java runtime environment not older than version 11.
 
-Precompiled packages are built for Mac and Linux platforms, download the latest version from
+To make it easier to run, bundled packages with all dependencies, including the entire GUI toolkit,
+are built for Mac and Linux platforms, download the latest version from
 [Releases page](https://github.com/koma-im/continuum-desktop/releases).
 
-For convenience, all dependencies all packaged in a single file,
-just double-click to run it.
-Alternatively, you can also use a command like `java -jar filename.jar`.
+Double-click on the jar file to launch the program.
+Alternatively, you can use the command-line: `java -jar continuum.jar`.
 
 # Usage
 

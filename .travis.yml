@@ -8,17 +8,24 @@ language: java
 sudo: false
 git:
   depth: 1
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-  - "$HOME/.m2"
+    - "$HOME/.m2"
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
 jdk:
   - openjdk11
 before_deploy:
-  - mv target/$APPNAME-desktop-$TRAVIS_TAG-jar-with-dependencies.jar $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+  - ./gradlew shadowJar
+  - mv build/libs/*-bundled.jar $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   skip_cleanup: true
-  file: $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+  file: *.jar
+  file_glob: true
   on:
     tags: true
