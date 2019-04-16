@@ -94,3 +94,11 @@ tasks.withType(AbstractArchiveTask) {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
+
+shadowJar {
+    classifier = "bundled"
+}
+
+jar {
+    classifier = "without-dependencies"
+}
