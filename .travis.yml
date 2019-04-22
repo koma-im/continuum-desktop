@@ -20,12 +20,13 @@ jdk:
   - openjdk11
 before_deploy:
   - ./gradlew shadowJar
-  - mv build/libs/*-bundled.jar $APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+  - mkdir -p deploy
+  - mv build/libs/*-bundled.jar deploy/$APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   skip_cleanup: true
-  file: *.jar
+  file: deploy/*
   file_glob: true
   on:
     tags: true
