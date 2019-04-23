@@ -1,9 +1,9 @@
+dist: xenial
+osx_image: xcode10.1
 matrix:
   include:
     - os: linux
-      dist: xenial
     - os: osx
-      osx_image: xcode10.1
 language: java
 sudo: false
 git:
@@ -22,6 +22,7 @@ before_deploy:
   - ./gradlew shadowJar
   - mkdir -p deploy
   - mv build/libs/*-bundled.jar deploy/$APPNAME-$TRAVIS_TAG-$TRAVIS_OS_NAME.jar
+  - ./scripts/pack.sh
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
