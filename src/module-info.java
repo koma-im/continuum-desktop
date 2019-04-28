@@ -8,7 +8,6 @@ module link.continuum.desktop {
     requires java.prefs;
     requires de.jensd.fx.glyphs.fontawesome;
     requires tornadofx;
-    requires javafx.web;
     requires jdk.jsobject;
     requires kotlin.stdlib;
     requires kotlinx.coroutines.javafx;

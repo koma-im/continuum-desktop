@@ -5,11 +5,11 @@ import com.github.kittinunf.result.failure
 import com.github.kittinunf.result.success
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
+import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.scene.web.WebView
 import javafx.util.StringConverter
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
@@ -26,7 +26,6 @@ import link.continuum.desktop.gui.uialert
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.getErrOr
 import link.continuum.desktop.util.getOr
-import netscape.javascript.JSObject
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -227,7 +226,7 @@ class FallbackWebviewAuth(
         private val unauthorized: Unauthorized,
         private val type: String
 ): AuthView() {
-    override val root = WebView()
+    override val root = Label("under construction")
     private var webAuthDone = false
     override suspend fun finish(): Result<RegisterdUser, Exception>? {
         if (webAuthDone) {
@@ -250,18 +249,6 @@ class FallbackWebviewAuth(
                 .addQueryParameter("session", unauthorized.session)
                 .build()
         println("Using fallback webpage authentication: $url")
-        root.engine.load(url.toString())
-        val win = root.engine.executeScript("window") as JSObject
-
-        class JavaApplication {
-            fun finishAuth() {
-                println("Auth is done")
-                webAuthDone = true
-            }
-        }
-
-        // val app = JavaApplication()
-        win.setMember("onAuthDone", "app.finishAuth()")
     }
 }
 
