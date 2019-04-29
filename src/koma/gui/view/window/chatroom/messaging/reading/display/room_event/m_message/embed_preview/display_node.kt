@@ -36,8 +36,8 @@ fun TextSegment.toFlow(): FlowElement {
 }
 
 private fun makeEmojiElement(emoji: String): InlineElement {
-    val icon = EmojiIcon(emoji)
-    return InlineElement(icon)
+    val icon = EmojiIcon(emoji, settings.fontSize)
+    return InlineElement(icon.node)
 }
 
 /**

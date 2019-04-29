@@ -5,24 +5,26 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.sendMessage
 import koma.gui.view.window.chatroom.messaging.reading.MessagesListScrollPane
 import koma.gui.view.window.chatroom.messaging.sending.createButtonBar
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 
+@ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class ChatRecvSendView(room: Room, server: HttpUrl,
                        store: UserDataStore,
                        client: OkHttpClient): View() {
     override val root = vbox(10.0)
 
-    @ObsoleteCoroutinesApi
     private val messageScroll = MessagesListScrollPane(room, server, store, client)
     private val messageInput = TextField()
 
-    @ObsoleteCoroutinesApi
     fun scroll(down: Boolean) = messageScroll.scrollPage(down)
     init {
         with(root) {

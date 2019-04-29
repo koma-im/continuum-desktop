@@ -10,8 +10,11 @@ import koma.gui.element.emoji.keyboard.EmojiKeyboard
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import model.Room
+import mu.KotlinLogging
 import tornadofx.*
 import kotlin.math.roundToInt
+
+private val logger = KotlinLogging.logger {}
 
 fun createButtonBar(inputField: TextField, room: Room,
                     settings: AppSettings = appState.store.settings
@@ -36,12 +39,15 @@ fun createButtonBar(inputField: TextField, room: Room,
         button{
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT, size)
             action {
-                val ep = EmojiKeyboard
-                ep.onEmojiChosen = {inputField.text += it}
-                ep.show(this)
+                emojiKeyboard.onEmoji = {
+                    logger.trace { "emoji input $it in $it" }
+                    inputField.text += it
+                }
+                emojiKeyboard.show(this)
             }
         }
     }
     return bbar
 }
 
+private val emojiKeyboard by lazy { EmojiKeyboard ()}
