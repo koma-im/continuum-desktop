@@ -3,6 +3,7 @@ package link.continuum.desktop.action
 import koma.Koma
 import koma.gui.view.ChatWindowBars
 import koma.gui.view.SyncStatusBar
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
 import link.continuum.database.KDataStore
@@ -17,7 +18,10 @@ private val logger = KotlinLogging.logger {}
  * show the chat window after login is done
  * updates the list of recently used accounts
  */
-fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDataStore) {
+fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
+              appData: AppStore
+              ) {
+    val data = appData.database
     updateAccountUsage(data, userId)
 
     val app = appState
@@ -25,14 +29,14 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDa
     val apiClient  = koma.createApi(token, userId, url)
     app.currentUser = userId
     app.apiClient = apiClient
-    val userRooms = store.getAccountRoomStore(userId)
+    val userRooms = store.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms.roomList, url, data, store, koma.http.client)
+    val primary = ChatWindowBars(userRooms, url, data, store, koma.http.client)
     val statusBar = SyncStatusBar()
     primary.statusBar.add(statusBar.root)
     FX.primaryStage.scene.root = primary.root
 
-    val fullSync = userRooms.roomList.isEmpty()
+    val fullSync = userRooms.isEmpty()
     if (fullSync) logger.warn { "Doing a full sync because there " +
             "are no known rooms $userId has joined" }
     val sync = SyncControl(
@@ -40,8 +44,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl, data: KDa
             userId,
             statusChan = statusBar.status,
             full_sync =  fullSync,
-            data = data,
-            userDataStore = store.userData
+            appData = appData
     )
 
     sync.start()

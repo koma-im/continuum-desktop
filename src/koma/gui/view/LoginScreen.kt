@@ -91,7 +91,7 @@ class LoginScreen(
                     action {
                         GlobalScope.launch {
                             val k = appState.koma
-                            val d = appState.store.database
+                            val d = appState.store
                             onClickLogin(k, d, userId.value, password.text, serverCombo.editor.text)
                         }
                     }

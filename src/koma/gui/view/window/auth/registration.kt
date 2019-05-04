@@ -159,7 +159,7 @@ private class Success(user: RegisterdUser, server: HttpUrl, window: Registration
                     action {
                         window.close()
                         val k = appState.koma
-                        startChat(k, user.user_id, user.access_token, server, appState.store.database)
+                        startChat(k, user.user_id, user.access_token, server, appState.store)
                     }
                 }
             }

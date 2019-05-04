@@ -1,6 +1,6 @@
 package koma.controller.room
 
-import koma.koma_app.appState
+import koma.koma_app.AppStore
 import koma.koma_app.appState.apiClient
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
@@ -10,7 +10,6 @@ import koma.matrix.room.participation.Membership
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.mapMxc
 import model.Room
 import mu.KotlinLogging
@@ -26,11 +25,15 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     }
 }
 
-suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server: HttpUrl) {
+suspend fun Room.applyUpdate(
+        update: RoomEvent,
+        server: HttpUrl,
+        appStore: AppStore
+) {
     val room = this
     if (update !is RoomStateEvent) return
     when (update) {
-        is MRoomMember -> this.updateMember(update, userData, server)
+        is MRoomMember -> this.updateMember(update, server, appStore)
         is MRoomAliases -> {
             withContext(UiDispatcher) {
                 room.aliases.addAll(0, update.content.aliases)
@@ -59,8 +62,13 @@ suspend fun Room.applyUpdate(update: RoomEvent, userData: UserDataStore, server:
 
 
 @ExperimentalCoroutinesApi
-suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, server: HttpUrl) {
+suspend fun Room.updateMember(
+        update: MRoomMember,
+        server: HttpUrl,
+        appStore: AppStore
+) {
     val room = this
+    val userData = appStore.userData
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
@@ -82,7 +90,7 @@ suspend fun Room.updateMember(update: MRoomMember, userData: UserDataStore, serv
             withContext(UiDispatcher) {
                 room.removeMember(update.sender)
                 if (apiClient?.userId == update.sender) {
-                    appState.store.getAccountRoomStore(update.sender).remove(room.id)
+                    appStore.joinedRoom.removeById(room.id)
                 }
             }
         }

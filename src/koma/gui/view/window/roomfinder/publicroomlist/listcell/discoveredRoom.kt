@@ -13,9 +13,9 @@ import javafx.scene.control.ListCell
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.text.FontWeight
-import koma.controller.events.addJoinedRoom
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.gui.element.icon.user.extract_key_chars
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
@@ -138,13 +138,13 @@ class DiscoveredRoomFragment(
     }
 }
 
-fun joinById(roomid: RoomId, name: String, owner: Node) {
+fun joinById(roomid: RoomId, name: String, owner: Node, store: AppStore = appState.store) {
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
         val rs = api.joinRoom(roomid).awaitMatrix()
         rs.success {
-            launch(Dispatchers.JavaFx) { addJoinedRoom(api.userId, roomid) }
+            launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
         }
         rs.failure {
             launch(Dispatchers.JavaFx) {

@@ -6,12 +6,13 @@ import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
+import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
-import koma.storage.rooms.UserRoomStore
 import koma.storage.users.UserStore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.openStore
+import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import mu.KotlinLogging
@@ -42,11 +43,21 @@ class AppStore(dir: String) {
         database = openStore(dbPath)
     }
     val userStore = UserStore(database)
+    /**
+     * users on the network
+     */
     val userData = UserDataStore(database)
+    /**
+     * rooms on the network
+     */
     val roomStore = RoomStore(database)
     val settings = AppSettings(database)
-    private val _accountRooms = mutableMapOf<UserId, UserRoomStore>()
-    fun getAccountRoomStore(userId: UserId): UserRoomStore {
-        return _accountRooms.computeIfAbsent(userId, { UserRoomStore(roomStore) })
+    val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
+
+    fun joinRoom(roomId: RoomId){
+        joinedRoom.addIfAbsent(roomId) {
+            logger.debug { "Add user joined room; $roomId" }
+            roomStore.getOrCreate(it)
+        }
     }
 }

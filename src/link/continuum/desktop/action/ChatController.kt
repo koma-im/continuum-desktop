@@ -4,16 +4,15 @@ import com.github.kittinunf.result.Result
 import koma.controller.events.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
 import koma.gui.view.SyncStatusBar
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.database.KDataStore
 import link.continuum.database.models.getSyncBatchKey
 import link.continuum.database.models.saveSyncBatchKey
-import link.continuum.desktop.gui.list.user.UserDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -29,8 +28,7 @@ class SyncControl(
          * used to show sync status
          */
         private val statusChan: Channel<SyncStatusBar.Variants>,
-        private val data: KDataStore,
-        private val userDataStore: UserDataStore,
+        private val appData: AppStore,
         full_sync: Boolean = false
 ) {
     private val sync: MatrixSyncReceiver
@@ -42,7 +40,7 @@ class SyncControl(
             }
             null
         }  else {
-            getSyncBatchKey(data, user)
+            getSyncBatchKey(appData.database, user)
         }
         sync = MatrixSyncReceiver(apiClient, batch_key)
 
@@ -62,10 +60,10 @@ class SyncControl(
             for (s in sync.events) {
                 if (s is Result.Success) {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(user, s.value, userDataStore, apiClient.server)
+                    processEventsResult(s.value, apiClient.server, appData = appData)
                     val nb = sync.since
                     nb?.let {
-                        saveSyncBatchKey(data, user, nb)
+                        saveSyncBatchKey(appData.database, user, nb)
                     }
                 } else if (s is Result.Failure) {
                     val deferred = CompletableDeferred<Unit>()

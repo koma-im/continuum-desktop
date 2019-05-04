@@ -15,6 +15,7 @@ import javafx.scene.layout.VBox
 import javafx.util.Callback
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.publicapi.rooms.findPublicRooms
@@ -114,7 +115,8 @@ class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
         input: StringProperty,
         server: HttpUrl,
-        client: OkHttpClient
+        client: OkHttpClient,
+        appData: AppStore = appState.store
 ): View() {
     private val api = appState.apiClient!!
     private val matchRooms = FilteredList(roomlist)
@@ -134,8 +136,7 @@ class RoomListView(
     private val existing = ConcurrentHashMap.newKeySet<RoomId>()
 
     init {
-        appState.currentUser?.let { appState.store.getAccountRoomStore(it).roomList
-        }?.map { it.id } ?.let { existing.addAll(it) }
+        existing.addAll(appData.joinedRoom.getIds())
         with(root) {
             vgrow = Priority.ALWAYS
             cellFactory = Callback{

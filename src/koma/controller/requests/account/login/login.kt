@@ -4,6 +4,7 @@ import com.github.kittinunf.result.Result
 import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
 import koma.Koma
+import koma.koma_app.AppStore
 import koma.matrix.UserId
 import koma.matrix.UserPassword
 import koma.matrix.login
@@ -26,7 +27,9 @@ import okhttp3.HttpUrl
  * when the login button is clicked
  * accept text of text fields as parameters
  */
-suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: String, server: String) {
+suspend fun onClickLogin(koma: Koma,
+                         appData: AppStore,
+                         user: String, password: String, server: String) {
     val userid = UserId_new(user)
     val url = HttpUrl.parse(server)
     if (url == null) {
@@ -34,6 +37,7 @@ suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: S
                 "$server not parsed")
         return
     }
+    val data = appData.database
     saveServerAddr(data, userid.server, server)
     val token = if (!password.isBlank()) {
         getTokenWithPassword(userid, password, koma, data, server)
@@ -48,7 +52,7 @@ suspend fun onClickLogin(koma: Koma, data: KDataStore, user: String, password: S
         t
     }
     token ?: return
-    startChat(koma, userid, token, url, data)
+    startChat(koma, userid, token, url, appData)
 }
 
 /**
