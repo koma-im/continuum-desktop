@@ -1,10 +1,8 @@
 package link.continuum.database.models
 
-import io.requery.Column
-import io.requery.Entity
-import io.requery.Index
-import io.requery.Persistable
+import io.requery.*
 import io.requery.kotlin.eq
+import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import link.continuum.database.KDataStore
 
@@ -13,15 +11,16 @@ interface Membership: Persistable {
     /**
      * id of room
      */
-    @get:Index("room_person_membership")
-    @get:Column(length = Int.MAX_VALUE, unique = true)
+
+    @get:Key
+    @get:Column(length = Int.MAX_VALUE)
     var room: String
 
     /**
      * user id
      */
-    @get:Index("room_person_membership")
-    @get:Column(length = Int.MAX_VALUE, unique = true)
+    @get:Key
+    @get:Column(length = Int.MAX_VALUE)
     var person: String
 
     /**
@@ -36,3 +35,24 @@ fun loadMembership(data: KDataStore, roomId: RoomId): List<Membership> {
             .where(Membership::room.eq(roomId.id)).get().toList()
 }
 
+/**
+ * rooms the given user has joined
+ */
+fun loadUserRooms(data: KDataStore, userId: UserId): List<RoomId> {
+    return data.select(Membership::class)
+            .where(Membership::person.eq(userId.str)).get().map { RoomId(it.room) }
+}
+
+fun saveUserInRoom(data: KDataStore, userId: UserId, roomId: RoomId, time: Long) {
+    val membership = MembershipEntity()
+    membership.room = roomId.id
+    membership.person = userId.str
+    membership.lastActive = time
+    data.upsert(membership)
+}
+
+fun removeMembership(data: KDataStore, userId: UserId, roomId: RoomId) {
+    data.delete(Membership::class)
+            .where(Membership::person.eq(userId.str)
+                    .and(Membership::room.eq(roomId.id))).get().value()
+}

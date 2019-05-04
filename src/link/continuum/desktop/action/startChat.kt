@@ -6,7 +6,11 @@ import koma.gui.view.SyncStatusBar
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
+import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -18,6 +22,7 @@ private val logger = KotlinLogging.logger {}
  * show the chat window after login is done
  * updates the list of recently used accounts
  */
+@ExperimentalCoroutinesApi
 fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
               appData: AppStore
               ) {
@@ -36,16 +41,23 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     primary.statusBar.add(statusBar.root)
     FX.primaryStage.scene.root = primary.root
 
-    val fullSync = userRooms.isEmpty()
-    if (fullSync) logger.warn { "Doing a full sync because there " +
-            "are no known rooms $userId has joined" }
-    val sync = SyncControl(
-            apiClient,
-            userId,
-            statusChan = statusBar.status,
-            full_sync =  fullSync,
-            appData = appData
-    )
+    GlobalScope.launch {
+        val rooms = loadUserRooms(data, userId)
+        logger.debug { "user is in ${rooms.size} rooms according database records" }
+        rooms.forEach { store.joinRoom(it) }
+        val fullSync = userRooms.isEmpty()
+        if (fullSync) logger.warn {
+            "Doing a full sync because there " +
+                    "are no known rooms $userId has joined"
+        }
+        val sync = SyncControl(
+                apiClient,
+                userId,
+                statusChan = statusBar.status,
+                full_sync = fullSync,
+                appData = appData
+        )
 
-    sync.start()
+        sync.start()
+    }
 }

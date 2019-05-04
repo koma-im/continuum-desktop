@@ -9,6 +9,8 @@ import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
+import link.continuum.database.models.removeMembership
+import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.http.mapMxc
 import model.Room
@@ -25,6 +27,7 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     }
 }
 
+@ExperimentalCoroutinesApi
 suspend fun Room.applyUpdate(
         update: RoomEvent,
         server: HttpUrl,
@@ -82,11 +85,13 @@ suspend fun Room.updateMember(
             update.content.displayname?.let {
                 userData.updateName(update.sender, it, update.origin_server_ts)
             }
+            saveUserInRoom(data = appStore.database, userId = senderid, roomId = room.id, time = update.origin_server_ts)
             withContext(UiDispatcher) {
                 room.makeUserJoined(senderid)
             }
         }
         Membership.leave -> {
+            removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
             withContext(UiDispatcher) {
                 room.removeMember(update.sender)
                 if (apiClient?.userId == update.sender) {
@@ -95,6 +100,7 @@ suspend fun Room.updateMember(
             }
         }
         Membership.ban -> {
+            removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
             withContext(UiDispatcher) {
                 room.removeMember(update.sender)
             }
