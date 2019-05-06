@@ -5,6 +5,9 @@ import io.requery.kotlin.eq
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import link.continuum.database.KDataStore
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger { }
 
 @Entity
 interface Membership: Persistable {
@@ -43,7 +46,8 @@ fun loadUserRooms(data: KDataStore, userId: UserId): List<RoomId> {
             .where(Membership::person.eq(userId.str)).get().map { RoomId(it.room) }
 }
 
-fun saveUserInRoom(data: KDataStore, userId: UserId, roomId: RoomId, time: Long) {
+
+fun saveUserInRoom(data: KDataStore, userId: UserId, roomId: RoomId, time: Long? = null) {
     val membership = MembershipEntity()
     membership.room = roomId.id
     membership.person = userId.str

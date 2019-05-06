@@ -2,6 +2,7 @@ package koma.controller.room
 
 import koma.koma_app.AppStore
 import koma.koma_app.appState.apiClient
+import koma.matrix.UserId
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
@@ -31,12 +32,13 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
 suspend fun Room.applyUpdate(
         update: RoomEvent,
         server: HttpUrl,
+        self: UserId,
         appStore: AppStore
 ) {
     val room = this
     if (update !is RoomStateEvent) return
     when (update) {
-        is MRoomMember -> this.updateMember(update, server, appStore)
+        is MRoomMember -> this.updateMember(update, server, self = self, appStore = appStore)
         is MRoomAliases -> {
             withContext(UiDispatcher) {
                 room.aliases.addAll(0, update.content.aliases)
@@ -68,6 +70,7 @@ suspend fun Room.applyUpdate(
 suspend fun Room.updateMember(
         update: MRoomMember,
         server: HttpUrl,
+        self: UserId,
         appStore: AppStore
 ) {
     val room = this
@@ -94,7 +97,7 @@ suspend fun Room.updateMember(
             removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
             withContext(UiDispatcher) {
                 room.removeMember(update.sender)
-                if (apiClient?.userId == update.sender) {
+                if (self == update.sender) {
                     appStore.joinedRoom.removeById(room.id)
                 }
             }

@@ -5,6 +5,7 @@ import koma.controller.room.handle_ephemeral
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
+import koma.koma_app.appState.apiClient
 import koma.matrix.UserId
 import koma.matrix.event.ephemeral.parse
 import koma.matrix.room.InvitedRoom
@@ -14,12 +15,12 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.util.matrix.getUserState
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import link.continuum.database.models.removeMembership
+import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.libutil.`?or`
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -40,15 +41,16 @@ private suspend fun handle_joined_room(
         roomid: RoomId,
         data: JoinedRoom,
         server: HttpUrl,
+        self: UserId,
         appData: AppStore
 ) {
     val room = appData.roomStore.getOrCreate(roomid)
     withContext(UiDispatcher) {
         appData.joinRoom(roomid)
     }
-    data.state.events.forEach { room.applyUpdate(it, server, appData) }
+    data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
     val timeline = data.timeline
-    timeline.events.forEach { room.applyUpdate(it, server, appData) }
+    timeline.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
 
     GlobalScope.launch {
         room.messageManager.appendTimeline(timeline)
@@ -61,19 +63,30 @@ private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, d
     println("TODO: handle room invitation $data")
 }
 
+@ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 fun processEventsResult(syncRes: SyncResponse,
                         server: HttpUrl,
                         appData: AppStore
                         ) {
+    val self = appState.currentUser `?or` {
+        logger.error { "current user not set" }
+        return
+    }
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
     syncRes.rooms.join.forEach{ rid, data ->
+        val roomId = RoomId(rid)
         GlobalScope.launch {
-            handle_joined_room(RoomId(rid), data, server, appData = appData)
+            saveUserInRoom(data = appData.database, userId = self, roomId = roomId)
+            handle_joined_room(roomId, data, server, appData = appData, self = self)
         }
     }
     syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data) }
+
+    syncRes.rooms.leave.forEach { roomId, leftRoom ->
+        removeMembership(data = appData.database, userId = self, roomId = roomId)
+    }
     uilaunch {
         syncRes.rooms.leave.forEach { id, leftroom ->
             appData.joinedRoom.removeById(id)

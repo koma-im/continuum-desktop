@@ -5,10 +5,9 @@ import io.requery.kotlin.eq
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import link.continuum.database.KDataStore
-import link.continuum.database.models.Membership
-import link.continuum.database.models.RoomAliasRecord
-import link.continuum.database.models.RoomPowerSettings
-import link.continuum.database.models.RoomSettings
+import link.continuum.database.models.*
+import link.continuum.libutil.`?or?`
+import link.continuum.libutil.onNull
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -19,26 +18,32 @@ fun loadRoom(data: KDataStore, roomId: RoomId): Room? {
     logger.debug { "Loading room with id $roomId" }
     val settings = data.select(RoomSettings::class).where(
             RoomSettings::roomId.eq(roomId.id)
-    ).get().firstOrNull() ?: return null
+    ).get().firstOrNull() onNull {
+        logger.warn { "no settings stored for room $roomId" }
+    }
 
     val aliases = data.select(RoomAliasRecord::class).where(
             RoomAliasRecord::roomId.eq(roomId.id)
     ).get().toList()
     val powers = data.select(RoomPowerSettings::class).where(
             RoomPowerSettings::roomId.eq(roomId.id)
-    ).get().firstOrNull()
+    ).get().firstOrNull() onNull  {
+        logger.warn { "no power settings stored for room $roomId" }
+    }
     val room = Room(roomId, data,
             aliases = aliases,
-            name = settings.roomName,
-            avatar = settings.avatar?.let { HttpUrl.parse(it) },
-            historyVisibility = settings.historyVisibility,
-            joinRule = settings.joinRule,
-            visibility = settings.visibility,
-            powerLevels = powers
+            name = settings?.roomName,
+            avatar = settings?.avatar?.let { HttpUrl.parse(it) },
+            historyVisibility = settings?.historyVisibility,
+            joinRule = settings?.joinRule,
+            visibility = settings?.visibility,
+            powerLevels = powers ?: defaultRoomPowerSettings(roomId)
     )
     val members = data.select(Membership::class).where(
             Membership::room.eq(roomId.id)
     ).orderBy(Membership::lastActive.desc()).limit(200).get().toList()
     room.members.addAll(members.map { UserId_new(it.person) })
+    logger.debug { "loaded ${members.size} members, " +
+            "there are now ${room.members.size()} members in $roomId" }
     return room
 }
