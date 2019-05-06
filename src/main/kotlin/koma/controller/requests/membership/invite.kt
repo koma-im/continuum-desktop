@@ -1,79 +1,76 @@
 package koma.controller.requests.membership
 
 import com.github.kittinunf.result.Result
+import com.github.kittinunf.result.getOrElse
+import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import koma.gui.view.window.auth.uilaunch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.util.getOr
 import tornadofx.*
 import java.util.*
 
 
-fun ask_invite_member() {
+fun dialogInviteMember(roomId: RoomId) {
     val res = dialog_get_member()
     if (!res.isPresent) {
         return
     }
-
-    val room_user: Pair<String, String> = res.get()
-    val username = room_user.second
-    val roomid = room_user.first
+    val username = res.get()
 
     val userid = UserId_new(username)
-    GlobalScope.launch(Dispatchers.JavaFx) {
-        val result = apiClient!!.inviteMember(RoomId(roomid), userid).awaitMatrix()
-        if (result is Result.Failure) {
-            val content = result.error.message
-            alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomid", content)
+    GlobalScope.launch {
+        apiClient!!.inviteMember(roomId, userid).awaitMatrix() getOr {
+            uilaunch {
+                val content = it.error.message
+                alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomId", content)
+            }
+            return@launch
         }
     }
 }
 
-private fun dialog_get_member(): Optional<Pair<String, String>> {
-    val dialog: Dialog<Pair<String, String>> = Dialog()
-    dialog.setTitle("Invite Dialog")
-    dialog.setHeaderText("Invite a friend to a room")
+private fun dialog_get_member(): Optional<String> {
+    val dialog = Dialog<String>()
+    dialog.title = "Send an invitation"
+    dialog.headerText = "Invite someone to the room"
 
     val inviteButtonType = ButtonType("Ok", ButtonBar.ButtonData.OK_DONE)
-    dialog.getDialogPane().getButtonTypes().addAll(inviteButtonType, ButtonType.CANCEL)
+    dialog.dialogPane.buttonTypes.addAll(inviteButtonType, ButtonType.CANCEL)
 
-    val grid = GridPane()
-    grid.hgap = 10.0
-    grid.vgap = 10.0
-
-    val roomnamef = TextField()
-    roomnamef.setPromptText("Room")
     val usernamef = TextField()
-    usernamef.promptText = "User"
+    usernamef.promptText = "e.g. @chris:matrix.org"
+    dialog.dialogPane.content = VBox(5.0).apply {
+        vgrow = Priority.ALWAYS
+        hbox(5.0) {
+            alignment = Pos.CENTER
+            label("User ID:")
+            add(usernamef)
+        }
+    }
 
-    grid.add(Label("Room:"), 0, 0)
-    grid.add(roomnamef, 1, 0)
-    grid.add(Label("user:"), 0, 1)
-    grid.add(usernamef, 1, 1)
+    val inviteButton = dialog.dialogPane.lookupButton(inviteButtonType)
+    inviteButton.isDisable = true
 
-    // Enable/Disable invite button depending on whether a username was entered.
-    val inviteButton = dialog.getDialogPane().lookupButton(inviteButtonType)
-    inviteButton.setDisable(true)
-
-    // Do some validation (using the Java 8 lambda syntax).
-    roomnamef.textProperty().addListener({ _, _, newValue ->
-        inviteButton.setDisable(newValue.trim().isEmpty()) })
-
-    dialog.getDialogPane().setContent(grid)
+    usernamef.textProperty().addListener { _, _, newValue ->
+        inviteButton.isDisable = newValue.trim().isEmpty()
+    }
 
     // Convert the result to a username-password-pair when the login button is clicked.
-    dialog.setResultConverter({ dialogButton ->
+    dialog.setResultConverter { dialogButton ->
         if (dialogButton === inviteButtonType) {
-            return@setResultConverter Pair(roomnamef.getText(), usernamef.getText())
+            return@setResultConverter usernamef.getText()
         }
         null
-    })
+    }
 
     return dialog.showAndWait()
 }

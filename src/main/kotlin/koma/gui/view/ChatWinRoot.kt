@@ -8,7 +8,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.controller.requests.membership.ask_invite_member
+import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.window.preferences.PreferenceWindow
@@ -65,9 +65,6 @@ class ChatWindowBars(
                     }
                 }
                 menu("Room") {
-                    item("Invite Member"){
-                        action { ask_invite_member() }
-                    }
                     item("Ban Member") {
                         action { runAskBanRoomMember() }
                     }

@@ -7,6 +7,7 @@ import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.chatview.SwitchableRoomView
@@ -17,10 +18,12 @@ import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.KDataStore
 import model.Room
+import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 
+private val logger = KotlinLogging.logger {}
 
 /**
  * a list of joined rooms used for switching
@@ -88,6 +91,13 @@ class RoomFragment(private val data: KDataStore, private val client: OkHttpClien
         alignment = Pos.CENTER_LEFT
         contextmenu {
             item("Room Info").action { openInfoView() }
+            item("Invite Member"){
+                action {
+                    room?.let {
+                        dialogInviteMember(it.id)
+                    } ?: logger.warn { "No room selected" }
+                }
+            }
             separator()
             item("Leave").action {
                 room ?.let { leaveRoom(it) }

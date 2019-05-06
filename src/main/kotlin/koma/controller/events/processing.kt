@@ -5,23 +5,20 @@ import koma.controller.room.handle_ephemeral
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
-import koma.koma_app.appState.apiClient
 import koma.matrix.UserId
 import koma.matrix.event.ephemeral.parse
 import koma.matrix.room.InvitedRoom
 import koma.matrix.room.JoinedRoom
-import koma.matrix.room.LeftRoom
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.util.matrix.getUserState
 import kotlinx.coroutines.*
+import link.continuum.database.models._logger
 import link.continuum.database.models.removeMembership
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.libutil.`?or`
-import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 
@@ -59,8 +56,8 @@ private suspend fun handle_joined_room(
     // TODO:  account_data
 }
 
-private fun handle_invited_room(@Suppress("UNUSED_PARAMETER") _roomid: String, data: InvitedRoom) {
-    println("TODO: handle room invitation $data")
+private fun handleInvitedRoom(roomId: RoomId, data: InvitedRoom) {
+    logger.debug { "Invited to $roomId, data $data" }
 }
 
 @ExperimentalCoroutinesApi
@@ -82,7 +79,7 @@ fun processEventsResult(syncRes: SyncResponse,
             handle_joined_room(roomId, data, server, appData = appData, self = self)
         }
     }
-    syncRes.rooms.invite.forEach{ rid, data -> handle_invited_room(rid, data) }
+    syncRes.rooms.invite.forEach{ rid, data -> handleInvitedRoom(rid, data) }
 
     syncRes.rooms.leave.forEach { roomId, leftRoom ->
         removeMembership(data = appData.database, userId = self, roomId = roomId)
