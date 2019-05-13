@@ -55,7 +55,8 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
                 userId,
                 statusChan = statusBar.status,
                 full_sync = fullSync,
-                appData = appData
+                appData = appData,
+                view = primary.center
         )
 
         sync.start()

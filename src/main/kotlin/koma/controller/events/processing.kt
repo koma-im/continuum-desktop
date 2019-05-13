@@ -2,6 +2,7 @@ package koma.controller.events
 
 import koma.controller.room.applyUpdate
 import koma.controller.room.handle_ephemeral
+import koma.gui.view.ChatView
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -17,6 +18,7 @@ import kotlinx.coroutines.*
 import link.continuum.database.models._logger
 import link.continuum.database.models.removeMembership
 import link.continuum.database.models.saveUserInRoom
+import link.continuum.desktop.events.handleInvitedRoom
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.libutil.`?or`
 import mu.KotlinLogging
@@ -56,15 +58,13 @@ private suspend fun handle_joined_room(
     // TODO:  account_data
 }
 
-private fun handleInvitedRoom(roomId: RoomId, data: InvitedRoom) {
-    logger.debug { "Invited to $roomId, data $data" }
-}
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 fun processEventsResult(syncRes: SyncResponse,
                         server: HttpUrl,
-                        appData: AppStore
+                        appData: AppStore,
+                        view: ChatView
                         ) {
     val self = appState.currentUser `?or` {
         logger.error { "current user not set" }
@@ -79,7 +79,7 @@ fun processEventsResult(syncRes: SyncResponse,
             handle_joined_room(roomId, data, server, appData = appData, self = self)
         }
     }
-    syncRes.rooms.invite.forEach{ rid, data -> handleInvitedRoom(rid, data) }
+    syncRes.rooms.invite.forEach{ rid, data -> handleInvitedRoom(rid, data, view.invitationsView, server) }
 
     syncRes.rooms.leave.forEach { roomId, leftRoom ->
         removeMembership(data = appData.database, userId = self, roomId = roomId)

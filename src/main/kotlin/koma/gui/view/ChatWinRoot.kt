@@ -41,6 +41,7 @@ class ChatWindowBars(
         httpClient: OkHttpClient
 ) {
     val root = BorderPane()
+    val center = ChatView(roomList, server, kDataStore, store, httpClient)
     // used to show sync errors and allow user intervention
     val statusBar = VBox()
 
@@ -50,7 +51,7 @@ class ChatWindowBars(
             style {
                 fontSize= settings.scaling.em
             }
-            center = ChatView(roomList, server, kDataStore, store, httpClient).root
+            center = this@ChatWindowBars.center.root
             top = menubar {
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }

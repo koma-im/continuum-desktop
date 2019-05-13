@@ -14,9 +14,11 @@ import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.AppStore
+import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.KDataStore
+import link.continuum.desktop.gui.list.InvitationsView
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -36,12 +38,15 @@ class ChatView(roomList: ObservableList<Room>,
                server: HttpUrl,
                data: KDataStore,
                storage: AppStore,
-               httpClient: OkHttpClient
+               httpClient: OkHttpClient,
+               scaling: Float = appState.store.settings.scaling
 ): View() {
 
-    override val root = vbox (spacing = 5.0)
+    override val root = hbox (spacing = 5.0)
 
     val roomListView = RoomListView(roomList, server, data, client = httpClient)
+    val invitationsView = InvitationsView(client = httpClient, scaling = scaling.toDouble())
+
     val switchableRoomView = SwitchableRoomView(server, storage.userData, httpClient)
 
     init {
@@ -51,14 +56,14 @@ class ChatView(roomList: ObservableList<Room>,
         })
 
         with(root) {
-            hbox() {
-                vgrow = Priority.ALWAYS
+            vgrow = Priority.ALWAYS
 
+            vbox(5.0) {
+                add(invitationsView.list)
                 add(roomListView)
-
-                add(switchableRoomView)
             }
 
+            add(switchableRoomView)
         }
 
 

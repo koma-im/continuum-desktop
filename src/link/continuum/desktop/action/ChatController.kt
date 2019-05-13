@@ -3,6 +3,7 @@ package link.continuum.desktop.action
 import com.github.kittinunf.result.Result
 import koma.controller.events.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
+import koma.gui.view.ChatView
 import koma.gui.view.SyncStatusBar
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -21,6 +22,7 @@ private val logger = KotlinLogging.logger {}
  * loads sync pagination token from disk by user id
  * Created by developer on 2017/6/22.
  */
+@ExperimentalCoroutinesApi
 class SyncControl(
         val apiClient: MatrixApi,
         private val user: UserId,
@@ -29,6 +31,7 @@ class SyncControl(
          */
         private val statusChan: Channel<SyncStatusBar.Variants>,
         private val appData: AppStore,
+        private val view: ChatView,
         full_sync: Boolean = false
 ) {
     private val sync: MatrixSyncReceiver
@@ -60,7 +63,7 @@ class SyncControl(
             for (s in sync.events) {
                 if (s is Result.Success) {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(s.value, apiClient.server, appData = appData)
+                    processEventsResult(s.value, apiClient.server, appData = appData, view = view)
                     val nb = sync.since
                     nb?.let {
                         saveSyncBatchKey(appData.database, user, nb)
