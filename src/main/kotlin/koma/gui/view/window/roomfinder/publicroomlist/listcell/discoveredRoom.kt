@@ -72,6 +72,7 @@ class DiscoveredRoomFragment(
         name = item.dispName()
         val (c1, c2) = extract_key_chars(name)
         initialIcon.updateItem(c1, c2, hashStringColorDark(item.room_id.id))
+        imageView.imageProperty().unbind()
         imageView.image = null
         item.avatar_url?.let {
             val u = mapMxc(it, server) `?or` {
@@ -79,8 +80,9 @@ class DiscoveredRoomFragment(
                 return@let
             }
             val i = downloadImageResized(u, avatarSize, client = client)
-            imageView.imageProperty().cleanBind(i)
+            imageView.imageProperty().bind(i)
         }
+
 
         worldRead.set(item.world_readable)
         guestJoin.set(item.guest_can_join)
