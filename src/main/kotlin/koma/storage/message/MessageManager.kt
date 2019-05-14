@@ -6,8 +6,8 @@ import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import io.requery.kotlin.lte
 import io.requery.sql.KotlinEntityDataStore
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.transformation.SortedList
-import koma.gui.view.window.chatroom.messaging.reading.display.supportedByDisplay
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
@@ -16,10 +16,12 @@ import koma.storage.message.fetch.fetchPreceding
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
 import link.continuum.database.models.toEventRowList
+import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.checkUiThread
 import link.continuum.desktop.gui.list.DedupList
 import mu.KotlinLogging
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -55,10 +57,12 @@ class MessageManager(val roomId: RoomId,
         }
     }
 
-    private val startedFetchJobs = ConcurrentHashMap<Pair<String, FetchDirection>, Job>()
+    private val startedFetchJobs = ConcurrentHashMap<Pair<String, FetchDirection>, SimpleBooleanProperty>()
     @ExperimentalCoroutinesApi
-    private fun fetchPrecedingRows(row: RoomEventRow) {
-        startedFetchJobs.computeIfAbsent(row.event_id to FetchDirection.Backward) {
+    fun fetchPrecedingRows(row: RoomEventRow): SimpleBooleanProperty {
+        checkUiThread()
+        val status = startedFetchJobs.computeIfAbsent(row.event_id to FetchDirection.Backward) {
+            val loading = SimpleBooleanProperty(true)
             GlobalScope.launch {
                 fetchPreceding(row).fold({
                     if (it.prevKey == row.preceding_batch) {
@@ -70,12 +74,18 @@ class MessageManager(val roomId: RoomId,
                         rows.firstOrNull()?.preceding_batch = it.prevKey
                         insert(rows, tail = row)
                     }
+                    withContext(UiDispatcher) {
+                        logger.debug { "loading of messages before ${row.event_id} finished" }
+                        loading.set(false)
+                    }
                 }, {
                     logger.error { "fetch preceding events for $row ${it}" }
                 })
                 startedFetchJobs.remove(row.event_id to FetchDirection.Backward)
             }
+            loading
         }
+        return status
     }
 
     /**
@@ -93,7 +103,6 @@ class MessageManager(val roomId: RoomId,
      * add events that are new
      */
     private suspend fun addToUi(rows: List<RoomEventRow>) {
-        val disp = rows.filter { it.getEvent()?.supportedByDisplay() == true }
         val old = eventAll.size()
         withContext(Dispatchers.JavaFx) {
             eventAll.addAll(rows)

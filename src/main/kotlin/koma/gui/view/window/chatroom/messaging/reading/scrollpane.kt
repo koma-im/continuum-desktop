@@ -72,7 +72,7 @@ class MessagesListScrollPane(
         virtualList.hgrow = Priority.ALWAYS
 
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(server, store, client)
+            RoomEventCell(server, room.messageManager, store, client)
         }
 
         addVirtualScrollPane()

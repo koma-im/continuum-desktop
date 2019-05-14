@@ -17,7 +17,7 @@ dependencies {
     implementation("com.h2database:h2:1.4.198")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     implementation("io.github.microutils:kotlin-logging:1.6.22")
-    implementation("io.github.koma-im:koma-library:0.7.6.8")
+    implementation("io.github.koma-im:koma-library:0.7.8")
     compile(project(":libutil"))
     kapt("io.requery:requery-processor:1.5.1")
 

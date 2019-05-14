@@ -11,22 +11,39 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.json.MoshiInstance
+import koma.storage.message.MessageManager
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.showIf
+import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 
+private val logger = KotlinLogging.logger {}
+
+@ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MessageCell(
         private val server: HttpUrl,
+        private val manager: MessageManager,
         store: UserDataStore,
         client: OkHttpClient
 ) {
-    val node = StackPane()
+    private val center = StackPane()
+    private val loading = Label("Loading older messages...")
+
+    val node = VBox(3.0).apply {
+        hbox {
+            alignment = Pos.CENTER
+            add(loading)
+        }
+        add(center)
+    }
     private val contextMenu: ContextMenu
     private val contextMenuShowSource = MenuItem("View Source").apply {
         action { current?.let {
@@ -42,8 +59,18 @@ class MessageCell(
 
 
     fun updateEvent(message: RoomEventRow) {
+        loading.managedProperty().unbind()
+        loading.visibleProperty().unbind()
+        loading.showIf(false)
+        if(!message.preceding_stored) {
+            logger.debug { "messages before ${message.event_id} are not stored yet" }
+            loading.showIf(true)
+            val status = manager.fetchPrecedingRows(message)
+            loading.managedProperty().bind(status)
+            loading.visibleProperty().bind(status)
+        }
         current = message
-        node.children.clear()
+        center.children.clear()
         contextMenu.items.clear()
         val ev = message.getEvent()
         val vn = when(ev) {
@@ -62,7 +89,7 @@ class MessageCell(
             else -> null
         }
         if (vn!= null) {
-            node.children.add(vn.node)
+            center.children.add(vn.node)
             contextMenu.items.addAll(vn.menuItems)
             contextMenu.items.add(contextMenuShowSource)
         }
@@ -70,14 +97,6 @@ class MessageCell(
     init {
         contextMenu = node.contextmenu()
     }
-}
-
-fun RoomEvent.supportedByDisplay(): Boolean
-        = when (this) {
-    is MRoomMember,
-    is MRoomCreate,
-    is MRoomMessage -> true
-    else -> false
 }
 
 interface ViewNode {
