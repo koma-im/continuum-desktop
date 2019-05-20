@@ -22,9 +22,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.KDataStore
+import link.continuum.desktop.gui.UiDispatcher
 import model.Room
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import org.controlsfx.control.NotificationPane
+import org.controlsfx.control.action.Action
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
@@ -40,14 +43,14 @@ class ChatWindowBars(
         store: AppStore,
         httpClient: OkHttpClient
 ) {
-    val root = BorderPane()
+    private val content = BorderPane()
+    val root = NotificationPane(content)
     val center = ChatView(roomList, server, kDataStore, store, httpClient)
-    // used to show sync errors and allow user intervention
-    val statusBar = VBox()
+    val status = SyncStatusBar(root)
 
     private val roomFinder by lazy { RoomFinder(server, client = httpClient) }
     init {
-        with(root) {
+        with(content) {
             style {
                 fontSize= settings.scaling.em
             }
@@ -80,28 +83,23 @@ class ChatWindowBars(
                     item("Join Room").action { roomFinder.open() }
                 }
             }
-            bottom = statusBar
         }
     }
 }
 
-class SyncStatusBar() {
-    val root = HBox()
-    val status = Channel<Variants>(Channel.CONFLATED)
-    private val hideStatus = SimpleBooleanProperty(true)
-    private val hideButton = SimpleBooleanProperty(true)
-    private val text = SimpleStringProperty()
-    private val button = Button()
+class SyncStatusBar(
+        private val pane: NotificationPane
+) {
+    val ctrl = Channel<Variants>(Channel.CONFLATED)
+
+    /**
+     * true unless there is error
+     */
+    private var syncing = true
+
     init {
-        root.removeWhen(hideStatus)
-        button.removeWhen(hideButton)
-        with(root) {
-            label(text)
-            stackpane { hgrow = Priority.ALWAYS }
-            add(button)
-        }
         GlobalScope.launch(Dispatchers.JavaFx) {
-            for (s in status) {
+            for (s in ctrl) {
                 update(s)
             }
         }
@@ -110,42 +108,44 @@ class SyncStatusBar() {
     private fun update(s: Variants) {
         when (s) {
             is Variants.Normal -> {
-                hideStatus.set(true)
+                pane.hide()
             }
             is Variants.FullSync -> {
-                hideButton.set(true)
-                text.set("Doing a full sync, it may take several seconds")
-                hideStatus.set(false)
+                pane.show("Doing a full sync", null, null)
             }
             is Variants.NeedRetry -> {
-                button.text = "Retry Now"
-                hideButton.set(false)
+                syncing = false
                 val countDown = GlobalScope.launch(Dispatchers.JavaFx) {
                     for (i in 9 downTo 1) {
-                        text.set("Network issue, retrying in $i seconds")
+                        pane.text = "Network issue, retrying in $i seconds"
                         delay(1000)
                     }
                     setRetrying(s.retryNow)
                 }
-                button.setOnAction {
+                pane.text = "Network issue"
+                pane.actions.setAll(Action("Retry Now") {
                     countDown.cancel()
                     setRetrying(s.retryNow)
+                })
+                if (!pane.isShowing) {
+                    pane.show()
                 }
-                hideStatus.set(false)
             }
         }
     }
 
-    /**
-     * one issue is that the status is only set to normal when there are new events
-     * when there are not a lot going on, it may appear to be waiting
-     * even though the long-polling has started working
-     */
     private fun setRetrying(retryNow: CompletableDeferred<Unit>) {
-        text.set("Syncing...")
-        hideButton.set(true)
-        hideStatus.set(false)
+        syncing = true
+        pane.actions.clear()
+        pane.text = "Syncing"
         if (!retryNow.isCompleted) retryNow.complete(Unit)
+        GlobalScope.launch(UiDispatcher) {
+            delay(3000)
+            // assume the long-polling sync api is working
+            if (syncing) {
+                pane.hide()
+            }
+        }
     }
 
     // various states

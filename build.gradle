@@ -49,7 +49,7 @@ dependencies {
     implementation 'de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2'
     implementation 'de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2'
     implementation 'de.jensd:fontawesomefx-commons:9.1.2'
-    implementation 'org.controlsfx:controlsfx:9.0.0'
+    implementation 'org.controlsfx:controlsfx:11.0.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.1.0'
     implementation 'com.vdurmont:emoji-java:4.0.0'
@@ -68,7 +68,7 @@ dependencies {
 }
 
 group = 'link.continuum'
-version = '0.9.3'
+version = '0.9.4'
 description = 'continuum-desktop'
 sourceCompatibility = "9"
 

@@ -37,8 +37,6 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     val userRooms = store.joinedRoom.list
 
     val primary = ChatWindowBars(userRooms, url, data, store, koma.http.client)
-    val statusBar = SyncStatusBar()
-    primary.statusBar.add(statusBar.root)
     FX.primaryStage.scene.root = primary.root
 
     GlobalScope.launch {
@@ -53,7 +51,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
         val sync = SyncControl(
                 apiClient,
                 userId,
-                statusChan = statusBar.status,
+                statusChan = primary.status.ctrl,
                 full_sync = fullSync,
                 appData = appData,
                 view = primary.center
