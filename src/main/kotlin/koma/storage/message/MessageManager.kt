@@ -9,6 +9,7 @@ import io.requery.sql.KotlinEntityDataStore
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.transformation.SortedList
 import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
 import koma.matrix.room.naming.RoomId
@@ -21,7 +22,7 @@ import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.checkUiThread
 import link.continuum.desktop.gui.list.DedupList
 import mu.KotlinLogging
-import java.util.*
+
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -136,7 +137,7 @@ class MessageManager(val roomId: RoomId,
     /**
      * append messages returned by the sync api
      */
-    suspend fun appendTimeline(timeline: Timeline<RoomEvent>) {
+    suspend fun appendTimeline(timeline: Timeline<RawJson<RoomEvent>>) {
         val rows = timeline.events.toEventRowList(roomId)
         rows.firstOrNull()?.preceding_batch = timeline.prev_batch
         rows.firstOrNull()?.preceding_stored = timeline.limited == false

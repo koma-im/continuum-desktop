@@ -7,6 +7,7 @@ import koma.matrix.Chunked
 import koma.matrix.event.EventId
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
+import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
@@ -37,11 +38,11 @@ suspend fun fetchPreceding(
 }
 
 class FetchedBatch(
-        val messages: List<RoomEvent>,
+        val messages: List<RawJson<RoomEvent>>,
         val prevKey: String?
 ) {
     companion object {
-        fun fromChunkedBackward(chunked: Chunked<RoomEvent>): FetchedBatch {
+        fun fromChunkedBackward(chunked: Chunked<RawJson<RoomEvent>>): FetchedBatch {
             return FetchedBatch(
                     chunked.chunk.reversed(),
                     chunked.end

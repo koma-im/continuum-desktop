@@ -49,7 +49,7 @@ private suspend fun handle_joined_room(
     }
     data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
     val timeline = data.timeline
-    timeline.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
+    timeline.events.forEach { room.applyUpdate(it.value, server, self = self, appStore = appData) }
 
     GlobalScope.launch {
         room.messageManager.appendTimeline(timeline)
