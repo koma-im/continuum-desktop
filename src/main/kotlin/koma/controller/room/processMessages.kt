@@ -11,6 +11,8 @@ import koma.matrix.room.participation.Membership
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import link.continuum.database.models.removeMembership
+import link.continuum.database.models.saveRoomAvatar
+import link.continuum.database.models.saveRoomName
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.http.mapMxc
@@ -28,6 +30,9 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     }
 }
 
+/**
+ * call on UI thread
+ */
 @ExperimentalCoroutinesApi
 suspend fun Room.applyUpdate(
         update: RoomEvent,
@@ -44,7 +49,13 @@ suspend fun Room.applyUpdate(
                 room.aliases.addAll(0, update.content.aliases)
             }
         }
-        is MRoomAvatar -> HttpUrl.parse(update.content.url)?.let { this.avatar.set(it) }
+        is MRoomAvatar -> {
+            room.setAvatar(update.content.url, server)
+            saveRoomAvatar(appStore.database, room.id,
+                    mapMxc(update.content.url, server)?.toString(),
+                    update.origin_server_ts
+            )
+        }
         is MRoomCanonAlias -> {
             withContext(UiDispatcher) {
                 room.canonicalAlias.set(update.content.alias)
@@ -57,9 +68,8 @@ suspend fun Room.applyUpdate(
         is MRoomPinnedEvents -> {}
         is MRoomTopic -> {}
         is MRoomName -> {
-            withContext(UiDispatcher) {
-                room.name.set(update.content.name)
-            }
+            room.setName(update.content.name)
+            saveRoomName(appStore.database, room.id, update.content.name, update.origin_server_ts)
         }
         is MRoomGuestAccess -> {}
     }

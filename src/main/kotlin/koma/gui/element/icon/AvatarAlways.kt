@@ -3,6 +3,7 @@ package koma.gui.element.icon
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
@@ -46,7 +47,7 @@ class AvatarAlways(
         }
     }
 
-    fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl>) {
+    fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl?>) {
         bindName(name, color)
         bindImage(url)
     }
@@ -57,16 +58,17 @@ class AvatarAlways(
         this.name.bind(name)
     }
 
-    fun bindImage(urlV: ObservableValue<AvatarUrl>) {
-        val imp =  urlV.select { url: HttpUrl? ->
-            if (url != null) {
-                downloadImageResized(url, avatarSize, client = client)
-            } else   {
-                logger.debug { "no avatar url" }
-                SimpleObjectProperty()
-            }
+    fun bindImage(urlV: ObservableValue<AvatarUrl?>) {
+        val im = SimpleObjectProperty<Image>()
+        urlV.onChange {
+            im.unbind()
+            im.value = null
+            logger.debug { "new avatar url $it" }
+            it ?: return@onChange
+            logger.debug { "downloading avatar $it" }
+            im.bind(downloadImageResized(it, avatarSize, client = client))
         }
         this.imageView.imageProperty().unbind()
-        this.imageView.imageProperty().bind(imp)
+        this.imageView.imageProperty().bind(im)
     }
 }

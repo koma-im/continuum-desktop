@@ -35,6 +35,7 @@ fun process_presence(message: PresenceMessage) {
     }
 }
 
+@ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 private suspend fun handle_joined_room(
         roomid: RoomId,
@@ -46,12 +47,9 @@ private suspend fun handle_joined_room(
     val room = appData.roomStore.getOrCreate(roomid)
     withContext(UiDispatcher) {
         appData.joinRoom(roomid)
-    }
-    data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
-    val timeline = data.timeline
-    timeline.events.forEach { room.applyUpdate(it.value, server, self = self, appStore = appData) }
-
-    GlobalScope.launch {
+        data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
+        val timeline = data.timeline
+        timeline.events.forEach { room.applyUpdate(it.value, server, self = self, appStore = appData) }
         room.messageManager.appendTimeline(timeline)
     }
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())

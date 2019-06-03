@@ -1,5 +1,7 @@
 package link.continuum.desktop.util
 
+import java.util.*
+
 @Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS", "DEPRECATION")
 inline class Option<out T>
 @PublishedApi

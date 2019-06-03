@@ -1,9 +1,7 @@
 package link.continuum.database.models
 
-import io.requery.Column
-import io.requery.Entity
-import io.requery.Key
-import io.requery.Persistable
+import io.requery.*
+import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
@@ -14,6 +12,7 @@ import link.continuum.database.KDataStore
 import link.continuum.libutil.`?or?`
 import link.continuum.libutil.`?or`
 import mu.KotlinLogging
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -25,8 +24,36 @@ interface RoomSettings: Persistable {
     var visibility: RoomVisibility?
     var joinRule: RoomJoinRules?
     var historyVisibility: HistoryVisibility?
+}
+
+
+@Entity
+interface RoomName: Persistable {
+    @get:Index()
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    var roomId: String
+
+    @get:Column(length = Int.MAX_VALUE)
     var roomName: String?
+
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    var since: Long
+}
+
+@Entity
+interface RoomAvatar: Persistable {
+    @get:Index()
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    var roomId: String
+
+    /**
+     * URL
+     */
+    @get:Column(length = Int.MAX_VALUE)
     var avatar: String?
+
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    var since: Long
 }
 
 @Entity
@@ -167,4 +194,73 @@ fun saveUserPowerLevels(data: KDataStore, roomId: RoomId, levels: Map<UserId, Fl
         record
     }
     data.upsert(records)
+}
+
+
+fun saveRoomName(data: KDataStore, roomId: RoomId,
+                 nick: String?, timestamp: Long) {
+    val d = data.select(RoomName::class) where (RoomName::roomId.eq(roomId.str)
+            and RoomName::since.eq(timestamp)
+            )
+    val e = d.get().firstOrNull()
+    if (e != null && e.roomName == nick) {
+        logger.trace { "already saved Name $nick of room $roomId with time $timestamp" }
+        return
+    }
+    val t: RoomName = RoomNameEntity()
+    t.roomId = roomId.str
+    t.roomName = nick
+    t.since = timestamp
+    data.insert(t)
+}
+
+fun getLatestRoomName(data: KDataStore, roomId: RoomId): Optional<String>? {
+     data.select(RoomName::class)
+            .where(RoomName::roomId.eq(roomId.str))
+            .orderBy(RoomName::since.desc())
+            .get().use {
+                 it.iterator(0, 1).use {
+                     if (it.hasNext()) {
+                         val rec = it.next()
+                         val n = rec.roomName
+                         if (n == null) {
+                             logger.debug { "room $roomId has empty name in db" }
+                             return Optional.empty()
+                         } else {
+                             logger.debug { "room $roomId has name $n in db" }
+                             return Optional.of(n)
+                         }
+                     } else {
+                         logger.debug { "no name recorded for room $roomId" }
+                         return null
+                     }
+                 }
+             }
+}
+
+
+fun saveRoomAvatar(data: KDataStore, roomId: RoomId, avatar: String?, timestamp: Long) {
+    val d = data.select(RoomAvatar::class) where (
+            RoomAvatar::roomId.eq(roomId.str)
+            and RoomAvatar::since.eq(timestamp)
+            )
+    val e = d.get().firstOrNull()
+    if (e != null && e.avatar == avatar) {
+        logger.trace { "already saved Avatar $avatar of room $roomId with time $timestamp" }
+        return
+    }
+    val t: RoomAvatar = RoomAvatarEntity()
+    t.roomId = roomId.str
+    t.avatar = avatar
+    t.since = timestamp
+    data.insert(t)
+}
+
+fun getLatestAvatar(data: KDataStore, roomId: RoomId): Optional<String>? {
+    return data.select(RoomAvatar::class)
+            .where(RoomAvatar::roomId.eq(roomId.str))
+            .orderBy(RoomAvatar::since.desc())
+            .get().use { it.firstOrNull() }?.let {
+                it.avatar?.let { Optional.of(it) }?: Optional.empty()
+            }
 }

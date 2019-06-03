@@ -7,6 +7,7 @@ import koma.matrix.user.identity.UserId_new
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.libutil.`?or?`
+import link.continuum.libutil.getOrNull
 import link.continuum.libutil.onNull
 import model.Room
 import mu.KotlinLogging
@@ -32,13 +33,13 @@ fun loadRoom(data: KDataStore, roomId: RoomId): Room? {
     }
     val room = Room(roomId, data,
             aliases = aliases,
-            name = settings?.roomName,
-            avatar = settings?.avatar?.let { HttpUrl.parse(it) },
             historyVisibility = settings?.historyVisibility,
             joinRule = settings?.joinRule,
             visibility = settings?.visibility,
             powerLevels = powers ?: defaultRoomPowerSettings(roomId)
     )
+    room.initName(getLatestRoomName(data, roomId))
+    room.initAvatar(getLatestAvatar(data, roomId)?.map { HttpUrl.parse(it) })
     val members = data.select(Membership::class).where(
             Membership::room.eq(roomId.id)
     ).orderBy(Membership::lastActive.desc()).limit(200).get().toList()

@@ -14,6 +14,7 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
+import link.continuum.libutil.getOrNull
 import model.Room
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -27,7 +28,8 @@ class RoomInfoDialog(
     private val roomicon = AvatarAlways(client = client)
 
     init {
-        roomicon.bind(room.displayName, room.color, room.avatar)
+        val avatarUrl = objectBinding(room.avatar) {value?.getOrNull()}
+        roomicon.bind(room.displayName, room.color, avatarUrl)
         val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
         val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())
 
@@ -39,7 +41,7 @@ class RoomInfoDialog(
                 vbox(5) {
                     fieldset("Name") {
                         hbox(5) {
-                            val input = textfield(room.name.value)
+                            val input = textfield(room.name.value?.getOrNull())
                             input.editableProperty().value = canEditName
                             button("Set") {
                                 removeWhen(SimpleBooleanProperty(canEditName).not())
