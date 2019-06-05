@@ -126,6 +126,7 @@ private fun fixRoomName(room: Room) {
     }
 }
 
+@ExperimentalCoroutinesApi
 class RoomFragment(private val data: KDataStore, private val client: OkHttpClient): ListCell<Room>() {
     var room: Room? = null
     private val avatar = AvatarAlways(client = client)

@@ -2,7 +2,9 @@ package koma.gui.element.icon
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
+import javafx.beans.value.WeakChangeListener
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
@@ -58,16 +60,22 @@ class AvatarAlways(
         this.name.bind(name)
     }
 
+    private var listener: ChangeListener<AvatarUrl?>? = null
     fun bindImage(urlV: ObservableValue<AvatarUrl?>) {
         val im = SimpleObjectProperty<Image>()
-        urlV.onChange {
+        fun changeUrl(it: AvatarUrl?) {
             im.unbind()
             im.value = null
             logger.debug { "new avatar url $it" }
-            it ?: return@onChange
-            logger.debug { "downloading avatar $it" }
+            it ?: return
             im.bind(downloadImageResized(it, avatarSize, client = client))
         }
+        changeUrl(urlV.value)
+        listener = ChangeListener {
+            _, _, newValue ->
+            changeUrl(newValue)
+        }
+        urlV.addListener(WeakChangeListener(listener))
         this.imageView.imageProperty().unbind()
         this.imageView.imageProperty().bind(im)
     }
