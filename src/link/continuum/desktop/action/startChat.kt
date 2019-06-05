@@ -9,9 +9,11 @@ import koma.matrix.UserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import link.continuum.database.KDataStore
 import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
+import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -42,7 +44,9 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     GlobalScope.launch {
         val rooms = loadUserRooms(data, userId)
         logger.debug { "user is in ${rooms.size} rooms according database records" }
-        rooms.forEach { store.joinRoom(it) }
+        withContext(UiDispatcher) {
+            rooms.forEach { store.joinRoom(it) }
+        }
         val fullSync = userRooms.isEmpty()
         if (fullSync) logger.warn {
             "Doing a full sync because there " +

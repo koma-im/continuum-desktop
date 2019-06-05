@@ -68,7 +68,7 @@ dependencies {
 }
 
 group = 'link.continuum'
-version = '0.9.6'
+version = '0.9.7'
 description = 'continuum-desktop'
 sourceCompatibility = "9"
 
