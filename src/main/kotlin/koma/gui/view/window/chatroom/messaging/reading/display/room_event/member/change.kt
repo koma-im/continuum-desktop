@@ -15,6 +15,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.StateEventUserView
 import koma.koma_app.appState
+import koma.matrix.UserId
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
 import kotlinx.coroutines.*
@@ -49,6 +50,8 @@ class MRoomMemberViewNode(
     private val userView = StateEventUserView(store, client, avatarsize)
     private val timeView = DatatimeView()
     private val contentPane = StackPane()
+
+    private val invitationContent by lazy { InvitationContent(client, avatarsize, store) }
     private val joinedContent = Text("joined this room.")
     private val userUpdate = UserAppearanceUpdateView(client, avatarsize = avatarsize, minWid = minWid)
 
@@ -56,9 +59,18 @@ class MRoomMemberViewNode(
         userView.updateUser(message.sender)
         timeView.updateTime(message.origin_server_ts)
         contentPane.children.clear()
-        if (message.content.membership != Membership.join) {
-            return
+        when (message.content.membership) {
+            Membership.join -> updateJoin(message, server)
+            Membership.invite -> updateInvite(message, server)
         }
+    }
+    private fun updateInvite(message: MRoomMember, server: HttpUrl) {
+        val invitee = message.state_key
+        if (invitee == null) return
+        invitationContent.userView.updateUser(UserId(invitee))
+        contentPane.children.addAll(invitationContent.root)
+    }
+    private fun updateJoin(message: MRoomMember, server: HttpUrl) {
         val pc = message.prev_content ?: message.unsigned?.prev_content
         if (pc == null) {
             contentPane.children.addAll(joinedContent)
@@ -83,7 +95,19 @@ class MRoomMemberViewNode(
     }
 }
 
-
+@ExperimentalCoroutinesApi
+private class InvitationContent(
+        client: OkHttpClient,
+        avatarsize: Double,
+        store: UserDataStore
+) {
+    val userView = StateEventUserView(store, client, avatarsize)
+    val root =  HBox(5.0).apply {
+        alignment = Pos.CENTER
+        text("invited")
+        add(userView.root)
+    }
+}
 
 @ExperimentalCoroutinesApi
 class UserAppearanceUpdateView(
