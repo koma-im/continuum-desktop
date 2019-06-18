@@ -4,14 +4,17 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.text.Text
+import javafx.scene.text.TextFlow
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
+import koma.matrix.event.room_message.state.MRoomHistoryVisibility
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.json.MoshiInstance
+import koma.matrix.room.visibility.HistoryVisibility
 import koma.storage.message.MessageManager
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,6 +60,7 @@ class MessageCell(
     private val memberView = MRoomMemberViewNode(store, client)
     private val messageView by lazy { MRoomMessageViewNode(server, store, client) }
     private val creationView by lazy { MRoomCreationViewNode(store, client) }
+    private val historyVisibilityView by lazy { HistoryVisibilityEventView() }
 
 
     fun updateEvent(message: RoomEventRow) {
@@ -87,6 +91,7 @@ class MessageCell(
                 messageView.update(ev)
                 messageView
             }
+            is MRoomHistoryVisibility -> historyVisibilityView.apply { update(ev) }
             else -> {
                 center.children.add(HBox(5.0).apply {
                     alignment = Pos.CENTER
@@ -106,6 +111,30 @@ class MessageCell(
     }
     init {
         contextMenu = node.contextmenu()
+    }
+}
+
+class HistoryVisibilityEventView(
+): ViewNode {
+    override val menuItems: List<MenuItem> = listOf()
+    private val sender = Text()
+    private val text = Text()
+    override val node = HBox().apply {
+        alignment = Pos.CENTER
+        add(TextFlow(sender, Text(" "), text))
+    }
+    
+    fun update(ev: MRoomHistoryVisibility) {
+        sender.text = ev.sender.toString()
+        val t = when(ev.content.history_visibility) {
+            HistoryVisibility.Invited -> "made events accessible to newly joined members " +
+                    "from the point they were invited onwards"
+            HistoryVisibility.Joined -> "made events accessible to newly joined members " +
+                    "from the point they joined the room onwards"
+            HistoryVisibility.Shared -> "made future room history visible to all members"
+            HistoryVisibility.WorldReadable -> "made new events visible to the world"
+        }
+        text.text = t
     }
 }
 
