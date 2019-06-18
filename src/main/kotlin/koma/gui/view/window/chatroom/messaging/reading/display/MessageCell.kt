@@ -91,8 +91,8 @@ class MessageCell(
         if (vn!= null) {
             center.children.add(vn.node)
             contextMenu.items.addAll(vn.menuItems)
-            contextMenu.items.add(contextMenuShowSource)
         }
+        contextMenu.items.add(contextMenuShowSource)
     }
     init {
         contextMenu = node.contextmenu()
