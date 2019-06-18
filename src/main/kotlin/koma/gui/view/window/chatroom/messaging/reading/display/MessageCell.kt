@@ -3,6 +3,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
+import javafx.scene.text.Text
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
@@ -86,7 +87,16 @@ class MessageCell(
                 messageView.update(ev)
                 messageView
             }
-            else -> null
+            else -> {
+                center.children.add(HBox(5.0).apply {
+                    alignment = Pos.CENTER
+                    text("${ev?.type} event")
+                    hyperlink("View source").action {
+                        sourceViewer.showAndWait(message)
+                    }
+                })
+                null
+            }
         }
         if (vn!= null) {
             center.children.add(vn.node)
