@@ -8,9 +8,11 @@ import javafx.scene.text.TextFlow
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
+import koma.koma_app.appState
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
+import koma.matrix.event.room_message.state.MRoomGuestAccess
 import koma.matrix.event.room_message.state.MRoomHistoryVisibility
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.json.MoshiInstance
@@ -21,6 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
 import mu.KotlinLogging
@@ -57,10 +60,13 @@ class MessageCell(
     }
     private var current: RoomEventRow? = null
 
+    // share between different types of view
+    private val senderAvatar = AvatarView(store, client, appState.store.settings.scaling * 32.0)
     private val memberView = MRoomMemberViewNode(store, client)
     private val messageView by lazy { MRoomMessageViewNode(server, store, client) }
     private val creationView by lazy { MRoomCreationViewNode(store, client) }
     private val historyVisibilityView by lazy { HistoryVisibilityEventView() }
+    private val guestAccessUpdateView by lazy {GuestAccessUpdateView()}
 
 
     fun updateEvent(message: RoomEventRow) {
@@ -77,6 +83,7 @@ class MessageCell(
         current = message
         center.children.clear()
         contextMenu.items.clear()
+
         val ev = message.getEvent()
         val vn = when(ev) {
             is MRoomMember -> {
@@ -92,6 +99,11 @@ class MessageCell(
                 messageView
             }
             is MRoomHistoryVisibility -> historyVisibilityView.apply { update(ev) }
+            is MRoomGuestAccess -> {
+                senderAvatar.updateUser(ev.sender)
+                guestAccessUpdateView.update(senderAvatar, ev)
+                guestAccessUpdateView
+            }
             else -> {
                 center.children.add(HBox(5.0).apply {
                     alignment = Pos.CENTER
@@ -135,6 +147,20 @@ class HistoryVisibilityEventView(
             HistoryVisibility.WorldReadable -> "made new events visible to the world"
         }
         text.text = t
+    }
+}
+
+@ExperimentalCoroutinesApi
+class GuestAccessUpdateView(): ViewNode {
+    override val node = HBox(5.0).apply {
+        alignment = Pos.CENTER
+    }
+    override val menuItems: List<MenuItem>
+        get() = listOf()
+    fun update(senderAvatar: AvatarView, event: MRoomGuestAccess) {
+        node.children.addAll(senderAvatar.root,
+                Text("set guest access to ${event.content.guest_access}")
+                )
     }
 }
 
