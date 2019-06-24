@@ -51,8 +51,17 @@ class MRoomMemberViewNode(
     private val timeView = DatatimeView()
     private val contentPane = StackPane()
 
-    private val invitationContent by lazy { InvitationContent(client, avatarsize, store) }
-    private val joinedContent = Text("joined this room.")
+    private val inviterView = StateEventUserView(store, client, avatarsize)
+    private val invitationContent by lazy {
+        HBox(5.0).apply {
+            alignment = Pos.CENTER
+        }
+    }
+    private val joinedContent by lazy {
+        HBox(5.0).apply {
+            alignment = Pos.CENTER
+        }
+    }
     private val userUpdate = UserAppearanceUpdateView(client, avatarsize = avatarsize, minWid = minWid)
 
     fun update(message: MRoomMember, server: HttpUrl) {
@@ -65,22 +74,32 @@ class MRoomMemberViewNode(
         }
     }
     private fun updateInvite(message: MRoomMember, server: HttpUrl) {
-        val invitee = message.state_key
-        if (invitee == null) return
-        invitationContent.userView.updateUser(UserId(invitee))
-        contentPane.children.addAll(invitationContent.root)
+        val invitee = message.state_key ?: return
+        inviterView.updateUser(UserId(invitee))
+        invitationContent.children.addAll(Text("invited"), inviterView.root)
+        contentPane.children.addAll(invitationContent)
     }
     private fun updateJoin(message: MRoomMember, server: HttpUrl) {
         val pc = message.prev_content ?: message.unsigned?.prev_content
-        if (pc == null) {
-            contentPane.children.addAll(joinedContent)
-        } else {
+        if (pc != null && pc.membership == Membership.join) {
             userUpdate.updateName(pc.displayname, message.content.displayname)
 
             userUpdate.updateAvatar(
                     pc.avatar_url?.let { mapMxc(it, server) },
                     message.content.avatar_url?.let{ mapMxc(it, server) })
             contentPane.children.addAll(userUpdate.root)
+        } else {
+            if (pc != null && pc.membership == Membership.invite) {
+                joinedContent.children.addAll(Text("accepted invitation"))
+                val invi = message.content.inviter
+                if (invi != null) {
+                    inviterView.updateUser(invi)
+                    joinedContent.children.addAll(Text("from"), inviterView.root)
+                }
+                joinedContent.children.addAll(Text("and"))
+            }
+            joinedContent.children.addAll(Text("joined"))
+            contentPane.children.addAll(joinedContent)
         }
     }
     init {

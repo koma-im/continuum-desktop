@@ -123,7 +123,7 @@ class HistoryVisibilityEventView(
         alignment = Pos.CENTER
         add(TextFlow(sender, Text(" "), text))
     }
-    
+
     fun update(ev: MRoomHistoryVisibility) {
         sender.text = ev.sender.toString()
         val t = when(ev.content.history_visibility) {
