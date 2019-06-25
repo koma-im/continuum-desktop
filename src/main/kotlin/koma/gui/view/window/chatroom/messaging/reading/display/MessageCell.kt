@@ -163,6 +163,7 @@ class GuestAccessUpdateView(): ViewNode {
     override val menuItems: List<MenuItem>
         get() = listOf()
     fun update(senderAvatar: AvatarView, event: MRoomGuestAccess) {
+        node.children.clear()
         node.children.addAll(senderAvatar.root,
                 Text("set guest access to ${event.content.guest_access}")
                 )

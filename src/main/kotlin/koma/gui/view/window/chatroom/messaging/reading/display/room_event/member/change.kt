@@ -76,6 +76,7 @@ class MRoomMemberViewNode(
     private fun updateInvite(message: MRoomMember, server: HttpUrl) {
         val invitee = message.state_key ?: return
         inviterView.updateUser(UserId(invitee))
+        invitationContent.children.clear()
         invitationContent.children.addAll(Text("invited"), inviterView.root)
         contentPane.children.addAll(invitationContent)
     }
@@ -89,6 +90,7 @@ class MRoomMemberViewNode(
                     message.content.avatar_url?.let{ mapMxc(it, server) })
             contentPane.children.addAll(userUpdate.root)
         } else {
+            joinedContent.children.clear()
             if (pc != null && pc.membership == Membership.invite) {
                 joinedContent.children.addAll(Text("accepted invitation"))
                 val invi = message.content.inviter
