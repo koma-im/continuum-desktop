@@ -98,7 +98,10 @@ class MessageCell(
                 messageView.update(ev)
                 messageView
             }
-            is MRoomHistoryVisibility -> historyVisibilityView.apply { update(ev) }
+            is MRoomHistoryVisibility -> {
+                senderAvatar.updateUser(ev.sender)
+                historyVisibilityView.apply { update(senderAvatar, ev) }
+            }
             is MRoomGuestAccess -> {
                 senderAvatar.updateUser(ev.sender)
                 guestAccessUpdateView.update(senderAvatar, ev)
@@ -126,18 +129,20 @@ class MessageCell(
     }
 }
 
+@ExperimentalCoroutinesApi
 class HistoryVisibilityEventView(
 ): ViewNode {
     override val menuItems: List<MenuItem> = listOf()
-    private val sender = Text()
+    private val sender = HBox()
     private val text = Text()
-    override val node = HBox().apply {
+    override val node = HBox(5.0).apply {
         alignment = Pos.CENTER
-        add(TextFlow(sender, Text(" "), text))
+        children.addAll(sender, text)
     }
 
-    fun update(ev: MRoomHistoryVisibility) {
-        sender.text = ev.sender.toString()
+    fun update(senderAvatar: AvatarView, ev: MRoomHistoryVisibility) {
+        sender.children.clear()
+        sender.children.add(senderAvatar.root)
         val t = when(ev.content.history_visibility) {
             HistoryVisibility.Invited -> "made events accessible to newly joined members " +
                     "from the point they were invited onwards"
