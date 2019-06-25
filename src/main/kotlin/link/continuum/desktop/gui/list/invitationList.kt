@@ -9,11 +9,16 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
+import koma.util.coroutine.adapter.retrofit.await
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
+import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.mapMxc
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -85,6 +90,16 @@ class InvitationsView(
                     hgrow = Priority.ALWAYS
                     button("Join").action {
                         logger.debug { "Accepting invitation to $roomId" }
+                        roomId?.let {
+                            logger.debug { "joining $it" }
+                            GlobalScope.launch {
+                                val j = appState.apiClient?.joinRoom(it)?.await() ?.getOr {
+                                    logger.warn { "failed to join $roomId, ${it.error}" }
+                                    return@launch
+                                }
+                                logger.debug { "joined room $j" }
+                            }
+                        }
                         remove()
                     }
                     button("Ignore").action {
