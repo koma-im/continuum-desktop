@@ -45,8 +45,7 @@ class UrlAvatar(
     }
 
     fun updateName(name: String, color: Color) {
-        val c = extract_key_chars(name)
-        this.initialIcon.updateItem(c.first, c.second, color)
+        this.initialIcon.updateItem(name, color)
     }
 
     fun updateUrl(url:HttpUrl?) {

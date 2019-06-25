@@ -85,8 +85,7 @@ class AvatarView(
                         logger.trace { "getting generated avatar for $current with name $it" }
                         withContext(Dispatchers.JavaFx) {
                             val color = userData.getUserColor(current)
-                            val (c1, c2) = extract_key_chars(it)
-                            initialIcon.updateItem(c1, c2, color)
+                            initialIcon.updateItem(it, color)
                         }
                         false
                     }

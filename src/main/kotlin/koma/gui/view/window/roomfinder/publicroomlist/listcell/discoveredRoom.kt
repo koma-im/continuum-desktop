@@ -70,8 +70,7 @@ class DiscoveredRoomFragment(
             return
         }
         name = item.dispName()
-        val (c1, c2) = extract_key_chars(name)
-        initialIcon.updateItem(c1, c2, hashStringColorDark(item.room_id.id))
+        initialIcon.updateItem(name, hashStringColorDark(item.room_id.id))
         imageView.imageProperty().unbind()
         imageView.image = null
         item.avatar_url?.let {

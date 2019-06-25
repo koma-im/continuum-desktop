@@ -9,7 +9,6 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
-import koma.gui.element.icon.user.extract_key_chars
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
@@ -44,8 +43,7 @@ class AvatarAlways(
         this.minWidth = avatarSize
         name.addListener { _, _, n: String? ->
             n?:return@addListener
-            val c = extract_key_chars(n)
-            this.initialIcon.updateItem(c.first, c.second, color)
+            this.initialIcon.updateItem(n, color)
         }
     }
 
