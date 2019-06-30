@@ -2,7 +2,6 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
-import koma.gui.element.icon.user.extract_key_chars
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -10,6 +9,8 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.onNone
+import link.continuum.desktop.util.onSome
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -69,7 +70,7 @@ class AvatarView(
                         } ?: true
                     }
                     image.onReceive {
-                        logger.trace { "got updated ${it.isSome} image for $current" }
+                        logger.trace { "got updated ${it.isPresent} image for $current" }
                         withContext(Dispatchers.JavaFx) {
                             it.onSome {
                                 imageView.image = it

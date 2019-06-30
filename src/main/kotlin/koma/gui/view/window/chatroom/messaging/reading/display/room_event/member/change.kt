@@ -23,14 +23,16 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
-import link.continuum.desktop.util.Option
 import link.continuum.desktop.util.http.mapMxc
 import link.continuum.desktop.util.http.urlChannelDownload
+import link.continuum.desktop.util.onNone
+import link.continuum.desktop.util.onSome
 import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
+import java.util.*
 
 private val AppSettings = appState.store.settings
 private val logger = KotlinLogging.logger {}
@@ -196,8 +198,8 @@ class UserAppearanceUpdateView(
 
 class ImageViewAsync(client: OkHttpClient) {
     val root = ImageView()
-    private val urlChannel: SendChannel<Option<HttpUrl>>
-    fun updateUrl(url: Option<HttpUrl>) {
+    private val urlChannel: SendChannel<Optional<HttpUrl>>
+    fun updateUrl(url: Optional<HttpUrl>) {
         logger.trace { "ImageViewAsync update url $url" }
         if (!urlChannel.offer(url)) {
             logger.error { "url $url not offered successfully" }

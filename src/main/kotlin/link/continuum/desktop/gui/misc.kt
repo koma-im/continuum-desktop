@@ -140,7 +140,7 @@ fun<T: Any, U: Any, C: SendChannel<Option<U>>> CoroutineScope.switchGetDeferredO
                 break
             } else {
                 current = next
-                if (current.isNone)
+                if (current.isEmpty)
                     output.send(None())
             }
         }
