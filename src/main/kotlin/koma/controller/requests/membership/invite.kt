@@ -1,10 +1,7 @@
 package koma.controller.requests.membership
 
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.getOrElse
 import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.gui.view.window.auth.uilaunch
@@ -12,9 +9,9 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
+import koma.util.getOr
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import link.continuum.desktop.util.getOr
 import tornadofx.*
 import java.util.*
 
@@ -30,7 +27,7 @@ fun dialogInviteMember(roomId: RoomId) {
     GlobalScope.launch {
         apiClient!!.inviteMember(roomId, userid).awaitMatrix() getOr {
             uilaunch {
-                val content = it.error.message
+                val content = it.message
                 alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomId", content)
             }
             return@launch

@@ -1,13 +1,12 @@
 package koma.controller.requests.membership
 
-import com.github.kittinunf.result.Result
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.failureOrThrow
 import kotlinx.coroutines.*
-import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.UiDispatcher
 import model.Room
 import mu.KotlinLogging
@@ -25,15 +24,15 @@ fun leaveRoom(mxroom: Room, appData: AppStore = appState.store) {
     api ?: return
     GlobalScope.launch {
         val result = api.leavingRoom(roomId).awaitMatrix()
-        when(result) {
-            is Result.Success -> {
+        when {
+            result.isSuccess -> {
                 logger.debug { "Left $roomname successfully" }
                 withContext(UiDispatcher) {
                     appData.joinedRoom.removeById(roomId)
                 }
             }
-            is Result.Failure -> {
-                val ex = result.error
+            result.isFailure -> {
+                val ex = result.failureOrThrow()
                 uilaunch {
                     Notifications.create()
                             .title("Had error leaving room $roomname")

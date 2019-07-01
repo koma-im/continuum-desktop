@@ -9,9 +9,9 @@ import javafx.scene.layout.StackPane
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
+import koma.util.getOr
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.downloadHttp
 import mu.KotlinLogging
 import okhttp3.HttpUrl

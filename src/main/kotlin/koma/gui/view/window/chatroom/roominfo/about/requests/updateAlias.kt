@@ -1,10 +1,11 @@
 package koma.gui.view.window.chatroom.roominfo.about.requests
 
-import com.github.kittinunf.result.Result
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.room.naming.RoomAlias
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -20,8 +21,8 @@ fun requestAddRoomAlias(room: Room, input: String?) {
     val alias = RoomAlias(input)
     GlobalScope.launch {
         val result = api.putRoomAlias(room.id, alias.str).awaitMatrix()
-        if (result is Result.Failure) {
-            val message = result.error.message
+        result.onFailure {
+            val message = it.message
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to add room alias $alias")
@@ -29,7 +30,7 @@ fun requestAddRoomAlias(room: Room, input: String?) {
                         .owner(FX.primaryStage)
                         .showWarning()
             }
-        } else {
+        }.onSuccess {
             launch(Dispatchers.JavaFx) {
                 room.addAlias(alias)
             }
@@ -44,8 +45,8 @@ fun requestSetRoomCanonicalAlias(room: Room, alias: RoomAlias?) {
     val content =  RoomCanonAliasContent(alias)
     GlobalScope.launch {
         val result = api.setRoomCanonicalAlias(room.id, content).awaitMatrix()
-        if (result is Result.Failure) {
-            val message = result.error.message
+        result.onFailure {
+            val message = it.message
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to set canonical room alias $alias")

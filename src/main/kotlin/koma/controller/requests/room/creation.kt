@@ -1,6 +1,5 @@
 package koma.controller.requests.room
 
-import com.github.kittinunf.result.Result
 import javafx.geometry.Pos
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.ButtonType
@@ -10,6 +9,8 @@ import koma.koma_app.appState.apiClient
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -23,16 +24,16 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     val settings = input.get()
     val api = apiClient ?: return@launch
     val result = api.createRoom(settings).awaitMatrix()
-    if (result is Result.Failure) {
+    result.onFailure {
         launch(Dispatchers.JavaFx) {
             Notifications.create()
                     .owner(FX.primaryStage)
                     .position(Pos.CENTER)
                     .title("Failure to create room ${settings.room_alias_name}")
-                    .text(result.error.toString())
+                    .text(it.toString())
                     .showWarning()
         }
-    } else {
+    }.onSuccess{
         println("Room created ${settings.room_alias_name}")
     }
 }

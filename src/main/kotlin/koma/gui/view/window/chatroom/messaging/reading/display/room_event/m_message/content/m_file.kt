@@ -12,7 +12,7 @@ import koma.koma_app.appState
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
-import koma.util.result.ok
+import koma.util.onSuccess
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -22,7 +22,7 @@ class MFileViewNode(val content: FileMessage,
                     private val server: HttpUrl): ViewNode {
     override val node = HBox(5.0)
     override val menuItems: List<MenuItem>
-    private val url = MHUrl.fromStr(content.url).ok()
+    private val url = MHUrl.fromStr(content.url)
 
     init {
         val faicon = guessIconForMime(content.info?.mimetype)
@@ -55,8 +55,10 @@ class MFileViewNode(val content: FileMessage,
     }
 
     private fun save() {
-        url?.toHttpUrl(server)?.ok()?.let {
-            downloadFileAs(it, filename = content.filename, title = "Save File As")
+        url.onSuccess {
+            it.toHttpUrl(server)?.let {
+                downloadFileAs(it, filename = content.filename, title = "Save File As")
+            }
         }
     }
 }

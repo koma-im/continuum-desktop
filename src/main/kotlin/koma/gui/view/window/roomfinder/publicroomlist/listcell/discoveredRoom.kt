@@ -1,7 +1,5 @@
 package koma.gui.view.window.roomfinder.publicroomlist.listcell
 
-import com.github.kittinunf.result.failure
-import com.github.kittinunf.result.success
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -20,6 +18,8 @@ import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -144,10 +144,10 @@ fun joinById(roomid: RoomId, name: String, owner: Node, store: AppStore = appSta
     api ?: return
     GlobalScope.launch {
         val rs = api.joinRoom(roomid).awaitMatrix()
-        rs.success {
+        rs.onSuccess {
             launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
         }
-        rs.failure {
+        rs.onFailure {
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .owner(owner)

@@ -2,12 +2,12 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
+import koma.util.getOr
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import link.continuum.desktop.util.Some
-import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.downloadHttp
 import link.continuum.libutil.`?or`
 import mu.KotlinLogging
@@ -49,7 +49,7 @@ class DeferredImage(
 
     private fun CoroutineScope.asyncImage(url: HttpUrl, client: OkHttpClient) = async {
         val bs = downloadHttp(url, client, maxStale) getOr {
-            logger.warn { "image $url not downloaded, ${it.error}, returning None" }
+            logger.warn { "image $url not downloaded, ${it}, returning None" }
             return@async None<Image>()
         }
         val img = processing(bs.inputStream())
@@ -71,7 +71,7 @@ fun downloadImageResized(url: HttpUrl, size: Double, client: OkHttpClient): Imag
     val prop = ImageProperty()
     GlobalScope.launch {
         val bs = downloadHttp(url, client) getOr  {
-            logger.error { "download of $url fails with ${it.error}" }
+            logger.error { "download of $url fails with ${it}" }
             return@launch
         }
         val img = bs.inputStream().use {

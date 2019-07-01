@@ -6,8 +6,8 @@ import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
 import koma.storage.persistence.settings.encoding.KProxy
+import koma.util.KResult
 import link.continuum.desktop.util.ErrorMsg
-import link.continuum.desktop.util.KResult
 import tornadofx.*
 import java.net.Proxy
 

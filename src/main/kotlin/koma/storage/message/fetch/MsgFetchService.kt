@@ -1,7 +1,5 @@
 package koma.storage.message.fetch
 
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.map
 import koma.koma_app.appState
 import koma.matrix.Chunked
 import koma.matrix.event.EventId
@@ -11,6 +9,8 @@ import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.map
+import koma.util.KResult as Result
 import link.continuum.database.models.RoomEventRow
 import mu.KotlinLogging
 

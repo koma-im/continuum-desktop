@@ -12,13 +12,13 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import koma.util.coroutine.adapter.retrofit.await
+import koma.util.getOr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
-import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.mapMxc
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -94,7 +94,7 @@ class InvitationsView(
                             logger.debug { "joining $it" }
                             GlobalScope.launch {
                                 val j = appState.apiClient?.joinRoom(it)?.await() ?.getOr {
-                                    logger.warn { "failed to join $roomId, ${it.error}" }
+                                    logger.warn { "failed to join $roomId, ${it}" }
                                     return@launch
                                 }
                                 logger.debug { "joined room $j" }

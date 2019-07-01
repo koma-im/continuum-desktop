@@ -1,6 +1,5 @@
 package link.continuum.desktop.action
 
-import com.github.kittinunf.result.Result
 import koma.controller.events.processEventsResult
 import koma.controller.sync.MatrixSyncReceiver
 import koma.gui.view.ChatView
@@ -9,6 +8,8 @@ import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
@@ -61,16 +62,16 @@ class SyncControl(
     private fun startProcessing() {
         GlobalScope.launch(Dispatchers.JavaFx) {
             for (s in sync.events) {
-                if (s is Result.Success) {
+                s.onSuccess {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(s.value, apiClient.server, appData = appData, view = view)
+                    processEventsResult(it, apiClient.server, appData = appData, view = view)
                     val nb = sync.since
                     nb?.let {
                         saveSyncBatchKey(appData.database, user, nb)
                     }
-                } else if (s is Result.Failure) {
+                }.onFailure {
                     val deferred = CompletableDeferred<Unit>()
-                    statusChan.send(SyncStatusBar.Variants.NeedRetry(s.error, deferred))
+                    statusChan.send(SyncStatusBar.Variants.NeedRetry(it, deferred))
                     logger.warn { "sync stopped because of $s" }
                     deferred.await()
                     logger.info { "Retrying sync" }

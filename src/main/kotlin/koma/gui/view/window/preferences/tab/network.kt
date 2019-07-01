@@ -9,7 +9,7 @@ import koma.gui.view.window.preferences.tab.network.NewProxy
 import koma.gui.view.window.preferences.tab.network.ProxyOption
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import link.continuum.desktop.util.isOk
+import koma.util.getOr
 import tornadofx.*
 
 
@@ -56,12 +56,7 @@ class NetworkSettingsTab(
         val proxy = if ( selection is ExistingProxy) {
             selection.proxy
         } else {
-            val p = proxyField.getProxy()
-            if (p.isOk()) {
-                p.get()
-            } else {
-                return
-            }
+            proxyField.getProxy() getOr {return}
         }
         settings.proxyList = settings.proxyList.setDefault(proxy)
     }

@@ -1,9 +1,9 @@
 package koma.gui.view.window.userinfo.actions
 
-import com.github.kittinunf.result.Result
 import javafx.scene.control.TextInputDialog
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
+import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -23,11 +23,11 @@ fun updateMyAlias() {
     api?:return
     GlobalScope.launch {
         val result = api.updateDisplayName(newname).awaitMatrix()
-        if (result is Result.Failure) {
+        result.onFailure {
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to update nick name")
-                        .text(result.error.message.toString())
+                        .text(it.message.toString())
                         .owner(FX.primaryStage)
                         .showWarning()
             }

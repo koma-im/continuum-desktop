@@ -1,6 +1,5 @@
 package koma.gui.view.window.chatroom.roominfo.about
 
-import com.github.kittinunf.result.Result
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.beans.binding.Bindings
@@ -22,6 +21,8 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import koma.matrix.room.naming.RoomAlias
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -82,8 +83,8 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
     api ?: return
     GlobalScope.launch {
         val result = api.deleteRoomAlias(alias.str).awaitMatrix()
-        if (result is Result.Failure) {
-            val message = result.error.message
+        result.onFailure {
+            val message = it.message
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to delete room alias $alias")
@@ -91,7 +92,7 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
                         .owner(FX.primaryStage)
                         .showWarning()
             }
-        } else {
+        }.onSuccess {
             launch(Dispatchers.JavaFx) {
                 room.aliases.remove(alias)
             }

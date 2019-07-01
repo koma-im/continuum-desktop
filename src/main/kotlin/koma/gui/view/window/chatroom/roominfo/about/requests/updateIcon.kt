@@ -1,11 +1,12 @@
 package koma.gui.view.window.chatroom.roominfo.about.requests
 
-import com.github.kittinunf.result.Result
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.matrix.event.room_message.state.RoomAvatarContent
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -23,11 +24,11 @@ fun chooseUpdateRoomIcon(room: Room) {
     file ?: return
     GlobalScope.launch {
         val upload = uploadFile(api, file)
-        if (upload is Result.Success) {
-            val icon = RoomAvatarContent(upload.value.content_uri)
+        upload.onSuccess {
+            val icon = RoomAvatarContent(it.content_uri)
             val result = api.setRoomIcon(room.id, icon).awaitMatrix()
-            if (result is Result.Failure) {
-                val message = result.error.message
+            result.onFailure {
+                val message = it.message
                 launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to set room icon")

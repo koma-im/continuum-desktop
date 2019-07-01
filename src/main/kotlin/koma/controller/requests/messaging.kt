@@ -1,17 +1,17 @@
 package koma.controller.requests
 
-import com.github.kittinunf.result.Result
 import javafx.scene.control.Alert
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.koma_app.appState.apiClient
-import koma.matrix.UploadResponse
 import koma.matrix.event.room_message.chat.FileInfo
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.file.guessMediaType
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -26,9 +26,8 @@ fun sendMessage(room: RoomId, message: String) {
     val msg = textToMessage(message)
     GlobalScope.launch(Dispatchers.UI) {
         val result = apiClient!!.sendMessage(room, msg)
-
-        if (result is Result.Failure) {
-            val content = result.error.message
+        result.onFailure {
+            val content = it.message
             alert(Alert.AlertType.ERROR, "failed to send message", content)
         }
     }
@@ -46,17 +45,16 @@ fun sendFileMessage(room: RoomId) {
     api?:return
     GlobalScope.launch {
         val uploadResult = uploadFile(api, file, type)
-        if (uploadResult is Result.Success) {
-            val up: UploadResponse = uploadResult.value
+        uploadResult.onSuccess { up ->
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
             val r = api.sendMessage(room, message)
-            if (r is Result.Failure) {
+            r.onFailure {
                 withContext(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to send file $file")
-                            .text("Error ${r.error}")
+                            .text("Error ${it}")
                             .showError()
                 }
             }
@@ -77,16 +75,15 @@ fun sendImageMessage(room: RoomId) {
     api?:return
     GlobalScope.launch {
         val uploadResult = uploadFile(api, file, type)
-        if (uploadResult is Result.Success) {
-            val up: UploadResponse = uploadResult.value
+        uploadResult.onSuccess {up ->
             println("sending image $file ${up.content_uri}")
             val msg = ImageMessage(file.name, up.content_uri)
             val r = api.sendMessage(room, msg)
-            if (r is Result.Failure) {
+            r.onFailure {
                 withContext(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to send image $file")
-                            .text("Error ${r.error}")
+                            .text("Error ${it}")
                             .showError()
                 }
             }

@@ -1,6 +1,7 @@
 package koma.storage.persistence.settings
 
 import koma.storage.persistence.settings.encoding.KProxy
+import koma.util.getOrThrow
 import link.continuum.database.models.deserialize
 import link.continuum.database.models.serialize
 import kotlin.test.Test
@@ -16,7 +17,7 @@ internal class KProxyTest {
 
     @Test
     fun testKProxySerial() {
-        val x = KProxy.parse("http 127.0.0.1 8080").get()
+        val x = KProxy.parse("http 127.0.0.1 8080").getOrThrow()
         val b = serialize(x)!!
         val y = deserialize<KProxy>(b)
         assertEquals(x, y)

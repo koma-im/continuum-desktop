@@ -19,6 +19,7 @@ import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
+import koma.util.getOr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,7 +29,6 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.InvitationsView
-import link.continuum.desktop.util.getOr
 import link.continuum.desktop.util.http.mapMxc
 import link.continuum.libutil.getOrNull
 import model.Room
@@ -37,7 +37,6 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 import java.util.*
-import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -96,7 +95,7 @@ private fun fixAvatar(room: Room) {
     val api = appState.apiClient ?: return
     GlobalScope.launch {
         val av = api.getRoomAvatar(room.id) getOr {
-            logger.warn { "error fixing room $name's avatar, ${it.error}" }
+            logger.warn { "error fixing room $name's avatar, ${it}" }
             return@launch
         }
         withContext(UiDispatcher) {
@@ -116,7 +115,7 @@ private fun fixRoomName(room: Room) {
     val api = appState.apiClient ?: return
     GlobalScope.launch {
         val n = api.getRoomName(room.id) getOr {
-            logger.warn { "error fixing room $name's name, ${it.error}" }
+            logger.warn { "error fixing room $name's name, ${it}" }
             return@launch
         }
         withContext(UiDispatcher) {

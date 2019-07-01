@@ -1,7 +1,5 @@
 package koma.gui.view.window.roomfinder.publicroomlist
 
-import com.github.kittinunf.result.failure
-import com.github.kittinunf.result.success
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.StringProperty
@@ -24,6 +22,8 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -94,10 +94,10 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
         api ?: return
         GlobalScope.launch {
             val rs = api.resolveRoomAlias(alias).awaitMatrix()
-            rs.success {
+            rs.onSuccess {
                 joinById(it.room_id, alias, this@PublicRoomsView.ui )
             }
-            rs.failure {
+            rs.onFailure {
                 launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .owner(this@PublicRoomsView.ui)

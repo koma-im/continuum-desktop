@@ -1,11 +1,13 @@
 package koma.gui.view.window.userinfo.actions
 
-import com.github.kittinunf.result.Result
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.koma_app.appState
 import koma.matrix.user.AvatarUrl
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.failureOrThrow
+import koma.util.getOrThrow
+import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -22,9 +24,9 @@ fun chooseUpdateUserAvatar() {
     file ?: return
     GlobalScope.launch {
         val upload = uploadFile(api, file)
-        when (upload) {
-            is Result.Failure -> {
-                val message = upload.error.message
+        when  {
+            upload.isFailure -> {
+                val message = upload.failureOrThrow().message
                 launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to upload new avatar")
@@ -33,11 +35,11 @@ fun chooseUpdateUserAvatar() {
                             .showWarning()
                 }
             }
-            is Result.Success -> {
-                val data = AvatarUrl(upload.value.content_uri)
+            upload.isSuccess -> {
+                val data = AvatarUrl(upload.getOrThrow().content_uri)
                 val result = api.updateAvatar(api.userId, data).awaitMatrix()
-                if (result is Result.Failure) {
-                    val message = result.error.message
+                result.onFailure {
+                    val message = it.message
                     launch(Dispatchers.JavaFx) {
                         Notifications.create()
                                 .title("Failed to set new avatar")

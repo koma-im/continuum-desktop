@@ -14,6 +14,7 @@ import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
 import koma.matrix.room.naming.RoomId
 import koma.storage.message.fetch.fetchPreceding
+import koma.util.fold
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow

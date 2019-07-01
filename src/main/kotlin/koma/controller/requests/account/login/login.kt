@@ -1,6 +1,5 @@
 package koma.controller.requests.account.login
 
-import com.github.kittinunf.result.Result
 import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
 import koma.Koma
@@ -10,6 +9,8 @@ import koma.matrix.UserPassword
 import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
+import koma.util.onFailure
+import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -62,25 +63,21 @@ suspend fun onClickLogin(koma: Koma,
 private suspend fun getTokenWithPassword(userid: UserId, password: String, koma: Koma,
                                          data: KDataStore,
                                          server: String): String? {
-    val authResu = login(UserPassword(user = userid.user, password = password), server, koma.http).awaitMatrix()
-    when (authResu) {
-        is Result.Success -> {
-            val u = authResu.value.user_id
-            val t = authResu.value.access_token
-            saveToken(data, u, t)
-            return t
-        }
-        is Result.Failure -> {
-            val ex = authResu.error
-            val mes = ex.message
-            System.err.println(mes)
-            val message = if (ex is JsonEncodingException) {
-                "Does ${server} have a valid JSON API?"
-            } else mes
-            GlobalScope.launch(Dispatchers.JavaFx) {
-                alert(Alert.AlertType.ERROR, "Login Fail with Error",
-                        message)
-            }
+    login(UserPassword(user = userid.user, password = password), server, koma.http
+    ).awaitMatrix().onSuccess {
+        val u = it.user_id
+        val t = it.access_token
+        saveToken(data, u, t)
+        return t
+    }.onFailure { ex ->
+        val mes = ex.message
+        System.err.println(mes)
+        val message = if (ex is JsonEncodingException) {
+            "Does ${server} have a valid JSON API?"
+        } else mes
+        GlobalScope.launch(Dispatchers.JavaFx) {
+            alert(Alert.AlertType.ERROR, "Login Fail with Error",
+                    message)
         }
     }
     return null

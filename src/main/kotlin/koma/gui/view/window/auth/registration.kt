@@ -1,8 +1,5 @@
 package koma.gui.view.window.auth
 
-import com.github.kittinunf.result.Result
-import com.github.kittinunf.result.failure
-import com.github.kittinunf.result.success
 import javafx.scene.control.Alert
 import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
@@ -13,6 +10,9 @@ import javafx.scene.layout.VBox
 import javafx.util.StringConverter
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
+import koma.util.*
+import koma.util.KResult
+import koma.util.KResult as Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,10 +24,10 @@ import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.gui.uialert
 import link.continuum.desktop.util.Err
-import link.continuum.desktop.util.getErrOr
-import link.continuum.desktop.util.getOr
+import link.continuum.desktop.util.Ok
 import okhttp3.HttpUrl
 import tornadofx.*
+import kotlin.onFailure
 
 class RegistrationWizard(private val data: KDataStore): View() {
 
@@ -62,7 +62,7 @@ class RegistrationWizard(private val data: KDataStore): View() {
         }
         else if (cur is Stage) {
             val res = cur.submit()?: return
-            res.success { newUser ->
+            res.onSuccess { newUser ->
                 println("Successfully registered ${newUser.user_id}")
                 val k = appState.store.database
                 saveToken(k, newUser.user_id, newUser.access_token)
@@ -70,7 +70,7 @@ class RegistrationWizard(private val data: KDataStore): View() {
                 state = s
                 uilaunch { root.center = s.root }
             }
-            res.failure { ex ->
+            res.onFailure { ex ->
                 when (ex) {
                     is AuthException.AuthFail -> {
                         GlobalScope.launch(Dispatchers.JavaFx) {
@@ -174,7 +174,7 @@ abstract class AuthView: View() {
      * if it is Unauthorized, more stages are needed
      * if it's other exceptions, registration has failed
      */
-    abstract suspend fun finish(): Result<RegisterdUser, Exception>?
+    abstract suspend fun finish(): KResult<RegisterdUser, Exception>?
 }
 
 /**
@@ -190,8 +190,8 @@ class PasswordAuthView(
      * if it is Unauthorized, more stages are needed
      * if it's other exceptions, registration has failed
      */
-    override suspend fun finish(): Result<RegisterdUser, Exception>? {
-        val f = register.registerByPassword(user.text, pass.text).getErrOr { return it }
+    override suspend fun finish(): KResult<RegisterdUser, Exception>? {
+        val f = register.registerByPassword(user.text, pass.text).getFailureOr { return Ok(it) }
         if (f is AuthException.AuthFail) return Err(f)
         uilaunch {
             alert(Alert.AlertType.WARNING,
@@ -228,7 +228,7 @@ class FallbackWebviewAuth(
 ): AuthView() {
     override val root = Label("under construction")
     private var webAuthDone = false
-    override suspend fun finish(): Result<RegisterdUser, Exception>? {
+    override suspend fun finish(): KResult<RegisterdUser, Exception>? {
         if (webAuthDone) {
             TODO("not sure whether there is a fallback method for registration")
         } else {
@@ -265,7 +265,7 @@ private class Start(private val data: KDataStore): WizardState() {
         val f = r.getFlows() getOr {
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR,
-                        "Failed to get authentication flows from server: ${it.error}")
+                        "Failed to get authentication flows from server: ${it}")
             }
             return null
         }

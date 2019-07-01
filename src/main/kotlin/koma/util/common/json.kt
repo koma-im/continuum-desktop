@@ -1,17 +1,17 @@
 package koma.util.common
 
-import com.github.kittinunf.result.Result
 import com.squareup.moshi.JsonAdapter
+import koma.util.KResult
 
-fun <T: Any> JsonAdapter<T>.tryParse(json: String): Result<T, Exception> {
+fun <T: Any> JsonAdapter<T>.tryParse(json: String): KResult<T, Exception> {
     try {
         val v = this.fromJson(json)
         if (v != null) {
-            return Result.of(v)
+            return KResult.success(v)
         } else {
-            return Result.error(NullPointerException("json parsed into null"))
+            return KResult.failure(NullPointerException("json parsed into null"))
         }
     } catch (e: Exception) {
-        return Result.error(e)
+        return KResult.failure(e)
     }
 }

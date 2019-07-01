@@ -1,6 +1,8 @@
 package link.continuum.desktop.util
 
-import com.github.kittinunf.result.Result
+import koma.util.KResult
+import koma.util.getFailureOr
+import koma.util.getOr
 import koma.util.given
 import link.continuum.libutil.`?or?`
 import link.continuum.libutil.`?or`
@@ -13,16 +15,16 @@ internal class ResultKtTest {
         val ex = Exception("ex")
         fun returnEx(): KResult<Unit, Exception> {
             val e: KResult<Unit, Exception> = Err(ex)
-            val t = e getOr { return it }
+            val t = e getOr { return Err(it) }
             return Ok(t)
         }
 
         val e = returnEx()
-        assertFalse { e.isOk() }
-        assert(e is Result.Failure)
-        assertNotSame(ex, Ok<Int, Exception>(5).getErrOr { Exception() })
-        assertNotSame(ex, Err<Int, Exception>(Exception("ex2")).getErrOr { Exception() })
-        assertSame(ex, e.getErrOr { Exception() })
+        assertFalse { e.isSuccess }
+        assert(e.isFailure)
+        assertNotSame(ex, Ok<Int, Exception>(5).getFailureOr { Exception() })
+        assertNotSame(ex, Err<Int, Exception>(Exception("ex2")).getFailureOr { Exception() })
+        assertSame(ex, e.getFailureOr { Exception() })
     }
 
     @Test

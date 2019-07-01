@@ -1,7 +1,7 @@
 package koma.storage.persistence.settings.encoding
 
+import koma.util.KResult
 import link.continuum.desktop.util.ErrorMsg
-import link.continuum.desktop.util.KResult
 import link.continuum.desktop.util.Ok
 import link.continuum.desktop.util.fmtErr
 import java.io.Serializable

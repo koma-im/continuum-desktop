@@ -1,8 +1,10 @@
 package link.continuum.desktop.util.http
 
-import com.github.kittinunf.result.flatMap
-import com.github.kittinunf.result.map
+import koma.util.KResult
 import koma.util.coroutine.adapter.okhttp.await
+import koma.util.flatMap
+import koma.util.fold
+import koma.util.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -12,9 +14,11 @@ import link.continuum.desktop.gui.switchGetDeferredOption
 import link.continuum.desktop.util.*
 import mu.KotlinLogging
 import okhttp3.*
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
+private typealias Option<T> = Optional<T>
 
 suspend fun downloadHttp(
         url: HttpUrl, client: OkHttpClient, maxStale: Int? = null
