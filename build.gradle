@@ -13,6 +13,22 @@ plugins {
 
 allprojects {
     apply plugin: "org.jetbrains.kotlin.jvm"
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url = 'https://dl.bintray.com/jerady/maven'
+        }
+        maven {
+            url = 'https://dl.bintray.com/kittinunf/maven'
+        }
+        maven {
+            url = 'https://jitpack.io'
+        }
+        maven {
+            url = 'https://repo.maven.apache.org/maven2'
+        }
+    }
     dependencies {
         implementation 'io.github.koma-im:koma-library:0.8'
         implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.40'
@@ -29,26 +45,6 @@ ext.moduleName = "link.continuum.desktop"
 javafx {
     version = "11.0.+"
     modules = [ "javafx.controls", "javafx.media", "javafx.fxml" ]
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url = 'https://dl.bintray.com/jerady/maven'
-    }
-
-    maven {
-        url = 'https://dl.bintray.com/kittinunf/maven'
-    }
-
-    maven {
-        url = 'https://jitpack.io'
-    }
-
-    maven {
-        url = 'https://repo.maven.apache.org/maven2'
-    }
 }
 
 dependencies {
@@ -73,7 +69,7 @@ dependencies {
 }
 
 group = 'link.continuum'
-version = '0.9.10'
+version = '0.9.11'
 description = 'continuum-desktop'
 sourceCompatibility = "9"
 

@@ -2,12 +2,6 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
 }
 
-repositories {
-    jcenter()
-    mavenLocal()
-    mavenCentral()
-}
-
 dependencies {
     implementation("io.requery:requery-kotlin:1.6.0")
     implementation("io.requery:requery:1.6.0")
