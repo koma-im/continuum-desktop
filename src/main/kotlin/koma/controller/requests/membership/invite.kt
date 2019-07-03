@@ -27,7 +27,7 @@ fun dialogInviteMember(roomId: RoomId) {
     GlobalScope.launch {
         apiClient!!.inviteMember(roomId, userid).awaitMatrix() getOr {
             uilaunch {
-                val content = it.message
+                val content = it.toString()
                 alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomId", content)
             }
             return@launch

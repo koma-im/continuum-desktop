@@ -2,6 +2,7 @@ package koma.controller.requests.account.login
 
 import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
+import koma.IOFailure
 import koma.Koma
 import koma.koma_app.AppStore
 import koma.matrix.UserId
@@ -70,9 +71,9 @@ private suspend fun getTokenWithPassword(userid: UserId, password: String, koma:
         saveToken(data, u, t)
         return t
     }.onFailure { ex ->
-        val mes = ex.message
+        val mes = ex.toString()
         System.err.println(mes)
-        val message = if (ex is JsonEncodingException) {
+        val message = if (ex is IOFailure && ex.throwable is JsonEncodingException) {
             "Does ${server} have a valid JSON API?"
         } else mes
         GlobalScope.launch(Dispatchers.JavaFx) {

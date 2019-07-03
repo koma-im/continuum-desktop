@@ -1,5 +1,7 @@
 package koma.storage.message.fetch
 
+import koma.Failure
+import koma.OtherFailure
 import koma.koma_app.appState
 import koma.matrix.Chunked
 import koma.matrix.event.EventId
@@ -18,10 +20,10 @@ private val logger = KotlinLogging.logger {}
 
 suspend fun fetchPreceding(
         row: RoomEventRow)
-        : Result<FetchedBatch, Exception> {
+        : Result<FetchedBatch, Failure> {
     val service = appState.apiClient
     if (service == null) {
-        return Result.error(NullPointerException("no service for loading messages"))
+        return Result.failure(OtherFailure("no service for loading messages"))
     }
     val fetchkey = row.preceding_batch
     return if (fetchkey == null) {

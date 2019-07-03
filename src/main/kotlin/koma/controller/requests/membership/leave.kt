@@ -1,9 +1,9 @@
 package koma.controller.requests.membership
 
+import koma.HttpFailure
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
-import koma.util.coroutine.adapter.retrofit.HttpException
 import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.failureOrThrow
 import kotlinx.coroutines.*
@@ -36,10 +36,10 @@ fun leaveRoom(mxroom: Room, appData: AppStore = appState.store) {
                 uilaunch {
                     Notifications.create()
                             .title("Had error leaving room $roomname")
-                            .text("${ex.message}")
+                            .text("$ex")
                             .owner(FX.primaryStage)
                             .showWarning()
-                    if ((ex is HttpException && ex.code == 404)) {
+                    if ((ex is HttpFailure && ex.http_code == 404)) {
                         logger.debug { "leaving room although there is exception $ex" }
                         appData.joinedRoom.removeById(roomId)
                     }

@@ -1,7 +1,7 @@
 package koma.storage.persistence.settings.encoding
 
+import koma.Failure
 import koma.util.KResult
-import link.continuum.desktop.util.ErrorMsg
 import link.continuum.desktop.util.Ok
 import link.continuum.desktop.util.fmtErr
 import java.io.Serializable
@@ -46,7 +46,7 @@ sealed class KProxy: Serializable {
 
     companion object {
         const val serialVersionUID = 1L
-        fun parse(type: Proxy.Type, host: String, port: String): KResult<KProxy, ErrorMsg> {
+        fun parse(type: Proxy.Type, host: String, port: String): KResult<KProxy, Failure> {
             if (type == Proxy.Type.DIRECT)  return Ok(KProxy.Direct)
             val portInt = port.toIntOrNull() ?: return fmtErr { "invalid port ${port}" }
             val sa = try {
@@ -60,7 +60,7 @@ sealed class KProxy: Serializable {
                 Proxy.Type.DIRECT -> Ok(KProxy.Direct)
             }
         }
-        fun parse(str: String): KResult<KProxy, Exception> {
+        fun parse(str: String): KResult<KProxy, Failure> {
             val proxyconf = str.split(" ", limit = 3)
             if (proxyconf.isEmpty()) return fmtErr { "proxy string $str is too short" }
             val ts = when(proxyconf[0].toUpperCase()) {

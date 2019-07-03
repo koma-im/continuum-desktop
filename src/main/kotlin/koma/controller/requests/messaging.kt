@@ -27,7 +27,7 @@ fun sendMessage(room: RoomId, message: String) {
     GlobalScope.launch(Dispatchers.UI) {
         val result = apiClient!!.sendMessage(room, msg)
         result.onFailure {
-            val content = it.message
+            val content = it.toString()
             alert(Alert.AlertType.ERROR, "failed to send message", content)
         }
     }

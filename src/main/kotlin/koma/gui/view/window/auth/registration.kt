@@ -8,6 +8,8 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.util.StringConverter
+import koma.AuthFailure
+import koma.Failure
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
 import koma.util.*
@@ -72,7 +74,7 @@ class RegistrationWizard(private val data: KDataStore): View() {
             }
             res.onFailure { ex ->
                 when (ex) {
-                    is AuthException.AuthFail -> {
+                    is AuthFailure -> {
                         GlobalScope.launch(Dispatchers.JavaFx) {
                             val a = Stage(register, ex.status)
                             state = a
@@ -99,7 +101,7 @@ class Stage(
         private val unauthorized: Unauthorized): WizardState() {
     override val root = BorderPane()
     private var authView: AuthView? = null
-    suspend fun submit(): Result<RegisterdUser, Exception>? {
+    suspend fun submit(): Result<RegisterdUser, Failure>? {
         return authView?.finish()
     }
 
@@ -174,7 +176,7 @@ abstract class AuthView: View() {
      * if it is Unauthorized, more stages are needed
      * if it's other exceptions, registration has failed
      */
-    abstract suspend fun finish(): KResult<RegisterdUser, Exception>?
+    abstract suspend fun finish(): KResult<RegisterdUser, Failure>?
 }
 
 /**
@@ -190,13 +192,13 @@ class PasswordAuthView(
      * if it is Unauthorized, more stages are needed
      * if it's other exceptions, registration has failed
      */
-    override suspend fun finish(): KResult<RegisterdUser, Exception>? {
+    override suspend fun finish(): KResult<RegisterdUser, Failure>? {
         val f = register.registerByPassword(user.text, pass.text).getFailureOr { return Ok(it) }
-        if (f is AuthException.AuthFail) return Err(f)
+        if (f is AuthFailure) return Err(f)
         uilaunch {
             alert(Alert.AlertType.WARNING,
                     "Registration hasn't succeeded",
-                    "Error: ${f.message}"
+                    "Error: $f"
             )
         }
         return null
@@ -228,7 +230,7 @@ class FallbackWebviewAuth(
 ): AuthView() {
     override val root = Label("under construction")
     private var webAuthDone = false
-    override suspend fun finish(): KResult<RegisterdUser, Exception>? {
+    override suspend fun finish(): KResult<RegisterdUser, Failure>? {
         if (webAuthDone) {
             TODO("not sure whether there is a fallback method for registration")
         } else {

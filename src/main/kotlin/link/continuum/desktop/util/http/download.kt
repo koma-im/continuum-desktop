@@ -1,10 +1,8 @@
 package link.continuum.desktop.util.http
 
-import koma.util.KResult
+import koma.Failure
+import koma.util.*
 import koma.util.coroutine.adapter.okhttp.await
-import koma.util.flatMap
-import koma.util.fold
-import koma.util.map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -22,7 +20,7 @@ private typealias Option<T> = Optional<T>
 
 suspend fun downloadHttp(
         url: HttpUrl, client: OkHttpClient, maxStale: Int? = null
-): KResult<ByteArray, Exception> {
+): KResult<ByteArray, Failure> {
     val req = Request.Builder().url(url).let {
         if (maxStale != null) {
             it.cacheControl(CacheControl
@@ -31,14 +29,12 @@ suspend fun downloadHttp(
                     .build())
         } else { it }
     }.build()
-    return client.newCall(req).await().flatMap { res ->
-        val b = res.body()
-        if (res.isSuccessful && b !=null) {
-            Ok<ResponseBody, ErrorMsg>(b)
-        } else {
-            fmtErr { "failed to get response body for $url" }
-        }
-    }.map { it.use { it.bytes() } }
+    val res = client.newCall(req).await() getOr  { return Err(it)}
+    val b = res.body()
+    if (!res.isSuccessful || b == null) {
+        return fmtErr { "failed to get response body for $url" }
+    }
+    return Ok(b.use { it.bytes() })
 }
 
 /**

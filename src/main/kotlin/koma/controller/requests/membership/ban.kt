@@ -27,7 +27,7 @@ fun runAskBanRoomMember()  {
     GlobalScope.launch(Dispatchers.JavaFx) {
         val result = apiClient!!.banMember(RoomId(roomid), userid).awaitMatrix()
         result.onFailure {
-            val content = it.message
+            val content = it.toString()
             alert(Alert.AlertType.ERROR, "failed to ban $userid from $roomid", content)
         }
     }

@@ -5,9 +5,9 @@ import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
+import koma.Failure
 import koma.storage.persistence.settings.encoding.KProxy
 import koma.util.KResult
-import link.continuum.desktop.util.ErrorMsg
 import tornadofx.*
 import java.net.Proxy
 
@@ -21,7 +21,7 @@ class AddProxyField(): View() {
 
     val isValid: BooleanBinding
 
-    fun getProxy(): KResult<KProxy, ErrorMsg> {
+    fun getProxy(): KResult<KProxy, Failure> {
         return KProxy.parse(type.value, host.text, port.text)
     }
 

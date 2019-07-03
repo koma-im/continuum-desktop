@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.Failure
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
@@ -153,7 +154,7 @@ class SyncStatusBar(
         class Normal(): Variants()
         class FullSync(): Variants()
         // network issue that may be temporary
-        class NeedRetry(val err: Exception, val retryNow: CompletableDeferred<Unit>): Variants()
+        class NeedRetry(val err: Failure, val retryNow: CompletableDeferred<Unit>): Variants()
         // authentication error
         class NeedRelogin(val err: Exception, val restart: CompletableDeferred<Unit>): Variants()
     }
