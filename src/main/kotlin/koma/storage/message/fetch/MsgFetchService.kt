@@ -10,7 +10,6 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.map
 import koma.util.KResult as Result
 import link.continuum.database.models.RoomEventRow
@@ -29,11 +28,11 @@ suspend fun fetchPreceding(
     return if (fetchkey == null) {
         val eventid = row.event_id
         logger.warn { "trying to get pagination token by getting the context of $eventid" }
-        service.getEventContext(RoomId(row.room_id), EventId(eventid)).awaitMatrix().map { res ->
+        service.getEventContext(RoomId(row.room_id), EventId(eventid)).map { res ->
             FetchedBatch.fromContextBackward(res)
         }
     } else {
-        service.getRoomMessages(RoomId(row.room_id), fetchkey, FetchDirection.Backward).awaitMatrix().map { res ->
+        service.getRoomMessages(RoomId(row.room_id), fetchkey, FetchDirection.Backward).map { res ->
             FetchedBatch.fromChunkedBackward(res)
         }
     }

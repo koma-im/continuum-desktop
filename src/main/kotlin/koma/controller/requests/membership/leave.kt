@@ -4,7 +4,6 @@ import koma.HttpFailure
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.failureOrThrow
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.UiDispatcher
@@ -23,7 +22,7 @@ fun leaveRoom(mxroom: Room, appData: AppStore = appState.store) {
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
-        val result = api.leavingRoom(roomId).awaitMatrix()
+        val result = api.leavingRoom(roomId)
         when {
             result.isSuccess -> {
                 logger.debug { "Left $roomname successfully" }

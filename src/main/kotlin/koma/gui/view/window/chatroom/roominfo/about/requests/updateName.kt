@@ -1,7 +1,6 @@
 package koma.gui.view.window.chatroom.roominfo.about.requests
 
 import koma.matrix.event.room_message.state.RoomNameContent
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
 import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +17,7 @@ fun requestUpdateRoomName(room: Room, input: String?) {
     api ?: return
     val name = RoomNameContent(input)
     GlobalScope.launch {
-        val result = api.setRoomName(room.id, name).awaitMatrix()
+        val result = api.setRoomName(room.id, name)
         result.onFailure {
             val message = it.message
             launch(Dispatchers.JavaFx) {

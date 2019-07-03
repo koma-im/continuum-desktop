@@ -8,7 +8,6 @@ import javafx.scene.control.TextField
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +22,7 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     if (!input.isPresent) return@launch
     val settings = input.get()
     val api = apiClient ?: return@launch
-    val result = api.createRoom(settings).awaitMatrix()
+    val result = api.createRoom(settings)
     result.onFailure {
         launch(Dispatchers.JavaFx) {
             Notifications.create()

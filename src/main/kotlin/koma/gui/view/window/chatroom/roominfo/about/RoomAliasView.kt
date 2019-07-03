@@ -20,7 +20,6 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import koma.matrix.room.naming.RoomAlias
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +81,7 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
-        val result = api.deleteRoomAlias(alias.str).awaitMatrix()
+        val result = api.deleteRoomAlias(alias.str)
         result.onFailure {
             val message = it.message
             launch(Dispatchers.JavaFx) {

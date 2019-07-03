@@ -4,7 +4,6 @@ import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.koma_app.appState
 import koma.matrix.user.AvatarUrl
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.failureOrThrow
 import koma.util.getOrThrow
 import koma.util.onFailure
@@ -37,7 +36,7 @@ fun chooseUpdateUserAvatar() {
             }
             upload.isSuccess -> {
                 val data = AvatarUrl(upload.getOrThrow().content_uri)
-                val result = api.updateAvatar(api.userId, data).awaitMatrix()
+                val result = api.updateAvatar(api.userId, data)
                 result.onFailure {
                     val message = it.message
                     launch(Dispatchers.JavaFx) {

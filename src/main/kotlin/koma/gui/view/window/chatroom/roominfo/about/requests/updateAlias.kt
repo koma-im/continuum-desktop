@@ -2,7 +2,6 @@ package koma.gui.view.window.chatroom.roominfo.about.requests
 
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
 import koma.matrix.room.naming.RoomAlias
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
 import koma.util.onFailure
 import koma.util.onSuccess
@@ -20,7 +19,7 @@ fun requestAddRoomAlias(room: Room, input: String?) {
     api ?: return
     val alias = RoomAlias(input)
     GlobalScope.launch {
-        val result = api.putRoomAlias(room.id, alias.str).awaitMatrix()
+        val result = api.putRoomAlias(room.id, alias.str)
         result.onFailure {
             val message = it.message
             launch(Dispatchers.JavaFx) {
@@ -44,7 +43,7 @@ fun requestSetRoomCanonicalAlias(room: Room, alias: RoomAlias?) {
     api ?: return
     val content =  RoomCanonAliasContent(alias)
     GlobalScope.launch {
-        val result = api.setRoomCanonicalAlias(room.id, content).awaitMatrix()
+        val result = api.setRoomCanonicalAlias(room.id, content)
         result.onFailure {
             val message = it.message
             launch(Dispatchers.JavaFx) {

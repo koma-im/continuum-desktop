@@ -14,7 +14,7 @@ plugins {
 allprojects {
     apply plugin: "org.jetbrains.kotlin.jvm"
     dependencies {
-        implementation 'io.github.koma-im:koma-library:0.7.20'
+        implementation 'io.github.koma-im:koma-library:0.8'
         implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.40'
         implementation "io.github.microutils:kotlin-logging:1.6.22"
 
@@ -73,7 +73,7 @@ dependencies {
 }
 
 group = 'link.continuum'
-version = '0.9.9'
+version = '0.9.10'
 description = 'continuum-desktop'
 sourceCompatibility = "9"
 

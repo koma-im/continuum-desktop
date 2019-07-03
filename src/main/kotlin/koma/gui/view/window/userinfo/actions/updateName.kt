@@ -1,7 +1,6 @@
 package koma.gui.view.window.userinfo.actions
 
 import javafx.scene.control.TextInputDialog
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
 import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +21,7 @@ fun updateMyAlias() {
     val api = apiClient
     api?:return
     GlobalScope.launch {
-        val result = api.updateDisplayName(newname).awaitMatrix()
+        val result = api.updateDisplayName(newname)
         result.onFailure {
             launch(Dispatchers.JavaFx) {
                 Notifications.create()

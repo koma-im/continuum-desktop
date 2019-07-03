@@ -7,7 +7,6 @@ import javafx.scene.layout.VBox
 import koma.gui.view.window.auth.uilaunch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
 import koma.util.getOr
 import kotlinx.coroutines.GlobalScope
@@ -25,7 +24,7 @@ fun dialogInviteMember(roomId: RoomId) {
 
     val userid = UserId_new(username)
     GlobalScope.launch {
-        apiClient!!.inviteMember(roomId, userid).awaitMatrix() getOr {
+        apiClient!!.inviteMember(roomId, userid) getOr {
             uilaunch {
                 val content = it.toString()
                 alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomId", content)

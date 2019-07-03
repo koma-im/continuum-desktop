@@ -4,7 +4,6 @@ import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState.apiClient
 import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +24,7 @@ fun runAskBanRoomMember()  {
     val username = room_user.second
     val userid = UserId_new(username)
     GlobalScope.launch(Dispatchers.JavaFx) {
-        val result = apiClient!!.banMember(RoomId(roomid), userid).awaitMatrix()
+        val result = apiClient!!.banMember(RoomId(roomid), userid)
         result.onFailure {
             val content = it.toString()
             alert(Alert.AlertType.ERROR, "failed to ban $userid from $roomid", content)

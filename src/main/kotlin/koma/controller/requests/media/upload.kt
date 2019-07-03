@@ -1,12 +1,10 @@
 package koma.controller.requests.media
 
-import com.sun.net.httpserver.Authenticator
 import javafx.scene.control.Alert
 import koma.Failure
 import koma.matrix.MatrixApi
 import koma.matrix.UploadResponse
 import koma.util.KResult
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.file.guessMediaType
 import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
@@ -23,7 +21,7 @@ import java.io.File
 suspend fun uploadFile(api: MatrixApi, file: File, filetype: MediaType? = null
 ): KResult<UploadResponse, Failure> {
     val type = filetype ?: file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
-    val uploadResult = api.uploadFile(file, type).awaitMatrix()
+    val uploadResult = api.uploadFile(file, type)
     uploadResult.onFailure { ex ->
         val error = "during upload: error $ex"
         GlobalScope.launch(Dispatchers.JavaFx) {

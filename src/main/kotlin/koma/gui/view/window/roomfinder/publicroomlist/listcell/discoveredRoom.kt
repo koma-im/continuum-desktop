@@ -17,7 +17,6 @@ import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -143,7 +142,7 @@ fun joinById(roomid: RoomId, name: String, owner: Node, store: AppStore = appSta
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
-        val rs = api.joinRoom(roomid).awaitMatrix()
+        val rs = api.joinRoom(roomid)
         rs.onSuccess {
             launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
         }

@@ -3,7 +3,6 @@ package koma.gui.view.window.chatroom.roominfo.about.requests
 import javafx.stage.FileChooser
 import koma.controller.requests.media.uploadFile
 import koma.matrix.event.room_message.state.RoomAvatarContent
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.koma_app.appState
 import koma.util.onFailure
 import koma.util.onSuccess
@@ -26,7 +25,7 @@ fun chooseUpdateRoomIcon(room: Room) {
         val upload = uploadFile(api, file)
         upload.onSuccess {
             val icon = RoomAvatarContent(it.content_uri)
-            val result = api.setRoomIcon(room.id, icon).awaitMatrix()
+            val result = api.setRoomIcon(room.id, icon)
             result.onFailure {
                 val message = it.message
                 launch(Dispatchers.JavaFx) {

@@ -9,7 +9,6 @@ import koma.matrix.UserId
 import koma.matrix.UserPassword
 import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
-import koma.util.coroutine.adapter.retrofit.awaitMatrix
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +64,7 @@ private suspend fun getTokenWithPassword(userid: UserId, password: String, koma:
                                          data: KDataStore,
                                          server: String): String? {
     login(UserPassword(user = userid.user, password = password), server, koma.http
-    ).awaitMatrix().onSuccess {
+    ).onSuccess {
         val u = it.user_id
         val t = it.access_token
         saveToken(data, u, t)
