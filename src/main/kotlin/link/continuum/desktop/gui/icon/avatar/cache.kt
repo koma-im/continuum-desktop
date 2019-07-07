@@ -2,6 +2,9 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
+import koma.Koma
+import koma.network.media.MHUrl
+import koma.network.media.downloadMedia
 import koma.util.getOr
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.UiDispatcher
@@ -23,32 +26,32 @@ private typealias Item = Deferred<Option<Image>>
 
 class DeferredImage(
         val processing: (InputStream) -> Image,
-        private val maxStale: Int = 1000
+        private val koma: Koma
 ) {
-    private val cache: Cache<HttpUrl, Item>
+    private val cache: Cache<MHUrl, Item>
 
     init {
         cache = createCache()
     }
 
-    fun getDeferred(url: HttpUrl, client: OkHttpClient): Item {
-        return cache.computeIfAbsent(url) { createImageProperty(url, client) }
+    fun getDeferred(url: MHUrl, server: HttpUrl): Item {
+        return cache.computeIfAbsent(url) { createImageProperty(url, server) }
     }
 
-    fun getDeferred(url: String, client: OkHttpClient): Item {
-        val h = HttpUrl.parse(url) `?or` {
+    fun getDeferred(url: String, server: HttpUrl): Item {
+        val h = MHUrl.fromStr(url) getOr {
             logger.warn { "invalid image url" }
             return CompletableDeferred(None())
         }
-        return getDeferred(h, client)
+        return getDeferred(h, server)
     }
 
-    private fun createImageProperty(url: HttpUrl, client: OkHttpClient): Item {
-        return GlobalScope.asyncImage(url, client)
+    private fun createImageProperty(url: MHUrl, server: HttpUrl): Item {
+        return GlobalScope.asyncImage(url, server)
     }
 
-    private fun CoroutineScope.asyncImage(url: HttpUrl, client: OkHttpClient) = async {
-        val bs = downloadHttp(url, client, maxStale) getOr {
+    private fun CoroutineScope.asyncImage(url: MHUrl, server: HttpUrl) = async {
+        val bs = koma.downloadMedia(url, server) getOr {
             logger.warn { "image $url not downloaded, ${it}, returning None" }
             return@async None<Image>()
         }
@@ -56,8 +59,8 @@ class DeferredImage(
         Some(img)
     }
 
-    private fun createCache(): Cache<HttpUrl, Item> {
-        val conf = Cache2kConfiguration<HttpUrl, Item>()
+    private fun createCache(): Cache<MHUrl, Item> {
+        val conf = Cache2kConfiguration<MHUrl, Item>()
         val cache = Cache2kBuilder.of(conf)
                 .entryCapacity(100)
         return cache.build()
@@ -67,10 +70,10 @@ class DeferredImage(
 
 private typealias ImageProperty = SimpleObjectProperty<Image>
 
-fun downloadImageResized(url: HttpUrl, size: Double, client: OkHttpClient): ImageProperty {
+fun downloadImageResized(url: MHUrl, size: Double, server: HttpUrl, koma: Koma): ImageProperty {
     val prop = ImageProperty()
     GlobalScope.launch {
-        val bs = downloadHttp(url, client) getOr  {
+        val bs = koma.downloadMedia(url, server) getOr  {
             logger.error { "download of $url fails with ${it}" }
             return@launch
         }

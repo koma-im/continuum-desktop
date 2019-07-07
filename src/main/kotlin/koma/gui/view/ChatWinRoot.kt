@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.Failure
+import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
@@ -42,14 +43,14 @@ private val settings: AppSettings = appState.store.settings
 class ChatWindowBars(
         roomList: ObservableList<Room>, server: HttpUrl, kDataStore: KDataStore,
         store: AppStore,
-        httpClient: OkHttpClient
+        koma: Koma
 ) {
     private val content = BorderPane()
     val root = NotificationPane(content)
-    val center = ChatView(roomList, server, kDataStore, store, httpClient)
+    val center = ChatView(roomList, server, store, koma)
     val status = SyncStatusBar(root)
 
-    private val roomFinder by lazy { RoomFinder(server, client = httpClient) }
+    private val roomFinder by lazy { RoomFinder(server, koma) }
     init {
         with(content) {
             style {

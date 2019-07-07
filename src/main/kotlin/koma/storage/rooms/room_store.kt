@@ -5,6 +5,7 @@ import koma.matrix.room.naming.RoomId
 import link.continuum.database.KDataStore
 import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.gui.list.DedupList
+import link.continuum.desktop.util.http.MediaServer
 import link.continuum.libutil.`?or`
 import model.Room
 import mu.KotlinLogging
@@ -15,11 +16,11 @@ private val logger = KotlinLogging.logger {}
 class RoomStore(private val data: KDataStore){
     private val store = ConcurrentHashMap<RoomId, Room>()
 
-    fun getOrCreate(roomId: RoomId): Room {
+    fun getOrCreate(roomId: RoomId, server: MediaServer): Room {
         val newRoom = store.computeIfAbsent(roomId) {
-            loadRoom(data, roomId) `?or` {
+            loadRoom(data, roomId, server) `?or` {
                 logger.info { "Room $roomId not in database" }
-                Room(roomId, data)
+                Room(roomId, data, server =  server)
             }}
         return newRoom
     }

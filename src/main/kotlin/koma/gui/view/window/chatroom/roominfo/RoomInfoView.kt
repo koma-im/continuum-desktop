@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.Koma
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.window.chatroom.roominfo.about.RoomAliasForm
 import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIcon
@@ -22,14 +23,14 @@ import tornadofx.*
 class RoomInfoDialog(
         room: Room, user: UserId,
         data: KDataStore,
-        client: OkHttpClient
+        koma: Koma
 ): Fragment() {
     override val root= VBox(10.0)
-    private val roomicon = AvatarAlways(client = client)
+    private val roomicon = AvatarAlways(koma)
 
     init {
         val avatarUrl = objectBinding(room.avatar) {value?.getOrNull()}
-        roomicon.bind(room.displayName, room.color, avatarUrl)
+        roomicon.bind(room.displayName, room.color, avatarUrl, room.server)
         val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
         val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())
 

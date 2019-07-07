@@ -9,10 +9,11 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.switchUpdates
+import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
@@ -22,14 +23,13 @@ private val logger = KotlinLogging.logger {}
  */
 @ExperimentalCoroutinesApi
 class StateEventUserView(private val store: UserDataStore,
-                         private val client: OkHttpClient,
                          avatarSize: Double) {
     val root = HBox(5.0)
-    private val avatarView = AvatarView(store, client, avatarSize)
+    private val avatarView = AvatarView(store, avatarSize)
     private val nameLabel: Label
-    private val itemId = ConflatedBroadcastChannel<UserId>()
-    fun updateUser(userId: UserId) {
-        if (!itemId.offer(userId)) {
+    private val itemId = ConflatedBroadcastChannel<SelectUser>()
+    fun updateUser(userId: UserId, mediaServer: MediaServer) {
+        if (!itemId.offer(userId to mediaServer)) {
             logger.error { "$userId not offered" }
         }
     }
@@ -45,7 +45,7 @@ class StateEventUserView(private val store: UserDataStore,
         root.add(l)
 
         GlobalScope.launch {
-            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it) }
+            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it.first) }
             for (n in newName) {
                 withContext(Dispatchers.JavaFx) {
                     nameLabel.text = n
@@ -55,8 +55,8 @@ class StateEventUserView(private val store: UserDataStore,
         }
         GlobalScope.launch {
             for (id in itemId.openSubscription()) {
-                avatarView.updateUser(id)
-                nameLabel.textFill = store.getUserColor(id)
+                avatarView.updateUser(id.first, id.second)
+                nameLabel.textFill = store.getUserColor(id.first)
             }
         }
     }

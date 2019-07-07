@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.onNone
 import link.continuum.desktop.util.onSome
 import mu.KotlinLogging
@@ -19,17 +20,22 @@ import java.util.concurrent.atomic.AtomicInteger
 private val logger = KotlinLogging.logger {}
 private val counter = AtomicInteger(0)
 
+/**
+ * the server through which we got this user
+ * also where we should download the avatar from
+ */
+typealias SelectUser = Pair<UserId, MediaServer>
+
 @ExperimentalCoroutinesApi
 class AvatarView(
         private val userData: UserDataStore,
-        private val client: OkHttpClient,
         avatarSize: Double
 ) {
     val root = StackPane()
     private val initialIcon = InitialIcon(avatarSize)
     private val imageView = ImageView()
 
-    private val user = Channel<UserId>(Channel.CONFLATED)
+    private val user = Channel<SelectUser>(Channel.CONFLATED)
 
     init {
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
@@ -42,18 +48,18 @@ class AvatarView(
             switchUpdateUser(user)
         }
     }
-    fun updateUser(userId: UserId) {
-        if (!user.offer(userId)) {
+    fun updateUser(userId: UserId, server: MediaServer) {
+        if (!user.offer(userId to server)) {
             logger.error { "failed to update user of avatar view to $userId" }
         }
     }
 
     @ExperimentalCoroutinesApi
-    fun CoroutineScope.switchUpdateUser(input: ReceiveChannel<UserId>) {
+    fun CoroutineScope.switchUpdateUser(input: ReceiveChannel<SelectUser>) {
         launch {
             var current = input.receive()
-            var name = userData.getNameUpdates(current)
-            var image = userData.getAvatarImageUpdates(current, client)
+            var name = userData.getNameUpdates(current.first)
+            var image = userData.getAvatarImageUpdates(current.first, current.second)
             loop@ while (isActive) {
                 val noMore = select<Boolean> {
                     input.onReceiveOrNull { k ->
@@ -64,8 +70,8 @@ class AvatarView(
                             image.cancel()
                             initialIcon.show()
                             imageView.image = null
-                            name = userData.getNameUpdates(current)
-                            image = userData.getAvatarImageUpdates(current, client)
+                            name = userData.getNameUpdates(current.first)
+                            image = userData.getAvatarImageUpdates(current.first, current.second)
                             false
                         } ?: true
                     }
@@ -85,7 +91,7 @@ class AvatarView(
                     name.onReceive {
                         logger.trace { "getting generated avatar for $current with name $it" }
                         withContext(Dispatchers.JavaFx) {
-                            val color = userData.getUserColor(current)
+                            val color = userData.getUserColor(current.first)
                             initialIcon.updateItem(it, color)
                         }
                         false

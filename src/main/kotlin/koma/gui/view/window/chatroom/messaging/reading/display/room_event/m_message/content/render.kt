@@ -17,7 +17,7 @@ class MessageView(
     private val emote by lazy { MEmoteViewNode(userDataStore) }
     private val notice by lazy { MNoticeViewNode() }
     private val text by lazy { MTextViewNode() }
-    private val image by lazy { MImageViewNode(server, appState.koma.http.client) }
+    private val image by lazy { MImageViewNode(server, appState.koma) }
     fun update(message: MRoomMessage) {
         val content = message.content
         node = when(content) {
@@ -30,7 +30,7 @@ class MessageView(
             is EmoteMessage -> emote.apply{
                 update(content, message.sender)
             }
-            is ImageMessage -> image.apply { update(content) }
+            is ImageMessage -> image.apply { update(content, server) }
             is FileMessage -> {
                 MFileViewNode(content, server)
             }

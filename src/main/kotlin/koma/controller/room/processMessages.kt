@@ -8,6 +8,7 @@ import koma.matrix.event.ephemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.*
 import koma.matrix.room.participation.Membership
+import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import link.continuum.database.models.removeMembership
@@ -15,7 +16,6 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.util.http.mapMxc
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -52,7 +52,7 @@ suspend fun Room.applyUpdate(
         is MRoomAvatar -> {
             room.setAvatar(update.content.url, server)
             saveRoomAvatar(appStore.database, room.id,
-                    mapMxc(update.content.url, server)?.toString(),
+                    update.content.url,
                     update.origin_server_ts
             )
         }
@@ -88,11 +88,7 @@ suspend fun Room.updateMember(
     when(update.content.membership)  {
         Membership.join -> {
             val senderid = update.sender
-            update.content.avatar_url?.let {
-                val u = mapMxc(it, server)
-                if (u == null) logger.error { "invalid avatar url in ${update.content.avatar_url}"}
-                u
-            }?.let {
+            update.content.avatar_url?.parseMxc()?.let {
                 userData.updateAvatarUrl(senderid, it, update.origin_server_ts)
             }
             update.content.displayname?.let {

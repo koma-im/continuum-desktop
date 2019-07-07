@@ -11,12 +11,14 @@ import javafx.scene.control.ListCell
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.text.FontWeight
+import koma.Koma
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
-import koma.gui.element.icon.user.extract_key_chars
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.room.naming.RoomId
+import koma.network.media.downloadMedia
+import koma.network.media.parseMxc
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +28,6 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
-import link.continuum.desktop.util.http.mapMxc
-import link.continuum.libutil.`?or`
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -39,7 +39,7 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class DiscoveredRoomFragment(
         private val server: HttpUrl,
-        private val client: OkHttpClient,
+        private val koma: Koma,
         private val avatarSize: Double = appState.store.settings.scaling * 32.0
 ): ListCell<DiscoveredRoom>() {
     val root = hbox(spacing = 10.0)
@@ -72,12 +72,8 @@ class DiscoveredRoomFragment(
         initialIcon.updateItem(name, hashStringColorDark(item.room_id.id))
         imageView.imageProperty().unbind()
         imageView.image = null
-        item.avatar_url?.let {
-            val u = mapMxc(it, server) `?or` {
-                logger.warn { "invalid avatar url $it" }
-                return@let
-            }
-            val i = downloadImageResized(u, avatarSize, client = client)
+        item.avatar_url?.parseMxc()?.let {
+            val i = downloadImageResized(it, avatarSize, server, koma)
             imageView.imageProperty().bind(i)
         }
 
@@ -130,7 +126,7 @@ class DiscoveredRoomFragment(
                 val h = hoverProperty()
                 button("Join") {
                     visibleWhen { h }
-                    action { joinById(roomId.value, name, root) }
+                    action { joinById(roomId.value, name, root, server) }
                 }
                 alignment = Pos.CENTER_RIGHT
             }
@@ -138,13 +134,15 @@ class DiscoveredRoomFragment(
     }
 }
 
-fun joinById(roomid: RoomId, name: String, owner: Node, store: AppStore = appState.store) {
+fun joinById(roomid: RoomId, name: String, owner: Node,
+             server: HttpUrl,
+             store: AppStore = appState.store) {
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
         val rs = api.joinRoom(roomid)
         rs.onSuccess {
-            launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
+            launch(Dispatchers.JavaFx) { store.joinRoom(roomid, server) }
         }
         rs.onFailure {
             launch(Dispatchers.JavaFx) {

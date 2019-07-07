@@ -44,9 +44,9 @@ private suspend fun handle_joined_room(
         self: UserId,
         appData: AppStore
 ) {
-    val room = appData.roomStore.getOrCreate(roomid)
+    val room = appData.roomStore.getOrCreate(roomid, server)
     withContext(UiDispatcher) {
-        appData.joinRoom(roomid)
+        appData.joinRoom(roomid, server)
         data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
         val timeline = data.timeline
         timeline.events.forEach { room.applyUpdate(it.value, server, self = self, appStore = appData) }

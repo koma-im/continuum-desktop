@@ -7,12 +7,12 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.Tooltip
 import javafx.scene.layout.HBox
 import koma.koma_app.appState
-import koma.matrix.UserId
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.switchUpdates
 import mu.KotlinLogging
@@ -30,13 +30,13 @@ class MemberCell(
         client: OkHttpClient,
         scale: Float = settings.scaling,
         avsize: Double = scale * 32.0
-) : ListCell<UserId>() {
+) : ListCell<SelectUser>() {
     private val root = HBox( 5.0)
     private val toolTip = Tooltip()
-    private val avatarView = AvatarView(store, client, avsize)
+    private val avatarView = AvatarView(store, avsize)
     private val name: Label
 
-    private val itemId = ConflatedBroadcastChannel<UserId>()
+    private val itemId = ConflatedBroadcastChannel<SelectUser>()
     init {
 
         root.apply {
@@ -60,7 +60,7 @@ class MemberCell(
         }
 
         GlobalScope.launch {
-            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it) }
+            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it.first) }
             for (n in newName) {
                 withContext(Dispatchers.JavaFx) {
                     logger.debug { "updating name in user list: ${itemId.valueOrNull} is $n" }
@@ -70,20 +70,20 @@ class MemberCell(
         }
         GlobalScope.launch {
             for (id in itemId.openSubscription()) {
-                avatarView.updateUser(id)
-                toolTip.text = id.str
+                avatarView.updateUser(id.first, id.second)
+                toolTip.text = id.first.str
             }
         }
     }
 
-    override fun updateItem(item: UserId?, empty: Boolean) {
+    override fun updateItem(item: SelectUser?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
             graphic = null
             return
         }
         itemId.offer(item)
-        name.textFill = store.getUserColor(item)
+        name.textFill = store.getUserColor(item.first)
 
         graphic = root
     }

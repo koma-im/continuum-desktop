@@ -4,13 +4,12 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.text.Text
-import javafx.scene.text.TextFlow
+import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
 import koma.koma_app.appState
 import koma.matrix.event.room_message.MRoomMessage
-import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
 import koma.matrix.event.room_message.state.MRoomGuestAccess
 import koma.matrix.event.room_message.state.MRoomHistoryVisibility
@@ -28,7 +27,6 @@ import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
@@ -39,7 +37,7 @@ class MessageCell(
         private val server: HttpUrl,
         private val manager: MessageManager,
         store: UserDataStore,
-        client: OkHttpClient
+        koma: Koma
 ) {
     private val center = StackPane()
     private val loading = Label("Loading older messages...")
@@ -60,11 +58,13 @@ class MessageCell(
     }
     private var current: RoomEventRow? = null
 
+    private val client = koma.http.client
+    private val avSize = appState.store.settings.scaling * 32.0
     // share between different types of view
-    private val senderAvatar = AvatarView(store, client, appState.store.settings.scaling * 32.0)
-    private val memberView = MRoomMemberViewNode(store, client)
+    private val senderAvatar = AvatarView(store, avSize)
+    private val memberView = MRoomMemberViewNode(store, koma)
     private val messageView by lazy { MRoomMessageViewNode(server, store, client) }
-    private val creationView by lazy { MRoomCreationViewNode(store, client) }
+    private val creationView by lazy { MRoomCreationViewNode(store, avSize ) }
     private val historyVisibilityView by lazy { HistoryVisibilityEventView() }
     private val guestAccessUpdateView by lazy {GuestAccessUpdateView()}
 
@@ -91,7 +91,7 @@ class MessageCell(
                 memberView
             }
             is MRoomCreate -> {
-                creationView.update(ev)
+                creationView.update(ev, server)
                 creationView
             }
             is MRoomMessage -> {
@@ -99,11 +99,11 @@ class MessageCell(
                 messageView
             }
             is MRoomHistoryVisibility -> {
-                senderAvatar.updateUser(ev.sender)
+                senderAvatar.updateUser(ev.sender, server)
                 historyVisibilityView.apply { update(senderAvatar, ev) }
             }
             is MRoomGuestAccess -> {
-                senderAvatar.updateUser(ev.sender)
+                senderAvatar.updateUser(ev.sender, server)
                 guestAccessUpdateView.update(senderAvatar, ev)
                 guestAccessUpdateView
             }

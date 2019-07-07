@@ -14,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.openStore
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.http.MediaServer
 import model.Room
 import mu.KotlinLogging
 import java.io.File
@@ -32,32 +33,29 @@ object appState {
     }
 }
 
-@ExperimentalCoroutinesApi
-class AppStore(dir: String) {
-    val database: KotlinEntityDataStore<Persistable>
-
-    init {
-        val desktop = File(dir).resolve("desktop")
-        desktop.mkdirs()
-        val dbPath = desktop.resolve("continuum-desktop").canonicalPath
-        database = openStore(dbPath)
-    }
+/**
+ * some components need to access the network to download avatars, etc
+ */
+class AppStore(
+        val database: KotlinEntityDataStore<Persistable>,
+        val settings: AppSettings,
+        koma: Koma
+        ) {
     val userStore = UserStore(database)
     /**
      * users on the network
      */
-    val userData = UserDataStore(database)
+    val userData = UserDataStore(database, koma)
     /**
      * rooms on the network
      */
     val roomStore = RoomStore(database)
-    val settings = AppSettings(database)
     val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
 
-    fun joinRoom(roomId: RoomId){
+    fun joinRoom(roomId: RoomId, server: MediaServer){
         joinedRoom.addIfAbsent(roomId) {
             logger.debug { "Add user joined room; $roomId" }
-            roomStore.getOrCreate(it)
+            roomStore.getOrCreate(it, server)
         }
     }
 }

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.Koma
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
@@ -16,7 +17,7 @@ private val settings: AppSettings = appState.store.settings
 
 class RoomFinder(
         server: HttpUrl,
-        client: OkHttpClient
+        koma: Koma
 ): Fragment() {
     override val root = VBox(5.0)
 
@@ -34,7 +35,7 @@ class RoomFinder(
 
     init {
         this.title = "Room Finder"
-        pubs = PublicRoomsView(publicRoomList, server, client = client)
+        pubs = PublicRoomsView(publicRoomList, server, koma)
         root.apply {
             this.minWidth = 600.0
             vgrow = Priority.ALWAYS

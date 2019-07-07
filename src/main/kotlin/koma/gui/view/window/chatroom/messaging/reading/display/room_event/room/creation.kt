@@ -10,20 +10,19 @@ import koma.koma_app.appState
 import koma.matrix.event.room_message.state.MRoomCreate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.list.user.UserDataStore
-import okhttp3.OkHttpClient
+import link.continuum.desktop.util.http.MediaServer
 import tornadofx.*
 
 @ExperimentalCoroutinesApi
 class MRoomCreationViewNode constructor(
         store: UserDataStore,
-        client: OkHttpClient,
         avatarsize: Double = appState.store.settings.scaling * 32.0
 ): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
         get() = listOf()
 
-    private val userView = StateEventUserView(store, client, avatarsize)
+    private val userView = StateEventUserView(store, avatarsize)
     private val timeView = DatatimeView()
 
     init {
@@ -40,8 +39,8 @@ class MRoomCreationViewNode constructor(
         }
     }
 
-    fun update(message: MRoomCreate) {
-        userView.updateUser(message.sender)
+    fun update(message: MRoomCreate, mediaServer: MediaServer) {
+        userView.updateUser(message.sender, mediaServer)
         timeView.updateTime(message.origin_server_ts)
     }
 }

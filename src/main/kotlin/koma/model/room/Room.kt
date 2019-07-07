@@ -14,13 +14,15 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
+import koma.network.media.MHUrl
+import koma.network.media.parseMxc
 import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.gui.checkUiThread
+import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.DedupList
-import link.continuum.desktop.util.http.mapMxc
 import link.continuum.libutil.getOrNull
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -30,6 +32,7 @@ class Room(
         val id: RoomId,
         private val data: KDataStore,
         aliases: List<RoomAliasRecord> = listOf(),
+        val server: HttpUrl,
         historyVisibility: HistoryVisibility? = null,
         joinRule: RoomJoinRules? = null,
         visibility: RoomVisibility? = null,
@@ -41,7 +44,7 @@ class Room(
 
     @ObsoleteCoroutinesApi
     val messageManager by lazy { MessageManager(id, appState.store.database ) }
-    val members = DedupList<UserId, UserId>({it})
+    val members = DedupList<SelectUser, UserId>({it.first})
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -58,7 +61,7 @@ class Room(
     private val _displayName = ReadOnlyStringWrapper(id.id)
     val displayName = _displayName.readOnlyProperty
 
-    val avatar = SimpleObjectProperty<Optional<HttpUrl>>(null)
+    val avatar = SimpleObjectProperty<Optional<MHUrl>>(null)
 
     init {
         historyVisibility?.let { histVisibility = it }
@@ -87,17 +90,20 @@ class Room(
 
     fun makeUserJoined(us: UserId) {
         checkUiThread()
-        members.add(us)
+        members.add(us to server)
     }
 
     fun removeMember(mid: UserId) {
         checkUiThread()
-        members.remove(mid)
+        members.remove(mid to server)
     }
 
     fun addAlias(alias: RoomAlias) {
         checkUiThread()
         aliases.add(alias)
+    }
+    fun addMembers(ms: List<UserId>) {
+        members.addAll(ms.map { it to server })
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
@@ -114,17 +120,14 @@ class Room(
     }
 
     fun setAvatar(url: String, server: HttpUrl) {
-        val u = mapMxc(url, server)
-        // if the url is not valid
-        // the room would appear to have an empty avatar set
-        this.avatar.set(Optional.ofNullable(u))
+        this.avatar.set(Optional.ofNullable(url.parseMxc()))
     }
 
     fun setAvatar(url: Optional<String>, server: HttpUrl) {
-        this.avatar.set(url.map { mapMxc(it, server) })
+        this.avatar.set(url.map { it.parseMxc() })
     }
 
-    fun initAvatar(url: Optional<HttpUrl>?) {
+    fun initAvatar(url: Optional<MHUrl>?) {
         this.avatar.set(url)
     }
 

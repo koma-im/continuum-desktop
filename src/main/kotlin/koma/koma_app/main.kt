@@ -39,11 +39,14 @@ class KomaApp : App(StartScreen::class) {
         val args = parameters.raw
         val arg = args.firstOrNull()
         val data_dir = arg ?: getConfigDir()
-        val s = AppStore(data_dir)
-        appState.store = s
-        val proxy = s.settings.proxyList.default()
-        appState.koma = Koma(proxy.toJavaNet(), path = data_dir,
+        val (settings, db) = loadSettings(data_dir)
+        val proxy = settings.proxyList.default()
+        val k= Koma(proxy.toJavaNet(), path = data_dir,
                 addTrust = loadOptionalCert(File(data_dir)))
+        appState.koma = k
+        val store = AppStore(db, settings, k)
+        appState.store = store
+
     }
 
   override fun start(stage: Stage) {

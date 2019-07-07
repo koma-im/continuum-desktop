@@ -11,6 +11,7 @@ import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.util.Callback
+import koma.Koma
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.koma_app.AppStore
@@ -39,8 +40,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
 class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
-                      server: HttpUrl,
-                      client: OkHttpClient
+                      private val server: HttpUrl,
+                      koma: Koma
 ) {
 
     val ui = VBox(5.0)
@@ -51,7 +52,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
     init {
         val field = TextFields.createClearableTextField() as CustomTextField
         input = field.textProperty()
-        roomlist = RoomListView(publicRoomList, input, server, client = client)
+        roomlist = RoomListView(publicRoomList, input, server, koma)
         createui(field)
         ui.vgrow = Priority.ALWAYS
     }
@@ -81,7 +82,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                     enableWhen { inputIsId }
                     action {
                         val inputid = input.get()
-                        joinById(RoomId(inputid), inputid, this) }
+                        joinById(RoomId(inputid), inputid, this, server) }
                 }
             }
             this+=roomlist
@@ -94,7 +95,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
         GlobalScope.launch {
             val rs = api.resolveRoomAlias(alias)
             rs.onSuccess {
-                joinById(it.room_id, alias, this@PublicRoomsView.ui )
+                joinById(it.room_id, alias, this@PublicRoomsView.ui , server)
             }
             rs.onFailure {
                 launch(Dispatchers.JavaFx) {
@@ -114,7 +115,7 @@ class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
         input: StringProperty,
         server: HttpUrl,
-        client: OkHttpClient,
+        koma: Koma,
         appData: AppStore = appState.store
 ): View() {
     private val api = appState.apiClient!!
@@ -139,7 +140,7 @@ class RoomListView(
         with(root) {
             vgrow = Priority.ALWAYS
             cellFactory = Callback{
-                DiscoveredRoomFragment(server, client = client)
+                DiscoveredRoomFragment(server, koma)
             }
         }
         root.skinProperty().addListener { _ ->

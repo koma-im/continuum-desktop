@@ -3,8 +3,10 @@ package link.continuum.desktop.gui.icon.avatar
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
+import koma.Koma
 import koma.gui.element.icon.user.extract_key_chars
 import koma.matrix.UserId
+import koma.network.media.MHUrl
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
@@ -24,7 +26,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class UrlAvatar(
-        private val client: OkHttpClient,
+        private val koma: Koma,
         private val avatarSize: Double
 ) {
     val root = object :StackPane() {
@@ -48,11 +50,11 @@ class UrlAvatar(
         this.initialIcon.updateItem(name, color)
     }
 
-    fun updateUrl(url:HttpUrl?) {
+    fun updateUrl(url: MHUrl?, server: HttpUrl) {
         this.imageView.imageProperty().unbind()
         this.imageView.image = null
         if (url!=null) {
-            val i = downloadImageResized(url, avatarSize, client = client)
+            val i = downloadImageResized(url, avatarSize, server, koma)
             this.imageView.imageProperty().bind(i)
         }
     }

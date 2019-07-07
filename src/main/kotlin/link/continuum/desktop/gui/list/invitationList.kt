@@ -8,16 +8,17 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
+import koma.Koma
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
+import koma.network.media.parseMxc
 import koma.util.getOr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
-import link.continuum.desktop.util.http.mapMxc
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -27,7 +28,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class InvitationsView(
-        private val client: OkHttpClient,
+        private val koma: Koma,
         private val scaling: Double = 1.0
 ) {
     val list = VBox(3.0)
@@ -49,7 +50,7 @@ class InvitationsView(
         val c = if (spareCells.isNotEmpty()) {
             spareCells.removeAt(0)
         } else{
-            InvitationCell(scaling, client)
+            InvitationCell(scaling, koma)
         }
         c.update(invite,
                 server = server)
@@ -59,14 +60,14 @@ class InvitationsView(
     @ExperimentalCoroutinesApi
     private inner class InvitationCell(
             private val scaling: Double = 1.0,
-            client: OkHttpClient
+            koma: Koma
     ) {
         private val inviterAvatarSize = scaling * 12.0
         private val roomAvatarSize = scaling * 32.0
 
         private val inviter = Label()
-        private val inviterAvatar = UrlAvatar(client, inviterAvatarSize)
-        private val roomAvatar = UrlAvatar(client, roomAvatarSize)
+        private val inviterAvatar = UrlAvatar(koma, inviterAvatarSize)
+        private val roomAvatar = UrlAvatar(koma, roomAvatarSize)
         private val roomLabel = Text()
         private var roomId: RoomId? = null
 
@@ -118,17 +119,13 @@ class InvitationsView(
             inviterAvatar.updateName(
                     invitation.inviterName?:"   ",
                     hashStringColorDark(invitation.inviterId?.str?:""))
-            inviterAvatar.updateUrl(
-                    invitation.inviterAvatar?.let { mapMxc(it, server) }
-            )
+            inviterAvatar.updateUrl(invitation.inviterAvatar?.parseMxc(), server)
 
             roomLabel.text = invitation.roomDisplayName
 
             roomAvatar.updateName(invitation.roomDisplayName?:"   ",
                     hashStringColorDark(invitation.id.str))
-            roomAvatar.updateUrl(
-                    invitation.roomAvatar?.let { mapMxc(it, server) }
-            )
+            roomAvatar.updateUrl(invitation.roomAvatar?.parseMxc(), server)
         }
 
         fun remove() {

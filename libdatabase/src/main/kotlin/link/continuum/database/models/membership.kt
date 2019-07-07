@@ -60,3 +60,4 @@ fun removeMembership(data: KDataStore, userId: UserId, roomId: RoomId) {
             .where(Membership::person.eq(userId.str)
                     .and(Membership::room.eq(roomId.id))).get().value()
 }
+

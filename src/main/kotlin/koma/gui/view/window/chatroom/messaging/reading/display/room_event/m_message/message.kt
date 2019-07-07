@@ -32,7 +32,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        server: HttpUrl,
+        private val server: HttpUrl,
         private val store: UserDataStore,
         client: OkHttpClient,
         avatarSize: Double = appState.store.settings.scaling * 32.0
@@ -42,7 +42,7 @@ class MRoomMessageViewNode(
 
     private var item: MRoomMessage? = null
     private val timeView = DatatimeView()
-    private val avatarView = AvatarView(avatarSize = avatarSize, userData = store, client = client)
+    private val avatarView = AvatarView(avatarSize = avatarSize, userData = store)
     private val senderLabel = Text()
     private val senderId = Channel<UserId>(Channel.CONFLATED)
     private val contentBox = HBox(5.0)
@@ -85,7 +85,7 @@ class MRoomMessageViewNode(
         item = message
         senderId.offer(message.sender)
         timeView.updateTime(message.origin_server_ts)
-        avatarView.updateUser(message.sender)
+        avatarView.updateUser(message.sender, server)
         senderLabel.fill = store.getUserColor(message.sender)
         content.update(message)
         contentBox.children.apply {

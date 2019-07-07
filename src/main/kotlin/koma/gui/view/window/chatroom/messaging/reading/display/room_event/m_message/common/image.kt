@@ -6,9 +6,14 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.StackPane
+import koma.Failure
+import koma.Koma
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
+import koma.network.media.MHUrl
+import koma.network.media.downloadMedia
+import koma.util.KResult
 import koma.util.getOr
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
@@ -22,7 +27,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class ImageElement(
-        private val client: OkHttpClient,
+        private val koma: Koma,
         private val imageSize: Double = 200.0 * appState.store.settings.scaling
 ): ViewNode {
     override val node = StackPane()
@@ -33,14 +38,21 @@ class ImageElement(
     private var url: HttpUrl? = null
     private var job: Job? = null
 
-    fun update(url: HttpUrl, mxcUrl: String? = null) {
+    fun update(url: HttpUrl) {
         this.url = url
+        title = url.toString()
+        updateImage { downloadHttp(url, koma.http.client) }
+    }
+    fun update(mxc: MHUrl, server: HttpUrl) {
+        this.url = mxc.toHttpUrl(server)
+        title = mxc.toString()
+        updateImage {koma.downloadMedia(mxc, server)}
+    }
+    private fun updateImage(dl: suspend ()-> KResult<ByteArray, Failure>) {
         imageView.image = null
         job?.cancel()
-
-        title = mxcUrl ?: url.toString()
         job = GlobalScope.launch {
-            val res = downloadHttp(url, client) getOr {
+            val res = dl() getOr {
                 return@launch
             }
             val image = Image(res.inputStream())

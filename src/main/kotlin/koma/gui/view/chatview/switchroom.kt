@@ -6,11 +6,11 @@ import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import koma.Koma
 import koma.koma_app.appState
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -18,11 +18,12 @@ import java.util.concurrent.ConcurrentHashMap
  * switch between chat rooms
  */
 class SwitchableRoomView(server: HttpUrl, userDataStore: UserDataStore,
-                         httpClient: OkHttpClient): View() {
+                         koma: Koma
+): View() {
     override val root = StackPane()
 
     val roomProperty = SimpleObjectProperty<Room>()
-    private val viewCache = RoomViewCache(server, userDataStore, httpClient)
+    private val viewCache = RoomViewCache(server, userDataStore, koma)
     private val roomView: ObjectBinding<JoinedRoomView?>
 
     fun scroll(down: Boolean) {
@@ -49,11 +50,11 @@ class SwitchableRoomView(server: HttpUrl, userDataStore: UserDataStore,
 
 private class RoomViewCache(private val server: HttpUrl,
                             private val userDataStore: UserDataStore,
-                            private val httpClient: OkHttpClient
+                            private val koma: Koma
                             ) {
     private val cachemap = ConcurrentHashMap<Room, JoinedRoomView>()
 
     fun getViewOfRoom(room: Room): JoinedRoomView {
-        return cachemap.computeIfAbsent(room) {JoinedRoomView(it, server, userDataStore, httpClient)}
+        return cachemap.computeIfAbsent(room) {JoinedRoomView(it, server, userDataStore, koma)}
     }
 }

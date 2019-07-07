@@ -1,6 +1,5 @@
 package koma.gui.view
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
@@ -9,6 +8,7 @@ import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
+import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
@@ -19,6 +19,7 @@ import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
+import koma.network.media.MHUrl
 import koma.util.getOr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -29,7 +30,6 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.InvitationsView
-import link.continuum.desktop.util.http.mapMxc
 import link.continuum.libutil.getOrNull
 import model.Room
 import mu.KotlinLogging
@@ -50,18 +50,17 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class ChatView(roomList: ObservableList<Room>,
                server: HttpUrl,
-               data: KDataStore,
                storage: AppStore,
-               httpClient: OkHttpClient,
-               scaling: Float = appState.store.settings.scaling
+               koma: Koma,
+               scaling: Float = storage.settings.scaling
 ): View() {
 
     override val root = hbox (spacing = 5.0)
 
-    val roomListView = RoomListView(roomList, server, data, client = httpClient)
-    val invitationsView = InvitationsView(client = httpClient, scaling = scaling.toDouble())
+    val roomListView = RoomListView(roomList, server, storage.database, koma)
+    val invitationsView = InvitationsView(koma, scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(server, storage.userData, httpClient)
+    val switchableRoomView = SwitchableRoomView(server, storage.userData, koma)
 
     init {
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
@@ -102,7 +101,7 @@ private fun fixAvatar(room: Room) {
             room.setAvatar(av, api.server)
         }
         saveRoomAvatar(appState.store.database, room.id,
-                av.map { mapMxc(it, api.server) }.getOrNull()?.toString(),
+                av.getOrNull()?.toString(),
                 System.currentTimeMillis())
     }
 }
@@ -126,12 +125,12 @@ private fun fixRoomName(room: Room) {
 }
 
 @ExperimentalCoroutinesApi
-class RoomFragment(private val data: KDataStore, private val client: OkHttpClient): ListCell<Room>() {
+class RoomFragment(private val data: KDataStore, private val koma: Koma): ListCell<Room>() {
     var room: Room? = null
-    private val avatar = AvatarAlways(client = client)
+    private val avatar = AvatarAlways(koma)
     private val nameLabel = Label()
 
-    private val avatarOptionalUrl = SimpleObjectProperty<Optional<HttpUrl>>()
+    private val avatarOptionalUrl = SimpleObjectProperty<Optional<MHUrl>>()
     private val avatarUrl = objectBinding(avatarOptionalUrl) {value?.getOrNull()}
 
     override fun updateItem(item: Room?, empty: Boolean) {
@@ -149,7 +148,7 @@ class RoomFragment(private val data: KDataStore, private val client: OkHttpClien
         }
 
         avatarOptionalUrl.cleanBind(item.avatar)
-        avatar.bind(item.displayName, item.color, avatarUrl)
+        avatar.bind(item.displayName, item.color, avatarUrl, item.server)
         nameLabel.textProperty().cleanBind(item.displayName)
         nameLabel.textFill = item.color
 
@@ -182,7 +181,7 @@ class RoomFragment(private val data: KDataStore, private val client: OkHttpClien
     private fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(room, user, data, client = client).openWindow()
+        RoomInfoDialog(room, user, data, koma).openWindow()
     }
 }
 

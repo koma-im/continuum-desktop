@@ -3,37 +3,37 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
+import koma.Koma
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.ImageElement
 import koma.matrix.event.room_message.chat.ImageMessage
+import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.util.http.mapMxc
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MImageViewNode(private val server: HttpUrl,
-                     client: OkHttpClient
+                     koma: Koma
                      ): ViewNode {
     override val menuItems: List<MenuItem>  = createMenuItems()
 
     private var url: HttpUrl? = null
     private var filename: String? =null
-    private var image = ImageElement(client)
+    private var image = ImageElement(koma)
     override val node = image.node
 
-    fun update(content: ImageMessage) {
-        val u = mapMxc(content.url, server)
-        url = u
+    fun update(content: ImageMessage, server: HttpUrl) {
+        val u = content.url.parseMxc()
+        url = u?.toHttpUrl(server)
         if (u == null) {
             logger.warn { "url ${content.url} not parsed" }
         } else {
-            image.update(u, content.url)
+            image.update(u, server)
         }
         node.tooltip(content.body)
     }

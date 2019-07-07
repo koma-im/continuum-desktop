@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import link.continuum.database.KDataStore
 import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
+import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -38,14 +39,18 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     app.apiClient = apiClient
     val userRooms = store.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, url, data, store, koma.http.client)
+    val primary = ChatWindowBars(userRooms, url, data, store, koma)
     FX.primaryStage.scene.root = primary.root
 
     GlobalScope.launch {
         val rooms = loadUserRooms(data, userId)
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
-            rooms.forEach { store.joinRoom(it) }
+            rooms.forEach {
+                loadRoom(store.database, it)?.let {
+                    store.joinRoom(it.id, it.server)
+                }
+            }
         }
         val fullSync = userRooms.isEmpty()
         if (fullSync) logger.warn {

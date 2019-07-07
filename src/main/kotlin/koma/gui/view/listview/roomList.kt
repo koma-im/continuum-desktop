@@ -7,6 +7,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.Koma
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
@@ -15,7 +16,6 @@ import koma.storage.persistence.settings.AppSettings
 import link.continuum.database.KDataStore
 import model.Room
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
@@ -23,7 +23,7 @@ private val settings: AppSettings = appState.store.settings
 class RoomListView(
         roomlist: ObservableList<Room>, server: HttpUrl,
         private val data: KDataStore,
-        private val client: OkHttpClient
+        private val koma: Koma
         ): View() {
     override val root = listview(roomlist)
 
@@ -40,7 +40,7 @@ class RoomListView(
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder(server, client = client).open()
+                    RoomFinder(server, koma).open()
                 }
             }
             button("Create") {
@@ -73,7 +73,7 @@ class RoomListView(
         node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
         node.setCellFactory {
-            RoomFragment(data, client = client)
+            RoomFragment(data, koma)
         }
         node.selectionModel.selectedItemProperty().onChange { room ->
             if (room != null) appState.currRoom.set(room)

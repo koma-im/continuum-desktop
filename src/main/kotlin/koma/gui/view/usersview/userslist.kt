@@ -13,6 +13,7 @@ import koma.matrix.UserId
 import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.user.UserDataStore
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -22,7 +23,7 @@ private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
-        memList: ObservableList<UserId>,
+        memList: ObservableList<SelectUser>,
         userData: UserDataStore,
         client: OkHttpClient
 ): View() {
@@ -46,7 +47,7 @@ class RoomMemberListView(
                     showavataronly.set(showavataronly.not().get())
                 }
             }
-            val userlist = PrettyListView<UserId>()
+            val userlist = PrettyListView<SelectUser>()
             userlist.apply {
                 isFocusTraversable = false
                 items = memList

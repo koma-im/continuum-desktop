@@ -11,6 +11,7 @@ import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import javafx.util.Callback
+import koma.Koma
 import koma.gui.element.control.KListView
 import koma.koma_app.appState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +35,7 @@ class MessagesListScrollPane(
         room: Room,
         server: HttpUrl,
         store: UserDataStore,
-        client: OkHttpClient
+        koma: Koma
 ): View() {
     override val root = AnchorPane()
 
@@ -72,7 +73,7 @@ class MessagesListScrollPane(
         virtualList.hgrow = Priority.ALWAYS
 
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(server, room.messageManager, store, client)
+            RoomEventCell(server, room.messageManager, store, koma )
         }
 
         addVirtualScrollPane()
