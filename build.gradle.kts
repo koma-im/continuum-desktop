@@ -33,16 +33,12 @@ allprojects {
 }
 
 javafx {
-    version = "11.0.+"
+    version = "12"
     modules = listOf("javafx.controls", "javafx.media", "javafx.fxml")
 }
 
 dependencies {
     implementation(kotlin("reflect"))
-    val ojfxv = "11.0.1"
-    implementation("org.openjfx:javafx-controls:$ojfxv")
-    implementation("org.openjfx:javafx-fxml:$ojfxv")
-    implementation("org.openjfx:javafx-media:$ojfxv")
     implementation("no.tornado:tornadofx:1.7.18")
     implementation("org.cache2k:cache2k-core:1.0.2.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
@@ -60,10 +56,10 @@ dependencies {
 }
 
 group = "link.continuum"
-version = "0.9.6"
+version = "0.9.13"
 description = "continuum-desktop"
 application {
-    mainClassName = "koma.koma_app.MainKt"    
+    mainClassName = "koma.koma_app.MainKt"
 }
 
 tasks.withType<KotlinCompile> {
