@@ -9,6 +9,7 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import koma.Koma
+import koma.Server
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
@@ -30,6 +31,7 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.InvitationsView
+import link.continuum.desktop.util.Account
 import link.continuum.libutil.getOrNull
 import model.Room
 import mu.KotlinLogging
@@ -49,18 +51,18 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class ChatView(roomList: ObservableList<Room>,
-               server: HttpUrl,
+               account: Account,
                storage: AppStore,
-               koma: Koma,
                scaling: Float = storage.settings.scaling
 ): View() {
 
     override val root = hbox (spacing = 5.0)
 
-    val roomListView = RoomListView(roomList, server, storage.database, koma)
-    val invitationsView = InvitationsView(koma, scaling = scaling.toDouble())
+    private val server = account.server
+    val roomListView = RoomListView(roomList, account, storage.database)
+    val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(server, storage.userData, koma)
+    val switchableRoomView = SwitchableRoomView(server.url, storage.userData, server.km)
 
     init {
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
@@ -98,7 +100,7 @@ private fun fixAvatar(room: Room) {
             return@launch
         }
         withContext(UiDispatcher) {
-            room.setAvatar(av, api.server)
+            room.setAvatar(av)
         }
         saveRoomAvatar(appState.store.database, room.id,
                 av.getOrNull()?.toString(),
@@ -148,7 +150,7 @@ class RoomFragment(private val data: KDataStore, private val koma: Koma): ListCe
         }
 
         avatarOptionalUrl.cleanBind(item.avatar)
-        avatar.bind(item.displayName, item.color, avatarUrl, item.server)
+        avatar.bind(item.displayName, item.color, avatarUrl, item.account.server)
         nameLabel.textProperty().cleanBind(item.displayName)
         nameLabel.textFill = item.color
 
@@ -181,7 +183,7 @@ class RoomFragment(private val data: KDataStore, private val koma: Koma): ListCe
     private fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(room, user, data, koma).openWindow()
+        RoomInfoDialog(room, user, data).openWindow()
     }
 }
 

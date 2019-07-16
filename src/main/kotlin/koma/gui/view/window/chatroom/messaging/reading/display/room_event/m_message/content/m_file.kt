@@ -6,6 +6,7 @@ import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
+import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
@@ -13,13 +14,12 @@ import koma.matrix.event.room_message.chat.FileMessage
 import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
 import koma.util.onSuccess
-import okhttp3.HttpUrl
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
 
 class MFileViewNode(val content: FileMessage,
-                    private val server: HttpUrl): ViewNode {
+                    private val server: Server): ViewNode {
     override val node = HBox(5.0)
     override val menuItems: List<MenuItem>
     private val url = MHUrl.fromStr(content.url)
@@ -56,7 +56,7 @@ class MFileViewNode(val content: FileMessage,
 
     private fun save() {
         url.onSuccess {
-            it.toHttpUrl(server)?.let {
+            it.toHttpUrl(server.url)?.let {
                 downloadFileAs(it, filename = content.filename, title = "Save File As")
             }
         }

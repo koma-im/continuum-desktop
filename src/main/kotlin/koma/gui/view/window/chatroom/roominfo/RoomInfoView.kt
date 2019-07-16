@@ -22,15 +22,14 @@ import tornadofx.*
 
 class RoomInfoDialog(
         room: Room, user: UserId,
-        data: KDataStore,
-        koma: Koma
+        data: KDataStore
 ): Fragment() {
     override val root= VBox(10.0)
-    private val roomicon = AvatarAlways(koma)
+    private val roomicon = AvatarAlways(room.account.server.km)
 
     init {
         val avatarUrl = objectBinding(room.avatar) {value?.getOrNull()}
-        roomicon.bind(room.displayName, room.color, avatarUrl, room.server)
+        roomicon.bind(room.displayName, room.color, avatarUrl, room.account.server)
         val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
         val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())
 

@@ -3,6 +3,7 @@ package link.continuum.desktop.gui.icon.avatar
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import koma.Koma
+import koma.Server
 import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.util.getOr
@@ -25,8 +26,7 @@ private val logger = KotlinLogging.logger {}
 private typealias Item = Deferred<Option<Image>>
 
 class DeferredImage(
-        val processing: (InputStream) -> Image,
-        private val koma: Koma
+        val processing: (InputStream) -> Image
 ) {
     private val cache: Cache<MHUrl, Item>
 
@@ -34,11 +34,11 @@ class DeferredImage(
         cache = createCache()
     }
 
-    fun getDeferred(url: MHUrl, server: HttpUrl): Item {
+    fun getDeferred(url: MHUrl, server: Server): Item {
         return cache.computeIfAbsent(url) { createImageProperty(url, server) }
     }
 
-    fun getDeferred(url: String, server: HttpUrl): Item {
+    fun getDeferred(url: String, server: Server): Item {
         val h = MHUrl.fromStr(url) getOr {
             logger.warn { "invalid image url" }
             return CompletableDeferred(None())
@@ -46,12 +46,12 @@ class DeferredImage(
         return getDeferred(h, server)
     }
 
-    private fun createImageProperty(url: MHUrl, server: HttpUrl): Item {
+    private fun createImageProperty(url: MHUrl, server: Server): Item {
         return GlobalScope.asyncImage(url, server)
     }
 
-    private fun CoroutineScope.asyncImage(url: MHUrl, server: HttpUrl) = async {
-        val bs = koma.downloadMedia(url, server) getOr {
+    private fun CoroutineScope.asyncImage(url: MHUrl, server: Server) = async {
+        val bs = server.downloadMedia(url) getOr {
             logger.warn { "image $url not downloaded, ${it}, returning None" }
             return@async None<Image>()
         }
@@ -70,10 +70,10 @@ class DeferredImage(
 
 private typealias ImageProperty = SimpleObjectProperty<Image>
 
-fun downloadImageResized(url: MHUrl, size: Double, server: HttpUrl, koma: Koma): ImageProperty {
+fun downloadImageResized(url: MHUrl, size: Double, server: Server): ImageProperty {
     val prop = ImageProperty()
     GlobalScope.launch {
-        val bs = koma.downloadMedia(url, server) getOr  {
+        val bs = server.downloadMedia(url) getOr  {
             logger.error { "download of $url fails with ${it}" }
             return@launch
         }

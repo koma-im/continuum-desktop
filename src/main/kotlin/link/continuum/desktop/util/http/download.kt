@@ -2,6 +2,7 @@ package link.continuum.desktop.util.http
 
 import koma.Failure
 import koma.Koma
+import koma.Server
 import koma.network.media.MHUrl
 import koma.network.media.downloadMedia
 import koma.util.*
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 private typealias Option<T> = Optional<T>
-typealias MediaServer = HttpUrl
+typealias MediaServer = Server
 
 suspend fun downloadHttp(
         url: HttpUrl, client: OkHttpClient, maxStale: Int? = null
@@ -42,19 +43,18 @@ suspend fun downloadHttp(
 /**
  * given a channel of URLs, get the latest download
  */
-typealias DL = Option<Pair<MHUrl, HttpUrl>>
-fun CoroutineScope.urlChannelDownload(koma: Koma
-): Pair<SendChannel<DL>, ReceiveChannel<Option<ByteArray>>> {
+typealias DL = Option<Pair<MHUrl, Server>>
+fun CoroutineScope.urlChannelDownload(): Pair<SendChannel<DL>, ReceiveChannel<Option<ByteArray>>> {
     val url = Channel<DL>(Channel.CONFLATED)
     val bytes = Channel<Option<ByteArray>>(Channel.CONFLATED)
     switchGetDeferredOption(url, { u ->
-        deferredDownload(u.first, u.second, koma)
+        deferredDownload(u.first, u.second)
     }, bytes)
     return url to bytes
 }
 
-fun CoroutineScope.deferredDownload(url: MHUrl, server: HttpUrl, koma: Koma) = async {
-    koma.downloadMedia(url, server).fold({
+fun CoroutineScope.deferredDownload(url: MHUrl, server: Server) = async {
+    server.downloadMedia(url).fold({
         Some(it)
     }, {
         logger.warn { "deferredDownload of $url error $it" }

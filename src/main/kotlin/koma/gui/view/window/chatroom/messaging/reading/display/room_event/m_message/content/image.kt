@@ -4,6 +4,7 @@ import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
 import koma.Koma
+import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common.ImageElement
@@ -17,19 +18,18 @@ import tornadofx.*
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
-class MImageViewNode(private val server: HttpUrl,
-                     koma: Koma
+class MImageViewNode(private val server: Server
                      ): ViewNode {
     override val menuItems: List<MenuItem>  = createMenuItems()
 
     private var url: HttpUrl? = null
     private var filename: String? =null
-    private var image = ImageElement(koma)
+    private var image = ImageElement(server.km)
     override val node = image.node
 
-    fun update(content: ImageMessage, server: HttpUrl) {
+    fun update(content: ImageMessage, server: Server) {
         val u = content.url.parseMxc()
-        url = u?.toHttpUrl(server)
+        url = u?.toHttpUrl(server.url)
         if (u == null) {
             logger.warn { "url ${content.url} not parsed" }
         } else {

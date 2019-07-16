@@ -20,6 +20,7 @@ import link.continuum.database.models.removeMembership
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.events.handleInvitedRoom
 import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.util.Account
 import link.continuum.libutil.`?or`
 import mu.KotlinLogging
 import okhttp3.HttpUrl
@@ -40,16 +41,15 @@ fun process_presence(message: PresenceMessage) {
 private suspend fun handle_joined_room(
         roomid: RoomId,
         data: JoinedRoom,
-        server: HttpUrl,
-        self: UserId,
+        account: Account,
         appData: AppStore
 ) {
-    val room = appData.roomStore.getOrCreate(roomid, server)
+    val room = appData.roomStore.getOrCreate(roomid, account)
     withContext(UiDispatcher) {
-        appData.joinRoom(roomid, server)
-        data.state.events.forEach { room.applyUpdate(it, server, self = self, appStore = appData) }
+        appData.joinRoom(roomid, account)
+        data.state.events.forEach { room.applyUpdate(it, appStore = appData) }
         val timeline = data.timeline
-        timeline.events.forEach { room.applyUpdate(it.value, server, self = self, appStore = appData) }
+        timeline.events.forEach { room.applyUpdate(it.value, appStore = appData) }
         room.messageManager.appendTimeline(timeline)
     }
     room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
@@ -60,24 +60,21 @@ private suspend fun handle_joined_room(
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 fun processEventsResult(syncRes: SyncResponse,
-                        server: HttpUrl,
+                        account: Account,
                         appData: AppStore,
                         view: ChatView
                         ) {
-    val self = appState.currentUser `?or` {
-        logger.error { "current user not set" }
-        return
-    }
+    val self = account.userId
     syncRes.presence.events.forEach { process_presence(it) }
     // TODO: handle account_data
     syncRes.rooms.join.forEach{ rid, data ->
         val roomId = RoomId(rid)
         GlobalScope.launch {
             saveUserInRoom(data = appData.database, userId = self, roomId = roomId)
-            handle_joined_room(roomId, data, server, appData = appData, self = self)
+            handle_joined_room(roomId, data, account, appData = appData)
         }
     }
-    syncRes.rooms.invite.forEach{ rid, data -> handleInvitedRoom(rid, data, view.invitationsView, server) }
+    syncRes.rooms.invite.forEach{ rid, data -> handleInvitedRoom(rid, data, view.invitationsView, account.server) }
 
     syncRes.rooms.leave.forEach { roomId, leftRoom ->
         removeMembership(data = appData.database, userId = self, roomId = roomId)

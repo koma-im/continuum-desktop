@@ -33,9 +33,7 @@ typealias EventItem = RoomEventRow
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
         room: Room,
-        server: HttpUrl,
-        store: UserDataStore,
-        koma: Koma
+        store: UserDataStore
 ): View() {
     override val root = AnchorPane()
 
@@ -72,8 +70,9 @@ class MessagesListScrollPane(
         virtualList.vgrow = Priority.ALWAYS
         virtualList.hgrow = Priority.ALWAYS
 
+        val server = room.account.server
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(server, room.messageManager, store, koma )
+            RoomEventCell(server, room.messageManager, store)
         }
 
         addVirtualScrollPane()

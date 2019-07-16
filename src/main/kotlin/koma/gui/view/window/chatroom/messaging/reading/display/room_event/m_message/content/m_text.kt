@@ -4,6 +4,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
+import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.addStringWithElements
 import koma.matrix.UserId
@@ -16,29 +17,32 @@ import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.user.UserDataStore
 import tornadofx.*
 
-class MTextViewNode(): ViewNode {
+class MTextViewNode(private val koma: Koma): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     fun update(content: TextMessage) {
         node.clear()
-        node.addStringWithElements(content.body)
+        node.addStringWithElements(content.body, koma)
     }
 }
 
-class MNoticeViewNode(): ViewNode {
+class MNoticeViewNode(private val koma: Koma): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     fun update(content: NoticeMessage) {
         node.clear()
-        node.addStringWithElements(content.body)
+        node.addStringWithElements(content.body, koma)
     }
 }
 
 
 @ExperimentalCoroutinesApi
-class MEmoteViewNode(private val userData: UserDataStore): ViewNode {
+class MEmoteViewNode(
+        private val userData: UserDataStore,
+        private val koma: Koma
+): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
@@ -60,7 +64,7 @@ class MEmoteViewNode(private val userData: UserDataStore): ViewNode {
 
         node.add(userLabel)
         node.add(Text(" "))
-        node.addStringWithElements(content.body)
+        node.addStringWithElements(content.body, koma)
     }
 
     private suspend fun updateName(updates: ReceiveChannel<String>) = coroutineScope {

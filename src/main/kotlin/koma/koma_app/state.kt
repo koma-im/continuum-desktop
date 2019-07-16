@@ -4,6 +4,7 @@ import io.requery.Persistable
 import io.requery.sql.KotlinEntityDataStore
 import javafx.beans.property.SimpleObjectProperty
 import koma.Koma
+import koma.Server
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
@@ -14,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.openStore
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.http.MediaServer
 import model.Room
 import mu.KotlinLogging
@@ -52,10 +54,10 @@ class AppStore(
     val roomStore = RoomStore(database)
     val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
 
-    fun joinRoom(roomId: RoomId, server: MediaServer){
+    fun joinRoom(roomId: RoomId, account: Account){
         joinedRoom.addIfAbsent(roomId) {
             logger.debug { "Add user joined room; $roomId" }
-            roomStore.getOrCreate(it, server)
+            roomStore.getOrCreate(it, account)
         }
     }
 }

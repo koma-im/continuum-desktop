@@ -1,5 +1,6 @@
 package link.continuum.desktop.events
 
+import koma.Server
 import koma.matrix.UserId
 import koma.matrix.event.room_message.state.RoomAvatarContent
 import koma.matrix.event.room_message.state.RoomCanonAliasContent
@@ -19,7 +20,7 @@ private val logger = KotlinLogging.logger {}
 internal fun handleInvitedRoom(
         roomId: RoomId, data: InvitedRoom,
         view: InvitationsView,
-        server: HttpUrl
+        server: Server
 ) {
     logger.debug { "Invited to $roomId, data $data" }
     view.add(InviteData(data, roomId), server)

@@ -11,6 +11,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.Koma
+import koma.Server
 import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
@@ -26,6 +27,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
+import link.continuum.desktop.util.http.DL
 import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.http.urlChannelDownload
 import link.continuum.desktop.util.onNone
@@ -42,8 +44,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMemberViewNode(
-        store: UserDataStore,
-        koma: Koma
+        store: UserDataStore
 ): ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
@@ -67,7 +68,7 @@ class MRoomMemberViewNode(
             alignment = Pos.CENTER
         }
     }
-    private val userUpdate = UserAppearanceUpdateView(koma, avatarsize = avatarsize, minWid = minWid)
+    private val userUpdate = UserAppearanceUpdateView(avatarsize = avatarsize, minWid = minWid)
 
     fun update(message: MRoomMember, server: MediaServer) {
         userView.updateUser(message.sender, server)
@@ -85,7 +86,7 @@ class MRoomMemberViewNode(
         invitationContent.children.addAll(Text("invited"), inviterView.root)
         contentPane.children.addAll(invitationContent)
     }
-    private fun updateJoin(message: MRoomMember, server: MediaServer) {
+    private fun updateJoin(message: MRoomMember, server: Server) {
         val pc = message.prev_content ?: message.unsigned?.prev_content
         if (pc != null && pc.membership == Membership.join) {
             userUpdate.updateName(pc.displayname, message.content.displayname)
@@ -137,19 +138,18 @@ private class InvitationContent(
 
 @ExperimentalCoroutinesApi
 class UserAppearanceUpdateView(
-        private val koma: Koma,
         private val avatarsize: Double,
         private val minWid: Double
 ){
     val root = VBox()
     private val avatarChangeView: HBox
-    private val oldAvatar = ImageViewAsync(koma)
-    private val newAvatar = ImageViewAsync(koma)
+    private val oldAvatar = ImageViewAsync()
+    private val newAvatar = ImageViewAsync()
     private val nameChangeView: HBox
     private val oldName = Text()
     private val newName = Text()
 
-    fun updateAvatar(old: MHUrl?, new: MHUrl?, mediaServer: MediaServer) {
+    fun updateAvatar(old: MHUrl?, new: MHUrl?, mediaServer: Server) {
         avatarChangeView.showIf(old != new)
         oldAvatar.updateUrl(old.toOption(), mediaServer)
         newAvatar.updateUrl(new.toOption(),mediaServer)
@@ -199,10 +199,10 @@ class UserAppearanceUpdateView(
     }
 }
 
-class ImageViewAsync(koma: Koma) {
+class ImageViewAsync {
     val root = ImageView()
-    private val urlChannel: SendChannel<Optional<Pair<MHUrl, HttpUrl>>>
-    fun updateUrl(url: Optional<MHUrl>, server: HttpUrl) {
+    private val urlChannel: SendChannel<DL>
+    fun updateUrl(url: Optional<MHUrl>, server: Server) {
         logger.trace { "ImageViewAsync update url $url" }
         if (!urlChannel.offer(url.map { it to server })) {
             logger.error { "url $url not offered successfully" }
@@ -210,7 +210,7 @@ class ImageViewAsync(koma: Koma) {
     }
 
     init {
-        val (tx, rx) = GlobalScope.urlChannelDownload(koma)
+        val (tx, rx) = GlobalScope.urlChannelDownload()
         urlChannel = tx
         GlobalScope.launch {
             for (i in rx) {

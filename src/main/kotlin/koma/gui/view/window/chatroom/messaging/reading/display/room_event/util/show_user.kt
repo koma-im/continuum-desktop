@@ -4,6 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -27,7 +28,7 @@ class StateEventUserView(private val store: UserDataStore,
     val root = HBox(5.0)
     private val avatarView = AvatarView(store, avatarSize)
     private val nameLabel: Label
-    private val itemId = ConflatedBroadcastChannel<SelectUser>()
+    private val itemId = ConflatedBroadcastChannel<Pair<UserId, Server>>()
     fun updateUser(userId: UserId, mediaServer: MediaServer) {
         if (!itemId.offer(userId to mediaServer)) {
             logger.error { "$userId not offered" }

@@ -23,7 +23,7 @@ class ChatRecvSendView(room: Room, server: HttpUrl,
 ): View() {
     override val root = vbox(10.0)
 
-    private val messageScroll = MessagesListScrollPane(room, server, store, koma)
+    private val messageScroll = MessagesListScrollPane(room, store)
     private val messageInput = TextField()
 
     fun scroll(down: Boolean) = messageScroll.scrollPage(down)

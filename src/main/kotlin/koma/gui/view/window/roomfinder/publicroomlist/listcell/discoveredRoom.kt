@@ -11,11 +11,11 @@ import javafx.scene.control.ListCell
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.text.FontWeight
-import koma.Koma
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
+import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
 import koma.network.media.downloadMedia
 import koma.network.media.parseMxc
@@ -38,8 +38,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class DiscoveredRoomFragment(
-        private val server: HttpUrl,
-        private val koma: Koma,
+        private val account: MatrixApi,
         private val avatarSize: Double = appState.store.settings.scaling * 32.0
 ): ListCell<DiscoveredRoom>() {
     val root = hbox(spacing = 10.0)
@@ -73,7 +72,7 @@ class DiscoveredRoomFragment(
         imageView.imageProperty().unbind()
         imageView.image = null
         item.avatar_url?.parseMxc()?.let {
-            val i = downloadImageResized(it, avatarSize, server, koma)
+            val i = downloadImageResized(it, avatarSize, account.server)
             imageView.imageProperty().bind(i)
         }
 
@@ -126,7 +125,7 @@ class DiscoveredRoomFragment(
                 val h = hoverProperty()
                 button("Join") {
                     visibleWhen { h }
-                    action { joinById(roomId.value, name, root, server) }
+                    action { joinById(roomId.value, name, root, account) }
                 }
                 alignment = Pos.CENTER_RIGHT
             }
@@ -135,14 +134,12 @@ class DiscoveredRoomFragment(
 }
 
 fun joinById(roomid: RoomId, name: String, owner: Node,
-             server: HttpUrl,
+             api: MatrixApi,
              store: AppStore = appState.store) {
-    val api = appState.apiClient
-    api ?: return
     GlobalScope.launch {
         val rs = api.joinRoom(roomid)
         rs.onSuccess {
-            launch(Dispatchers.JavaFx) { store.joinRoom(roomid, server) }
+            launch(Dispatchers.JavaFx) { store.joinRoom(roomid, api) }
         }
         rs.onFailure {
             launch(Dispatchers.JavaFx) {

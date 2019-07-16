@@ -8,6 +8,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
+import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
@@ -32,9 +33,8 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        private val server: HttpUrl,
+        private val server: Server,
         private val store: UserDataStore,
-        client: OkHttpClient,
         avatarSize: Double = appState.store.settings.scaling * 32.0
 ): ViewNode {
     override val node = StackPane()

@@ -8,6 +8,7 @@ import koma.matrix.user.identity.UserId_new
 import koma.network.media.parseMxc
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
+import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.http.MediaServer
 import link.continuum.libutil.`?or?`
 import link.continuum.libutil.getOrNull
@@ -19,8 +20,7 @@ import okhttp3.HttpUrl
 private val logger = KotlinLogging.logger {}
 
 fun loadRoom(data: KDataStore, roomId: RoomId,
-             //TODO
-             server: MediaServer = HttpUrl.Builder().scheme("https").host(roomId.servername).build()
+             account: Account
 ): Room? {
     logger.debug { "Loading room with id $roomId" }
     val settings = data.select(RoomSettings::class).where(
@@ -39,7 +39,7 @@ fun loadRoom(data: KDataStore, roomId: RoomId,
     }
     val room = Room(roomId, data,
             aliases = aliases,
-            server = server,
+            account = account,
             historyVisibility = settings?.historyVisibility,
             joinRule = settings?.joinRule,
             visibility = settings?.visibility,

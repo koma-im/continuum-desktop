@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import koma.Server
 import koma.gui.element.control.PrettyListView
 import koma.gui.view.usersview.fragment.MemberCell
 import koma.koma_app.appState
@@ -23,7 +24,7 @@ private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
-        memList: ObservableList<SelectUser>,
+        memList: ObservableList<Pair<UserId, Server>>,
         userData: UserDataStore,
         client: OkHttpClient
 ): View() {
@@ -47,7 +48,7 @@ class RoomMemberListView(
                     showavataronly.set(showavataronly.not().get())
                 }
             }
-            val userlist = PrettyListView<SelectUser>()
+            val userlist = PrettyListView<Pair<UserId, Server>>()
             userlist.apply {
                 isFocusTraversable = false
                 items = memList

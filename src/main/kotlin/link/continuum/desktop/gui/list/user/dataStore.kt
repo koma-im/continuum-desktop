@@ -3,6 +3,7 @@ package link.continuum.desktop.gui.list.user
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import koma.Koma
+import koma.Server
 import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
@@ -24,7 +25,6 @@ import link.continuum.desktop.gui.icon.avatar.DeferredImage
 import link.continuum.desktop.gui.switchGetDeferred
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -62,7 +62,7 @@ class UserDataStore(
         val c = u.subscribe()
         return c
     }
-    val avatarFetcher = DeferredImage({ i -> processAvatar(i)}, koma)
+    val avatarFetcher = DeferredImage({ i -> processAvatar(i)})
     private val avatarUrlUpdates = ConcurrentHashMap<UserId, UpdateConflater<MHUrl>>()
     private val avatarImageUpdates = ConcurrentHashMap<UserId, ConflatedBroadcastChannel<Option<Image>>>()
     suspend fun updateAvatarUrl(userId: UserId, avatarUrl: MHUrl, time: Long) {
@@ -73,7 +73,7 @@ class UserDataStore(
         }
         saveUserAvatar(data, userId, avatarUrl.toString(), time)
     }
-    fun getAvatarImageUpdates(userId: UserId, server: HttpUrl): ReceiveChannel<Option<Image>> {
+    fun getAvatarImageUpdates(userId: UserId, server: Server): ReceiveChannel<Option<Image>> {
         val imageBroadcast = avatarImageUpdates.computeIfAbsent(userId) {
             val urls = getAvatarUrlUpdates(userId)
             val av = ConflatedBroadcastChannel<Option<Image>>()

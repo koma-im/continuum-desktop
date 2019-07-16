@@ -3,11 +3,12 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
+import koma.Koma
 import tornadofx.*
 
-fun TextFlow.addStringWithElements(str: String) {
+fun TextFlow.addStringWithElements(str: String, koma: Koma) {
     val textelements = tokenize_string(str)
-    val nodes = textelements.map { it.toFlow() }.toNodes()
+    val nodes = textelements.map { it.toFlow(koma) }.toNodes()
     this.addNodes(nodes)
 }
 

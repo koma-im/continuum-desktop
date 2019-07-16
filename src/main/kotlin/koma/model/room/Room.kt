@@ -4,6 +4,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import koma.Server
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.MatrixApi
@@ -31,8 +32,8 @@ import java.util.*
 class Room(
         val id: RoomId,
         private val data: KDataStore,
+        val account: MatrixApi,
         aliases: List<RoomAliasRecord> = listOf(),
-        val server: HttpUrl,
         historyVisibility: HistoryVisibility? = null,
         joinRule: RoomJoinRules? = null,
         visibility: RoomVisibility? = null,
@@ -44,7 +45,7 @@ class Room(
 
     @ObsoleteCoroutinesApi
     val messageManager by lazy { MessageManager(id, appState.store.database ) }
-    val members = DedupList<SelectUser, UserId>({it.first})
+    val members = DedupList<Pair<UserId, Server>, UserId>({it.first})
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -63,6 +64,7 @@ class Room(
 
     val avatar = SimpleObjectProperty<Optional<MHUrl>>(null)
 
+    private val server = account.server
     init {
         historyVisibility?.let { histVisibility = it }
         joinRule?.let { this.joinRule = it }
@@ -119,11 +121,11 @@ class Room(
         saveUserPowerLevels(data, id, roomPowerLevel.users)
     }
 
-    fun setAvatar(url: String, server: HttpUrl) {
+    fun setAvatar(url: String) {
         this.avatar.set(Optional.ofNullable(url.parseMxc()))
     }
 
-    fun setAvatar(url: Optional<String>, server: HttpUrl) {
+    fun setAvatar(url: Optional<String>) {
         this.avatar.set(url.map { it.parseMxc() })
     }
 

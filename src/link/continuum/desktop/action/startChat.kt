@@ -34,12 +34,14 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
 
     val app = appState
     val store = app.store
-    val apiClient  = koma.createApi(token, userId, url)
+    val server = koma.server(url)
+    val account  = server.account(userId, token)
+    val apiClient  = account
     app.currentUser = userId
     app.apiClient = apiClient
     val userRooms = store.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, url, data, store, koma)
+    val primary = ChatWindowBars(userRooms, account, store)
     FX.primaryStage.scene.root = primary.root
 
     GlobalScope.launch {
@@ -47,8 +49,8 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
             rooms.forEach {
-                loadRoom(store.database, it)?.let {
-                    store.joinRoom(it.id, it.server)
+                loadRoom(store.database, it, account)?.let {
+                    store.joinRoom(it.id, apiClient)
                 }
             }
         }

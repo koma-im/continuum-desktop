@@ -9,6 +9,7 @@ import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.util.Account
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
@@ -16,8 +17,7 @@ import tornadofx.*
 private val settings: AppSettings = appState.store.settings
 
 class RoomFinder(
-        server: HttpUrl,
-        koma: Koma
+        account: Account
 ): Fragment() {
     override val root = VBox(5.0)
 
@@ -35,7 +35,7 @@ class RoomFinder(
 
     init {
         this.title = "Room Finder"
-        pubs = PublicRoomsView(publicRoomList, server, koma)
+        pubs = PublicRoomsView(publicRoomList, account )
         root.apply {
             this.minWidth = 600.0
             vgrow = Priority.ALWAYS

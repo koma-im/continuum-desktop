@@ -2,6 +2,7 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
+import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -13,6 +14,7 @@ import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.onNone
 import link.continuum.desktop.util.onSome
 import mu.KotlinLogging
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -24,7 +26,7 @@ private val counter = AtomicInteger(0)
  * the server through which we got this user
  * also where we should download the avatar from
  */
-typealias SelectUser = Pair<UserId, MediaServer>
+typealias SelectUser = Pair<UserId, HttpUrl>
 
 @ExperimentalCoroutinesApi
 class AvatarView(
@@ -35,7 +37,7 @@ class AvatarView(
     private val initialIcon = InitialIcon(avatarSize)
     private val imageView = ImageView()
 
-    private val user = Channel<SelectUser>(Channel.CONFLATED)
+    private val user = Channel<Pair<UserId, Server>>(Channel.CONFLATED)
 
     init {
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
@@ -55,7 +57,7 @@ class AvatarView(
     }
 
     @ExperimentalCoroutinesApi
-    fun CoroutineScope.switchUpdateUser(input: ReceiveChannel<SelectUser>) {
+    fun CoroutineScope.switchUpdateUser(input: ReceiveChannel<Pair<UserId, Server>>) {
         launch {
             var current = input.receive()
             var name = userData.getNameUpdates(current.first)

@@ -12,6 +12,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.util.Callback
 import koma.Koma
+import koma.Server
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.koma_app.AppStore
@@ -30,6 +31,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.util.Account
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
@@ -40,8 +42,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
 class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
-                      private val server: HttpUrl,
-                      koma: Koma
+                      private val account: Account
 ) {
 
     val ui = VBox(5.0)
@@ -52,7 +53,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
     init {
         val field = TextFields.createClearableTextField() as CustomTextField
         input = field.textProperty()
-        roomlist = RoomListView(publicRoomList, input, server, koma)
+        roomlist = RoomListView(publicRoomList, input, account)
         createui(field)
         ui.vgrow = Priority.ALWAYS
     }
@@ -82,7 +83,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                     enableWhen { inputIsId }
                     action {
                         val inputid = input.get()
-                        joinById(RoomId(inputid), inputid, this, server) }
+                        joinById(RoomId(inputid), inputid, this, account) }
                 }
             }
             this+=roomlist
@@ -90,12 +91,11 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
     }
 
     private fun joinRoomByAlias(alias: String) {
-        val api = appState.apiClient
-        api ?: return
+        val api = account.server
         GlobalScope.launch {
             val rs = api.resolveRoomAlias(alias)
             rs.onSuccess {
-                joinById(it.room_id, alias, this@PublicRoomsView.ui , server)
+                joinById(it.room_id, alias, this@PublicRoomsView.ui , account)
             }
             rs.onFailure {
                 launch(Dispatchers.JavaFx) {
@@ -114,11 +114,9 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
 class RoomListView(
         private val roomlist: ObservableList<DiscoveredRoom>,
         input: StringProperty,
-        server: HttpUrl,
-        koma: Koma,
+        private val account: Account,
         appData: AppStore = appState.store
 ): View() {
-    private val api = appState.apiClient!!
     private val matchRooms = FilteredList(roomlist)
 
     override val root = listview(matchRooms)
@@ -140,7 +138,7 @@ class RoomListView(
         with(root) {
             vgrow = Priority.ALWAYS
             cellFactory = Callback{
-                DiscoveredRoomFragment(server, koma)
+                DiscoveredRoomFragment(account)
             }
         }
         root.skinProperty().addListener { _ ->
@@ -203,9 +201,9 @@ class RoomListView(
     private fun getRoomSource(term: String): RoomListingSource {
         return roomSources.computeIfAbsent(term.trim(), {
             if (it.isBlank())
-                RoomListingSource("", getPublicRooms(api))
+                RoomListingSource("", getPublicRooms(account.server))
             else
-                RoomListingSource(it, findPublicRooms(it, api))
+                RoomListingSource(it, findPublicRooms(it, account))
         })
     }
 

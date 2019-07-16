@@ -1,8 +1,6 @@
 package koma.controller.room
 
 import koma.koma_app.AppStore
-import koma.koma_app.appState.apiClient
-import koma.matrix.UserId
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
 import koma.matrix.event.room_message.RoomEvent
@@ -36,21 +34,19 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
 @ExperimentalCoroutinesApi
 suspend fun Room.applyUpdate(
         update: RoomEvent,
-        server: HttpUrl,
-        self: UserId,
         appStore: AppStore
 ) {
     val room = this
     if (update !is RoomStateEvent) return
     when (update) {
-        is MRoomMember -> this.updateMember(update, server, self = self, appStore = appStore)
+        is MRoomMember -> this.updateMember(update, appStore = appStore)
         is MRoomAliases -> {
             withContext(UiDispatcher) {
                 room.aliases.addAll(0, update.content.aliases)
             }
         }
         is MRoomAvatar -> {
-            room.setAvatar(update.content.url, server)
+            room.setAvatar(update.content.url)
             saveRoomAvatar(appStore.database, room.id,
                     update.content.url,
                     update.origin_server_ts
@@ -79,8 +75,6 @@ suspend fun Room.applyUpdate(
 @ExperimentalCoroutinesApi
 suspend fun Room.updateMember(
         update: MRoomMember,
-        server: HttpUrl,
-        self: UserId,
         appStore: AppStore
 ) {
     val room = this
@@ -103,7 +97,7 @@ suspend fun Room.updateMember(
             removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
             withContext(UiDispatcher) {
                 room.removeMember(update.sender)
-                if (self == update.sender) {
+                if (account.userId == update.sender) {
                     appStore.joinedRoom.removeById(room.id)
                 }
             }

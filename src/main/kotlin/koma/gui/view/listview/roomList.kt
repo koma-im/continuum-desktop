@@ -14,6 +14,7 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.database.KDataStore
+import link.continuum.desktop.util.Account
 import model.Room
 import okhttp3.HttpUrl
 import tornadofx.*
@@ -21,9 +22,9 @@ import tornadofx.*
 private val settings: AppSettings = appState.store.settings
 
 class RoomListView(
-        roomlist: ObservableList<Room>, server: HttpUrl,
-        private val data: KDataStore,
-        private val koma: Koma
+        roomlist: ObservableList<Room>,
+        private val account: Account,
+        private val data: KDataStore
         ): View() {
     override val root = listview(roomlist)
 
@@ -40,7 +41,7 @@ class RoomListView(
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder(server, koma).open()
+                    RoomFinder(account).open()
                 }
             }
             button("Create") {
@@ -73,7 +74,7 @@ class RoomListView(
         node.maxWidth = 178.0 * scale
         node.vgrow = Priority.ALWAYS
         node.setCellFactory {
-            RoomFragment(data, koma)
+            RoomFragment(data, account.server.km)
         }
         node.selectionModel.selectedItemProperty().onChange { room ->
             if (room != null) appState.currRoom.set(room)

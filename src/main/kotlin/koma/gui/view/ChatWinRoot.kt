@@ -25,6 +25,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.util.Account
 import model.Room
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -41,16 +42,16 @@ private val settings: AppSettings = appState.store.settings
  * Created by developer on 2017/6/17.
  */
 class ChatWindowBars(
-        roomList: ObservableList<Room>, server: HttpUrl, kDataStore: KDataStore,
-        store: AppStore,
-        koma: Koma
+        roomList: ObservableList<Room>,
+        account: Account,
+        store: AppStore
 ) {
     private val content = BorderPane()
     val root = NotificationPane(content)
-    val center = ChatView(roomList, server, store, koma)
+    val center = ChatView(roomList, account, store)
     val status = SyncStatusBar(root)
 
-    private val roomFinder by lazy { RoomFinder(server, koma) }
+    private val roomFinder by lazy { RoomFinder(account) }
     init {
         with(content) {
             style {

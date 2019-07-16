@@ -8,6 +8,7 @@ import javafx.scene.input.MouseButton
 import javafx.scene.layout.StackPane
 import koma.Failure
 import koma.Koma
+import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
@@ -43,10 +44,10 @@ class ImageElement(
         title = url.toString()
         updateImage { downloadHttp(url, koma.http.client) }
     }
-    fun update(mxc: MHUrl, server: HttpUrl) {
-        this.url = mxc.toHttpUrl(server)
+    fun update(mxc: MHUrl, server: Server) {
+        this.url = mxc.toHttpUrl(server.url)
         title = mxc.toString()
-        updateImage {koma.downloadMedia(mxc, server)}
+        updateImage {server.downloadMedia(mxc)}
     }
     private fun updateImage(dl: suspend ()-> KResult<ByteArray, Failure>) {
         imageView.image = null

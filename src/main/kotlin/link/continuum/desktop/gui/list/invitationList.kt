@@ -9,6 +9,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.Koma
+import koma.Server
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
@@ -28,7 +29,6 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class InvitationsView(
-        private val koma: Koma,
         private val scaling: Double = 1.0
 ) {
     val list = VBox(3.0)
@@ -40,7 +40,7 @@ class InvitationsView(
         list.isFocusTraversable = false
     }
 
-    fun add(invite: InviteData, server: HttpUrl) {
+    fun add(invite: InviteData, server: Server) {
         if (added.contains(invite.id)) {
             logger.warn { "ignoring duplicate invite $invite" }
             return
@@ -50,7 +50,7 @@ class InvitationsView(
         val c = if (spareCells.isNotEmpty()) {
             spareCells.removeAt(0)
         } else{
-            InvitationCell(scaling, koma)
+            InvitationCell(scaling)
         }
         c.update(invite,
                 server = server)
@@ -59,15 +59,14 @@ class InvitationsView(
 
     @ExperimentalCoroutinesApi
     private inner class InvitationCell(
-            private val scaling: Double = 1.0,
-            koma: Koma
+            private val scaling: Double = 1.0
     ) {
         private val inviterAvatarSize = scaling * 12.0
         private val roomAvatarSize = scaling * 32.0
 
         private val inviter = Label()
-        private val inviterAvatar = UrlAvatar(koma, inviterAvatarSize)
-        private val roomAvatar = UrlAvatar(koma, roomAvatarSize)
+        private val inviterAvatar = UrlAvatar(inviterAvatarSize)
+        private val roomAvatar = UrlAvatar(roomAvatarSize)
         private val roomLabel = Text()
         private var roomId: RoomId? = null
 
@@ -111,7 +110,7 @@ class InvitationsView(
 
         fun update(
                 invitation: InviteData,
-                server: HttpUrl
+                server: Server
         ) {
             roomId = invitation.id
             inviter.text = invitation.inviterName

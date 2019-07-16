@@ -4,6 +4,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import koma.Koma
+import koma.Server
 import koma.gui.element.icon.user.extract_key_chars
 import koma.matrix.UserId
 import koma.network.media.MHUrl
@@ -26,7 +27,6 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class UrlAvatar(
-        private val koma: Koma,
         private val avatarSize: Double
 ) {
     val root = object :StackPane() {
@@ -50,11 +50,11 @@ class UrlAvatar(
         this.initialIcon.updateItem(name, color)
     }
 
-    fun updateUrl(url: MHUrl?, server: HttpUrl) {
+    fun updateUrl(url: MHUrl?, server: Server) {
         this.imageView.imageProperty().unbind()
         this.imageView.image = null
         if (url!=null) {
-            val i = downloadImageResized(url, avatarSize, server, koma)
+            val i = downloadImageResized(url, avatarSize, server)
             this.imageView.imageProperty().bind(i)
         }
     }

@@ -64,7 +64,7 @@ class SyncControl(
             for (s in sync.events) {
                 s.onSuccess {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(it, apiClient.server, appData = appData, view = view)
+                    processEventsResult(it, apiClient, appData = appData, view = view)
                     val nb = sync.since
                     nb?.let {
                         saveSyncBatchKey(appData.database, user, nb)

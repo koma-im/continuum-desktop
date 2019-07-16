@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import koma.Koma
+import koma.Server
 import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
@@ -49,7 +50,7 @@ class AvatarAlways(
     }
 
     fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl?>,
-             server: HttpUrl
+             server: Server
              ) {
         bindName(name, color)
         bindImage(url, server)
@@ -63,14 +64,14 @@ class AvatarAlways(
 
     private var listener: ChangeListener<AvatarUrl?>? = null
 
-    fun bindImage(urlV: ObservableValue<AvatarUrl?>, server: HttpUrl) {
+    fun bindImage(urlV: ObservableValue<AvatarUrl?>, server: Server) {
         val im = SimpleObjectProperty<Image>()
         fun changeUrl(it: AvatarUrl?) {
             im.unbind()
             im.value = null
             logger.debug { "new avatar url $it" }
             it ?: return
-            im.bind(downloadImageResized(it, avatarSize, server, koma))
+            im.bind(downloadImageResized(it, avatarSize, server))
         }
         changeUrl(urlV.value)
         listener = ChangeListener {

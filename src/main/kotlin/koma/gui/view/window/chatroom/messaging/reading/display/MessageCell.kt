@@ -4,7 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.text.Text
-import koma.Koma
+import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
@@ -34,10 +34,9 @@ private val logger = KotlinLogging.logger {}
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MessageCell(
-        private val server: HttpUrl,
+        private val server: Server,
         private val manager: MessageManager,
-        store: UserDataStore,
-        koma: Koma
+        store: UserDataStore
 ) {
     private val center = StackPane()
     private val loading = Label("Loading older messages...")
@@ -58,12 +57,12 @@ class MessageCell(
     }
     private var current: RoomEventRow? = null
 
-    private val client = koma.http.client
+    private val client = server.km.http.client
     private val avSize = appState.store.settings.scaling * 32.0
     // share between different types of view
     private val senderAvatar = AvatarView(store, avSize)
-    private val memberView = MRoomMemberViewNode(store, koma)
-    private val messageView by lazy { MRoomMessageViewNode(server, store, client) }
+    private val memberView = MRoomMemberViewNode(store)
+    private val messageView by lazy { MRoomMessageViewNode(server, store) }
     private val creationView by lazy { MRoomCreationViewNode(store, avSize ) }
     private val historyVisibilityView by lazy { HistoryVisibilityEventView() }
     private val guestAccessUpdateView by lazy {GuestAccessUpdateView()}
