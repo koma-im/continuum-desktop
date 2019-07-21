@@ -27,7 +27,7 @@ private typealias Item = Deferred<Option<Image>>
 
 class DeferredImage(
         val processing: (InputStream) -> Image
-) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val cache: Cache<MHUrl, Item>
 
     init {
@@ -47,7 +47,7 @@ class DeferredImage(
     }
 
     private fun createImageProperty(url: MHUrl, server: Server): Item {
-        return GlobalScope.asyncImage(url, server)
+        return asyncImage(url, server)
     }
 
     private fun CoroutineScope.asyncImage(url: MHUrl, server: Server) = async {
@@ -70,9 +70,9 @@ class DeferredImage(
 
 private typealias ImageProperty = SimpleObjectProperty<Image>
 
-fun downloadImageResized(url: MHUrl, size: Double, server: Server): ImageProperty {
+fun CoroutineScope.downloadImageResized(url: MHUrl, size: Double, server: Server): ImageProperty {
     val prop = ImageProperty()
-    GlobalScope.launch {
+    launch {
         val bs = server.downloadMedia(url) getOr  {
             logger.error { "download of $url fails with ${it}" }
             return@launch

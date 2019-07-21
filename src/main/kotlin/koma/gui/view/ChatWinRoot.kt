@@ -92,7 +92,7 @@ class ChatWindowBars(
 
 class SyncStatusBar(
         private val pane: NotificationPane
-) {
+): CoroutineScope by CoroutineScope(Dispatchers.Main) {
     val ctrl = Channel<Variants>(Channel.CONFLATED)
 
     /**
@@ -101,7 +101,7 @@ class SyncStatusBar(
     private var syncing = true
 
     init {
-        GlobalScope.launch(Dispatchers.JavaFx) {
+        launch {
             for (s in ctrl) {
                 update(s)
             }
@@ -118,7 +118,7 @@ class SyncStatusBar(
             }
             is Variants.NeedRetry -> {
                 syncing = false
-                val countDown = GlobalScope.launch(Dispatchers.JavaFx) {
+                val countDown = launch {
                     for (i in 9 downTo 1) {
                         pane.text = "Network issue, retrying in $i seconds"
                         delay(1000)
@@ -142,7 +142,7 @@ class SyncStatusBar(
         pane.actions.clear()
         pane.text = "Syncing"
         if (!retryNow.isCompleted) retryNow.complete(Unit)
-        GlobalScope.launch(UiDispatcher) {
+        launch {
             delay(3000)
             // assume the long-polling sync api is working
             if (syncing) {

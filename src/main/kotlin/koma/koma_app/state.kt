@@ -11,6 +11,8 @@ import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.users.UserStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.openStore
 import link.continuum.desktop.gui.list.DedupList
@@ -28,7 +30,7 @@ object appState {
     var currentUser: UserId? = null
     lateinit var koma: Koma
     lateinit var store: AppStore
-    var stopSync: (()-> Unit)? = null
+    val coroutineScope = CoroutineScope(Dispatchers.Main)
     var apiClient: MatrixApi? = null
 
     init {

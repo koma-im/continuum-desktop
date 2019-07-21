@@ -10,11 +10,9 @@ import koma.matrix.UserId
 import koma.network.media.MHUrl
 import koma.util.onFailure
 import koma.util.onSuccess
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getLatestAvatar
 import link.continuum.database.models.getLatestNick
@@ -33,7 +31,7 @@ private val logger = KotlinLogging.logger {}
 class UserDataStore(
         private val data: KDataStore,
         private val koma: Koma
-) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val nameUpdates = ConcurrentHashMap<UserId, UpdateConflater<String>>()
     suspend fun updateName(userId: UserId, name: String, time: Long) {
         val c = nameUpdates.get(userId)
@@ -51,7 +49,7 @@ class UserDataStore(
 
     fun getNameUpdates(userId: UserId): ReceiveChannel<String> {
         val u = nameUpdates.computeIfAbsent(userId) { UpdateConflater() }
-        GlobalScope.launch {
+        launch {
             val n = getLatestNick(data, userId)
             if (n != null) {
                 u.update(n.since, n.nickname)
@@ -77,7 +75,7 @@ class UserDataStore(
         val imageBroadcast = avatarImageUpdates.computeIfAbsent(userId) {
             val urls = getAvatarUrlUpdates(userId)
             val av = ConflatedBroadcastChannel<Option<Image>>()
-            GlobalScope.switchGetDeferred(urls, { u -> avatarFetcher.getDeferred(u, server) }, av)
+            switchGetDeferred(urls, { u -> avatarFetcher.getDeferred(u, server) }, av)
             av
         }
         return imageBroadcast.openSubscription()
@@ -86,7 +84,7 @@ class UserDataStore(
     fun getAvatarUrlUpdates(userId: UserId): ReceiveChannel<MHUrl> {
         val u = avatarUrlUpdates.computeIfAbsent(userId) {
             val up = UpdateConflater<MHUrl>()
-            GlobalScope.launch {
+            launch {
                 val n = getLatestAvatar(data, userId)
                 if (n != null) {
                     val avatar = MHUrl.fromStr(n.avatar)

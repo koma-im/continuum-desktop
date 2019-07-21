@@ -10,6 +10,7 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import okhttp3.OkHttpClient
@@ -23,7 +24,7 @@ fun main(args: Array<String>) {
     Logger.getLogger(OkHttpClient::class.java.name).setLevel(Level.FINE)
 
     Application.launch(KomaApp::class.java, *args)
-    appState.stopSync?.invoke()
+    appState.coroutineScope.cancel()
 }
 
 

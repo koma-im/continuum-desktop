@@ -30,7 +30,7 @@ private val logger = KotlinLogging.logger {}
 class ImageElement(
         private val koma: Koma,
         private val imageSize: Double = 200.0 * appState.store.settings.scaling
-): ViewNode {
+): ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
@@ -52,7 +52,7 @@ class ImageElement(
     private fun updateImage(dl: suspend ()-> KResult<ByteArray, Failure>) {
         imageView.image = null
         job?.cancel()
-        job = GlobalScope.launch {
+        job = launch {
             val res = dl() getOr {
                 return@launch
             }

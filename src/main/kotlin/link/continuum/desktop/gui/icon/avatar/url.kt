@@ -3,7 +3,6 @@ package link.continuum.desktop.gui.icon.avatar
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
-import koma.Koma
 import koma.Server
 import koma.gui.element.icon.user.extract_key_chars
 import koma.matrix.UserId
@@ -28,7 +27,7 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class UrlAvatar(
         private val avatarSize: Double
-) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = object :StackPane() {
         // roughly aligned with text vertically
         override fun getBaselineOffset(): Double = avatarSize * 0.75

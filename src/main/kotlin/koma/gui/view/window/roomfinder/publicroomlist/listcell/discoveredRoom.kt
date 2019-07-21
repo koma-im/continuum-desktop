@@ -17,15 +17,11 @@ import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
-import koma.network.media.downloadMedia
 import koma.network.media.parseMxc
 import koma.util.onFailure
 import koma.util.onSuccess
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
@@ -40,7 +36,7 @@ private val logger = KotlinLogging.logger {}
 class DiscoveredRoomFragment(
         private val account: MatrixApi,
         private val avatarSize: Double = appState.store.settings.scaling * 32.0
-): ListCell<DiscoveredRoom>() {
+): ListCell<DiscoveredRoom>(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = hbox(spacing = 10.0)
     private val imageView = ImageView()
     private val initialIcon = InitialIcon(avatarSize).apply {
@@ -133,10 +129,10 @@ class DiscoveredRoomFragment(
     }
 }
 
-fun joinById(roomid: RoomId, name: String, owner: Node,
-             api: MatrixApi,
-             store: AppStore = appState.store) {
-    GlobalScope.launch {
+fun CoroutineScope.joinById(roomid: RoomId, name: String, owner: Node,
+                            api: MatrixApi,
+                            store: AppStore = appState.store) {
+    launch {
         val rs = api.joinRoom(roomid)
         rs.onSuccess {
             launch(Dispatchers.JavaFx) { store.joinRoom(roomid, api) }

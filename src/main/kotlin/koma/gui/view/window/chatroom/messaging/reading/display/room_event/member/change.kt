@@ -199,7 +199,7 @@ class UserAppearanceUpdateView(
     }
 }
 
-class ImageViewAsync {
+class ImageViewAsync: CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = ImageView()
     private val urlChannel: SendChannel<DL>
     fun updateUrl(url: Optional<MHUrl>, server: Server) {
@@ -210,9 +210,9 @@ class ImageViewAsync {
     }
 
     init {
-        val (tx, rx) = GlobalScope.urlChannelDownload()
+        val (tx, rx) = urlChannelDownload()
         urlChannel = tx
-        GlobalScope.launch {
+        launch {
             for (i in rx) {
                 i.onSome {
                     it.inputStream().use {

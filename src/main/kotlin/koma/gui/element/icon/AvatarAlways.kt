@@ -14,6 +14,8 @@ import koma.Server
 import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
@@ -29,7 +31,7 @@ private val logger = KotlinLogging.logger {}
 class AvatarAlways(
         private val koma: Koma,
         private val avatarSize: Double = settings.scaling * 32.0
-): StackPane() {
+): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val initialIcon = InitialIcon(avatarSize)
     private val imageView = ImageView()
     private val name = SimpleStringProperty()

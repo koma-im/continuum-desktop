@@ -44,7 +44,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     val primary = ChatWindowBars(userRooms, account, store)
     FX.primaryStage.scene.root = primary.root
 
-    GlobalScope.launch {
+    app.coroutineScope.launch {
         val rooms = loadUserRooms(data, userId)
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
@@ -59,15 +59,14 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
             "Doing a full sync because there " +
                     "are no known rooms $userId has joined"
         }
-        val sync = SyncControl(
+        SyncControl(
                 apiClient,
                 userId,
+                coroutineScope = app.coroutineScope,
                 statusChan = primary.status.ctrl,
                 full_sync = fullSync,
                 appData = appData,
                 view = primary.center
         )
-
-        sync.start()
     }
 }

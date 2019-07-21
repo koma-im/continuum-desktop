@@ -22,10 +22,7 @@ import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
 import koma.network.media.MHUrl
 import koma.util.getOr
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import link.continuum.database.KDataStore
 import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
@@ -89,12 +86,12 @@ class ChatView(roomList: ObservableList<Room>,
 private val gettingRoomAvatar = ConcurrentHashMap<RoomId, Unit>()
 private val gettingRoomName = ConcurrentHashMap<RoomId, Unit>()
 
-private fun fixAvatar(room: Room) {
+private fun CoroutineScope.fixAvatar(room: Room) {
     if (gettingRoomAvatar.putIfAbsent(room.id, Unit) != null) return
     val name = room.displayName.get()
     logger.debug { "fixing unknown avatar of $name" }
     val api = appState.apiClient ?: return
-    GlobalScope.launch {
+    launch {
         val av = api.getRoomAvatar(room.id) getOr {
             logger.warn { "error fixing room $name's avatar, ${it}" }
             return@launch
@@ -109,12 +106,12 @@ private fun fixAvatar(room: Room) {
 }
 
 @ExperimentalCoroutinesApi
-private fun fixRoomName(room: Room) {
+private fun CoroutineScope.fixRoomName(room: Room) {
     if (gettingRoomName.putIfAbsent(room.id, Unit) != null) return
     val name = room.displayName.get()
     logger.debug { "fixing unknown name of $name" }
     val api = appState.apiClient ?: return
-    GlobalScope.launch {
+    launch {
         val n = api.getRoomName(room.id) getOr {
             logger.warn { "error fixing room $name's name, ${it}" }
             return@launch
@@ -127,7 +124,8 @@ private fun fixRoomName(room: Room) {
 }
 
 @ExperimentalCoroutinesApi
-class RoomFragment(private val data: KDataStore, private val koma: Koma): ListCell<Room>() {
+class RoomFragment(private val data: KDataStore, private val koma: Koma
+): ListCell<Room>(), CoroutineScope by CoroutineScope(Dispatchers.Default){
     var room: Room? = null
     private val avatar = AvatarAlways(koma)
     private val nameLabel = Label()

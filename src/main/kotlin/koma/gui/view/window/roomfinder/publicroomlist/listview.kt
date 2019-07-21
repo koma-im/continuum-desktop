@@ -25,12 +25,9 @@ import koma.matrix.room.naming.canBeValidRoomAlias
 import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.onFailure
 import koma.util.onSuccess
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
 import link.continuum.desktop.util.Account
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -43,7 +40,7 @@ import java.util.function.Predicate
 
 class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                       private val account: Account
-) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
     val ui = VBox(5.0)
 
@@ -116,7 +113,7 @@ class RoomListView(
         input: StringProperty,
         private val account: Account,
         appData: AppStore = appState.store
-): View() {
+): View(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val matchRooms = FilteredList(roomlist)
 
     override val root = listview(matchRooms)
@@ -171,7 +168,7 @@ class RoomListView(
         matchRooms.predicate = Predicate { r: DiscoveredRoom ->
             r.containsTerms(words)
         }
-        GlobalScope.launch {
+        launch {
             delay(500)
             if (filterTerm == term) {
                 curRoomSrc = getRoomSource(filterTerm)
@@ -187,7 +184,7 @@ class RoomListView(
 
     private fun loadMoreRooms(upto: Int) {
         var added = 0
-        GlobalScope.launch(Dispatchers.JavaFx) {
+        launch(Dispatchers.JavaFx) {
             for (room in curRoomSrc.produce) {
                 if (existing.add(room.room_id)) {
                     roomlist.add(room)

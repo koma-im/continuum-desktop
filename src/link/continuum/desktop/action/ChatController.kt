@@ -33,13 +33,14 @@ class SyncControl(
         private val statusChan: Channel<SyncStatusBar.Variants>,
         private val appData: AppStore,
         private val view: ChatView,
+        coroutineScope: CoroutineScope,
         full_sync: Boolean = false
 ) {
     private val sync: MatrixSyncReceiver
 
     init{
         val batch_key = if (full_sync) {
-            GlobalScope.launch {
+            coroutineScope.launch {
                 statusChan.send(SyncStatusBar.Variants.FullSync())
             }
             null
@@ -47,20 +48,15 @@ class SyncControl(
             getSyncBatchKey(appData.database, user)
         }
         sync = MatrixSyncReceiver(apiClient, batch_key)
-
-        appState.stopSync = {
-            logger.debug { "Stopping sync" }
-            runBlocking {
-                sync.stopSyncing()
-            }
-            logger.debug { "Sync stopped" }
+        coroutineScope.startProcessing()
+        coroutineScope.launch {
+            sync.startSyncing()
         }
-        startProcessing()
     }
 
     @ObsoleteCoroutinesApi
-    private fun startProcessing() {
-        GlobalScope.launch(Dispatchers.JavaFx) {
+    private fun CoroutineScope.startProcessing() {
+        launch(Dispatchers.JavaFx) {
             for (s in sync.events) {
                 s.onSuccess {
                     statusChan.send(SyncStatusBar.Variants.Normal())
@@ -75,13 +71,9 @@ class SyncControl(
                     logger.warn { "sync stopped because of $s" }
                     deferred.await()
                     logger.info { "Retrying sync" }
-                    start()
+                    sync.startSyncing()
                 }
             }
         }
-    }
-
-    fun start() {
-        sync.startSyncing()
     }
 }
