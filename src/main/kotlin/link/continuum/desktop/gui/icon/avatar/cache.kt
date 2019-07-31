@@ -2,21 +2,15 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
-import koma.Koma
 import koma.Server
 import koma.network.media.MHUrl
-import koma.network.media.downloadMedia
 import koma.util.getOr
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import link.continuum.desktop.util.Some
-import link.continuum.desktop.util.http.downloadHttp
-import link.continuum.libutil.`?or`
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import org.cache2k.Cache
 import org.cache2k.Cache2kBuilder
 import org.cache2k.configuration.Cache2kConfiguration
@@ -36,14 +30,6 @@ class DeferredImage(
 
     fun getDeferred(url: MHUrl, server: Server): Item {
         return cache.computeIfAbsent(url) { createImageProperty(url, server) }
-    }
-
-    fun getDeferred(url: String, server: Server): Item {
-        val h = MHUrl.fromStr(url) getOr {
-            logger.warn { "invalid image url" }
-            return CompletableDeferred(None())
-        }
-        return getDeferred(h, server)
     }
 
     private fun createImageProperty(url: MHUrl, server: Server): Item {

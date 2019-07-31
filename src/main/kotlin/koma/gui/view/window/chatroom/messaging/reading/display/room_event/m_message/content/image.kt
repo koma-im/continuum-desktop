@@ -29,10 +29,10 @@ class MImageViewNode(private val server: Server
 
     fun update(content: ImageMessage, server: Server) {
         val u = content.url.parseMxc()
-        url = u?.toHttpUrl(server.url)
         if (u == null) {
             logger.warn { "url ${content.url} not parsed" }
         } else {
+            url = server.mxcToHttp(u)
             image.update(u, server)
         }
         node.tooltip(content.body)

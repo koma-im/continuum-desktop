@@ -13,7 +13,6 @@ import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
 import koma.network.media.MHUrl
-import koma.network.media.downloadMedia
 import koma.util.KResult
 import koma.util.getOr
 import kotlinx.coroutines.*
@@ -45,7 +44,7 @@ class ImageElement(
         updateImage { downloadHttp(url, koma.http.client) }
     }
     fun update(mxc: MHUrl, server: Server) {
-        this.url = mxc.toHttpUrl(server.url)
+        this.url =server.mxcToHttp(mxc)
         title = mxc.toString()
         updateImage {server.downloadMedia(mxc)}
     }

@@ -23,7 +23,7 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
-        implementation("io.github.koma-im:koma-library:0.8.4")
+        implementation("io.github.koma-im:koma-library:0.8.7")
         implementation("io.github.microutils:kotlin-logging:1.6.22")
 
         testImplementation(kotlin("test"))
@@ -56,7 +56,7 @@ dependencies {
 }
 
 group = "link.continuum"
-version = "0.9.13"
+version = "0.9.14"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"

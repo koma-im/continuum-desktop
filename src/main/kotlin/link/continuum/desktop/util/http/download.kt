@@ -4,7 +4,6 @@ import koma.Failure
 import koma.Koma
 import koma.Server
 import koma.network.media.MHUrl
-import koma.network.media.downloadMedia
 import koma.util.*
 import koma.util.coroutine.adapter.okhttp.await
 import kotlinx.coroutines.CoroutineScope

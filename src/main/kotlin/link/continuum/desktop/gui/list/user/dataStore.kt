@@ -8,6 +8,7 @@ import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.network.media.MHUrl
+import koma.network.media.parseMxc
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.*
@@ -87,12 +88,10 @@ class UserDataStore(
             launch {
                 val n = getLatestAvatar(data, userId)
                 if (n != null) {
-                    val avatar = MHUrl.fromStr(n.avatar)
-                    avatar.onSuccess {
+                    val avatar = n.avatar.parseMxc()
+                    avatar?.let {
                         up.update(n.since, it)
-                    }.onFailure {
-                        logger.warn { "avatarUrl of $userId, ${n.avatar} not valid" }
-                    }
+                    } ?: logger.warn { "avatarUrl of $userId, ${n.avatar} not valid" }
                 } else {
                     logger.trace { "avatarUrl of $userId is not in database" }
                 }

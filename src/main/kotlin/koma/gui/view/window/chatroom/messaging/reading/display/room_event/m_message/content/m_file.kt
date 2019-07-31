@@ -12,6 +12,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
 import koma.matrix.event.room_message.chat.FileMessage
 import koma.network.media.MHUrl
+import koma.network.media.parseMxc
 import koma.storage.persistence.settings.AppSettings
 import koma.util.onSuccess
 import tornadofx.*
@@ -22,7 +23,7 @@ class MFileViewNode(val content: FileMessage,
                     private val server: Server): ViewNode {
     override val node = HBox(5.0)
     override val menuItems: List<MenuItem>
-    private val url = MHUrl.fromStr(content.url)
+    private val url = content.url.parseMxc()
 
     init {
         val faicon = guessIconForMime(content.info?.mimetype)
@@ -55,10 +56,8 @@ class MFileViewNode(val content: FileMessage,
     }
 
     private fun save() {
-        url.onSuccess {
-            it.toHttpUrl(server.url)?.let {
-                downloadFileAs(it, filename = content.filename, title = "Save File As")
-            }
+        url?.let {
+            downloadFileAs(server.mxcToHttp(it), filename = content.filename, title = "Save File As")
         }
     }
 }
