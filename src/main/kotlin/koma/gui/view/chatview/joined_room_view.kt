@@ -16,17 +16,22 @@ import tornadofx.*
  * the room the user is currently interacting with
  * view and send messages, view the list of members in the room
  */
-class JoinedRoomView(room: Room, server: HttpUrl, userData: UserDataStore,
-                     koma: Koma
+class JoinedRoomView(
+        km: Koma,
+        userData: UserDataStore
 ): View() {
     override val root = HBox()
 
-    val messageRecvSendView = ChatRecvSendView(room, server, userData, koma)
-    val usersListView = RoomMemberListView(room.members.list, userData, koma.http.client)
+    val messageRecvSendView = ChatRecvSendView(km, userData)
+    val usersListView = RoomMemberListView(userData)
 
     @ObsoleteCoroutinesApi
     fun scroll(down: Boolean) = messageRecvSendView.scroll(down)
 
+    fun setRoom(room: Room) {
+        messageRecvSendView.setRoom(room)
+        usersListView.setList(room.members.list)
+    }
     init {
         with(root) {
             hgrow = Priority.ALWAYS

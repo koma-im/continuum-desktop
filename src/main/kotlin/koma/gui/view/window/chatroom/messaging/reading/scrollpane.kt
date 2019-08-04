@@ -14,39 +14,45 @@ import javafx.util.Callback
 import koma.Koma
 import koma.gui.element.control.KListView
 import koma.koma_app.appState
+import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
+import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import tornadofx.*
 import kotlin.math.roundToInt
-
+private val logger = KotlinLogging.logger {}
 private val settings = appState.store.settings
 
-typealias EventItem = RoomEventRow
+typealias EventItem =Pair<RoomEventRow, Room>
+
+private class ViewRoomState(
+        // whether the user has caught up to the newest messages
+        //whether the list should scroll automatically
+        val following:SimpleBooleanProperty = SimpleBooleanProperty(true),
+        // timestamp of lastest message in the room
+        var lastTime: Long = 0
+)
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
-        room: Room,
+        private val km: Koma,
         store: UserDataStore
 ): View() {
     override val root = AnchorPane()
 
     private val virtualList: KListView<EventItem>
 
-    private val msgList: ObservableList<EventItem>
-
+    private var currentViewing: RoomId? = null
     // decide whether to scroll
     private val followingLatest = SimpleBooleanProperty(true)
-    // whether room is currently on screen
-    private val showing = this.root.sceneProperty().select { it.windowProperty() }.select { it.showingProperty() }
-    // timestamp of last message
-    private var lastTime: Long = 0
+    private val roomStates = mutableMapOf<RoomId, ViewRoomState>()
 
     fun scrollPage(scrollDown: Boolean) {
         val scrollRatio = 0.8f
@@ -59,34 +65,38 @@ class MessagesListScrollPane(
 
     fun scrollToBottom() {
         followingLatest.set(true)
-        virtualList.scrollTo(msgList.size - 1)
+        virtualList.items?.let {
+            virtualList.scrollTo(it.size - 1)
+        }
     }
 
+    fun setList(msgs: ObservableList<EventItem>, roomId: RoomId) {
+        virtualList.items = msgs
+        currentViewing = roomId
+        if (roomStates.containsKey(roomId)) return
+        logger.debug { "viewing now room $roomId" }
+        val s = ViewRoomState()
+        roomStates[roomId] = s
+        s.lastTime = Math.max(s.lastTime, msgs.lastOrNull()?.first?.server_time?: 0)
+        msgs.addListener { e: ListChangeListener.Change<out EventItem> -> onAddedMessages(e, roomId) }
+    }
     init {
         root.vgrow = Priority.ALWAYS
 
-        msgList = room.messageManager.shownList
-        virtualList = KListView(msgList)
+        virtualList = KListView()
         virtualList.vgrow = Priority.ALWAYS
         virtualList.hgrow = Priority.ALWAYS
 
-        val server = room.account.server
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(server, room.messageManager, store)
+            RoomEventCell(km, store)
         }
 
         addVirtualScrollPane()
         addScrollBottomButton()
-        setUpListeners()
         scrollToBottom()
-    }
-
-    private fun setUpListeners() {
-        lastTime = Math.max(lastTime, msgList.lastOrNull()?.server_time?: 0)
-        msgList.addListener { e: ListChangeListener.Change<out EventItem> -> onAddedMessages(e) }
-        virtualList.addEventFilter(ScrollEvent.SCROLL, { _: ScrollEvent ->
+        virtualList.addEventFilter(ScrollEvent.SCROLL) { _: ScrollEvent ->
             onScroll()
-        })
+        }
     }
 
     private fun addVirtualScrollPane() {
@@ -118,18 +128,22 @@ class MessagesListScrollPane(
         AnchorPane.setBottomAnchor(button, 10.0 * scale)
     }
 
-    private fun onAddedMessages(e : ListChangeListener.Change<out EventItem>) {
+    private fun onAddedMessages(e : ListChangeListener.Change<out EventItem>,
+                                roomId: RoomId
+    ) {
+        val s = roomStates[roomId]
+        if (s == null) return
         if (followingLatest.get()) {
             if (e.next() && e.wasAdded()) {
                 val added = e.addedSubList
-                val lastAdd = added.lastOrNull()?.getEvent()?.origin_server_ts
-                if (lastAdd != null && lastAdd > lastTime - 5000) {
+                val lastAdd = added.lastOrNull()?.first?.getEvent()?.origin_server_ts
+                if (lastAdd != null && lastAdd > s.lastTime - 5000) {
                     //roughly latest
-                    lastTime = lastAdd
+                    s.lastTime = lastAdd
                     if (added.size > 9) {
                         //added too much
                         followingLatest.set(false)
-                    } else if (showing.value != true) {
+                    } else if (currentViewing != roomId) {
                         //new message in a not selected room
                         followingLatest.set(false)
                     } else {
@@ -146,6 +160,7 @@ class MessagesListScrollPane(
     private fun onScroll() {
         val visibleLastIndex = virtualList.visibleIndexRange.value?.endInclusive
         visibleLastIndex ?:return
+        val msgList = virtualList.items ?: return
         val loadedLastIndex = msgList.size - 1
         if (visibleLastIndex >= loadedLastIndex - 2) {
             followingLatest.set(true)

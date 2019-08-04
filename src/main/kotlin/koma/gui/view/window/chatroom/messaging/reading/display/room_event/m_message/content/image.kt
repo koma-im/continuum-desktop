@@ -18,13 +18,12 @@ import tornadofx.*
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
-class MImageViewNode(private val server: Server
-                     ): ViewNode {
+class MImageViewNode(km: Koma): ViewNode {
     override val menuItems: List<MenuItem>  = createMenuItems()
 
     private var url: HttpUrl? = null
     private var filename: String? =null
-    private var image = ImageElement(server.km)
+    private var image = ImageElement(km)
     override val node = image.node
 
     fun update(content: ImageMessage, server: Server) {

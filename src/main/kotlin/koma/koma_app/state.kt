@@ -26,7 +26,6 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 object appState {
-    val currRoom = SimpleObjectProperty<Room>()
     var currentUser: UserId? = null
     lateinit var koma: Koma
     lateinit var store: AppStore

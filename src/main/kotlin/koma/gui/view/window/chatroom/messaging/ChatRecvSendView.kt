@@ -1,11 +1,13 @@
 package koma.gui.view.window.chatroom.messaging
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import koma.Koma
 import koma.controller.requests.sendMessage
 import koma.gui.view.window.chatroom.messaging.reading.MessagesListScrollPane
 import koma.gui.view.window.chatroom.messaging.sending.createButtonBar
+import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
@@ -17,23 +19,29 @@ import tornadofx.*
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class ChatRecvSendView(room: Room, server: HttpUrl,
-                       store: UserDataStore,
-                       koma: Koma
+class ChatRecvSendView(
+        km: Koma,
+        store: UserDataStore
 ): View() {
     override val root = vbox(10.0)
 
-    private val messageScroll = MessagesListScrollPane(room, store)
+    private val messageScroll = MessagesListScrollPane(km, store)
     private val messageInput = TextField()
+    private val currentRoom = SimpleObjectProperty<RoomId>()
 
     fun scroll(down: Boolean) = messageScroll.scrollPage(down)
+    fun setRoom(room: Room) {
+        currentRoom.set(room.id)
+        messageScroll.setList(room.messageManager.shownList, room.id)
+    }
+
     init {
         with(root) {
             hgrow = Priority.ALWAYS
 
             add(messageScroll)
 
-            add(createButtonBar(messageInput, room))
+            add(createButtonBar(messageInput, currentRoom))
 
             add(messageInput)
         }
@@ -43,8 +51,11 @@ class ChatRecvSendView(room: Room, server: HttpUrl,
             action {
                 val msg = text
                 text = ""
-                if (msg.isNotBlank())
-                    sendMessage(room.id, msg)
+                if (msg.isNotBlank()) {
+                    currentRoom.value?.let {
+                        sendMessage(it, msg)
+                    }
+                }
             }
         }
     }

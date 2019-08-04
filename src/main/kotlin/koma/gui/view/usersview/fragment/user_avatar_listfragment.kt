@@ -30,7 +30,6 @@ private typealias SelectUser = Pair<UserId, Server>
 class MemberCell(
         private val showNoName: SimpleBooleanProperty,
         private val store: UserDataStore,
-        client: OkHttpClient,
         scale: Float = settings.scaling,
         avsize: Double = scale * 32.0
 ) : ListCell<SelectUser>() {

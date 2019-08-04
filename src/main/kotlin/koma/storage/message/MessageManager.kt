@@ -22,6 +22,7 @@ import link.continuum.database.models.toEventRowList
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.checkUiThread
 import link.continuum.desktop.gui.list.DedupList
+import model.Room
 import mu.KotlinLogging
 
 import java.util.concurrent.ConcurrentHashMap
@@ -30,12 +31,13 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class MessageManager(val roomId: RoomId,
+class MessageManager(val room: Room,
                      private val data: KotlinEntityDataStore<Persistable>) {
+    private val roomId = room.id
     // added to UI, needs to be modified on FX thread
-    private val eventAll = DedupList<RoomEventRow, String>({it.event_id})
-    val shownList = SortedList(eventAll.list) { e1: RoomEventRow, e2: RoomEventRow ->
-        e1.server_time.compareTo(e2.server_time)
+    private val eventAll = DedupList<Pair<RoomEventRow, Room>, String>({it.first.event_id})
+    val shownList = SortedList(eventAll.list) { e1, e2 ->
+        e1.first.server_time.compareTo(e2.first.server_time)
     }
 
     private var prevLatestRow: RoomEventRow? = null
@@ -52,7 +54,7 @@ class MessageManager(val roomId: RoomId,
     fun getPrecedingRows(row: RoomEventRow) {
         val rows = data.select(RoomEventRow::class)
                 .where(RoomEventRow::server_time.lte(row.server_time)
-                        .and(RoomEventRow::room_id.eq(roomId.id)))
+                        .and(RoomEventRow::room_id.eq(room.id.str)))
                 .orderBy(RoomEventRow::server_time.asc()).limit(100).get().toList()
         GlobalScope.launch(Dispatchers.JavaFx) {
             addToUi(rows)
@@ -107,7 +109,7 @@ class MessageManager(val roomId: RoomId,
     private suspend fun addToUi(rows: List<RoomEventRow>) {
         val old = eventAll.size()
         withContext(Dispatchers.JavaFx) {
-            eventAll.addAll(rows)
+            eventAll.addAll(rows.map { it to room })
         }
         val newSize = eventAll.size()
         val add = newSize - old
