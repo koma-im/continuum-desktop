@@ -1,5 +1,6 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content
 
+import koma.Koma
 import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
@@ -12,15 +13,14 @@ import okhttp3.HttpUrl
 @ExperimentalCoroutinesApi
 class MessageView(
         private val userDataStore: UserDataStore,
-        private val server: Server) {
+        private val km: Koma) {
     var node: ViewNode? = null
 
-    private val km = server.km
     private val emote by lazy { MEmoteViewNode(userDataStore, km) }
     private val notice by lazy { MNoticeViewNode(km) }
     private val text by lazy { MTextViewNode(km) }
-    private val image by lazy { MImageViewNode(server) }
-    fun update(message: MRoomMessage) {
+    private val image by lazy { MImageViewNode(km) }
+    fun update(message: MRoomMessage, server: Server) {
         val content = message.content
         node = when(content) {
             is TextMessage ->text.apply {

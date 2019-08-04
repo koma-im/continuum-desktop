@@ -4,7 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.text.Text
-import koma.Server
+import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
@@ -16,7 +16,6 @@ import koma.matrix.event.room_message.state.MRoomHistoryVisibility
 import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.json.MoshiInstance
 import koma.matrix.room.visibility.HistoryVisibility
-import koma.storage.message.MessageManager
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -25,8 +24,8 @@ import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
+import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
@@ -34,8 +33,7 @@ private val logger = KotlinLogging.logger {}
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 class MessageCell(
-        private val server: Server,
-        private val manager: MessageManager,
+        private val km: Koma,
         store: UserDataStore
 ) {
     private val center = StackPane()
@@ -57,25 +55,24 @@ class MessageCell(
     }
     private var current: RoomEventRow? = null
 
-    private val client = server.km.http.client
     private val avSize = appState.store.settings.scaling * 32.0
     // share between different types of view
     private val senderAvatar = AvatarView(store, avSize)
     private val memberView = MRoomMemberViewNode(store)
-    private val messageView by lazy { MRoomMessageViewNode(server, store) }
+    private val messageView by lazy { MRoomMessageViewNode(km,  store) }
     private val creationView by lazy { MRoomCreationViewNode(store, avSize ) }
     private val historyVisibilityView by lazy { HistoryVisibilityEventView() }
     private val guestAccessUpdateView by lazy {GuestAccessUpdateView()}
 
 
-    fun updateEvent(message: RoomEventRow) {
+    fun updateEvent(message: RoomEventRow, room: Room) {
         loading.managedProperty().unbind()
         loading.visibleProperty().unbind()
         loading.showIf(false)
         if(!message.preceding_stored) {
             logger.debug { "messages before ${message.event_id} are not stored yet" }
             loading.showIf(true)
-            val status = manager.fetchPrecedingRows(message)
+            val status = room.messageManager.fetchPrecedingRows(message)
             loading.managedProperty().bind(status)
             loading.visibleProperty().bind(status)
         }
@@ -86,23 +83,23 @@ class MessageCell(
         val ev = message.getEvent()
         val vn = when(ev) {
             is MRoomMember -> {
-                memberView.update(ev, server)
+                memberView.update(ev, room.account.server)
                 memberView
             }
             is MRoomCreate -> {
-                creationView.update(ev, server)
+                creationView.update(ev, room.account.server)
                 creationView
             }
             is MRoomMessage -> {
-                messageView.update(ev)
+                messageView.update(ev, room.account.server)
                 messageView
             }
             is MRoomHistoryVisibility -> {
-                senderAvatar.updateUser(ev.sender, server)
+                senderAvatar.updateUser(ev.sender, room.account.server)
                 historyVisibilityView.apply { update(senderAvatar, ev) }
             }
             is MRoomGuestAccess -> {
-                senderAvatar.updateUser(ev.sender, server)
+                senderAvatar.updateUser(ev.sender, room.account.server)
                 guestAccessUpdateView.update(senderAvatar, ev)
                 guestAccessUpdateView
             }

@@ -19,7 +19,9 @@ import java.lang.ref.WeakReference
 
 
 
-class KListView<T>(items: ObservableList<T>): ListView<T>(items) {
+class KListView<T>: ListView<T> {
+    constructor(): super()
+    constructor(items: ObservableList<T>): super(items)
     val visibleIndexRange = SimpleObjectProperty<NullableIndexRange>()
     var flow: KVirtualFlow<*>? = null
     init {

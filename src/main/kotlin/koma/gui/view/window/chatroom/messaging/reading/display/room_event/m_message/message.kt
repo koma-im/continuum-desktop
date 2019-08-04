@@ -8,6 +8,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
+import koma.Koma
 import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
@@ -33,7 +34,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        private val server: Server,
+        private val km: Koma,
         private val store: UserDataStore,
         avatarSize: Double = appState.store.settings.scaling * 32.0
 ): ViewNode {
@@ -46,7 +47,7 @@ class MRoomMessageViewNode(
     private val senderLabel = Text()
     private val senderId = Channel<UserId>(Channel.CONFLATED)
     private val contentBox = HBox(5.0)
-    private val content by  lazy { MessageView(store, server) }
+    private val content by  lazy { MessageView(store, km) }
 
     init {
         with(node) {
@@ -81,13 +82,13 @@ class MRoomMessageViewNode(
             }
         }
     }
-    fun update(message: MRoomMessage) {
+    fun update(message: MRoomMessage, server: Server) {
         item = message
         senderId.offer(message.sender)
         timeView.updateTime(message.origin_server_ts)
         avatarView.updateUser(message.sender, server)
         senderLabel.fill = store.getUserColor(message.sender)
-        content.update(message)
+        content.update(message, server)
         contentBox.children.apply {
             clear()
             content.node?.node?.let { this.add(it) }

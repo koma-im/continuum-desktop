@@ -44,7 +44,7 @@ class Room(
     val color = hashStringColorDark(id.toString())
 
     @ObsoleteCoroutinesApi
-    val messageManager by lazy { MessageManager(id, appState.store.database ) }
+    val messageManager by lazy { MessageManager(this, appState.store.database ) }
     val members = DedupList<Pair<UserId, Server>, UserId>({it.first})
 
     // whether it's listed in the public directory

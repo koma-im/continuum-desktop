@@ -76,9 +76,6 @@ class RoomListView(
         node.setCellFactory {
             RoomFragment(data, account.server.km)
         }
-        node.selectionModel.selectedItemProperty().onChange { room ->
-            if (room != null) appState.currRoom.set(room)
-        }
    }
 }
 

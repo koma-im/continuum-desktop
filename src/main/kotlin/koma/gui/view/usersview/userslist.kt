@@ -24,13 +24,14 @@ private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
-        memList: ObservableList<Pair<UserId, Server>>,
-        userData: UserDataStore,
-        client: OkHttpClient
+        userData: UserDataStore
 ): View() {
 
     override val root = VBox(10.0)
-
+    private val userlist = PrettyListView<Pair<UserId, Server>>()
+    fun setList(memList: ObservableList<Pair<UserId, Server>>){
+        userlist.items = memList
+    }
     init {
         with(root) {
             val scale = settings.scaling
@@ -48,17 +49,15 @@ class RoomMemberListView(
                     showavataronly.set(showavataronly.not().get())
                 }
             }
-            val userlist = PrettyListView<Pair<UserId, Server>>()
             userlist.apply {
                 isFocusTraversable = false
-                items = memList
                 vgrow = Priority.ALWAYS
                 minWidth = 50.0 * scale
                 val ulwidth = doubleBinding(showavataronly) { scale * if(value) 50.0 else 138.0}
                 maxWidthProperty().bind(ulwidth)
                 prefWidthProperty().bind(ulwidth)
                 setCellFactory {
-                    MemberCell(showavataronly, userData, client)
+                    MemberCell(showavataronly, userData)
                 }
             }
             add(userlist)

@@ -55,13 +55,17 @@ class ChatView(roomList: ObservableList<Room>,
 
     override val root = hbox (spacing = 5.0)
 
-    private val server = account.server
     val roomListView = RoomListView(roomList, account, storage.database)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(server.url, storage.userData, server.km)
+    val switchableRoomView = SwitchableRoomView(account.server.km, storage.userData)
 
     init {
+        roomListView.root.selectionModel.selectedItemProperty().onChange { room ->
+            if (room != null) {
+                switchableRoomView.setRoom(room)
+            }
+        }
         root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
             if (e.code == KeyCode.PAGE_DOWN) switchableRoomView.scroll(true)
             else if (e.code == KeyCode.PAGE_UP) switchableRoomView.scroll(false)

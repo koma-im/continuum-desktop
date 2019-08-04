@@ -7,6 +7,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import koma.Koma
+import koma.Server
 import koma.koma_app.appState
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
@@ -17,19 +18,20 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * switch between chat rooms
  */
-class SwitchableRoomView(server: HttpUrl, userDataStore: UserDataStore,
-                         koma: Koma
+class SwitchableRoomView(
+         km: Koma,
+        userDataStore: UserDataStore
 ): View() {
     override val root = StackPane()
 
-    val roomProperty = SimpleObjectProperty<Room>()
-    private val viewCache = RoomViewCache(server, userDataStore, koma)
-    private val roomView: ObjectBinding<JoinedRoomView?>
+    private val roomView = JoinedRoomView(km, userDataStore)
 
     fun scroll(down: Boolean) {
-        val rv = roomView.value
-        rv?: return
+        val rv = roomView
         rv.scroll(down)
+    }
+    fun setRoom(room: Room) {
+        roomView.setRoom(room)
     }
 
     init {
@@ -37,24 +39,10 @@ class SwitchableRoomView(server: HttpUrl, userDataStore: UserDataStore,
         root.hgrow = Priority.ALWAYS
         val view = BorderPane()
         view.hgrow = Priority.ALWAYS
-        roomView = objectBinding(roomProperty) { value?.let { viewCache.getViewOfRoom(it) }}
-        val roomNode = objectBinding(roomView) { value?.root }
-        view.centerProperty().bind(roomNode)
-        roomProperty.bind(appState.currRoom)
+        view.center = roomView.root
         val placeholder = Label("Select a room to start chatting")//VBox()
         root.children.addAll(
                 placeholder,
                 view)
-    }
-}
-
-private class RoomViewCache(private val server: HttpUrl,
-                            private val userDataStore: UserDataStore,
-                            private val koma: Koma
-                            ) {
-    private val cachemap = ConcurrentHashMap<Room, JoinedRoomView>()
-
-    fun getViewOfRoom(room: Room): JoinedRoomView {
-        return cachemap.computeIfAbsent(room) {JoinedRoomView(it, server, userDataStore, koma)}
     }
 }
