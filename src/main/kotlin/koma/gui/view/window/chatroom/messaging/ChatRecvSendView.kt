@@ -28,9 +28,18 @@ class ChatRecvSendView(
     private val messageScroll = MessagesListScrollPane(km, store)
     private val messageInput = TextField()
     private val currentRoom = SimpleObjectProperty<RoomId>()
+    // messages typed but not sent in each room
+    private val roomInputs = mutableMapOf<RoomId, String>()
 
     fun scroll(down: Boolean) = messageScroll.scrollPage(down)
     fun setRoom(room: Room) {
+        currentRoom.value?.let {
+            roomInputs[it] =messageInput.text
+        }
+        messageInput.clear()
+        roomInputs[room.id]?.let {
+            messageInput.appendText(it)
+        }
         currentRoom.set(room.id)
         messageScroll.setList(room.messageManager.shownList, room.id)
     }
