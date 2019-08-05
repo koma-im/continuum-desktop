@@ -35,8 +35,11 @@ import javafx.scene.control.SkinBase
  * This class handles the interaction with the VirtualFlow class, which is the
  * main class handling the virtualization of the contents of this container.
  */
-abstract class KVirtualContainerBase<C : Control, I : IndexedCell<*>>
-(control: C) : SkinBase<C>(control) {
+abstract class KVirtualContainerBase<C, I, T>(
+        control: C
+): SkinBase<C>(control)
+        where C: Control,
+              I: IndexedCell<T> {
 
     /***************************************************************************
      * *
@@ -50,7 +53,7 @@ abstract class KVirtualContainerBase<C : Control, I : IndexedCell<*>>
      * The virtualized container which handles the layout and scrolling of
      * all the cells.
      */
-    protected val flow = KVirtualFlow<I>()
+    val flow = KVirtualFlow<I, T>()
 
 
     /***************************************************************************
@@ -66,7 +69,7 @@ abstract class KVirtualContainerBase<C : Control, I : IndexedCell<*>>
      */
     protected abstract val itemCount: Int
 
-    internal val virtualFlow: KVirtualFlow<I>
+    internal val virtualFlow: KVirtualFlow<I, T>
         get() = flow
 
     init {

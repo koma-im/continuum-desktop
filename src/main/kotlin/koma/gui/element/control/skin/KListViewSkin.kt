@@ -18,8 +18,9 @@ import koma.gui.element.control.behavior.ListViewBehavior
 import java.util.*
 
 
-class KListViewSkin<T>
-(control: ListView<T>) : KVirtualContainerBase<ListView<T>, ListCell<T>>(control) {
+class KListViewSkin<T>(
+        control: ListView<T>
+): KVirtualContainerBase<ListView<T>, ListCell<T>, T>(control) {
 
     /**
      * Region placed over the top of the flow (and possibly the header row) if
@@ -164,8 +165,6 @@ class KListViewSkin<T>
      * Public API                                                              *
      * *
      */
-
-    fun getVFlow() = flow
 
     /** {@inheritDoc}  */
     override fun dispose() {

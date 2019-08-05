@@ -12,7 +12,9 @@ import org.controlsfx.tools.Utils
  * to pixel based scrolling rather than thumb/track based scrolling, if the
  * "virtual" attribute is true.
  */
-class KVirtualScrollBar<T :IndexedCell<*>>(private val flow: KVirtualFlow<T>) : ScrollBar() {
+class KVirtualScrollBar<I, T>(private val flow: KVirtualFlow<I, T>
+) : ScrollBar()
+        where I: IndexedCell<T>{
 
     private var adjusting: Boolean = false
     private val virtual = SimpleBooleanProperty(this, "virtual")
