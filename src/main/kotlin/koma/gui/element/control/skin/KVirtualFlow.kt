@@ -1,3 +1,4 @@
+
 /**/
 
 package koma.gui.element.control.skin
@@ -30,14 +31,22 @@ import javafx.util.Duration
 import koma.gui.element.control.KVirtualScrollBar
 import koma.gui.element.control.NullableIndexRange
 import koma.gui.element.control.Utils
+import mu.KotlinLogging
 import java.util.*
 
+private val logger = KotlinLogging.logger {}
 /**
  * Implementation of a virtualized container using a cell based mechanism.
  */
-class KVirtualFlow<T :IndexedCell<*>> : Region() {
+class KVirtualFlow<I, T>
+    : Region()
+        where I :IndexedCell<T>{
 
     val visibleIndexRange = SimpleObjectProperty<NullableIndexRange>()
+    fun visibleFirst(): T? {
+        val i = firstVisibleCell?.item
+        return i
+    }
     /***************************************************************************
      * *
      * Private fields                                                          *
@@ -99,21 +108,21 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * view. When pixel scrolling, the list is simply shifted and items drop
      * off the beginning or the end, depending on the order of scrolling.
      */
-    internal val cells = ArrayLinkedList<T>()
+    internal val cells = ArrayLinkedList<I>()
 
     /**
      * A structure containing cells that can be reused later. These are cells
      * that at one time were needed to populate the view, but now are no longer
      * needed. We keep them here until they are needed again.
      */
-    internal val pile = ArrayLinkedList<T>()
+    internal val pile = ArrayLinkedList<I>()
 
     /**
      * A special cell used to accumulate bounds, such that we reduce object
      * churn. This cell must be recreated whenever the cell factory function
      * changes.
      */
-    internal var accumCell: T? = null
+    internal var accumCell: I? = null
 
     /**
      * This group is used for holding the 'accumCell'. 'accumCell' must
@@ -356,7 +365,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
 
 
     // --- Cell Factory
-    private var cellFactory: ObjectProperty<Callback<KVirtualFlow<T>, T>>? = null
+    private var cellFactory: ObjectProperty<Callback<KVirtualFlow<I, T>, I>>? = null
 
     /**
      * Locates and returns the last non-empty IndexedCell that is currently
@@ -364,11 +373,11 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * are no cells, or if the viewport length is 0.
      * @return the last visible cell
      */
-    val lastVisibleCell: T?
+    val lastVisibleCell: I?
         get() {
             if (cells.isEmpty() || viewportLength <= 0) return null
 
-            var cell: T?
+            var cell: I?
             for (i in cells.indices.reversed()) {
                 cell = cells[i]
                 if (!cell!!.isEmpty) {
@@ -385,11 +394,21 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * cells or the viewport length is 0.
      * @return the first visible cell
      */
-    val firstVisibleCell: T?
+    val firstVisibleCell: I?
         get() {
-            if (cells.isEmpty() || viewportLength <= 0) return null
+            if (cells.isEmpty()) {
+                logger.trace { "there are no cells" }
+                return null
+            }
+            if ( viewportLength <= 0) {
+                logger.debug { "the viewport length is 0." }
+                return null
+            }
             val cell = cells.first
-            return if (cell!!.isEmpty) null else cell
+            return if (cell!!.isEmpty) {
+                logger.trace { "cells.first isEmpty" }
+                null
+            } else cell
         }
 
     /**
@@ -421,11 +440,11 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
     // Returns last visible cell whose bounds are entirely within the viewport
     // we use the magic +2 to allow for a little bit of fuzziness,
     // this is to help in situations such as RT-34407
-    internal val lastVisibleCellWithinViewPort: T?
+    internal val lastVisibleCellWithinViewPort: I?
         get() {
             if (cells.isEmpty() || viewportLength <= 0) return null
 
-            var cell: T?
+            var cell: I?
             val max = viewportLength
             for (i in cells.indices.reversed()) {
                 cell = cells[i]
@@ -442,11 +461,11 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         }
 
     // Returns first visible cell whose bounds are entirely within the viewport
-    internal val firstVisibleCellWithinViewPort: T?
+    internal val firstVisibleCellWithinViewPort: I?
         get() {
             if (cells.isEmpty() || viewportLength <= 0) return null
 
-            var cell: T?
+            var cell: I?
             for (i in cells.indices) {
                 cell = cells[i]
                 if (cell!!.isEmpty) continue
@@ -460,7 +479,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
             return null
         }
 
-    private val privateCells = ArrayList<T>()
+    private val privateCells = ArrayList<I>()
 
     private val prefLength: Double
         get() {
@@ -836,7 +855,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * the new cell factory.
      * @param value the new cell factory
      */
-    fun setCellFactory(value: Callback<KVirtualFlow<T>, T>) {
+    fun setCellFactory(value: Callback<KVirtualFlow<I, T>, I>) {
         cellFactoryProperty().set(value)
     }
 
@@ -844,7 +863,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * Returns the current cell factory.
      * @return the current cell factory
      */
-    fun getCellFactory(): Callback<KVirtualFlow<T>, T>? {
+    fun getCellFactory(): Callback<KVirtualFlow<I, T>, I>? {
         return if (cellFactory == null) null else cellFactory!!.get()
     }
 
@@ -860,9 +879,9 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * Refer to the [Cell] class documentation for more detail.
      * @return  the cell factory property
      */
-    fun cellFactoryProperty(): ObjectProperty<Callback<KVirtualFlow<T>, T>> {
+    fun cellFactoryProperty(): ObjectProperty<Callback<KVirtualFlow<I, T>, I>> {
         if (cellFactory == null) {
-            cellFactory = object : SimpleObjectProperty<Callback<KVirtualFlow<T>, T>>(this, "cellFactory") {
+            cellFactory = object : SimpleObjectProperty<Callback<KVirtualFlow<I, T>, I>>(this, "cellFactory") {
                 override fun invalidated() {
                     if (get() != null) {
                         accumCell = null
@@ -1194,8 +1213,8 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * @param prefIndex the preferred index
      * @return the available cell
      */
-    protected fun getAvailableCell(prefIndex: Int): T {
-        var cell: T? = null
+    protected fun getAvailableCell(prefIndex: Int): I {
+        var cell: I? = null
 
         // Fix for RT-12822. We try to retrieve the cell from the pile rather
         // than just grab a random cell from the pile (or create another cell).
@@ -1252,7 +1271,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * @param index the index
      * @return the visible cell
      */
-    fun getVisibleCell(index: Int): T? {
+    fun getVisibleCell(index: Int): I? {
         if (cells.isEmpty()) return null
 
         // check the last index
@@ -1281,7 +1300,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * already be "live".
      * @param firstCell the first cell
      */
-    fun scrollToTop(firstCell: T?) {
+    fun scrollToTop(firstCell: I?) {
         if (firstCell != null) {
             scrollPixels(getCellPosition(firstCell))
         }
@@ -1293,7 +1312,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * already be "live".
      * @param lastCell the last cell
      */
-    fun scrollToBottom(lastCell: T?) {
+    fun scrollToBottom(lastCell: I?) {
         if (lastCell != null) {
             scrollPixels(getCellPosition(lastCell) + getCellLength(lastCell) - viewportLength)
         }
@@ -1304,7 +1323,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * the viewport (but only just).
      * @param cell the cell
      */
-    fun scrollTo(cell: T?) {
+    fun scrollTo(cell: I?) {
         if (cell != null) {
             val start = getCellPosition(cell)
             val length = getCellLength(cell)
@@ -1508,7 +1527,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * @param index the index
      * @return the cell
      */
-    fun getCell(index: Int): T? {
+    fun getCell(index: Int): I? {
         // If there are cells, then we will attempt to get an existing cell
         if (!cells.isEmpty()) {
             // First check the cells that have already been created and are
@@ -1570,7 +1589,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * @param cell The cell whose index will be updated.
      * @param index The new index for the cell.
      */
-    protected fun setCellIndex(cell: T?, index: Int) {
+    protected fun setCellIndex(cell: I?, index: Int) {
         assert(cell != null)
 
         cell!!.updateIndex(index)
@@ -1591,7 +1610,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * @param cell the cell
      * @return the index
      */
-    protected fun getCellIndex(cell: T?): Int {
+    protected fun getCellIndex(cell: I?): Int {
         return cell!!.index
     }
 
@@ -1624,7 +1643,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
     /**
      * Gets the length of a specific cell
      */
-    internal fun getCellLength(cell: T?): Double {
+    internal fun getCellLength(cell: I?): Double {
         if (cell == null) return 0.0
         if (fixedCellSizeEnabled) return getFixedCellSize()
 
@@ -1647,7 +1666,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
     /**
      * Gets the layout position of the cell along the length axis
      */
-    internal fun getCellPosition(cell: T?): Double {
+    internal fun getCellPosition(cell: I?): Double {
         if (cell == null) return 0.0
 
         return if (isVertical)
@@ -1656,7 +1675,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
             cell.layoutX
     }
 
-    private fun positionCell(cell: T?, position: Double) {
+    private fun positionCell(cell: I?, position: Double) {
         if (isVertical) {
             cell!!.layoutX = 0.0
             cell.setLayoutY(snapSizeY(position))
@@ -1666,7 +1685,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         }
     }
 
-    private fun resizeCellSize(cell: T?) {
+    private fun resizeCellSize(cell: I?) {
         if (cell == null) return
 
         if (isVertical) {
@@ -1703,7 +1722,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         // offset is our indication of whether we can lay out additional
         // cells. If the offset is ever < 0, except in the case of the very
         // first cell, then we must quit.
-        var cell: T?
+        var cell: I?
 
         // special case for the position == 1.0, skip adding last invisible cell
         if (index == getCellCount() && offset == viewportLength) {
@@ -2240,7 +2259,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
     /**
      * After using the accum cell, it needs to be released!
      */
-    private fun releaseCell(cell: T?) {
+    private fun releaseCell(cell: I?) {
         if (accumCell != null && cell === accumCell) {
             accumCell!!.updateIndex(-1)
         }
@@ -2252,8 +2271,8 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * given index and insert it into the sheet. From that point on it will be
      * unmanaged, and is up to the caller of this method to manage it.
      */
-    internal fun getPrivateCell(index: Int): T? {
-        var cell: T? = null
+    internal fun getPrivateCell(index: Int): I? {
+        var cell: I? = null
 
         // If there are cells, then we will attempt to get an existing cell
         if (!cells.isEmpty()) {
@@ -2272,7 +2291,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
         // check the existing sheet children
         if (cell == null) {
             for (i in sheetChildren.indices) {
-                val _cell = sheetChildren[i] as T
+                val _cell = sheetChildren[i] as I
                 if (getCellIndex(_cell) == index) {
                     return _cell
                 }
@@ -2303,7 +2322,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * Puts the given cell onto the pile. This is called whenever a cell has
      * fallen off the flow's start.
      */
-    private fun addToPile(cell: T) {
+    private fun addToPile(cell: I) {
         pile.addLast(cell)
     }
 
@@ -2337,7 +2356,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
             }
 
             var p: Parent? = focusOwner.parent
-            while (p != null && p !is KVirtualFlow<*>) {
+            while (p != null && p !is KVirtualFlow<*, *>) {
                 if (c == p) {
                     return true
                 }
@@ -2519,7 +2538,7 @@ class KVirtualFlow<T :IndexedCell<*>> : Region() {
      * A simple extension to Region that ensures that anything wanting to flow
      * outside of the bounds of the Region is clipped.
      */
-    internal class ClippedContainer(flow: KVirtualFlow<*>?) : Region() {
+    internal class ClippedContainer(flow: KVirtualFlow<*, *>?) : Region() {
 
         /**
          * The Node which is embedded within this `ClipView`.

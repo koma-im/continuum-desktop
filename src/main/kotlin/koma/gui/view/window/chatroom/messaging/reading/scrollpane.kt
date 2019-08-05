@@ -35,6 +35,8 @@ private class ViewRoomState(
         // whether the user has caught up to the newest messages
         //whether the list should scroll automatically
         val following:SimpleBooleanProperty = SimpleBooleanProperty(true),
+        //timestamp of last read message
+        var readStamp: Long? = null,
         // timestamp of lastest message in the room
         var lastTime: Long = 0
 )
@@ -71,10 +73,34 @@ class MessagesListScrollPane(
     }
 
     fun setList(msgs: ObservableList<EventItem>, roomId: RoomId) {
+        val cur = currentViewing
+        if (cur != null) {
+            val first = virtualList.visibleFirst()
+            if (first != null) {
+                val item = first
+                logger.debug { "room $cur has been read up to ${item.first.server_time}" }
+                roomStates[cur]?.readStamp = item.first.server_time
+            } else {
+                logger.warn { "can't find first visible message in $cur" }
+            }
+        }
         virtualList.items = msgs
+        //workaround. the first visible item may be null before any scrolling
+        virtualList.flow.scrollPixels(1.0)
         currentViewing = roomId
-        if (roomStates.containsKey(roomId)) return
-        logger.debug { "viewing now room $roomId" }
+        val s0 = roomStates[roomId]
+        if (s0 != null) {
+            s0.readStamp?.let {
+                logger.debug { "restore read position $it" }
+                virtualList.scrollBinarySearch(it, { it.first.server_time})
+                val actual = virtualList.visibleFirst()?.first?.server_time
+                if (actual!= it) {
+                    logger.debug { "read position restored to $actual" }
+                }
+            } ?: logger.warn  { "read position in $roomId is not stored" }
+            return
+        }
+        logger.debug { "viewing new room $roomId" }
         val s = ViewRoomState()
         roomStates[roomId] = s
         s.lastTime = Math.max(s.lastTime, msgs.lastOrNull()?.first?.server_time?: 0)
@@ -84,8 +110,8 @@ class MessagesListScrollPane(
         root.vgrow = Priority.ALWAYS
 
         virtualList = KListView()
-        virtualList.vgrow = Priority.ALWAYS
-        virtualList.hgrow = Priority.ALWAYS
+        virtualList.view.vgrow = Priority.ALWAYS
+        virtualList.view.hgrow = Priority.ALWAYS
 
         virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
             RoomEventCell(km, store)
@@ -101,12 +127,13 @@ class MessagesListScrollPane(
 
     private fun addVirtualScrollPane() {
         val virtualScroll = virtualList
-        virtualScroll.vgrow = Priority.ALWAYS
-        AnchorPane.setTopAnchor(virtualScroll, 0.0)
-        AnchorPane.setLeftAnchor(virtualScroll, 0.0)
-        AnchorPane.setRightAnchor(virtualScroll, 0.0)
-        AnchorPane.setBottomAnchor(virtualScroll, 0.0)
-        add(virtualScroll)
+        val node = virtualScroll.view
+        node.vgrow = Priority.ALWAYS
+        AnchorPane.setTopAnchor(node, 0.0)
+        AnchorPane.setLeftAnchor(node , 0.0)
+        AnchorPane.setRightAnchor(node , 0.0)
+        AnchorPane.setBottomAnchor(node , 0.0)
+        add(node)
     }
 
     private fun addScrollBottomButton() {

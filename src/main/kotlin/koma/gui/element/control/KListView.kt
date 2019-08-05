@@ -7,37 +7,53 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.WeakListChangeListener
+import javafx.event.Event
+import javafx.event.EventHandler
+import javafx.event.EventType
 import javafx.scene.AccessibleAttribute
+import javafx.scene.control.Control
 import javafx.scene.control.FocusModel
+import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
-import javafx.scene.control.Skin
+import javafx.scene.layout.Region
+import javafx.util.Callback
 import koma.gui.element.control.skin.KListViewSkin
 import koma.gui.element.control.skin.KVirtualFlow
 import koma.gui.element.emoji.keyboard.NoSelectionModel
-import tornadofx.*
 import java.lang.ref.WeakReference
 
 
-
-class KListView<T>: ListView<T> {
-    constructor(): super()
-    constructor(items: ObservableList<T>): super(items)
-    val visibleIndexRange = SimpleObjectProperty<NullableIndexRange>()
-    var flow: KVirtualFlow<*>? = null
+class KListView<T> {
+    private val listView = ListView<T>()
+    val view: Region
+        get() = listView
+    var items: ObservableList<T>?
+        get() = listView.items
+        set(value) {listView.items = value}
+    var cellFactory: Callback<ListView<T>, ListCell<T>>
+        get() = listView.cellFactory
+        set(value) {listView.cellFactory = value}
+    fun<E: Event> addEventFilter(t: EventType<E>, filter: (E)->Unit) = listView.addEventFilter(t, filter)
+    val visibleIndexRange: SimpleObjectProperty<NullableIndexRange>
+    val flow: KVirtualFlow<ListCell<T>, T>
     init {
-        this.selectionModel = NoSelectionModel()
-        this.focusModel = KListViewFocusModel(this)
-        this.skinProperty().onChange { it?.let  { onSkin(it) }}
+        val skin = KListViewSkin(listView)
+        listView.apply {
+            selectionModel = NoSelectionModel()
+            focusModel = KListViewFocusModel(this)
+            this.skin = skin
+        }
+        flow = skin.flow
+        val f = skin.flow
+        visibleIndexRange = f.visibleIndexRange
     }
-    private fun onSkin(skin: Skin<*>) {
-        if (skin !is KListViewSkin<*>) return
-        flow = skin.getVFlow()
-        val f = skin.getVFlow()
-        visibleIndexRange.cleanBind(f.visibleIndexRange)
+    fun visibleFirst(): T? = flow.visibleFirst()
+    fun<K: Comparable<K>> scrollBinarySearch(key: K, selector: (T)->K) {
+        val items = listView.items ?: return
+        val i = items.binarySearchBy(key, 0, items.size, selector)
+        listView.scrollTo(i)
     }
-    override fun createDefaultSkin(): Skin<*> {
-        return KListViewSkin(this)
-    }
+    fun scrollTo(index: Int) = listView.scrollTo(index)
 }
 
 class NullableIndexRange(
