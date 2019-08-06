@@ -16,6 +16,7 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        jcenter()
         maven("https://dl.bintray.com/jerady/maven")
         maven("https://jitpack.io")
         maven("https://repo.maven.apache.org/maven2")
@@ -52,11 +53,11 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.8.0-beta2")
     compile(project(":libutil"))
     compile(project(":libdatabase"))
-    implementation("io.requery:requery-kotlin:1.5.1")
+    implementation("io.requery:requery-kotlin:1.6.1")
 }
 
 group = "link.continuum"
-version = "0.9.14"
+version = "0.9.15"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"
