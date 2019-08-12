@@ -20,8 +20,12 @@ import javafx.util.Callback
 import koma.gui.element.control.skin.KListViewSkin
 import koma.gui.element.control.skin.KVirtualFlow
 import koma.gui.element.emoji.keyboard.NoSelectionModel
+import mu.KotlinLogging
+import tornadofx.onChange
+import tornadofx.onHover
 import java.lang.ref.WeakReference
 
+private val logger = KotlinLogging.logger {}
 
 class KListView<T> {
     private val listView = ListView<T>()
@@ -29,7 +33,9 @@ class KListView<T> {
         get() = listView
     var items: ObservableList<T>?
         get() = listView.items
-        set(value) {listView.items = value}
+        set(value) {
+            listView.items = value
+        }
     var cellFactory: Callback<ListView<T>, ListCell<T>>
         get() = listView.cellFactory
         set(value) {listView.cellFactory = value}
@@ -44,6 +50,10 @@ class KListView<T> {
             this.skin = skin
         }
         flow = skin.flow
+        listView.hoverProperty().addListener { _, _, hover ->
+            flow.vbar.isVisible = hover
+            flow.vbar.isManaged = hover
+        }
         val f = skin.flow
         visibleIndexRange = f.visibleIndexRange
     }

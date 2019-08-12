@@ -8,6 +8,7 @@ import javafx.geometry.Orientation
 import javafx.scene.AccessibleAction
 import javafx.scene.AccessibleAttribute
 import javafx.scene.Node
+import javafx.scene.control.IndexedCell
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
@@ -22,6 +23,8 @@ class KListViewSkin<T>(
         control: ListView<T>
 ): KVirtualContainerBase<ListView<T>, ListCell<T>, T>(control) {
 
+    public override val flow = KVirtualFlow<ListCell<T>, T>(
+            fixedCellSize = control.fixedCellSize.let { if (it > 0) it else null})
     /**
      * Region placed over the top of the flow (and possibly the header row) if
      * there is no data.
@@ -37,13 +40,6 @@ class KListViewSkin<T>(
 
     override var itemCount = -1
     private val behavior: ListViewBehavior<T>?
-
-
-    /***************************************************************************
-     * *
-     * Listeners                                                               *
-     * *
-     */
 
     private val propertiesMapListener = MapChangeListener<Any,Any> { c: MapChangeListener.Change<out Any, out Any> ->
         val RECREATE = "recreateKey"
@@ -111,9 +107,7 @@ class KListViewSkin<T>(
         // init the VirtualFlow
         flow.id = "virtual-flow"
         flow.isPannable = IS_PANNABLE
-        flow.isVertical = control.orientation == Orientation.VERTICAL
         flow.setCellFactory(Callback { createCell() })
-        flow.setFixedCellSize(control.fixedCellSize)
         children.add(flow)
 
         val ml: EventHandler<MouseEvent> = EventHandler {
@@ -134,7 +128,6 @@ class KListViewSkin<T>(
             }
         }
         flow.vbar.addEventFilter(MouseEvent.MOUSE_PRESSED, ml)
-        flow.hbar.addEventFilter(MouseEvent.MOUSE_PRESSED, ml)
 
         updateItemCount()
 
@@ -146,8 +139,6 @@ class KListViewSkin<T>(
 
         // Register listeners
         registerChangeListener(control.itemsProperty()) { updateListViewItems() }
-        registerChangeListener(control.orientationProperty()) {
-            flow.isVertical = control.orientation == Orientation.VERTICAL }
         registerChangeListener(control.cellFactoryProperty()) { _ -> flow.recreateCells() }
         registerChangeListener(control.parentProperty()) { _ ->
             if (control.parent != null && control.isVisible) {
@@ -155,25 +146,14 @@ class KListViewSkin<T>(
             }
         }
         registerChangeListener(control.placeholderProperty()) { _ -> updatePlaceholderRegionVisibility() }
-        registerChangeListener(control.fixedCellSizeProperty()
-        ) { _ -> flow.setFixedCellSize(control.fixedCellSize) }
     }
 
-
-    /***************************************************************************
-     * *
-     * Public API                                                              *
-     * *
-     */
-
-    /** {@inheritDoc}  */
     override fun dispose() {
         super.dispose()
 
         behavior?.dispose()
     }
 
-    /** {@inheritDoc}  */
     override fun layoutChildren(x: Double, y: Double,
                                 w: Double, h: Double) {
         super.layoutChildren(x, y, w, h)
@@ -189,16 +169,15 @@ class KListViewSkin<T>(
 
         if (itemCount == 0) {
             // show message overlay instead of empty listview
-            if (placeholderRegion != null) {
-                placeholderRegion!!.isVisible = w > 0 && h > 0
-                placeholderRegion!!.resizeRelocate(x, y, w, h)
+            placeholderRegion?.apply {
+                isVisible = w > 0 && h > 0
+                resizeRelocate(x, y, w, h)
             }
         } else {
             flow.resizeRelocate(x, y, w, h)
         }
     }
 
-    /** {@inheritDoc}  */
     override fun computePrefWidth(height: Double, topInset: Double, rightInset: Double, bottomInset: Double, leftInset: Double): Double {
         checkState()
 
@@ -214,12 +193,10 @@ class KListViewSkin<T>(
         return computePrefHeight(-1.0, topInset, rightInset, bottomInset, leftInset) * 0.618033987
     }
 
-    /** {@inheritDoc}  */
     override fun computePrefHeight(width: Double, topInset: Double, rightInset: Double, bottomInset: Double, leftInset: Double): Double {
         return 400.0
     }
 
-    /** {@inheritDoc}  */
     override fun updateItemCount() {
 
         val oldCount = itemCount
@@ -237,7 +214,6 @@ class KListViewSkin<T>(
         }
     }
 
-    /** {@inheritDoc}  */
     override fun queryAccessibleAttribute(attribute: AccessibleAttribute?, vararg parameters: Any): Any? {
         when (attribute) {
             AccessibleAttribute.FOCUS_ITEM -> {
@@ -273,12 +249,10 @@ class KListViewSkin<T>(
                 return FXCollections.observableArrayList<List<Node>>(selection)
             }
             AccessibleAttribute.VERTICAL_SCROLLBAR -> return flow.vbar
-            AccessibleAttribute.HORIZONTAL_SCROLLBAR -> return flow.hbar
             else -> return super.queryAccessibleAttribute(attribute, *parameters)
         }
     }
 
-    /** {@inheritDoc}  */
     override fun executeAccessibleAction(action: AccessibleAction, vararg parameters: Any) {
         when (action) {
            AccessibleAction.SHOW_ITEM -> {
@@ -306,13 +280,7 @@ class KListViewSkin<T>(
     }
 
 
-    /***************************************************************************
-     * *
-     * Private implementation                                                  *
-     * *
-     */
 
-    /** {@inheritDoc}  */
     private fun createCell(): ListCell<T> {
         val cell: ListCell<T>
         if (skinnable.cellFactory != null) {
@@ -510,12 +478,6 @@ class KListViewSkin<T>(
 
     companion object {
 
-        /***************************************************************************
-         * *
-         * Static Fields                                                           *
-         * *
-         */
-
         // RT-34744 : IS_PANNABLE will be false unless
         // javafx.scene.control.skin.ListViewSkin.pannable
         // is set to true. This is done in order to make ListView functional
@@ -523,12 +485,6 @@ class KListViewSkin<T>(
         // events for touch drag gestures.
         private val IS_PANNABLE = false
 
-
-        /***************************************************************************
-         * *
-         * Internal Fields                                                         *
-         * *
-         */
         private const val EMPTY_LIST_TEXT =  "ListView.noContent"
 
         private fun <T> createDefaultCellImpl(): ListCell<T> {

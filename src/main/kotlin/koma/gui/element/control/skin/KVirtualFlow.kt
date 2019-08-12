@@ -1,16 +1,10 @@
-
-/**/
-
 package koma.gui.element.control.skin
 
-import javafx.animation.KeyFrame
-import javafx.animation.Timeline
 import javafx.beans.Observable
 import javafx.beans.property.*
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
-import javafx.event.ActionEvent
 import javafx.event.Event
 import javafx.event.EventDispatchChain
 import javafx.event.EventHandler
@@ -24,10 +18,8 @@ import javafx.scene.control.IndexedCell
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import javafx.util.Callback
-import javafx.util.Duration
 import koma.gui.element.control.KVirtualScrollBar
 import koma.gui.element.control.NullableIndexRange
 import koma.gui.element.control.Utils
@@ -38,7 +30,14 @@ private val logger = KotlinLogging.logger {}
 /**
  * Implementation of a virtualized container using a cell based mechanism.
  */
-class KVirtualFlow<I, T>
+class KVirtualFlow<I, T>(
+        /**
+         * For optimisation purposes, some use cases can trade dynamic cell length
+         * for speed - if fixedCellSize is not null we'll use that rather
+         * than determine it by querying the cell itself.
+         */
+        private val fixedCellSize: Double? = null
+)
     : Region()
         where I :IndexedCell<T>{
 
@@ -74,15 +73,6 @@ class KVirtualFlow<I, T>
      * cells created and in use. In that case, lastCellCount would be 1000.
      */
     internal var lastCellCount = 0
-
-    /**
-     * We remember the last value for vertical the last time we laid out the
-     * flow. If vertical has changed, we will want to change the max & value
-     * for the different scroll bars. Since we do all the scroll bar update
-     * work in the layoutChildren function, we need to know what the old value for
-     * vertical was.
-     */
-    internal var lastVertical: Boolean = false
 
     /**
      * The position last time we laid out. If none of the lastXXX vars have
@@ -140,17 +130,6 @@ class KVirtualFlow<I, T>
     lateinit var sheetChildren: ObservableList<Node>
 
     /**
-     * The scroll bar used for scrolling horizontally.
-     */
-    /***************************************************************************
-     * *
-     * Private implementation                                                  *
-     * *
-     */
-
-    internal val hbar = KVirtualScrollBar(this)
-
-    /**
      * The scroll bar used to scrolling vertically.
      */
     internal val vbar = KVirtualScrollBar(this)
@@ -162,19 +141,10 @@ class KVirtualFlow<I, T>
      */
     internal var clipView: ClippedContainer
 
-    /**
-     * When both the horizontal and vertical scroll bars are visible,
-     * we have to 'fill in' the bottom right corner where the two scroll bars
-     * meet. This is handled by this corner region.
-     */
-    internal var corner: StackPane
-
     // used for panning the virtual flow
     private var lastX: Double = 0.toDouble()
     private var lastY: Double = 0.toDouble()
     private var isPanning = false
-
-    private var fixedCellSizeEnabled = false
 
     private var needsReconfigureCells = false // when cell contents are the same
     private var needsRecreateCells = false // when cell factory changed
@@ -182,14 +152,6 @@ class KVirtualFlow<I, T>
     private var needsCellsLayout = false
     private var sizeChanged = false
     private val dirtyCells = BitSet()
-
-    internal var sbTouchTimeline: Timeline? = null
-
-    private var needBreadthBar: Boolean = false
-    private var needLengthBar: Boolean = false
-    private var tempVisibility = false
-
-
 
     /***************************************************************************
      * *
@@ -250,20 +212,6 @@ class KVirtualFlow<I, T>
      * the actual width/height of a cell.
      */
 
-    // --- vertical
-    /**
-     * Indicates the primary direction of virtualization. If true, then the
-     * primary direction of virtualization is vertical, meaning that cells will
-     * stack vertically on top of each other. If false, then they will stack
-     * horizontally next to each other.
-     */
-    private var vertical: BooleanProperty? = null
-
-    var isVertical: Boolean
-        get() = if (vertical == null) true else vertical!!.get()
-        set(value) = verticalProperty().set(value)
-
-    // --- pannable
     /**
      * Indicates whether the VirtualFlow viewport is capable of being panned
      * by the user (either via the mouse or touch events).
@@ -293,7 +241,7 @@ class KVirtualFlow<I, T>
             // ensure that the virtual scrollbar adjusts in size based on the current
             // cell count.
             if (countChanged) {
-                val lengthBar = if (isVertical) vbar else hbar
+                val lengthBar = vbar
                 lengthBar.max = cellCount.toDouble()
             }
 
@@ -350,18 +298,8 @@ class KVirtualFlow<I, T>
     }
 
     // --- fixed cell size
-    /**
-     * For optimisation purposes, some use cases can trade dynamic cell length
-     * for speed - if fixedCellSize is greater than zero we'll use that rather
-     * than determine it by querying the cell itself.
-     */
-    private val fixedCellSize = object : SimpleDoubleProperty(this, "fixedCellSize") {
-        override fun invalidated() {
-            fixedCellSizeEnabled = get() > 0
-            needsCellsLayout = true
-            layoutChildren()
-        }
-    }
+
+
 
 
     // --- Cell Factory
@@ -530,17 +468,6 @@ class KVirtualFlow<I, T>
         // block the event from being passed down to children
         val blockEventDispatcher = { event: Event, _: EventDispatchChain -> event }
         // block ScrollEvent from being passed down to scrollbar's skin
-        val oldHsbEventDispatcher = hbar.eventDispatcher
-        hbar.setEventDispatcher { event, t ->
-            var tail = t
-            if (event.eventType == ScrollEvent.SCROLL && !(event as ScrollEvent).isDirect) {
-                tail = tail.prepend(blockEventDispatcher)
-                tail = tail.prepend(oldHsbEventDispatcher)
-                return@setEventDispatcher tail.dispatchEvent(event)
-            }
-            oldHsbEventDispatcher.dispatchEvent(event, tail)
-        }
-        // block ScrollEvent from being passed down to scrollbar's skin
         val oldVsbEventDispatcher = vbar.eventDispatcher
         vbar.setEventDispatcher { event, t ->
             var tail = t
@@ -557,52 +484,32 @@ class KVirtualFlow<I, T>
         ** scroll event handling.
         */
         onScroll = EventHandler { event ->
-            if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                if (touchDetected == false && mouseDown == false) {
-                    startSBReleasedAnimation()
-                }
-            }
             /**
              * calculate the delta in the direction of the flow.
              */
             var virtualDelta = 0.0
-            if (isVertical) {
-                @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
-                when (event.textDeltaYUnits) {
-                    ScrollEvent.VerticalTextScrollUnits.PAGES -> virtualDelta = event.textDeltaY * lastHeight
-                    ScrollEvent.VerticalTextScrollUnits.LINES -> {
-                        var lineSize: Double
-                        if (fixedCellSizeEnabled) {
-                            lineSize = getFixedCellSize()
-                        } else {
-                            // For the scrolling to be reasonably consistent
-                            // we set the lineSize to the average size
-                            // of all currently loaded lines.
-                            val lastCell = cells.last
-                            lineSize = (getCellPosition(lastCell) + getCellLength(lastCell) - getCellPosition(cells.first)) / cells.size
-                        }
-
-                        if (lastHeight / lineSize < MIN_SCROLLING_LINES_PER_PAGE) {
-                            lineSize = lastHeight / MIN_SCROLLING_LINES_PER_PAGE
-                        }
-
-                        virtualDelta = event.textDeltaY * lineSize
+            @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
+            when (event.textDeltaYUnits) {
+                ScrollEvent.VerticalTextScrollUnits.PAGES -> virtualDelta = event.textDeltaY * lastHeight
+                ScrollEvent.VerticalTextScrollUnits.LINES -> {
+                    var lineSize: Double
+                    lineSize = if (fixedCellSize != null) {
+                        fixedCellSize
+                    } else {
+                        // For the scrolling to be reasonably consistent
+                        // we set the lineSize to the average size
+                        // of all currently loaded lines.
+                        val lastCell = cells.last
+                        (getCellPosition(lastCell) + getCellLength(lastCell) - getCellPosition(cells.first)) / cells.size
                     }
-                    ScrollEvent.VerticalTextScrollUnits.NONE -> virtualDelta = event.deltaY
-                }
-            } else { // horizontal
-                @Suppress("WHEN_ENUM_CAN_BE_NULL_IN_JAVA")
-                when (event.textDeltaXUnits) {
-                    ScrollEvent.HorizontalTextScrollUnits.CHARACTERS,
-                        // can we get character size here?
-                        // for now, fall through to pixel values
-                    ScrollEvent.HorizontalTextScrollUnits.NONE -> {
-                        val dx = event.deltaX
-                        val dy = event.deltaY
 
-                        virtualDelta = if (Math.abs(dx) > Math.abs(dy)) dx else dy
+                    if (lastHeight / lineSize < MIN_SCROLLING_LINES_PER_PAGE) {
+                        lineSize = lastHeight / MIN_SCROLLING_LINES_PER_PAGE
                     }
+
+                    virtualDelta = event.textDeltaY * lineSize
                 }
+                ScrollEvent.VerticalTextScrollUnits.NONE -> virtualDelta = event.deltaY
             }
 
             if (virtualDelta != 0.0) {
@@ -614,30 +521,11 @@ class KVirtualFlow<I, T>
                     event.consume()
                 }
             }
-
-            val nonVirtualBar = if (isVertical) hbar else vbar
-            if (needBreadthBar) {
-                val nonVirtualDelta = if (isVertical) event.deltaX else event.deltaY
-                if (nonVirtualDelta != 0.0) {
-                    val newValue = nonVirtualBar.value - nonVirtualDelta
-                    if (newValue < nonVirtualBar.min) {
-                        nonVirtualBar.value = nonVirtualBar.min
-                    } else if (newValue > nonVirtualBar.max) {
-                        nonVirtualBar.value = nonVirtualBar.max
-                    } else {
-                        nonVirtualBar.value = newValue
-                    }
-                    event.consume()
-                }
-            }
         }
 
 
         addEventFilter(MouseEvent.MOUSE_PRESSED) { e ->
             mouseDown = true
-            if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                scrollBarOn()
-            }
             if (isFocusTraversable) {
                 // We check here to see if the current focus owner is within
                 // this VirtualFlow, and if so we back-off from requesting
@@ -673,30 +561,23 @@ class KVirtualFlow<I, T>
             // mouse events being 'doubled up' when dragging the scrollbar
             // thumb - it has the side-effect of also starting the panning
             // code, leading to flicker
-            isPanning = !(vbar.boundsInParent.contains(e.x, e.y) || hbar.boundsInParent.contains(e.x, e.y))
+            isPanning = !(vbar.boundsInParent.contains(e.x, e.y))
         }
         addEventFilter(MouseEvent.MOUSE_RELEASED) { _ ->
             mouseDown = false
-            if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                startSBReleasedAnimation()
-            }
         }
         addEventFilter(MouseEvent.MOUSE_DRAGGED) { e ->
-            if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                scrollBarOn()
-            }
             if (!isPanning || !isPannable) return@addEventFilter
 
             // With panning enabled, we support panning in both vertical
             // and horizontal directions, regardless of the fact that
             // VirtualFlow is virtual in only one direction.
-            val xDelta = lastX - e.x
             val yDelta = lastY - e.y
 
             // figure out the distance that the mouse moved in the virtual
             // direction, and then perform the movement along that axis
             // virtualDelta will contain the amount we actually did move
-            val virtualDelta = if (isVertical) yDelta else xDelta
+            val virtualDelta =  yDelta
             val actual = scrollPixels(virtualDelta)
             if (actual != 0.0) {
                 // update last* here, as we know we've just adjusted the
@@ -704,30 +585,7 @@ class KVirtualFlow<I, T>
                 // user presses-and-drags a long way past the min or max
                 // values, only to change directions and see the scrollbar
                 // start moving immediately.
-                if (isVertical)
                     lastY = e.y
-                else
-                    lastX = e.x
-            }
-
-            // similarly, we do the same in the non-virtual direction
-            val nonVirtualDelta = if (isVertical) xDelta else yDelta
-            val nonVirtualBar = if (isVertical) hbar else vbar
-            if (nonVirtualBar.isVisible) {
-                val newValue = nonVirtualBar.value + nonVirtualDelta
-                if (newValue < nonVirtualBar.min) {
-                    nonVirtualBar.value = nonVirtualBar.min
-                } else if (newValue > nonVirtualBar.max) {
-                    nonVirtualBar.value = nonVirtualBar.max
-                } else {
-                    nonVirtualBar.value = newValue
-
-                    // same as the last* comment above
-                    if (isVertical)
-                        lastX = e.x
-                    else
-                        lastY = e.y
-                }
             }
         }
 
@@ -743,27 +601,13 @@ class KVirtualFlow<I, T>
         vbar.addEventHandler(MouseEvent.ANY) { event -> event.consume() }
         children.add(vbar)
 
-        // --- hbar
-        hbar.orientation = Orientation.HORIZONTAL
-        hbar.addEventHandler(MouseEvent.ANY) { event -> event.consume() }
-        children.add(hbar)
-
-        // --- corner
-        corner = StackPane()
-        corner.styleClass.setAll("corner")
-        children.add(corner)
-
 
         // initBinds
         // clipView binds
-        val listenerX = { _: Observable -> updateHbar() }
-        verticalProperty().addListener(listenerX)
-        hbar.valueProperty().addListener(listenerX)
-        hbar.visibleProperty().addListener(listenerX)
 
         val listenerY = object : ChangeListener<Number> {
             override fun changed(ov: ObservableValue<out Number>?, t: Number?, t1: Number?) {
-                clipView.setClipY(if (isVertical) 0.0 else vbar.value)
+                clipView.setClipY(if (true) 0.0 else vbar.value)
             }
         }
         vbar.valueProperty().addListener(listenerY)
@@ -783,46 +627,12 @@ class KVirtualFlow<I, T>
         */
         setOnTouchPressed { _ ->
             touchDetected = true
-            scrollBarOn()
         }
 
         setOnTouchReleased { _ ->
             touchDetected = false
-            startSBReleasedAnimation()
         }
         setPosition(1.0)
-    }
-
-    fun verticalProperty(): BooleanProperty {
-        if (vertical == null) {
-            vertical = object : BooleanPropertyBase(true) {
-                override fun invalidated() {
-                    pile.clear()
-                    sheetChildren.clear()
-                    cells.clear()
-                    lastHeight = -1.0
-                    lastWidth = lastHeight
-                    maxPrefBreadth = -1.0
-                    viewportBreadth = 0.0
-                    viewportLength = 0.0
-                    lastPosition = 1.0
-                    hbar.value = 0.0
-                    vbar.value = 1.0
-                    setPosition(1.0)
-                    isNeedsLayout = true
-                    requestLayout()
-                }
-
-                override fun getBean(): Any {
-                    return this@KVirtualFlow
-                }
-
-                override fun getName(): String {
-                    return "vertical"
-                }
-            }
-        }
-        return vertical!!
     }
 
     fun getCellCount(): Int {
@@ -839,14 +649,6 @@ class KVirtualFlow<I, T>
 
     fun setPosition(value: Double) {
         position.set(value)
-    }
-
-    fun setFixedCellSize(value: Double) {
-        fixedCellSize.set(value)
-    }
-
-    fun getFixedCellSize(): Double {
-        return fixedCellSize.get()
     }
 
     /**
@@ -901,12 +703,6 @@ class KVirtualFlow<I, T>
                     lastVisibleCell?.index))
     }
 
-
-    /***************************************************************************
-     * *
-     * Public API                                                              *
-     * *
-     */
     fun scroll(r: Float) {
         scrollPixels(r * lastHeight)
     }
@@ -969,7 +765,6 @@ class KVirtualFlow<I, T>
 
         val width = width
         val height = height
-        val isVertical = isVertical
         val position = getPosition()
 
         // if the width and/or height is 0, then there is no point doing
@@ -978,9 +773,7 @@ class KVirtualFlow<I, T>
             addAllToPile()
             lastWidth = width
             lastHeight = height
-            hbar.isVisible = false
             vbar.isVisible = false
-            corner.isVisible = false
             return
         }
 
@@ -990,13 +783,6 @@ class KVirtualFlow<I, T>
         // 'jump' (in height normally) when the user drags the virtual thumb as
         // that is the first time the layout would occur otherwise.
         var cellNeedsLayout = false
-        var thumbNeedsLayout = false
-
-        if (koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-            if (tempVisibility && (!hbar.isVisible || !vbar.isVisible) || !tempVisibility && (hbar.isVisible || vbar.isVisible)) {
-                thumbNeedsLayout = true
-            }
-        }
 
         cellNeedsLayout = cellNeedsLayout || cells.any { it.isNeedsLayout }
 
@@ -1007,7 +793,7 @@ class KVirtualFlow<I, T>
         // If no cells need layout, we check other criteria to see if this
         // layout call is even necessary. If it is found that no layout is
         // needed, we just punt.
-        if (!cellNeedsLayout && !thumbNeedsLayout) {
+        if (!cellNeedsLayout) {
             var cellSizeChanged = false
             if (firstCell != null) {
                 val breadth = getCellBreadth(firstCell)
@@ -1019,8 +805,7 @@ class KVirtualFlow<I, T>
 
             if (width == lastWidth &&
                     height == lastHeight &&
-                    cellCount == lastCellCount &&
-                    isVertical == lastVertical &&
+                    cellCount == lastCellCount  &&
                     position == lastPosition &&
                     !cellSizeChanged) {
                 // TODO this happens to work around the problem tested by
@@ -1089,13 +874,11 @@ class KVirtualFlow<I, T>
          */
         var needTrailingCells = false
         var rebuild = cellNeedsLayout ||
-                isVertical != lastVertical ||
                 cells.isEmpty() ||
                 maxPrefBreadth == -1.0 ||
                 position != lastPosition ||
                 cellCount != lastCellCount ||
-                hasSizeChange ||
-                isVertical && height < lastHeight || !isVertical && width < lastWidth
+                hasSizeChange || height < lastHeight
 
         if (!rebuild) {
             // Check if maxPrefBreadth didn't change
@@ -1116,7 +899,7 @@ class KVirtualFlow<I, T>
         }
 
         if (!rebuild) {
-            if (isVertical && height > lastHeight || !isVertical && width > lastWidth) {
+            if (true && height > lastHeight || !true && width > lastWidth) {
                 // resized in the virtual direction
                 needTrailingCells = true
             }
@@ -1172,21 +955,17 @@ class KVirtualFlow<I, T>
             addTrailingCells(true)
         }
 
-        computeBarVisiblity()
-
         recreatedOrRebuilt = recreatedOrRebuilt || rebuild
         updateScrollBarsAndCells(recreatedOrRebuilt)
 
         lastWidth = getWidth()
         lastHeight = getHeight()
         lastCellCount = getCellCount()
-        lastVertical = isVertical
         lastPosition = getPosition()
 
         cleanPile()
     }
 
-    /** {@inheritDoc}  */
     override fun setWidth(value: Double) {
         if (value != lastWidth) {
             super.setWidth(value)
@@ -1196,7 +975,6 @@ class KVirtualFlow<I, T>
         }
     }
 
-    /** {@inheritDoc}  */
     override fun setHeight(value: Double) {
         if (value != lastHeight) {
             super.setHeight(value)
@@ -1395,10 +1173,6 @@ class KVirtualFlow<I, T>
         // Short cut this method for cases where nothing should be done
         if (delta == 0.0) return 0.0
 
-        val isVertical = isVertical
-        if (isVertical && if (tempVisibility) !needLengthBar else !vbar.isVisible || !isVertical && if (tempVisibility) !needLengthBar else !hbar.isVisible)
-            return 0.0
-
         val pos = getPosition()
         if (pos == 0.0 && delta < 0) return 0.0
         if (pos == 1.0 && delta > 0) return 0.0
@@ -1507,16 +1281,14 @@ class KVirtualFlow<I, T>
         return delta // TODO fake
     }
 
-    /** {@inheritDoc}  */
     override fun computePrefWidth(height: Double): Double {
-        val w = if (isVertical) getPrefBreadth(height) else prefLength
+        val w = getPrefBreadth(height)
         return w + vbar.prefWidth(-1.0)
     }
 
-    /** {@inheritDoc}  */
     override fun computePrefHeight(width: Double): Double {
-        val h = if (isVertical) prefLength else getPrefBreadth(width)
-        return h + hbar.prefHeight(-1.0)
+        val h = prefLength
+        return h
     }
 
     /**
@@ -1623,7 +1395,7 @@ class KVirtualFlow<I, T>
      * to use a cell as a helper for computing cell size in some cases.
      */
     internal fun getCellLength(index: Int): Double {
-        if (fixedCellSizeEnabled) return getFixedCellSize()
+        if (fixedCellSize != null) return fixedCellSize
 
         val cell = getCell(index)
         val length = getCellLength(cell)
@@ -1645,9 +1417,9 @@ class KVirtualFlow<I, T>
      */
     internal fun getCellLength(cell: I?): Double {
         if (cell == null) return 0.0
-        if (fixedCellSizeEnabled) return getFixedCellSize()
+        if (fixedCellSize != null) return fixedCellSize
 
-        return if (isVertical)
+        return if (true)
             cell.layoutBounds.height
         else
             cell.layoutBounds.width
@@ -1657,7 +1429,7 @@ class KVirtualFlow<I, T>
      * Gets the breadth of a specific cell
      */
     internal fun getCellBreadth(cell: Cell<*>?): Double {
-        return if (isVertical)
+        return if (true)
             cell!!.prefWidth(-1.0)
         else
             cell!!.prefHeight(-1.0)
@@ -1669,32 +1441,24 @@ class KVirtualFlow<I, T>
     internal fun getCellPosition(cell: I?): Double {
         if (cell == null) return 0.0
 
-        return if (isVertical)
-            cell.layoutY
-        else
-            cell.layoutX
+        return cell.layoutY
     }
 
     private fun positionCell(cell: I?, position: Double) {
-        if (isVertical) {
-            cell!!.layoutX = 0.0
-            cell.setLayoutY(snapSizeY(position))
-        } else {
-            cell!!.layoutX = snapSizeX(position)
-            cell.setLayoutY(0.0)
-        }
+        cell!!.layoutX = 0.0
+        cell.setLayoutY(snapSizeY(position))
     }
 
     private fun resizeCellSize(cell: I?) {
         if (cell == null) return
 
-        if (isVertical) {
+        if (true) {
             val width = Math.max(maxPrefBreadth, viewportBreadth)
-            cell.resize(width, if (fixedCellSizeEnabled) getFixedCellSize() else
+            cell.resize(width, if (fixedCellSize != null) fixedCellSize else
                 Utils.boundedSize(cell.prefHeight(width), cell.minHeight(width), cell.maxHeight(width)))
         } else {
             val height = Math.max(maxPrefBreadth, viewportBreadth)
-            cell.resize(if (fixedCellSizeEnabled) getFixedCellSize() else
+            cell.resize(if (fixedCellSize != null) fixedCellSize else
                 Utils.boundedSize(cell.prefWidth(height), cell.minWidth(height), cell.maxWidth(height)), height)
         }
     }
@@ -1767,7 +1531,6 @@ class KVirtualFlow<I, T>
         } else {
             // reset scrollbar to top, so if the flow sees cells again it starts at the top
             vbar.value = 0.0
-            hbar.value = 0.0
         }
     }
 
@@ -1907,142 +1670,20 @@ class KVirtualFlow<I, T>
         requestLayout()
     }
 
-    private fun startSBReleasedAnimation() {
-         val sbTouchKF1: KeyFrame
-         val sbTouchKF2: KeyFrame
-        if (sbTouchTimeline == null) {
-            /*
-            ** timeline to leave the scrollbars visible for a short
-            ** while after a scroll/drag
-            */
-            sbTouchTimeline = Timeline()
-            sbTouchKF1 = KeyFrame(Duration.millis(0.0),
-                    EventHandler<ActionEvent> {
-                        tempVisibility = true
-                        requestLayout()
-                    })
-
-            sbTouchKF2 = KeyFrame(Duration.millis(1000.0), EventHandler<ActionEvent> {
-                if (touchDetected == false && mouseDown == false) {
-                    tempVisibility = false
-                    requestLayout()
-                }
-            })
-            sbTouchTimeline!!.keyFrames.addAll(sbTouchKF1, sbTouchKF2)
-        }
-        sbTouchTimeline!!.playFromStart()
-    }
-
-    private fun scrollBarOn() {
-        tempVisibility = true
-        requestLayout()
-    }
-
-    internal fun updateHbar() {
-        if (!isVisible || scene == null) return
-        // Bring the clipView.clipX back to 0 if control is vertical or
-        // the hbar isn't visible (fix for RT-11666)
-        if (isVertical) {
-            if (hbar.isVisible) {
-                clipView.setClipX(hbar.value)
-            } else {
-                // all cells are now less than the width of the flow,
-                // so we should shift the hbar/clip such that
-                // everything is visible in the viewport.
-                clipView.setClipX(0.0)
-                hbar.value = 0.0
-            }
-        }
-    }
-
-    /**
-     * @return true if bar visibility changed
-     */
-    private fun computeBarVisiblity(): Boolean {
-        if (cells.isEmpty()) {
-            // In case no cells are set yet, we assume no bars are needed
-            needLengthBar = false
-            needBreadthBar = false
-            return true
-        }
-
-        val isVertical = isVertical
-        var barVisibilityChanged = false
-
-        val breadthBar = if (isVertical) hbar else vbar
-        val lengthBar = if (isVertical) vbar else hbar
-
-        val viewportBreadth = viewportBreadth
-
-        val cellsSize = cells.size
-        val cellCount = getCellCount()
-        for (i in 0..1) {
-            val lengthBarVisible = (getPosition() > 0
-                    || cellCount > cellsSize
-                    || cellCount == cellsSize && getCellPosition(cells.last) + getCellLength(cells.last) > viewportLength
-                    || cellCount == cellsSize - 1 && barVisibilityChanged && needBreadthBar)
-
-            if (lengthBarVisible xor needLengthBar) {
-                needLengthBar = lengthBarVisible
-                barVisibilityChanged = true
-            }
-
-            // second conditional removed for RT-36669.
-            val breadthBarVisible = maxPrefBreadth > viewportBreadth// || (needLengthBar && maxPrefBreadth > (viewportBreadth - lengthBarBreadth));
-            if (breadthBarVisible xor needBreadthBar) {
-                needBreadthBar = breadthBarVisible
-                barVisibilityChanged = true
-            }
-        }
-
-        // Start by optimistically deciding whether the length bar and
-        // breadth bar are needed and adjust the viewport dimensions
-        // accordingly. If during layout we find that one or the other of the
-        // bars actually is needed, then we will perform a cleanup pass
-
-        if (!koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-            updateViewportDimensions()
-            breadthBar.isVisible = needBreadthBar
-            lengthBar.isVisible = needLengthBar
-        } else {
-            breadthBar.isVisible = needBreadthBar && tempVisibility
-            lengthBar.isVisible = needLengthBar && tempVisibility
-        }
-
-        return barVisibilityChanged
-    }
-
     private fun updateViewportDimensions() {
-        val isVertical = isVertical
-        val breadthBarLength = if (isVertical) snapSizeY(hbar.prefHeight(-1.0)) else snapSizeX(vbar.prefWidth(-1.0))
-        val lengthBarBreadth = if (isVertical) snapSizeX(vbar.prefWidth(-1.0)) else snapSizeY(hbar.prefHeight(-1.0))
-
-        viewportBreadth = (if (isVertical) width else height) - if (needLengthBar) lengthBarBreadth else 0.0
-        viewportLength = (if (isVertical) height else width) - if (needBreadthBar) breadthBarLength else 0.0
+        viewportBreadth = width - snapSizeX(vbar.prefWidth(-1.0))
+        viewportLength = height
     }
 
     private fun initViewport() {
         // Initialize the viewportLength and viewportBreadth to match the
         // width/height of the flow
-        val isVertical = isVertical
 
         updateViewportDimensions()
-
-        val breadthBar = if (isVertical) hbar else vbar
-        val lengthBar = if (isVertical) vbar else hbar
-
-        // If there has been a switch between the virtualized bar, then we
-        // will want to do some stuff TODO.
-        breadthBar.isVirtual = false
-        lengthBar.isVirtual = true
     }
 
     private fun updateScrollBarsAndCells(recreate: Boolean) {
-        // Assign the hbar and vbar to the breadthBar and lengthBar so as
-        // to make some subsequent calculations easier.
-        val isVertical = isVertical
-        val breadthBar = if (isVertical) hbar else vbar
-        val lengthBar = if (isVertical) vbar else hbar
+        val lengthBar = vbar
 
         // We may have adjusted the viewport length and breadth after the
         // layout due to scroll bars becoming visible. So we need to perform
@@ -2089,57 +1730,12 @@ class KVirtualFlow<I, T>
             }
         }
 
-        // Toggle visibility on the corner
-        corner.isVisible = breadthBar.isVisible && lengthBar.isVisible
-
         var sumCellLength = 0.0
-        val flowLength = (if (isVertical) height else width) - if (breadthBar.isVisible) breadthBar.prefHeight(-1.0) else 0.0
-
-        val viewportBreadth = viewportBreadth
-        val viewportLength = viewportLength
-
-        // Now position and update the scroll bars
-        if (breadthBar.isVisible) {
-            /*
-            ** Positioning the ScrollBar
-            */
-            if (!koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                if (isVertical) {
-                    hbar.resizeRelocate(0.0, viewportLength,
-                            viewportBreadth, hbar.prefHeight(viewportBreadth))
-                } else {
-                    vbar.resizeRelocate(viewportLength, 0.0,
-                            vbar.prefWidth(viewportBreadth), viewportBreadth)
-                }
-            } else {
-                if (isVertical) {
-                    hbar.resizeRelocate(0.0, viewportLength - hbar.height,
-                            viewportBreadth, hbar.prefHeight(viewportBreadth))
-                } else {
-                    vbar.resizeRelocate(viewportLength - vbar.width, 0.0,
-                            vbar.prefWidth(viewportBreadth), viewportBreadth)
-                }
-            }
-
-            if (maxPrefBreadth != -1.0) {
-                val newMax = Math.max(1.0, maxPrefBreadth - viewportBreadth)
-                if (newMax != breadthBar.max) {
-                    breadthBar.max = newMax
-
-                    val breadthBarValue = breadthBar.value
-                    val maxed = breadthBarValue != 0.0 && newMax == breadthBarValue
-                    if (maxed || breadthBarValue > newMax) {
-                        breadthBar.value = newMax
-                    }
-
-                    breadthBar.visibleAmount = viewportBreadth / maxPrefBreadth * newMax
-                }
-            }
-        }
+        val flowLength = (height)
 
         // determine how many cells there are on screen so that the scrollbar
         // thumb can be appropriately sized
-        if (recreate && (lengthBar.isVisible || koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED)) {
+        if (recreate && (lengthBar.isVisible || Utils.IS_TOUCH_SUPPORTED)) {
             val cellCount = getCellCount()
             var numCellsVisibleOnScreen = 0
             var i = 0
@@ -2147,7 +1743,7 @@ class KVirtualFlow<I, T>
             while (i < max) {
                 val cell = cells[i]
                 if (cell != null && !cell.isEmpty) {
-                    sumCellLength += if (isVertical) cell.height else cell.width
+                    sumCellLength += cell.height
                     if (sumCellLength > flowLength) {
                         break
                     }
@@ -2167,52 +1763,10 @@ class KVirtualFlow<I, T>
             }
         }
 
-        if (lengthBar.isVisible) {
-            // Fix for RT-11873. If this isn't here, we can have a situation where
-            // the scrollbar scrolls endlessly. This is possible when the cell
-            // count grows as the user hits the maximal position on the scrollbar
-            // (i.e. the list size dynamically grows as the user needs more).
-            //
-            // This code was commented out to resolve RT-14477 after testing
-            // whether RT-11873 can be recreated. It could not, and therefore
-            // for now this code will remained uncommented until it is deleted
-            // following further testing.
-            //            if (lengthBar.getValue() == 1.0 && lastCellCount != cellCount) {
-            //                lengthBar.setValue(0.99);
-            //            }
+        vbar.resizeRelocate(viewportBreadth, 0.0, vbar.prefWidth(viewportLength), viewportLength)
 
-            /*
-            ** Positioning the ScrollBar
-            */
-            if (!koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                if (isVertical) {
-                    vbar.resizeRelocate(viewportBreadth, 0.0, vbar.prefWidth(viewportLength), viewportLength)
-                } else {
-                    hbar.resizeRelocate(0.0, viewportBreadth, viewportLength, hbar.prefHeight(-1.0))
-                }
-            } else {
-                if (isVertical) {
-                    vbar.resizeRelocate(viewportBreadth - vbar.width, 0.0, vbar.prefWidth(viewportLength), viewportLength)
-                } else {
-                    hbar.resizeRelocate(0.0, viewportBreadth - hbar.height, viewportLength, hbar.prefHeight(-1.0))
-                }
-            }
-        }
-
-        if (corner.isVisible) {
-            if (!koma.gui.element.control.Utils.IS_TOUCH_SUPPORTED) {
-                corner.resize(vbar.width, hbar.height)
-                corner.relocate(hbar.layoutX + hbar.width, vbar.layoutY + vbar.height)
-            } else {
-                corner.resize(vbar.width, hbar.height)
-                corner.relocate(hbar.layoutX + (hbar.width - vbar.width), vbar.layoutY + (vbar.height - hbar.height))
-                hbar.resize(hbar.width - vbar.width, hbar.height)
-                vbar.resize(vbar.width, vbar.height - hbar.height)
-            }
-        }
-
-        clipView.resize(snapSizeX(if (isVertical) viewportBreadth else viewportLength),
-                snapSizeY(if (isVertical) viewportLength else viewportBreadth))
+        clipView.resize(snapSizeX(viewportBreadth),
+                snapSizeY(viewportLength))
 
         // If the viewportLength becomes large enough that all cells fit
         // within the viewport, then we want to update the value to match.
@@ -2229,17 +1783,12 @@ class KVirtualFlow<I, T>
      */
     private fun fitCells() {
         val size = Math.max(maxPrefBreadth, viewportBreadth)
-        val isVertical = isVertical
 
         // Note: Do not optimise this loop by pre-calculating the cells size and
         // storing that into a int value - this can lead to RT-32828
         for (i in cells.indices) {
             val cell = cells[i]
-            if (isVertical) {
-                cell!!.resize(size, cell.prefHeight(size))
-            } else {
-                cell!!.resize(cell.prefWidth(size), size)
-            }
+            cell!!.resize(size, cell.prefHeight(size))
         }
     }
 
@@ -2291,6 +1840,7 @@ class KVirtualFlow<I, T>
         // check the existing sheet children
         if (cell == null) {
             for (i in sheetChildren.indices) {
+                @Suppress("UNCHECKED_CAST")
                 val _cell = sheetChildren[i] as I
                 if (getCellIndex(_cell) == index) {
                     return _cell
@@ -2552,11 +2102,6 @@ class KVirtualFlow<I, T>
             }
 
         private val clipRect: Rectangle
-
-        fun setClipX(clipX: Double) {
-            layoutX = -clipX
-            clipRect.layoutX = clipX
-        }
 
         fun setClipY(clipY: Double) {
             layoutY = -clipY

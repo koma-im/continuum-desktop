@@ -40,32 +40,17 @@ abstract class KVirtualContainerBase<C, I, T>(
 ): SkinBase<C>(control)
         where C: Control,
               I: IndexedCell<T> {
-
-    /***************************************************************************
-     * *
-     * Private fields                                                          *
-     * *
-     */
-
     private var itemCountDirty: Boolean = false
 
     /**
      * The virtualized container which handles the layout and scrolling of
      * all the cells.
      */
-    val flow = KVirtualFlow<I, T>()
-
-
-    /***************************************************************************
-     * *
-     * Abstract API                                                            *
-     * *
-     */
+    protected open val flow = KVirtualFlow<I, T>()
 
     /**
-     * Returns the total number of items in this container, including those
-     * that are currently hidden because they are out of view.
-     * @return the total number of items in this container
+     * the total number of items in this container
+     * including those that are currently hidden because they are out of view?
      */
     protected abstract val itemCount: Int
 
@@ -92,13 +77,6 @@ abstract class KVirtualContainerBase<C, I, T>(
      */
     protected abstract fun updateItemCount()
 
-
-    /***************************************************************************
-     * *
-     * Public API                                                              *
-     * *
-     */
-
     /**
      * Call this method to indicate that the item count should be updated on the next pulse.
      */
@@ -106,17 +84,9 @@ abstract class KVirtualContainerBase<C, I, T>(
         itemCountDirty = true
     }
 
-    /** {@inheritDoc}  */
     override fun layoutChildren(x: Double, y: Double, w: Double, h: Double) {
         checkState()
     }
-
-
-    /***************************************************************************
-     * *
-     * Private methods                                                         *
-     * *
-     */
 
     internal fun getMaxCellWidth(rowsToCount: Int): Double {
         return snappedLeftInset() + flow.getMaxCellWidth(rowsToCount) + snappedRightInset()
