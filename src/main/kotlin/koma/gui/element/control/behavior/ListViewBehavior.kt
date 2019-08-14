@@ -59,7 +59,7 @@ class ListViewBehavior<T>
 
     private var selectionChanging = false
 
-    private val selectedIndicesListener = ListChangeListener { c: ListChangeListener.Change<out Int> ->
+    private fun selectedIndicesChange(c: ListChangeListener.Change<out Int>) {
         var newAnchor = anchor
 
         while (c.next()) {
@@ -95,8 +95,9 @@ class ListViewBehavior<T>
             anchor = newAnchor
         }
     }
+    private val selectedIndicesListener = ListChangeListener<Int> { selectedIndicesChange(it) }
 
-    private val itemsListListener = ListChangeListener { c: ListChangeListener.Change<out T> ->
+    private fun itemsListChange(c: ListChangeListener.Change<out T>) {
         while (c.next()) {
             if (!hasAnchor()) continue
 
@@ -111,6 +112,7 @@ class ListViewBehavior<T>
             anchor = if (newAnchor < 0) 0 else newAnchor
         }
     }
+    private val itemsListListener = ListChangeListener<T> { itemsListChange(it) }
 
     private val itemsListener = ChangeListener<ObservableList<T>> { _, oldValue, newValue ->
         oldValue?.removeListener(weakItemsListListener)

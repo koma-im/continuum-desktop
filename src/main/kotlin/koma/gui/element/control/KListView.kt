@@ -87,9 +87,14 @@ internal class KListViewFocusModel<T>(private val listView: ListView<T>) : Focus
 
     private val itemsObserver: InvalidationListener
 
+
     // Listen to changes in the listview items list, such that when it
     // changes we can update the focused index to refer to the new indices.
-    private val itemsContentListener = ListChangeListener<T>{ c: ListChangeListener.Change<out T> ->
+    private val itemsContentListener = ListChangeListener<T>{ c ->
+       updateFocusedIndex(c)
+    }
+
+    private fun updateFocusedIndex(c: ListChangeListener.Change<out T>) {
         updateItemCount()
 
         while (c.next()) {
@@ -98,11 +103,11 @@ internal class KListViewFocusModel<T>(private val listView: ListView<T>) : Focus
 
             if (c.wasReplaced() || c.getAddedSize() == getItemCount()) {
                 updateDefaultFocus()
-                return@ListChangeListener
+                return
             }
 
             if (focusedIndex == -1 || from > focusedIndex) {
-                return@ListChangeListener
+                return
             }
 
             c.reset()
