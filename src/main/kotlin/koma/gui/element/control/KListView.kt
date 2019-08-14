@@ -27,7 +27,10 @@ import java.lang.ref.WeakReference
 
 private val logger = KotlinLogging.logger {}
 
-class KListView<T> {
+class KListView<T, I: ListCell<T>>(
+        cellPool: CellPool<I, T> = SimpleCellPool<I, T>(),
+        val cellCreator: (T?)->I
+) {
     private val listView = ListView<T>()
     val view: Region
         get() = listView
@@ -36,14 +39,11 @@ class KListView<T> {
         set(value) {
             listView.items = value
         }
-    var cellFactory: Callback<ListView<T>, ListCell<T>>
-        get() = listView.cellFactory
-        set(value) {listView.cellFactory = value}
     fun<E: Event> addEventFilter(t: EventType<E>, filter: (E)->Unit) = listView.addEventFilter(t, filter)
     val visibleIndexRange: SimpleObjectProperty<NullableIndexRange>
-    val flow: KVirtualFlow<ListCell<T>, T>
+    val flow: KVirtualFlow<I, T>
     init {
-        val skin = KListViewSkin(listView)
+        val skin = KListViewSkin(listView, cellPool, this)
         listView.apply {
             selectionModel = NoSelectionModel()
             focusModel = KListViewFocusModel(this)

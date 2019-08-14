@@ -5,6 +5,7 @@ import javafx.scene.layout.Priority
 import koma.Koma
 import koma.gui.view.usersview.RoomMemberListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
+import koma.koma_app.AppStore
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.gui.list.user.UserDataStore
 import model.Room
@@ -18,12 +19,12 @@ import tornadofx.*
  */
 class JoinedRoomView(
         km: Koma,
-        userData: UserDataStore
+        store: AppStore
 ): View() {
     override val root = HBox()
 
-    val messageRecvSendView = ChatRecvSendView(km, userData)
-    val usersListView = RoomMemberListView(userData)
+    val messageRecvSendView = ChatRecvSendView(km, store)
+    val usersListView = RoomMemberListView(store.userData)
 
     @ObsoleteCoroutinesApi
     fun scroll(down: Boolean) = messageRecvSendView.scroll(down)

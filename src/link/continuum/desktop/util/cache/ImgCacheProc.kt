@@ -3,6 +3,7 @@ package link.continuum.desktop.util.cache
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import koma.util.getOr
+import koma.util.getOrThrow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.util.http.downloadHttp
@@ -39,7 +40,9 @@ open class ImgCacheProc(
     private fun createImageProperty(url: HttpUrl): ImageProperty {
         val prop = ImageProperty()
         launch {
-            val bs = downloadHttp(url, client, maxStale) getOr { return@launch }
+            val d = downloadHttp(url, client, maxStale)
+            if (d.isFailure) return@launch
+            val bs =  d.getOrThrow()
             val img = processing(bs.inputStream())
             withContext(Dispatchers.JavaFx) { prop.set(img) }
         }

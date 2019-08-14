@@ -25,10 +25,7 @@
 
 package koma.gui.element.control.skin
 
-import javafx.scene.control.Control
-import javafx.scene.control.IndexedCell
-import javafx.scene.control.ScrollToEvent
-import javafx.scene.control.SkinBase
+import javafx.scene.control.*
 
 /**
  * Parent class to control skins whose contents are virtualized and scrollable.
@@ -39,14 +36,14 @@ abstract class KVirtualContainerBase<C, I, T>(
         control: C
 ): SkinBase<C>(control)
         where C: Control,
-              I: IndexedCell<T> {
+              I: ListCell<T> {
     private var itemCountDirty: Boolean = false
 
     /**
      * The virtualized container which handles the layout and scrolling of
      * all the cells.
      */
-    protected open val flow = KVirtualFlow<I, T>()
+    protected abstract val flow: KVirtualFlow<I, T>
 
     /**
      * the total number of items in this container

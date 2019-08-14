@@ -7,6 +7,7 @@ import koma.Koma
 import koma.controller.requests.sendMessage
 import koma.gui.view.window.chatroom.messaging.reading.MessagesListScrollPane
 import koma.gui.view.window.chatroom.messaging.sending.createButtonBar
+import koma.koma_app.AppStore
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -21,7 +22,7 @@ import tornadofx.*
 @ObsoleteCoroutinesApi
 class ChatRecvSendView(
         km: Koma,
-        store: UserDataStore
+        store: AppStore
 ): View() {
     override val root = vbox(10.0)
 

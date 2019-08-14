@@ -1,30 +1,25 @@
 package koma.gui.view.chatview
 
-import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import koma.Koma
-import koma.Server
-import koma.koma_app.appState
-import link.continuum.desktop.gui.list.user.UserDataStore
+import koma.koma_app.AppStore
 import model.Room
-import okhttp3.HttpUrl
-import tornadofx.*
-import java.util.concurrent.ConcurrentHashMap
+import tornadofx.View
+import tornadofx.hgrow
 
 /**
  * switch between chat rooms
  */
 class SwitchableRoomView(
          km: Koma,
-        userDataStore: UserDataStore
+        appStore: AppStore
 ): View() {
     override val root = StackPane()
 
-    private val roomView = JoinedRoomView(km, userDataStore)
+    private val roomView = JoinedRoomView(km, appStore)
     private val view = BorderPane()
     private var selected = false
 

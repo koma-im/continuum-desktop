@@ -16,6 +16,7 @@ import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.StateEventUserView
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.state.MRoomMember
@@ -25,7 +26,10 @@ import koma.network.media.parseMxc
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.database.models.RoomEventRow
+import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.showIf
 import link.continuum.desktop.util.http.DL
 import link.continuum.desktop.util.http.MediaServer
@@ -33,6 +37,7 @@ import link.continuum.desktop.util.http.urlChannelDownload
 import link.continuum.desktop.util.onNone
 import link.continuum.desktop.util.onSome
 import link.continuum.desktop.util.toOption
+import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -44,20 +49,21 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMemberViewNode(
-        store: UserDataStore
-): ViewNode {
-    override val node = StackPane()
-    override val menuItems: List<MenuItem>
-        get() = listOf()
-    private val scaling: Float = appState.store.settings.scaling
+        store: AppStore
+): MessageCell(store) {
+    override val center = StackPane()
+    init {
+        node.add(center)
+    }
+    private val scaling: Float = store.settings.scaling
     private val avatarsize: Double = scaling * 32.0
     private val minWid: Double = scaling * 40.0
 
-    private val userView = StateEventUserView(store, avatarsize)
+    private val userView = StateEventUserView(store.userData, avatarsize)
     private val timeView = DatatimeView()
     private val contentPane = StackPane()
 
-    private val inviterView = StateEventUserView(store, avatarsize)
+    private val inviterView = StateEventUserView(store.userData, avatarsize)
     private val invitationContent by lazy {
         HBox(5.0).apply {
             alignment = Pos.CENTER
@@ -70,7 +76,22 @@ class MRoomMemberViewNode(
     }
     private val userUpdate = UserAppearanceUpdateView(avatarsize = avatarsize, minWid = minWid)
 
-    fun update(message: MRoomMember, server: MediaServer) {
+    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
+        super.updateItem(item, empty)
+        if (empty || item == null) {
+            graphic = null
+        } else {
+            val ev = item.first.getEvent()
+            if (ev !is MRoomMember) {
+                graphic = null
+            } else {
+                updateEvent(item.first, item.second)
+                update(ev, item.second.account.server)
+                graphic = node
+            }
+        }
+    }
+    private fun update(message: MRoomMember, server: MediaServer) {
         userView.updateUser(message.sender, server)
         timeView.updateTime(message.origin_server_ts)
         contentPane.children.clear()

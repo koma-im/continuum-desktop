@@ -58,7 +58,7 @@ class ChatView(roomList: ObservableList<Room>,
     val roomListView = RoomListView(roomList, account, storage.database)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(account.server.km, storage.userData)
+    val switchableRoomView = SwitchableRoomView(account.server.km, storage)
 
     init {
         roomListView.root.selectionModel.selectedItemProperty().onChange { room ->

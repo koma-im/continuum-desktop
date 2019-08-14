@@ -28,6 +28,7 @@ interface RoomEventRow: Persistable {
     @get:Column(nullable = false, length = Int.MAX_VALUE)
     var json: String
 
+    @Deprecated("internal field")
     @get:Transient
     var _event: RoomEvent?
 
@@ -48,6 +49,7 @@ interface RoomEventRow: Persistable {
 /**
  * get decoded event
  */
+@Suppress("DEPRECATION")
 fun RoomEventRow.getEvent(): RoomEvent? {
     this._event = this._event ?: MoshiInstance.roomEventAdapter.fromJson(this.json)
     if (this._event == null) {

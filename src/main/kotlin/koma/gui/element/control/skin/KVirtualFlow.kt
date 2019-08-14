@@ -15,14 +15,13 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.Cell
 import javafx.scene.control.IndexedCell
+import javafx.scene.control.ListCell
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import javafx.util.Callback
-import koma.gui.element.control.KVirtualScrollBar
-import koma.gui.element.control.NullableIndexRange
-import koma.gui.element.control.Utils
+import koma.gui.element.control.*
+import link.continuum.desktop.util.ArrayLinkedList
 import mu.KotlinLogging
 import java.util.*
 
@@ -31,15 +30,24 @@ private val logger = KotlinLogging.logger {}
  * Implementation of a virtualized container using a cell based mechanism.
  */
 class KVirtualFlow<I, T>(
+        private val cellCreator: (T?)-> I,
+        private val kListView: KListView<T, I>,
+        /**
+         * A structure containing cells that can be reused later. These are cells
+         * that at one time were needed to populate the view, but now are no longer
+         * needed. We keep them here until they are needed again.
+         */
+        private val pile: CellPool<I, T>,
         /**
          * For optimisation purposes, some use cases can trade dynamic cell length
          * for speed - if fixedCellSize is not null we'll use that rather
          * than determine it by querying the cell itself.
          */
-        private val fixedCellSize: Double? = null
+        private
+        val fixedCellSize: Double? = null
 )
     : Region()
-        where I :IndexedCell<T>{
+        where I : ListCell<T> {
 
     val visibleIndexRange = SimpleObjectProperty<NullableIndexRange>()
     fun visibleFirst(): T? {
@@ -97,15 +105,9 @@ class KVirtualFlow<I, T>(
      * list is the first in the view, and the last cell is the last in the
      * view. When pixel scrolling, the list is simply shifted and items drop
      * off the beginning or the end, depending on the order of scrolling.
+     * New cells are only added by addLeadingCells, addTrailingCells
      */
     internal val cells = ArrayLinkedList<I>()
-
-    /**
-     * A structure containing cells that can be reused later. These are cells
-     * that at one time were needed to populate the view, but now are no longer
-     * needed. We keep them here until they are needed again.
-     */
-    internal val pile = ArrayLinkedList<I>()
 
     /**
      * A special cell used to accumulate bounds, such that we reduce object
@@ -127,6 +129,9 @@ class KVirtualFlow<I, T>(
      */
     internal val sheet: Group
 
+    /**
+     * what for ?
+     */
     lateinit var sheetChildren: ObservableList<Node>
 
     /**
@@ -147,17 +152,10 @@ class KVirtualFlow<I, T>(
     private var isPanning = false
 
     private var needsReconfigureCells = false // when cell contents are the same
-    private var needsRecreateCells = false // when cell factory changed
     private var needsRebuildCells = false // when cell contents have changed
     private var needsCellsLayout = false
     private var sizeChanged = false
     private val dirtyCells = BitSet()
-
-    /***************************************************************************
-     * *
-     * Properties                                                              *
-     * *
-     */
 
     /**
      * There are two main complicating factors in the implementation of the
@@ -221,7 +219,6 @@ class KVirtualFlow<I, T>(
         get() = pannable.get()
         set(value) = pannable.set(value)
 
-    // --- cell count
     /**
      * Indicates the number of cells that should be in the flow. The user of
      * the VirtualFlow must set this appropriately. When the cell count changes
@@ -280,8 +277,6 @@ class KVirtualFlow<I, T>(
         }
     }
 
-
-    // --- position
     /**
      * The position of the VirtualFlow within its list of cells. This is a value
      * between 0 and 1.
@@ -297,14 +292,6 @@ class KVirtualFlow<I, T>(
         }
     }
 
-    // --- fixed cell size
-
-
-
-
-    // --- Cell Factory
-    private var cellFactory: ObjectProperty<Callback<KVirtualFlow<I, T>, I>>? = null
-
     /**
      * Locates and returns the last non-empty IndexedCell that is currently
      * partially or completely visible. This function may return null if there
@@ -315,10 +302,10 @@ class KVirtualFlow<I, T>(
         get() {
             if (cells.isEmpty() || viewportLength <= 0) return null
 
-            var cell: I?
+            var cell: I
             for (i in cells.indices.reversed()) {
-                cell = cells[i]
-                if (!cell!!.isEmpty) {
+                cell = cells[i]!!
+                if (!cell.isEmpty) {
                     return cell
                 }
             }
@@ -342,29 +329,16 @@ class KVirtualFlow<I, T>(
                 logger.debug { "the viewport length is 0." }
                 return null
             }
-            val cell = cells.first
-            return if (cell!!.isEmpty) {
+            val cell = cells.first!!
+            return if (cell.isEmpty) {
                 logger.trace { "cells.first isEmpty" }
                 null
             } else cell
         }
 
     /**
-     * The maximum preferred size in the non-virtual direction. For example,
-     * if vertical, then this is the max pref width of all cells encountered.
-     *
-     * In general, this is the largest preferred size in the non-virtual
-     * direction that we have ever encountered. We don't reduce this size
-     * unless instructed to do so, so as to reduce the amount of scroll bar
-     * jitter.
-     */
-    internal var maxPrefBreadth: Double = 0.toDouble()
-        private set
-
-    /**
      * The breadth of the viewport portion of the VirtualFlow as computed during
-     * the layout pass. In a vertical flow this would be the same as the clip
-     * view width. In a horizontal flow this is the clip view height.
+     * the layout pass. The clip view width.
      */
     private var viewportBreadth: Double = 0.toDouble()
 
@@ -612,15 +586,6 @@ class KVirtualFlow<I, T>(
         }
         vbar.valueProperty().addListener(listenerY)
 
-        super.heightProperty().addListener { _, oldHeight, newHeight ->
-            // Fix for RT-8480, where the VirtualFlow does not show its content
-            // after changing size to 0 and back.
-            if (oldHeight.toDouble() == 0.0 && newHeight.toDouble() > 0) {
-                recreateCells()
-            }
-        }
-
-
         /*
         ** there are certain animations that need to know if the touch is
         ** happening.....
@@ -651,52 +616,6 @@ class KVirtualFlow<I, T>(
         position.set(value)
     }
 
-    /**
-     * Sets a new cell factory to use in the VirtualFlow. This forces all old
-     * cells to be thrown away, and new cells to be created with
-     * the new cell factory.
-     * @param value the new cell factory
-     */
-    fun setCellFactory(value: Callback<KVirtualFlow<I, T>, I>) {
-        cellFactoryProperty().set(value)
-    }
-
-    /**
-     * Returns the current cell factory.
-     * @return the current cell factory
-     */
-    fun getCellFactory(): Callback<KVirtualFlow<I, T>, I>? {
-        return if (cellFactory == null) null else cellFactory!!.get()
-    }
-
-    /**
-     *
-     * Setting a custom cell factory has the effect of deferring all cell
-     * creation, allowing for total customization of the cell. Internally, the
-     * VirtualFlow is responsible for reusing cells - all that is necessary
-     * is for the custom cell factory to return from this function a cell
-     * which might be usable for representing any item in the VirtualFlow.
-     *
-     *
-     * Refer to the [Cell] class documentation for more detail.
-     * @return  the cell factory property
-     */
-    fun cellFactoryProperty(): ObjectProperty<Callback<KVirtualFlow<I, T>, I>> {
-        if (cellFactory == null) {
-            cellFactory = object : SimpleObjectProperty<Callback<KVirtualFlow<I, T>, I>>(this, "cellFactory") {
-                override fun invalidated() {
-                    if (get() != null) {
-                        accumCell = null
-                        isNeedsLayout = true
-                        recreateCells()
-                        if (parent != null) parent.requestLayout()
-                    }
-                }
-            }
-        }
-        return cellFactory!!
-    }
-
     private fun updateVisibleIndices() {
             visibleIndexRange.set(NullableIndexRange(
                     firstVisibleCell?.index,
@@ -708,16 +627,8 @@ class KVirtualFlow<I, T>(
     }
 
     override fun layoutChildren() {
-        if (needsRecreateCells) {
-            lastWidth = -1.0
-            lastHeight = -1.0
-            releaseCell(accumCell)
-            sheet.children.clear()
-            cells.forEach { it.updateIndex(-1) }
-            cells.clear()
-            pile.clear()
-            releaseAllPrivateCells()
-        } else if (needsRebuildCells) {
+        if (needsRebuildCells) {
+            logger.debug { "layoutChildren: needsRebuildCells" }
             lastWidth = -1.0
             lastHeight = -1.0
             releaseCell(accumCell)
@@ -725,12 +636,13 @@ class KVirtualFlow<I, T>(
             addAllToPile()
             releaseAllPrivateCells()
         } else if (needsReconfigureCells) {
-            maxPrefBreadth = -1.0
+            logger.debug { "layoutChildren: needsReconfCells" }
             lastWidth = -1.0
             lastHeight = -1.0
         }
 
         if (!dirtyCells.isEmpty) {
+            logger.debug { "dirtyCells is not Empty size ${dirtyCells.size()}" }
             var index: Int
             val cellsSize = cells.size
             index = dirtyCells.nextSetBit(0)
@@ -741,20 +653,19 @@ class KVirtualFlow<I, T>(
                 index = dirtyCells.nextSetBit(0)
             }
 
-            maxPrefBreadth = -1.0
             lastWidth = -1.0
             lastHeight = -1.0
         }
 
         val hasSizeChange = sizeChanged
-        var recreatedOrRebuilt = needsRebuildCells || needsRecreateCells || sizeChanged
+        var recreatedOrRebuilt = needsRebuildCells || sizeChanged
 
-        needsRecreateCells = false
         needsReconfigureCells = false
         needsRebuildCells = false
         sizeChanged = false
 
         if (needsCellsLayout) {
+            logger.debug { "layoutChildren: needsCellsLayout" }
             cells.forEach { it?.requestLayout() }
             needsCellsLayout = false
 
@@ -763,13 +674,12 @@ class KVirtualFlow<I, T>(
             return
         }
 
-        val width = width
-        val height = height
         val position = getPosition()
 
         // if the width and/or height is 0, then there is no point doing
         // any of this work. In particular, this can happen during startup
         if (width <= 0 || height <= 0) {
+            logger.debug { "layoutChildren: the width and/or height is 0. $width $height" }
             addAllToPile()
             lastWidth = width
             lastHeight = height
@@ -794,6 +704,7 @@ class KVirtualFlow<I, T>(
         // layout call is even necessary. If it is found that no layout is
         // needed, we just punt.
         if (!cellNeedsLayout) {
+            logger.trace { "layoutChildren: no cellNeedsLayout" }
             var cellSizeChanged = false
             if (firstCell != null) {
                 val breadth = getCellBreadth(firstCell)
@@ -873,33 +784,14 @@ class KVirtualFlow<I, T>(
          * so that one will be executed every time.
          */
         var needTrailingCells = false
-        var rebuild = cellNeedsLayout ||
+        val rebuild = cellNeedsLayout ||
                 cells.isEmpty() ||
-                maxPrefBreadth == -1.0 ||
                 position != lastPosition ||
                 cellCount != lastCellCount ||
                 hasSizeChange || height < lastHeight
 
         if (!rebuild) {
-            // Check if maxPrefBreadth didn't change
-            val maxPrefBreadth = maxPrefBreadth
-            var foundMax = false
-            for (i in cells.indices) {
-                val breadth = getCellBreadth(cells[i])
-                if (maxPrefBreadth == breadth) {
-                    foundMax = true
-                } else if (breadth > maxPrefBreadth) {
-                    rebuild = true
-                    break
-                }
-            }
-            if (!foundMax) { // All values were lower
-                rebuild = true
-            }
-        }
-
-        if (!rebuild) {
-            if (true && height > lastHeight || !true && width > lastWidth) {
+            if (height > lastHeight) {
                 // resized in the virtual direction
                 needTrailingCells = true
             }
@@ -910,6 +802,7 @@ class KVirtualFlow<I, T>(
         // Get the index of the "current" cell
         var currentIndex = computeCurrentIndex()
         if (lastCellCount != cellCount) {
+            logger.trace { "layoutChildren: cellCount change: $lastCellCount $cellCount" }
             // The cell count has changed. We want to keep the viewport
             // stable if possible. If position was 0 or 1, we want to keep
             // the position in the same place. If the new cell count is >=
@@ -917,14 +810,17 @@ class KVirtualFlow<I, T>(
             // Otherwise, our goal is to leave the index of the cell at the
             // bottom consistent, with the same translation etc.
             if (position == 0.0 || position == 1.0) {
+                logger.trace { "position = $position" }
                 // Update the item count
                 //                setItemCount(cellCount);
             } else if (currentIndex >= cellCount) {
+                logger.debug { "currentIndex $currentIndex >= cellCount $cellCount" }
                 setPosition(1.0)
                 //                setItemCount(cellCount);
             } else if (lastCell != null) {
                 getCellPosition(lastCell)
                 val lastCellIndex = getCellIndex(lastCell)
+                logger.debug { "adjustPosition using lastCell index  $lastCellIndex" }
                 adjustPositionToIndex(lastCellIndex)
                 -computeOffsetForCell(lastCellIndex)
                 // ToDO figure out whether or how to adjust
@@ -936,7 +832,7 @@ class KVirtualFlow<I, T>(
         }
 
         if (rebuild) {
-            maxPrefBreadth = -1.0
+            logger.trace { "rebuilding" }
             // Start by dumping all the cells into the pile
             addAllToPile()
 
@@ -952,6 +848,7 @@ class KVirtualFlow<I, T>(
             // Force filling of space with empty cells if necessary
             addTrailingCells(true)
         } else if (needTrailingCells) {
+            logger.trace { "need TrailingCells instead of rebuilding" }
             addTrailingCells(true)
         }
 
@@ -991,34 +888,17 @@ class KVirtualFlow<I, T>(
      * @param prefIndex the preferred index
      * @return the available cell
      */
-    protected fun getAvailableCell(prefIndex: Int): I {
-        var cell: I? = null
-
-        // Fix for RT-12822. We try to retrieve the cell from the pile rather
-        // than just grab a random cell from the pile (or create another cell).
-        var i = 0
-        val max = pile.size
-        while (i < max) {
-            val _cell = pile[i]!!
-
-            if (getCellIndex(_cell) == prefIndex) {
-                cell = _cell
-                pile.removeAt(i)
-                break
+    protected fun getAvailableCell(prefIndex: Int, item: T?): I {
+        val cell: I = pile.removeFirst( {
+            // Fix for RT-12822. We try to retrieve the cell from the pile rather
+            // than just grab a random cell from the pile (or create another cell).
+            getCellIndex(it) == prefIndex }, item) ?: pile.removeLastOrNull(item) ?: cellCreator(item).apply {
+                properties[NEW_CELL] = null
             }
-            i++
-        }
-
-        if (cell == null && !pile.isEmpty()) {
-            cell = pile.removeLast()
-        }
-
-        if (cell == null) {
-            cell = getCellFactory()!!.call(this)
-            cell!!.properties[NEW_CELL] = null
-        }
 
         if (cell.parent == null) {
+            logger.trace { "adding cell $cell to sheetChildren" }
+            //newly created cell would not be on screen yet
             sheetChildren.add(cell)
         }
 
@@ -1035,7 +915,7 @@ class KVirtualFlow<I, T>(
         var i = 0
         val max = cells.size
         while (i < max) {
-            addToPile(cells.removeFirst()!!)
+            pile.add(cells.removeFirst()!!)
             i++
         }
     }
@@ -1046,7 +926,7 @@ class KVirtualFlow<I, T>(
      * viewport (it may be clipped), but does distinguish between cells that
      * have been created and are in use vs. those that are in the pile or
      * not created.
-     * @param index the index
+     * @param index the index of the item in the underlying list
      * @return the visible cell
      */
     fun getVisibleCell(index: Int): I? {
@@ -1063,9 +943,9 @@ class KVirtualFlow<I, T>(
         if (index == firstIndex) return firstCell
 
         // if index is > firstIndex and < lastIndex then we can get the index
-        if (index > firstIndex && index < lastIndex) {
+        if (index in firstIndex + 1 until lastIndex) {
             val cell = cells[index - firstIndex]
-            if (getCellIndex(cell) == index) return cell
+            if (cell?.index == index) return cell
         }
 
         // there is no visible cell for the specified index
@@ -1119,10 +999,9 @@ class KVirtualFlow<I, T>(
     /**
      * Adjusts the cells such that the cell in the given index will be fully visible in
      * the viewport.
-     * @param index the index
      */
-    fun scrollTo(index: Int) {
-        val cell = getVisibleCell(index)
+    fun scrollTo(itemIndex: Int) {
+        val cell = getVisibleCell(itemIndex)
         if (cell != null) {
             scrollTo(cell)
         } else {
@@ -1133,7 +1012,6 @@ class KVirtualFlow<I, T>(
     /**
      * Adjusts the cells such that the cell in the given index will be fully visible in
      * the viewport, and positioned at the very top of the viewport.
-     * @param index the index
      */
     fun scrollToTop(index: Int) {
         var posSet = false
@@ -1255,8 +1133,7 @@ class KVirtualFlow<I, T>(
                 if (cellEnd < viewportLength) {
                     // Reposition the nodes
                     val emptySize = viewportLength - cellEnd
-                    for (i in cells.indices) {
-                        val cell = cells[i]
+                    cells.forEach { cell ->
                         positionCell(cell, getCellPosition(cell) + emptySize)
                     }
                     setPosition(1.0)
@@ -1296,61 +1173,55 @@ class KVirtualFlow<I, T>(
      * including beyond the range defined by cellCount, in which case an
      * empty cell will be returned. The returned value should not be stored for
      * any reason.
-     * @param index the index
      * @return the cell
      */
-    fun getCell(index: Int): I? {
+    fun getCell(index: Int, item: T?): I {
         // If there are cells, then we will attempt to get an existing cell
         if (!cells.isEmpty()) {
             // First check the cells that have already been created and are
             // in use. If this call returns a value, then we can use it
             val cell = getVisibleCell(index)
-            if (cell != null) return cell
-        }
-
-        // check the pile
-        for (i in pile.indices) {
-            val cell = pile[i]
-            if (getCellIndex(cell) == index) {
-                // Note that we don't remove from the pile: if we do it leads
-                // to a severe performance decrease. This seems to be OK, as
-                // getCell() is only used for cell measurement purposes.
-                // pile.remove(i);
+            if (cell != null) {
+                logger.trace { "got cell $cell at $index for $item" }
                 return cell
             }
         }
 
-        if (pile.size > 0) {
-            return pile[0]
+        // check the pile
+        pile.find(item) { getCellIndex(it) == index }?.let {
+            // Note that we don't remove from the pile: if we do it leads
+            // to a severe performance decrease. This seems to be OK, as
+            // getCell() is only used for cell measurement purposes.
+            return it
         }
+
+        pile.firstOrNull(item)?.let { return it }
 
         // We need to use the accumCell and return that
         if (accumCell == null) {
-            val cellFactory = getCellFactory()
-            if (cellFactory != null) {
-                accumCell = cellFactory.call(this)
-                accumCell!!.properties[NEW_CELL] = null
-                accumCellParent.children.setAll(accumCell)
+            accumCell = cellCreator(item)
+            logger.debug { "creating accumCell $accumCell for $item" }
+            accumCell!!.properties[NEW_CELL] = null
+            accumCellParent.children.setAll(accumCell)
 
-                // Note the screen reader will attempt to find all
-                // the items inside the view to calculate the item count.
-                // Having items under different parents (sheet and accumCellParent)
-                // leads the screen reader to compute wrong values.
-                // The regular scheme to provide items to the screen reader
-                // uses getPrivateCell(), which places the item in the sheet.
-                // The accumCell, and its children, should be ignored by the
-                // screen reader.
-                accumCell!!.accessibleRole = AccessibleRole.NODE
-                accumCell!!.childrenUnmodifiable.addListener { _: Observable ->
-                    for (n in accumCell!!.childrenUnmodifiable) {
-                        n.accessibleRole = AccessibleRole.NODE
-                    }
+            // Note the screen reader will attempt to find all
+            // the items inside the view to calculate the item count.
+            // Having items under different parents (sheet and accumCellParent)
+            // leads the screen reader to compute wrong values.
+            // The regular scheme to provide items to the screen reader
+            // uses getPrivateCell(), which places the item in the sheet.
+            // The accumCell, and its children, should be ignored by the
+            // screen reader.
+            accumCell!!.accessibleRole = AccessibleRole.NODE
+            accumCell!!.childrenUnmodifiable.addListener { _: Observable ->
+                for (n in accumCell!!.childrenUnmodifiable) {
+                    n.accessibleRole = AccessibleRole.NODE
                 }
             }
         }
         setCellIndex(accumCell, index)
-        resizeCellSize(accumCell)
-        return accumCell
+        resizeCellSize(accumCell!!)
+        return accumCell!!
     }
 
     /**
@@ -1363,7 +1234,6 @@ class KVirtualFlow<I, T>(
      */
     protected fun setCellIndex(cell: I?, index: Int) {
         assert(cell != null)
-
         cell!!.updateIndex(index)
 
         // make sure the cell is sized correctly. This is important for both
@@ -1396,8 +1266,8 @@ class KVirtualFlow<I, T>(
      */
     internal fun getCellLength(index: Int): Double {
         if (fixedCellSize != null) return fixedCellSize
-
-        val cell = getCell(index)
+        val item = kListView.items!!.getOrNull(index)
+        val cell = getCell(index, item)
         val length = getCellLength(cell)
         releaseCell(cell)
         return length
@@ -1406,7 +1276,8 @@ class KVirtualFlow<I, T>(
     /**
      */
     internal fun getCellBreadth(index: Int): Double {
-        val cell = getCell(index)
+        val item = kListView.items!!.getOrNull(index)
+        val cell = getCell(index, item)
         val b = getCellBreadth(cell)
         releaseCell(cell)
         return b
@@ -1419,20 +1290,16 @@ class KVirtualFlow<I, T>(
         if (cell == null) return 0.0
         if (fixedCellSize != null) return fixedCellSize
 
-        return if (true)
-            cell.layoutBounds.height
-        else
-            cell.layoutBounds.width
+        val h = cell.layoutBounds.height
+        logger.trace { "cell height $h" }
+        return h
     }
 
     /**
-     * Gets the breadth of a specific cell
+     * Gets the pref breadth of a specific cell
      */
-    internal fun getCellBreadth(cell: Cell<*>?): Double {
-        return if (true)
-            cell!!.prefWidth(-1.0)
-        else
-            cell!!.prefHeight(-1.0)
+    internal fun getCellBreadth(cell: Cell<*>): Double {
+        return cell.prefWidth(-1.0)
     }
 
     /**
@@ -1444,23 +1311,23 @@ class KVirtualFlow<I, T>(
         return cell.layoutY
     }
 
-    private fun positionCell(cell: I?, position: Double) {
-        cell!!.layoutX = 0.0
-        cell.setLayoutY(snapSizeY(position))
+    private fun positionCell(cell: I, position: Double) {
+        cell.layoutX = 0.0
+        val y = snapSizeY(position)
+        logger.trace {
+            "position at ${String.format("%4d", y.toInt())}(${String.format("%3.0f", position)}) $cell"
+        }
+        cell.layoutY = y
     }
 
-    private fun resizeCellSize(cell: I?) {
-        if (cell == null) return
-
-        if (true) {
-            val width = Math.max(maxPrefBreadth, viewportBreadth)
-            cell.resize(width, if (fixedCellSize != null) fixedCellSize else
-                Utils.boundedSize(cell.prefHeight(width), cell.minHeight(width), cell.maxHeight(width)))
-        } else {
-            val height = Math.max(maxPrefBreadth, viewportBreadth)
-            cell.resize(if (fixedCellSize != null) fixedCellSize else
-                Utils.boundedSize(cell.prefWidth(height), cell.minWidth(height), cell.maxWidth(height)), height)
-        }
+    private fun resizeCellSize(cell: I) {
+        val w = viewportBreadth
+        val p=cell.prefHeight(w)
+        val min = cell.minHeight(w)
+        val max = cell.maxHeight(w)
+        val height = fixedCellSize?: Utils.boundedSize(p, min, max)
+        logger.trace { "cell h = $height ($min, $p, $max). w = $w" }
+        cell.resize(w, height)
     }
 
     /**
@@ -1494,7 +1361,8 @@ class KVirtualFlow<I, T>(
             first = false
         }
         while (index >= 0 && (offset > 0 || first)) {
-            cell = getAvailableCell(index)
+            val item = kListView.items!!.getOrNull(index)
+            cell = getAvailableCell(index, item)
             setCellIndex(cell, index)
             resizeCellSize(cell) // resize must be after config
             cells.addFirst(cell)
@@ -1512,7 +1380,6 @@ class KVirtualFlow<I, T>(
 
             // Position the cell, and update the maxPrefBreadth variable as we go.
             positionCell(cell, offset)
-            maxPrefBreadth = Math.max(maxPrefBreadth, getCellBreadth(cell))
             cell.isVisible = true
             --index
         }
@@ -1578,14 +1445,14 @@ class KVirtualFlow<I, T>(
                     return filledWithNonEmpty
                 }
             }
-            val cell = getAvailableCell(index)
+            val item = kListView.items!!.getOrNull(index)
+            val cell = getAvailableCell(index, item)
             setCellIndex(cell, index)
             resizeCellSize(cell) // resize happens after config!
             cells.addLast(cell)
 
             // Position the cell and update the max pref
             positionCell(cell, offset)
-            maxPrefBreadth = Math.max(maxPrefBreadth, getCellBreadth(cell))
 
             offset += getCellLength(cell)
             cell.isVisible = true
@@ -1611,7 +1478,8 @@ class KVirtualFlow<I, T>(
             val distance = viewportLength - end
             while (prospectiveEnd < viewportLength && index != 0 && -start < distance) {
                 index--
-                val cell = getAvailableCell(index)
+                val item = kListView.items!!.getOrNull(index)
+                val cell = getAvailableCell(index, item)
                 setCellIndex(cell, index)
                 resizeCellSize(cell) // resize must be after config
                 cells.addFirst(cell)
@@ -1619,7 +1487,6 @@ class KVirtualFlow<I, T>(
                 start -= cellLength
                 prospectiveEnd += cellLength
                 positionCell(cell, start)
-                maxPrefBreadth = Math.max(maxPrefBreadth, getCellBreadth(cell))
                 cell.isVisible = true
             }
 
@@ -1631,8 +1498,7 @@ class KVirtualFlow<I, T>(
                 delta = -start
             }
             // Move things
-            for (i in cells.indices) {
-                val cell = cells[i]
+            cells.forEach { cell ->
                 positionCell(cell, getCellPosition(cell) + delta)
             }
 
@@ -1652,11 +1518,6 @@ class KVirtualFlow<I, T>(
 
     internal fun reconfigureCells() {
         needsReconfigureCells = true
-        requestLayout()
-    }
-
-    internal fun recreateCells() {
-        needsRecreateCells = true
         requestLayout()
     }
 
@@ -1709,7 +1570,7 @@ class KVirtualFlow<I, T>(
             run {
                 var i = currIndex - 1
                 while (i in indices) {
-                    val cell = cells[i]
+                    val cell = cells[i]!!
 
                     offset -= getCellLength(cell)
 
@@ -1722,7 +1583,7 @@ class KVirtualFlow<I, T>(
             offset = currOffset
             var i = currIndex
             while (i in indices) {
-                val cell = cells[i]
+                val cell = cells[i]!!
                 positionCell(cell, offset)
 
                 offset += getCellLength(cell)
@@ -1782,25 +1643,31 @@ class KVirtualFlow<I, T>(
      * offset.
      */
     private fun fitCells() {
-        val size = Math.max(maxPrefBreadth, viewportBreadth)
+        val size = viewportBreadth
 
         // Note: Do not optimise this loop by pre-calculating the cells size and
         // storing that into a int value - this can lead to RT-32828
-        for (i in cells.indices) {
-            val cell = cells[i]
-            cell!!.resize(size, cell.prefHeight(size))
+        cells.forEach {
+            it.resize(size, it.prefHeight(size))
         }
     }
 
     private fun cull() {
-        val viewportLength = viewportLength
         for (i in cells.indices.reversed()) {
             val cell = cells[i]
             val cellSize = getCellLength(cell)
             val cellStart = getCellPosition(cell)
             val cellEnd = cellStart + cellSize
-            if (cellStart >= viewportLength || cellEnd < 0) {
-                addToPile(cells.removeAt(i))
+            if (cellStart >= viewportLength) {
+                val c = cells.removeAt(i)
+                logger.trace { "recycling cell below bottom cellStart $cellStart" +
+                        ">= viewportLength $viewportLength, index=$i, cell=$c" }
+                pile.add(c)
+            } else if(cellEnd < 0) {
+                val c = cells.removeAt(i)
+                logger.trace { "recycling cell above top cellStart $cellStart" +
+                        "<0, index=$i, cell=$c" }
+                pile.add(cells.removeAt(i))
             }
         }
     }
@@ -1814,78 +1681,21 @@ class KVirtualFlow<I, T>(
         }
     }
 
-    /**
-     * This method is an experts-only method - if the requested index is not
-     * already an existing visible cell, it will create a cell for the
-     * given index and insert it into the sheet. From that point on it will be
-     * unmanaged, and is up to the caller of this method to manage it.
-     */
-    internal fun getPrivateCell(index: Int): I? {
-        var cell: I? = null
-
-        // If there are cells, then we will attempt to get an existing cell
-        if (!cells.isEmpty()) {
-            // First check the cells that have already been created and are
-            // in use. If this call returns a value, then we can use it
-            cell = getVisibleCell(index)
-            if (cell != null) {
-                // Force the underlying text inside the cell to be updated
-                // so that when the screen reader runs, it will match the
-                // text in the cell (force updateDisplayedText())
-                cell.layout()
-                return cell
-            }
-        }
-
-        // check the existing sheet children
-        if (cell == null) {
-            for (i in sheetChildren.indices) {
-                @Suppress("UNCHECKED_CAST")
-                val _cell = sheetChildren[i] as I
-                if (getCellIndex(_cell) == index) {
-                    return _cell
-                }
-            }
-        }
-
-        val cellFactory = getCellFactory()
-        if (cellFactory != null) {
-            cell = cellFactory.call(this)
-        }
-
-        if (cell != null) {
-            setCellIndex(cell, index)
-            resizeCellSize(cell)
-            cell.isVisible = false
-            sheetChildren.add(cell)
-            privateCells.add(cell)
-        }
-
-        return cell
-    }
-
     private fun releaseAllPrivateCells() {
         sheetChildren.removeAll(privateCells)
     }
 
     /**
-     * Puts the given cell onto the pile. This is called whenever a cell has
-     * fallen off the flow's start.
+     * those should be off-screen, why do ghey need cleaning?
+     * called at the end of layoutChildren()
      */
-    private fun addToPile(cell: I) {
-        pile.addLast(cell)
-    }
-
     private fun cleanPile() {
+        logger.trace { "cleaning cell pool" }
         var wasFocusOwner = false
 
-        var i = 0
-        val max = pile.size
-        while (i < max) {
-            val cell = pile[i]
-            wasFocusOwner = wasFocusOwner || doesCellContainFocus(cell!!)
-            cell!!.isVisible = false
-            i++
+        pile.forEach { cell ->
+            wasFocusOwner = wasFocusOwner || doesCellContainFocus(cell)
+            cell.isVisible = false
         }
 
         // Fix for RT-35876: Rather than have the cells do weird things with
@@ -2123,159 +1933,6 @@ class KVirtualFlow<I, T>(
 
             super.widthProperty().addListener { _ -> clipRect.width = width }
             super.heightProperty().addListener { _ -> clipRect.height = height }
-        }
-    }
-
-    /**
-     * A List-like implementation that is exceedingly efficient for the purposes
-     * of the VirtualFlow. Typically there is not much variance in the number of
-     * cells -- it is always some reasonably consistent number. Yet for efficiency
-     * in code, we like to use a linked list implementation so as to append to
-     * start or append to end. However, at times when we need to iterate, LinkedList
-     * is expensive computationally as well as requiring the construction of
-     * temporary iterators.
-     *
-     *
-     * This linked list like implementation is done using an array. It begins by
-     * putting the first item in the center of the allocated array, and then grows
-     * outward (either towards the first or last of the array depending on whether
-     * we are inserting at the head or tail). It maintains an index to the start
-     * and end of the array, so that it can efficiently expose iteration.
-     *
-     *
-     * This class is package private solely for the sake of testing.
-     */
-    internal class ArrayLinkedList<T> : AbstractList<T>() {
-        /**
-         * The array list backing this class. We default the size of the array
-         * list to be fairly large so as not to require resizing during normal
-         * use, and since that many ArrayLinkedLists won't be created it isn't
-         * very painful to do so.
-         */
-        private val array: ArrayList<T?>
-
-        private var firstIndex = -1
-        private var lastIndex = -1
-
-        val first: T?
-            get() = if (firstIndex == -1) null else array[firstIndex]
-
-        val last: T?
-            get() = if (lastIndex == -1) null else array[lastIndex]
-
-        init {
-            array = ArrayList(50)
-
-            for (i in 0..49) {
-                array.add(null)
-            }
-        }
-
-        fun addFirst(cell: T?) {
-            // if firstIndex == -1 then that means this is the first item in the
-            // list and we need to initialize firstIndex and lastIndex
-            if (firstIndex == -1) {
-                lastIndex = array.size / 2
-                firstIndex = lastIndex
-                array.set(firstIndex, cell)
-            } else if (firstIndex == 0) {
-                // we're already at the head of the array, so insert at position
-                // 0 and then increment the lastIndex to compensate
-                array.add(0, cell)
-                lastIndex++
-            } else {
-                // we're not yet at the head of the array, so insert at the
-                // firstIndex - 1 position and decrement first position
-                array.set(--firstIndex, cell)
-            }
-        }
-
-        fun addLast(cell: T) {
-            // if lastIndex == -1 then that means this is the first item in the
-            // list and we need to initialize the firstIndex and lastIndex
-            if (firstIndex == -1) {
-                lastIndex = array.size / 2
-                firstIndex = lastIndex
-                array[lastIndex] = cell
-            } else if (lastIndex == array.size - 1) {
-                // we're at the end of the array so need to "add" so as to force
-                // the array to be expanded in size
-                array.add(++lastIndex, cell)
-            } else {
-                array[++lastIndex] = cell
-            }
-        }
-
-        override val size: Int
-            get() = if (firstIndex == -1) 0 else lastIndex - firstIndex + 1
-
-        override fun isEmpty(): Boolean {
-            return firstIndex == -1
-        }
-
-        override fun get(index: Int): T? {
-            return if (index > lastIndex - firstIndex || index < 0) {
-                // Commented out exception due to RT-29111
-                // throw new java.lang.ArrayIndexOutOfBoundsException();
-                null
-            } else array[firstIndex + index]
-
-        }
-
-        override fun clear() {
-            for (i in array.indices) {
-                array.set(i, null)
-            }
-
-            lastIndex = -1
-            firstIndex = lastIndex
-        }
-
-        fun removeFirst(): T? {
-            return if (isEmpty()) null else removeAt(0)
-        }
-
-        fun removeLast(): T? {
-            return if (isEmpty()) null else removeAt(lastIndex - firstIndex)
-        }
-
-        override fun removeAt(index: Int): T {
-            if (index > lastIndex - firstIndex || index < 0) {
-                throw ArrayIndexOutOfBoundsException()
-            }
-
-            // if the index == 0, then we're removing the first
-            // item and can simply set it to null in the array and increment
-            // the firstIndex unless there is only one item, in which case
-            // we have to also set first & last index to -1.
-            if (index == 0) {
-                val cell = array[firstIndex]
-                array.set(firstIndex, null)
-                if (firstIndex == lastIndex) {
-                    lastIndex = -1
-                    firstIndex = lastIndex
-                } else {
-                    firstIndex++
-                }
-                return cell!!
-            } else if (index == lastIndex - firstIndex) {
-                // if the index == lastIndex - firstIndex, then we're removing the
-                // last item and can simply set it to null in the array and
-                // decrement the lastIndex
-                val cell = array[lastIndex]
-                array.set(lastIndex--, null)
-                return cell!!
-            } else {
-                // if the index is somewhere in between, then we have to remove the
-                // item and decrement the lastIndex
-                val cell = array[firstIndex + index]
-                array.set(firstIndex + index, null)
-                for (i in firstIndex + index + 1..lastIndex) {
-                    array[i - 1] = array[i]
-                }
-                array.set(lastIndex--, null)
-                return cell!!
-            }
         }
     }
 

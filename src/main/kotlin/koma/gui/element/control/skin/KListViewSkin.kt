@@ -2,28 +2,37 @@ package koma.gui.element.control.skin
 
 import javafx.beans.Observable
 import javafx.beans.WeakInvalidationListener
-import javafx.collections.*
+import javafx.collections.ListChangeListener
+import javafx.collections.MapChangeListener
+import javafx.collections.ObservableList
+import javafx.collections.WeakListChangeListener
 import javafx.event.EventHandler
-import javafx.geometry.Orientation
 import javafx.scene.AccessibleAction
-import javafx.scene.AccessibleAttribute
 import javafx.scene.Node
-import javafx.scene.control.IndexedCell
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.StackPane
 import javafx.util.Callback
+import koma.gui.element.control.CellPool
+import koma.gui.element.control.KListView
 import koma.gui.element.control.behavior.ListViewBehavior
-import java.util.*
 
 
-class KListViewSkin<T>(
-        control: ListView<T>
-): KVirtualContainerBase<ListView<T>, ListCell<T>, T>(control) {
+class KListViewSkin<T, I>(
+        control: ListView<T>,
+        private val cellPool: CellPool<I, T>,
+        private val kListView: KListView<T, I>
+): KVirtualContainerBase<ListView<T>, I, T>(control)
+        where I: ListCell<T>{
 
-    public override val flow = KVirtualFlow<ListCell<T>, T>(
+    public override val flow = KVirtualFlow<I, T>(
+            cellCreator = {item ->
+                createCell(item)
+            },
+            kListView = kListView,
+            pile = cellPool,
             fixedCellSize = control.fixedCellSize.let { if (it > 0) it else null})
     /**
      * Region placed over the top of the flow (and possibly the header row) if
@@ -107,7 +116,6 @@ class KListViewSkin<T>(
         // init the VirtualFlow
         flow.id = "virtual-flow"
         flow.isPannable = IS_PANNABLE
-        flow.setCellFactory(Callback { createCell() })
         children.add(flow)
 
         val ml: EventHandler<MouseEvent> = EventHandler {
@@ -139,7 +147,6 @@ class KListViewSkin<T>(
 
         // Register listeners
         registerChangeListener(control.itemsProperty()) { updateListViewItems() }
-        registerChangeListener(control.cellFactoryProperty()) { _ -> flow.recreateCells() }
         registerChangeListener(control.parentProperty()) { _ ->
             if (control.parent != null && control.isVisible) {
                 control.requestLayout()
@@ -214,45 +221,6 @@ class KListViewSkin<T>(
         }
     }
 
-    override fun queryAccessibleAttribute(attribute: AccessibleAttribute?, vararg parameters: Any): Any? {
-        when (attribute) {
-            AccessibleAttribute.FOCUS_ITEM -> {
-                val fm = skinnable.focusModel
-                var focusedIndex = fm.focusedIndex
-                if (focusedIndex == -1) {
-                    if (placeholderRegion != null && placeholderRegion!!.isVisible) {
-                        return placeholderRegion!!.children[0]
-                    }
-                    if (itemCount > 0) {
-                        focusedIndex = 0
-                    } else {
-                        return null
-                    }
-                }
-                return flow.getPrivateCell(focusedIndex)
-            }
-            AccessibleAttribute.ITEM_COUNT -> return itemCount
-            AccessibleAttribute.ITEM_AT_INDEX -> {
-                val rowIndex = parameters[0] as Int
-                return if (0 <= rowIndex && rowIndex < itemCount) {
-                    flow.getPrivateCell(rowIndex)
-                } else null
-            }
-            AccessibleAttribute.SELECTED_ITEMS -> {
-                val sm = skinnable.selectionModel
-                val indices = sm.selectedIndices
-                val selection = ArrayList<ListCell<T>>(indices.size)
-                for (i in indices) {
-                    val row = flow.getPrivateCell(i)
-                    if (row != null) selection.add(row)
-                }
-                return FXCollections.observableArrayList<List<Node>>(selection)
-            }
-            AccessibleAttribute.VERTICAL_SCROLLBAR -> return flow.vbar
-            else -> return super.queryAccessibleAttribute(attribute, *parameters)
-        }
-    }
-
     override fun executeAccessibleAction(action: AccessibleAction, vararg parameters: Any) {
         when (action) {
            AccessibleAction.SHOW_ITEM -> {
@@ -281,14 +249,8 @@ class KListViewSkin<T>(
 
 
 
-    private fun createCell(): ListCell<T> {
-        val cell: ListCell<T>
-        if (skinnable.cellFactory != null) {
-            cell = skinnable.cellFactory.call(skinnable)
-        } else {
-            cell = createDefaultCellImpl()
-        }
-
+    private fun createCell(item: T?): I {
+        val cell: I = kListView.cellCreator(item)
         cell.updateListView(skinnable)
 
         return cell
@@ -390,11 +352,10 @@ class KListViewSkin<T>(
     }
 
     /**
-     * Function used to scroll the container down by one 'page', although
-     * if this is a horizontal container, then the scrolling will be to the right.
+     * Function used to scroll the container down by one 'page'
      */
     private fun onScrollPageDown(isFocusDriven: Boolean): Int {
-        var lastVisibleCell: ListCell<T>? = flow.lastVisibleCellWithinViewPort ?: return -1
+        var lastVisibleCell = flow.lastVisibleCellWithinViewPort ?: return -1
 
         val sm = skinnable.selectionModel
         val fm = skinnable.focusModel
@@ -438,7 +399,7 @@ class KListViewSkin<T>(
      * if this is a horizontal container, then the scrolling will be to the left.
      */
     private fun onScrollPageUp(isFocusDriven: Boolean): Int {
-        var firstVisibleCell: ListCell<T>? = flow.firstVisibleCellWithinViewPort ?: return -1
+        var firstVisibleCell = flow.firstVisibleCellWithinViewPort ?: return -1
 
         val sm = skinnable.selectionModel
         val fm = skinnable.focusModel
@@ -486,34 +447,5 @@ class KListViewSkin<T>(
         private val IS_PANNABLE = false
 
         private const val EMPTY_LIST_TEXT =  "ListView.noContent"
-
-        private fun <T> createDefaultCellImpl(): ListCell<T> {
-            return object : ListCell<T>() {
-                public override fun updateItem(item: T?, empty: Boolean) {
-                    super.updateItem(item, empty)
-
-                    if (empty) {
-                        text = null
-                        setGraphic(null)
-                    } else if (item is Node) {
-                        text = null
-                        val currentNode = graphic
-                        val newNode = item as Node?
-                        if (currentNode == null || !currentNode.equals(newNode)) {
-                            graphic = newNode
-                        }
-                    } else {
-                        /**
-                         * This label is used if the item associated with this cell is to be
-                         * represented as a String. While we will lazily instantiate it
-                         * we never clear it, being more afraid of object churn than a minor
-                         * "leak" (which will not become a "major" leak).
-                         */
-                        text = item?.toString() ?: "null"
-                        setGraphic(null)
-                    }
-                }
-            }
-        }
     }
 }

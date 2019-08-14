@@ -1,6 +1,7 @@
 package koma.gui.element.control
 
 import javafx.scene.control.IndexedCell
+import javafx.scene.control.ListCell
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.Skin
 import koma.gui.element.control.skin.KVirtualFlow
@@ -16,7 +17,7 @@ class KVirtualScrollBar<I, T>(
         private val flow: KVirtualFlow<I, T>,
         private val isVirtual: Boolean = true
 ) : ScrollBar()
-        where I: IndexedCell<T>{
+        where I: ListCell<T> {
 
     override fun decrement() {
         if (isVirtual) {

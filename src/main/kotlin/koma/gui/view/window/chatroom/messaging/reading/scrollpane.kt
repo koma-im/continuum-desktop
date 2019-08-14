@@ -5,27 +5,27 @@ import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
-import javafx.util.Callback
 import koma.Koma
+import koma.gui.element.control.EmptyCellPool
 import koma.gui.element.control.KListView
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.message.EventCellPool
+import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.message.createCell
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 import kotlin.math.roundToInt
+
 private val logger = KotlinLogging.logger {}
 private val settings = appState.store.settings
 
@@ -45,11 +45,11 @@ private class ViewRoomState(
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
         private val km: Koma,
-        store: UserDataStore
+        store: AppStore
 ): View() {
     override val root = AnchorPane()
 
-    private val virtualList: KListView<EventItem>
+    private val virtualList: KListView<EventItem, MessageCell>
 
     private var currentViewing: RoomId? = null
     // decide whether to scroll
@@ -108,14 +108,13 @@ class MessagesListScrollPane(
     }
     init {
         root.vgrow = Priority.ALWAYS
-
-        virtualList = KListView()
+        val p = EventCellPool()
+        virtualList = KListView<EventItem, MessageCell>(p) {
+            logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
+            createCell(it?.first?.getEvent(), km, store)
+        }
         virtualList.view.vgrow = Priority.ALWAYS
         virtualList.view.hgrow = Priority.ALWAYS
-
-        virtualList.cellFactory = Callback<ListView<EventItem>, ListCell<EventItem>> {
-            RoomEventCell(km, store)
-        }
 
         addVirtualScrollPane()
         addScrollBottomButton()

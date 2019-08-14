@@ -24,7 +24,7 @@ fun showDatetime(node: Node, ts: Long) {
 
 class DatatimeView {
     val root = HBox()
-    private val text = Text().apply {
+    val text = Text().apply {
         opacity = 0.4
     }
     fun updateTime(time: Long) {
