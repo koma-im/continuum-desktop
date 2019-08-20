@@ -18,7 +18,9 @@ import javafx.util.Callback
 import koma.gui.element.control.CellPool
 import koma.gui.element.control.KListView
 import koma.gui.element.control.behavior.ListViewBehavior
+import mu.KotlinLogging
 
+private val logger = KotlinLogging.logger {}
 
 class KListViewSkin<T, I>(
         control: ListView<T>,
@@ -104,12 +106,24 @@ class KListViewSkin<T, I>(
         // init the behavior 'closures'
         behavior.setOnFocusPreviousRow(Runnable { onFocusPreviousCell() })
         behavior.setOnFocusNextRow (Runnable{ onFocusNextCell() })
-        behavior.setOnMoveToFirstCell (Runnable{ onMoveToFirstCell() })
-        behavior.setOnMoveToLastCell (Runnable{ onMoveToLastCell() })
+        behavior.setOnMoveToFirstCell (Runnable{
+            logger.debug { "KListViewSkin behavior onMoveToFirstCell" }
+            onMoveToFirstCell()
+        })
+        behavior.setOnMoveToLastCell (Runnable{
+            logger.debug { "KListViewSkin behavior onMoveToLastCell" }
+            onMoveToLastCell()
+        })
         behavior.setOnSelectPreviousRow (Runnable{ onSelectPreviousCell() })
         behavior.setOnSelectNextRow (Runnable{ onSelectNextCell() })
-        behavior.setOnScrollPageDown(Callback<Boolean, Int> { this.onScrollPageDown(it) })
-        behavior.setOnScrollPageUp(Callback<Boolean, Int> { this.onScrollPageUp(it) })
+        behavior.onScrollPageDown =  {
+            logger.debug { "KListViewSkin behavior onScrollPageDown" }
+            flow.scrollRatio(0.8f)
+        }
+        behavior.onScrollPageUp =  {
+            logger.debug { "KListViewSkin behavior onScrollPage up" }
+            flow.scrollRatio(-0.8f)
+        }
 
         updateListViewItems()
 
@@ -349,92 +363,6 @@ class KListViewSkin<T, I>(
         //        sm.select(endPos);
         flow.scrollTo(endPos)
         flow.setPosition(1.0)
-    }
-
-    /**
-     * Function used to scroll the container down by one 'page'
-     */
-    private fun onScrollPageDown(isFocusDriven: Boolean): Int {
-        var lastVisibleCell = flow.lastVisibleCellWithinViewPort ?: return -1
-
-        val sm = skinnable.selectionModel
-        val fm = skinnable.focusModel
-        if (sm == null || fm == null) return -1
-
-        val lastVisibleCellIndex = lastVisibleCell!!.index
-
-        //        boolean isSelected = sm.isSelected(lastVisibleCellIndex) || fm.isFocused(lastVisibleCellIndex) || lastVisibleCellIndex == anchor;
-        // isSelected represents focus OR selection
-        val isSelected: Boolean
-        if (isFocusDriven) {
-            isSelected = lastVisibleCell.isFocused || fm.isFocused(lastVisibleCellIndex)
-        } else {
-            isSelected = lastVisibleCell.isSelected || sm.isSelected(lastVisibleCellIndex)
-        }
-
-        if (isSelected) {
-            val isLeadIndex = isFocusDriven && fm.focusedIndex == lastVisibleCellIndex || !isFocusDriven && sm.selectedIndex == lastVisibleCellIndex
-
-            if (isLeadIndex) {
-                // if the last visible cell is selected, we want to shift that cell up
-                // to be the top-most cell, or at least as far to the top as we can go.
-                flow.scrollToTop(lastVisibleCell)
-
-                val newLastVisibleCell = flow.lastVisibleCellWithinViewPort
-                lastVisibleCell = newLastVisibleCell ?: lastVisibleCell
-            }
-        } else {
-            // if the selection is not on the 'bottom' most cell, we firstly move
-            // the selection down to that, without scrolling the contents, so
-            // this is a no-op
-        }
-
-        val newSelectionIndex = lastVisibleCell.index
-        flow.scrollTo(lastVisibleCell)
-        return newSelectionIndex
-    }
-
-    /**
-     * Function used to scroll the container up by one 'page', although
-     * if this is a horizontal container, then the scrolling will be to the left.
-     */
-    private fun onScrollPageUp(isFocusDriven: Boolean): Int {
-        var firstVisibleCell = flow.firstVisibleCellWithinViewPort ?: return -1
-
-        val sm = skinnable.selectionModel
-        val fm = skinnable.focusModel
-        if (sm == null || fm == null) return -1
-
-        val firstVisibleCellIndex = firstVisibleCell!!.index
-
-        // isSelected represents focus OR selection
-        var isSelected: Boolean
-        if (isFocusDriven) {
-            isSelected = firstVisibleCell.isFocused || fm.isFocused(firstVisibleCellIndex)
-        } else {
-            isSelected = firstVisibleCell.isSelected || sm.isSelected(firstVisibleCellIndex)
-        }
-
-        if (isSelected) {
-            val isLeadIndex = isFocusDriven && fm.focusedIndex == firstVisibleCellIndex || !isFocusDriven && sm.selectedIndex == firstVisibleCellIndex
-
-            if (isLeadIndex) {
-                // if the first visible cell is selected, we want to shift that cell down
-                // to be the bottom-most cell, or at least as far to the bottom as we can go.
-                flow.scrollToBottom(firstVisibleCell)
-
-                val newFirstVisibleCell = flow.firstVisibleCellWithinViewPort
-                firstVisibleCell = newFirstVisibleCell ?: firstVisibleCell
-            }
-        } else {
-            // if the selection is not on the 'top' most cell, we firstly move
-            // the selection up to that, without scrolling the contents, so
-            // this is a no-op
-        }
-
-        val newSelectionIndex = firstVisibleCell.index
-        flow.scrollTo(firstVisibleCell)
-        return newSelectionIndex
     }
 
     companion object {

@@ -6,14 +6,12 @@ import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.WeakListChangeListener
 import javafx.event.EventHandler
-import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.MultipleSelectionModel
 import javafx.scene.control.SelectionMode
 import javafx.scene.input.KeyCode.*
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
-import javafx.util.Callback
 import koma.gui.element.control.Utils
 import koma.gui.element.control.behavior.FocusTraversalInputMap.createInputMap
 import koma.gui.element.control.inputmap.KInputMap
@@ -21,11 +19,13 @@ import koma.gui.element.control.inputmap.KeyBinding
 import koma.gui.element.control.inputmap.MappingType
 import koma.gui.element.control.inputmap.mapping.KeyMapping
 import koma.gui.element.control.inputmap.mapping.MouseMapping
+import mu.KotlinLogging
 import java.util.*
 import java.util.function.Predicate
 
-class ListViewBehavior<T>
-(val node: ListView<T>) {
+private val logger = KotlinLogging.logger {}
+
+class ListViewBehavior<T>(val node: ListView<T>) {
     private val installedDefaultMappings = mutableListOf<MappingType>()
     private val childInputMapDisposalHandlers = mutableListOf<Runnable>()
     private val inputMap: KInputMap<ListView<T>> = createInputMap(node)
@@ -48,8 +48,8 @@ class ListViewBehavior<T>
     private var isShiftDown = false
     private var isShortcutDown = false
 
-    private var onScrollPageUp: Callback<Boolean, Int>? = null
-    private var onScrollPageDown: Callback<Boolean, Int>? = null
+    var onScrollPageUp: ((KeyEvent)->Unit)? = null
+    var onScrollPageDown: ((KeyEvent)->Unit)? = null
     private var onFocusPreviousRow: Runnable? = null
     private var onFocusNextRow: Runnable? = null
     private var onSelectPreviousRow: Runnable? = null
@@ -146,18 +146,26 @@ class ListViewBehavior<T>
         // add focus traversal mappings
         addDefaultMapping(inputMap, FocusTraversalInputMap.mappings.map { MappingType.Key(it) })
         addDefaultMapping(inputMap, listOf(
-                KeyMapping(HOME, { _ -> selectFirstRow() }),
-                KeyMapping(END, { _ -> selectLastRow() }),
+                KeyMapping(HOME, {
+                    logger.debug { "ListViewBehavior<T> KeyMapping HOME selectFirstRow" }
+                    selectFirstRow()
+                }),
+                KeyMapping(END, {
+                    logger.debug { "ListViewBehavior<T> KeyMapping END selectLastRow" }
+                    selectLastRow()
+                }),
                 KeyMapping(KeyBinding(HOME).shift(), { _ -> selectAllToFirstRow() }),
                 KeyMapping(KeyBinding(END).shift(), { _ -> selectAllToLastRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shift(), { _ -> selectAllPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shift(), { _ -> selectAllPageDown() }),
 
                 KeyMapping(KeyBinding(SPACE).shift(), { _ -> selectAllToFocus() }),
                 KeyMapping(KeyBinding(SPACE).shortcut().shift(), { _ -> selectAllToFocus() }),
 
-                KeyMapping(PAGE_UP, { _ -> scrollPageUp() }),
-                KeyMapping(PAGE_DOWN, { _ -> scrollPageDown() }),
+                KeyMapping(PAGE_UP, {
+                    onScrollPageUp?.invoke(it)
+                }),
+                KeyMapping(PAGE_DOWN, {
+                    onScrollPageDown?.invoke(it)
+                }),
 
                 KeyMapping(ENTER, { _ -> activate() }),
                 KeyMapping(SPACE, { _ -> activate() }),
@@ -167,8 +175,6 @@ class ListViewBehavior<T>
                 KeyMapping(KeyBinding(A).shortcut(), { _ -> selectAll() }),
                 KeyMapping(KeyBinding(HOME).shortcut(), { _ -> focusFirstRow() }),
                 KeyMapping(KeyBinding(END).shortcut(), { _ -> focusLastRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shortcut(), { _ -> focusPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shortcut(), { _ -> focusPageDown() }),
 
                 KeyMapping(KeyBinding(BACK_SLASH).shortcut(), { _ -> clearSelection() })
         ).map { MappingType.Key(it) })
@@ -188,10 +194,8 @@ class ListViewBehavior<T>
         addDefaultMapping(otherOsInputMap, KeyMapping(KeyBinding(SPACE).ctrl(), { _ -> toggleFocusOwnerSelection() }))
         addDefaultChildMap(inputMap, otherOsInputMap)
 
-        // create two more child maps, one for vertical listview and one for horizontal listview
-        // --- vertical listview
+        // create child map for vertical listview
         val verticalListInputMap = KInputMap<ListView<T>>(control)
-        verticalListInputMap.interceptor = Predicate { _ -> control.orientation != Orientation.VERTICAL }
 
         addDefaultKeyMapping(verticalListInputMap, listOf(
                 KeyMapping(UP, { _ -> selectPreviousRow() }),
@@ -209,37 +213,11 @@ class ListViewBehavior<T>
 
                 KeyMapping(KeyBinding(UP).shortcut().shift(), { _ -> discontinuousSelectPreviousRow() }),
                 KeyMapping(KeyBinding(DOWN).shortcut().shift(), { _ -> discontinuousSelectNextRow() }),
-                KeyMapping(KeyBinding(PAGE_UP).shortcut().shift(), { _ -> discontinuousSelectPageUp() }),
-                KeyMapping(KeyBinding(PAGE_DOWN).shortcut().shift(), { _ -> discontinuousSelectPageDown() }),
                 KeyMapping(KeyBinding(HOME).shortcut().shift(), { _ -> discontinuousSelectAllToFirstRow() }),
                 KeyMapping(KeyBinding(END).shortcut().shift(), { _ -> discontinuousSelectAllToLastRow() })
         ))
 
         addDefaultChildMap(inputMap, verticalListInputMap)
-
-        // --- horizontal listview
-        val horizontalListInputMap = KInputMap<ListView<T>>(control)
-        horizontalListInputMap.interceptor = Predicate { _ -> control.orientation != Orientation.HORIZONTAL }
-
-        addDefaultKeyMapping(horizontalListInputMap, listOf(
-                KeyMapping(LEFT, { _ -> selectPreviousRow() }),
-                KeyMapping(KP_LEFT, { _ -> selectPreviousRow() }),
-                KeyMapping(RIGHT, { _ -> selectNextRow() }),
-                KeyMapping(KP_RIGHT, { _ -> selectNextRow() }),
-
-                KeyMapping(KeyBinding(LEFT).shift(), { _ -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(KP_LEFT).shift(), { _ -> alsoSelectPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shift(), { _ -> alsoSelectNextRow() }),
-                KeyMapping(KeyBinding(KP_RIGHT).shift(), { _ -> alsoSelectNextRow() }),
-
-                KeyMapping(KeyBinding(LEFT).shortcut(), { _ -> focusPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shortcut(), { _ -> focusNextRow() }),
-
-                KeyMapping(KeyBinding(LEFT).shortcut().shift(), { _ -> discontinuousSelectPreviousRow() }),
-                KeyMapping(KeyBinding(RIGHT).shortcut().shift(), { _ -> discontinuousSelectNextRow() })
-        ))
-
-        addDefaultChildMap(inputMap, horizontalListInputMap)
 
         // set up other listeners
         // We make this an event _filter_ so that we can determine the state
@@ -264,14 +242,6 @@ class ListViewBehavior<T>
         CellBehaviorBase.removeAnchor(control)
 
         control.removeEventHandler(KeyEvent.ANY, keyEventListener)
-    }
-
-    fun setOnScrollPageUp(c: Callback<Boolean, Int>) {
-        onScrollPageUp = c
-    }
-
-    fun setOnScrollPageDown(c: Callback<Boolean, Int>) {
-        onScrollPageDown = c
     }
 
     fun setOnFocusPreviousRow(r: Runnable) {
@@ -317,28 +287,6 @@ class ListViewBehavior<T>
         node.selectionModel.clearSelection()
     }
 
-    private fun scrollPageUp() {
-        var newSelectedIndex = -1
-        if (onScrollPageUp != null) {
-            newSelectedIndex = onScrollPageUp!!.call(false)
-        }
-        if (newSelectedIndex == -1) return
-
-        val sm = node.selectionModel ?: return
-        sm.clearAndSelect(newSelectedIndex)
-    }
-
-    private fun scrollPageDown() {
-        var newSelectedIndex = -1
-        if (onScrollPageDown != null) {
-            newSelectedIndex = onScrollPageDown!!.call(false)
-        }
-        if (newSelectedIndex == -1) return
-
-        val sm = node.selectionModel ?: return
-        sm.clearAndSelect(newSelectedIndex)
-    }
-
     private fun focusFirstRow() {
         val fm = node.focusModel ?: return
         fm.focus(0)
@@ -379,20 +327,6 @@ class ListViewBehavior<T>
         }
 
         if (onFocusNextRow != null) onFocusNextRow!!.run()
-    }
-
-    private fun focusPageUp() {
-        val newFocusIndex = onScrollPageUp!!.call(true)
-
-        val fm = node.focusModel ?: return
-        fm.focus(newFocusIndex)
-    }
-
-    private fun focusPageDown() {
-        val newFocusIndex = onScrollPageDown!!.call(true)
-
-        val fm = node.focusModel ?: return
-        fm.focus(newFocusIndex)
     }
 
     private fun alsoSelectPreviousRow() {
@@ -512,58 +446,6 @@ class ListViewBehavior<T>
     private fun selectLastRow() {
         node.selectionModel.clearAndSelect(rowCount - 1)
         if (onMoveToLastCell != null) onMoveToLastCell!!.run()
-    }
-
-    private fun selectAllPageUp() {
-        val fm = node.focusModel ?: return
-
-        var leadIndex = fm.focusedIndex
-        if (isShiftDown) {
-            leadIndex = if (anchor == -1) leadIndex else anchor
-            anchor = leadIndex
-        }
-
-        val leadSelectedIndex = onScrollPageUp!!.call(false)
-
-        // fix for RT-34407
-        val adjust = if (leadIndex < leadSelectedIndex) 1 else -1
-
-        val sm = node.selectionModel ?: return
-
-        selectionChanging = true
-        if (sm.selectionMode == SelectionMode.SINGLE) {
-            sm.select(leadSelectedIndex)
-        } else {
-            sm.clearSelection()
-            sm.selectRange(leadIndex, leadSelectedIndex + adjust)
-        }
-        selectionChanging = false
-    }
-
-    private fun selectAllPageDown() {
-        val fm = node.focusModel ?: return
-
-        var leadIndex = fm.focusedIndex
-        if (isShiftDown) {
-            leadIndex = if (anchor == -1) leadIndex else anchor
-            anchor = leadIndex
-        }
-
-        val leadSelectedIndex = onScrollPageDown!!.call(false)
-
-        // fix for RT-34407
-        val adjust = if (leadIndex < leadSelectedIndex) 1 else -1
-
-        val sm = node.selectionModel ?: return
-
-        selectionChanging = true
-        if (sm.selectionMode == SelectionMode.SINGLE) {
-            sm.select(leadSelectedIndex)
-        } else {
-            sm.clearSelection()
-            sm.selectRange(leadIndex, leadSelectedIndex + adjust)
-        }
-        selectionChanging = false
     }
 
     private fun selectAllToFirstRow() {
@@ -719,26 +601,6 @@ class ListViewBehavior<T>
         fm.focus(newFocusIndex)
 
         if (onFocusNextRow != null) onFocusNextRow!!.run()
-    }
-
-    private fun discontinuousSelectPageUp() {
-        val sm = node.selectionModel ?: return
-
-        node.focusModel ?: return
-
-        val anchor = anchor
-        val leadSelectedIndex = onScrollPageUp!!.call(false)
-        sm.selectRange(anchor, leadSelectedIndex - 1)
-    }
-
-    private fun discontinuousSelectPageDown() {
-        val sm = node.selectionModel ?: return
-
-        node.focusModel ?: return
-
-        val anchor = anchor
-        val leadSelectedIndex = onScrollPageDown!!.call(false)
-        sm.selectRange(anchor, leadSelectedIndex + 1)
     }
 
     private fun discontinuousSelectAllToFirstRow() {

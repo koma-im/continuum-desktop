@@ -23,10 +23,6 @@ class SwitchableRoomView(
     private val view = BorderPane()
     private var selected = false
 
-    fun scroll(down: Boolean) {
-        val rv = roomView
-        rv.scroll(down)
-    }
     fun setRoom(room: Room) {
         roomView.setRoom(room)
         if (!selected) {

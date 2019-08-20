@@ -56,15 +56,6 @@ class MessagesListScrollPane(
     private val followingLatest = SimpleBooleanProperty(true)
     private val roomStates = mutableMapOf<RoomId, ViewRoomState>()
 
-    fun scrollPage(scrollDown: Boolean) {
-        val scrollRatio = 0.8f
-        if (scrollDown) {
-            virtualList.flow?.scroll(scrollRatio)
-        } else {
-            virtualList.flow?.scroll(-scrollRatio)
-        }
-    }
-
     fun scrollToBottom() {
         followingLatest.set(true)
         virtualList.items?.let {

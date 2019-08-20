@@ -32,7 +32,6 @@ class ChatRecvSendView(
     // messages typed but not sent in each room
     private val roomInputs = mutableMapOf<RoomId, String>()
 
-    fun scroll(down: Boolean) = messageScroll.scrollPage(down)
     fun setRoom(room: Room) {
         currentRoom.value?.let {
             roomInputs[it] =messageInput.text

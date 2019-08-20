@@ -570,7 +570,6 @@ class KVirtualFlow<I, T>(
          * would be the case if the scrollbars were underneath it as the
          * rectangle itself doesn't block the mouse.
          */
-        // --- vbar
         vbar.orientation = Orientation.VERTICAL
         vbar.addEventHandler(MouseEvent.ANY) { event -> event.consume() }
         children.add(vbar)
@@ -579,10 +578,9 @@ class KVirtualFlow<I, T>(
         // initBinds
         // clipView binds
 
-        val listenerY = object : ChangeListener<Number> {
-            override fun changed(ov: ObservableValue<out Number>?, t: Number?, t1: Number?) {
-                clipView.setClipY(if (true) 0.0 else vbar.value)
-            }
+        val listenerY = ChangeListener<Number> { ov, t, t1 ->
+            //TODO is this correct?
+            clipView.setClipY(0.0)
         }
         vbar.valueProperty().addListener(listenerY)
 
@@ -622,7 +620,10 @@ class KVirtualFlow<I, T>(
                     lastVisibleCell?.index))
     }
 
-    fun scroll(r: Float) {
+    /**
+     * scroll by percent of view height
+     */
+    fun scrollRatio(r: Float) {
         scrollPixels(r * lastHeight)
     }
 

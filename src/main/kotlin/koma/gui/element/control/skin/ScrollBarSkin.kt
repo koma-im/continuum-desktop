@@ -18,6 +18,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import koma.gui.element.control.KScrollBarBehavior
 import koma.gui.element.control.KVirtualScrollBar
+import javax.swing.InputMap
 
 /**
  * Creates a new ScrollBarSkin instance, installing the necessary child
@@ -31,8 +32,6 @@ class ScrollBarSkin(
 ) : SkinBase<ScrollBar>(control) {
 
     private val behavior = KScrollBarBehavior(control)
-    // install default input map for the ScrollBar control?
-    //        control.setInputMap(behavior.getInputMap());
 
     private val thumb= object : StackPane() {
         override fun queryAccessibleAttribute(attribute: AccessibleAttribute, vararg parameters: Any): Any {

@@ -26,9 +26,6 @@ class JoinedRoomView(
     val messageRecvSendView = ChatRecvSendView(km, store)
     val usersListView = RoomMemberListView(store.userData)
 
-    @ObsoleteCoroutinesApi
-    fun scroll(down: Boolean) = messageRecvSendView.scroll(down)
-
     fun setRoom(room: Room) {
         messageRecvSendView.setRoom(room)
         usersListView.setList(room.members.list)

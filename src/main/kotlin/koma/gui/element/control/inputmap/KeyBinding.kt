@@ -62,6 +62,10 @@ class KeyBinding @JvmOverloads constructor(val code: KeyCode?, type: EventType<K
         return this
     }
 
+    /**
+     * usually ctrl
+     * except mac
+     */
     fun shortcut(): KeyBinding {
         when (Utils.getPlatformShortcutKey()) {
             KeyCode.SHIFT -> return shift()
