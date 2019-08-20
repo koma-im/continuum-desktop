@@ -1667,7 +1667,7 @@ class KVirtualFlow<I, T>(
                 val c = cells.removeAt(i)
                 logger.trace { "recycling cell above top cellStart $cellStart" +
                         "<0, index=$i, cell=$c" }
-                pile.add(cells.removeAt(i))
+                pile.add(c)
             }
         }
     }
