@@ -627,6 +627,11 @@ class KVirtualFlow<I, T>(
         scrollPixels(r * lastHeight)
     }
 
+    /**
+     * number of items in the underlying data model
+     */
+    fun itemsSize(): Int? = kListView.items?.size
+
     override fun layoutChildren() {
         if (needsRebuildCells) {
             logger.debug { "layoutChildren: needsRebuildCells" }

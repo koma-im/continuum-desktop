@@ -1,7 +1,5 @@
 package koma.gui.view.window.chatroom.messaging.reading
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
@@ -9,7 +7,6 @@ import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import koma.Koma
-import koma.gui.element.control.EmptyCellPool
 import koma.gui.element.control.KListView
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -24,7 +21,6 @@ import link.continuum.desktop.gui.message.createCell
 import model.Room
 import mu.KotlinLogging
 import tornadofx.*
-import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger {}
 private val settings = appState.store.settings
@@ -46,10 +42,13 @@ private class ViewRoomState(
 class MessagesListScrollPane(
         private val km: Koma,
         store: AppStore
-): View() {
-    override val root = AnchorPane()
-
-    private val virtualList: KListView<EventItem, MessageCell>
+) {
+    private val virtualList: KListView<EventItem, MessageCell> = KListView(EventCellPool()) {
+        logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
+        createCell(it?.first?.getEvent(), km, store)
+    }
+    val root
+        get() = virtualList.view
 
     private var currentViewing: RoomId? = null
     // decide whether to scroll
@@ -99,50 +98,13 @@ class MessagesListScrollPane(
     }
     init {
         root.vgrow = Priority.ALWAYS
-        val p = EventCellPool()
-        virtualList = KListView<EventItem, MessageCell>(p) {
-            logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
-            createCell(it?.first?.getEvent(), km, store)
-        }
-        virtualList.view.vgrow = Priority.ALWAYS
+
         virtualList.view.hgrow = Priority.ALWAYS
 
-        addVirtualScrollPane()
-        addScrollBottomButton()
         scrollToBottom()
         virtualList.addEventFilter(ScrollEvent.SCROLL) { _: ScrollEvent ->
             onScroll()
         }
-    }
-
-    private fun addVirtualScrollPane() {
-        val virtualScroll = virtualList
-        val node = virtualScroll.view
-        node.vgrow = Priority.ALWAYS
-        AnchorPane.setTopAnchor(node, 0.0)
-        AnchorPane.setLeftAnchor(node , 0.0)
-        AnchorPane.setRightAnchor(node , 0.0)
-        AnchorPane.setBottomAnchor(node , 0.0)
-        add(node)
-    }
-
-    private fun addScrollBottomButton() {
-        val scale = settings.scaling
-        val button = button() {
-            removeWhen(followingLatest)
-            graphic = MaterialIconFactory.get().createIcon(MaterialIcon.VERTICAL_ALIGN_BOTTOM, "${(scale*1.5).roundToInt()}em")
-            style {
-                backgroundRadius = multi(box(15.em))
-                val size = scale * 25.px
-                minWidth = size
-                minHeight = size
-                maxWidth = size
-                maxHeight = size
-            }
-            action { scrollToBottom() }
-        }
-        AnchorPane.setRightAnchor(button, 20.0 * scale)
-        AnchorPane.setBottomAnchor(button, 10.0 * scale)
     }
 
     private fun onAddedMessages(e : ListChangeListener.Change<out EventItem>,

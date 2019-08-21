@@ -1,12 +1,13 @@
 package koma.gui.element.control.skin
 
 import com.sun.javafx.scene.control.Properties
-import com.sun.javafx.scene.control.behavior.ScrollBarBehavior
 import com.sun.javafx.util.Utils
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Point2D
-import javafx.scene.AccessibleAction
+import javafx.geometry.VPos
 import javafx.scene.AccessibleAttribute
 import javafx.scene.AccessibleRole
 import javafx.scene.control.Control
@@ -16,9 +17,13 @@ import javafx.scene.input.MouseButton
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
 import koma.gui.element.control.KScrollBarBehavior
 import koma.gui.element.control.KVirtualScrollBar
-import javax.swing.InputMap
+import mu.KotlinLogging
+import kotlin.math.abs
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Creates a new ScrollBarSkin instance, installing the necessary child
@@ -28,8 +33,18 @@ import javax.swing.InputMap
  * @param control The control that this skin should be installed onto.
  */
 class ScrollBarSkin(
-        control: KVirtualScrollBar<*, *>
+        control: KVirtualScrollBar<*, *>,
+        /**
+         * the width of the scrollbar
+         */
+        breath: Double? = null
 ) : SkinBase<ScrollBar>(control) {
+
+    /*
+     * the breadth of the scrollbar. The "breadth" is the distance
+     * across the scrollbar, i.e. if vertical the width.
+     */
+    private val breadth: Double = breath?: Properties.DEFAULT_EMBEDDED_SB_BREADTH+ snappedLeftInset() + snappedRightInset()
 
     private val behavior = KScrollBarBehavior(control)
 
@@ -41,8 +56,26 @@ class ScrollBarSkin(
             }
         }
     }
-    private val trackBackground = StackPane()
     private val track = StackPane()
+    /**
+     * click scroll to bottom
+     */
+    private val bottomButton =Pane().apply {
+        val radius = breadth * 2.5
+        children.add(FontAwesomeIconFactory.get().createIcon(
+                FontAwesomeIcon.ANGLE_DOWN, "${breadth*4}px"
+        ).apply {
+            opacity = .5
+            this.textOrigin = VPos.CENTER
+            translateX = radius / 2
+            translateY = radius
+        })
+        border = Border(BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT))
+        shape = Circle(radius)
+        background = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))
+        prefHeight = radius * 2
+        prefWidth = radius * 2
+    }
 
     private var trackLength: Double = 0.0
     private var thumbLength: Double = 0.0
@@ -51,12 +84,6 @@ class ScrollBarSkin(
     private var dragStart: Point2D? = null // in the track's coord system
 
 
-    /*
-     * Gets the breadth of the scrollbar. The "breadth" is the distance
-     * across the scrollbar, i.e. if vertical the width.
-     */
-    internal val breadth: Double
-        get() = Properties.DEFAULT_EMBEDDED_SB_BREADTH+ snappedLeftInset() + snappedRightInset()
 
     init {
         initialize()
@@ -65,12 +92,16 @@ class ScrollBarSkin(
         // Register listeners
         val consumer = { _: Any? ->
             positionThumb()
+            showBottomButton()
             skinnable.requestLayout()
         }
         registerChangeListener(control.minProperty(), consumer)
         registerChangeListener(control.maxProperty(), consumer)
         registerChangeListener(control.visibleAmountProperty(), consumer)
-        registerChangeListener(control.valueProperty()) { e -> positionThumb() }
+        registerChangeListener(control.valueProperty()) { e ->
+            positionThumb()
+            showBottomButton()
+        }
     }
 
     override fun dispose() {
@@ -95,15 +126,23 @@ class ScrollBarSkin(
             visiblePortion = 1.0
         }
 
-        trackLength = snapSizeY(h)
+        val xs = snapPositionX(x)
+        val ys = snapPositionY(y)
+        val hs = snapSizeY(h)
+        logger.trace { "layoutChildren $x $y $w $h $xs $ys" }
+        trackLength = hs
         thumbLength = snapSizeY(Utils.clamp(minThumbLength(), trackLength * visiblePortion, trackLength))
-        trackBackground.resizeRelocate(snapPositionX(x), snapPositionY(y), w, trackLength)
-        track.resizeRelocate(snapPositionX(x), snapPositionY(y), w, trackLength)
+        track.resizeRelocate(xs, ys, w, trackLength)
         thumb.resize(snapSizeX(if (x >= 0) w else w + x), thumbLength) // Account for negative padding
+        bottomButton.apply {
+            resize(prefWidth, prefHeight)
+            val sep = breadth * 2
+            relocate( xs -sep - prefWidth, ys + hs - sep - prefHeight)
+        }
         positionThumb()
 
         // things should be invisible only when well below minimum length
-        if ( h >= computeMinHeight(
+        if ( h < computeMinHeight(
                         -1.0,
                         y.toInt().toDouble(),
                         snappedRightInset(),
@@ -111,14 +150,16 @@ class ScrollBarSkin(
                         x.toInt().toDouble()
                 ) - (y + snappedBottomInset())
         ) {
-            trackBackground.isVisible = true
-            track.isVisible = true
-            thumb.isVisible = true
-        } else {
-            trackBackground.isVisible = false
             track.isVisible = false
             thumb.isVisible = false
+            bottomButton.isVisible = false
+            return
         }
+        track.isVisible = true
+        thumb.isVisible = true
+
+        showBottomButton()
+
     }
 
     /*
@@ -147,7 +188,6 @@ class ScrollBarSkin(
     }
 
     override fun computePrefHeight(height: Double, topInset: Double, rightInset: Double, bottomInset: Double, leftInset: Double): Double {
-        val s = skinnable
         return Properties.DEFAULT_LENGTH.toDouble() + topInset + bottomInset
 
     }
@@ -168,10 +208,16 @@ class ScrollBarSkin(
      */
     private fun initialize() {
         track!!.styleClass.setAll("track")
-        trackBackground.styleClass.setAll("track-background")
         thumb.background = Background(BackgroundFill(Color.DARKGREY, CornerRadii.EMPTY, Insets.EMPTY))
         thumb!!.accessibleRole = AccessibleRole.THUMB
 
+        bottomButton.setOnMouseClicked {
+            if (it.button == MouseButton.PRIMARY) {
+                logger.debug { "go to bottom" }
+                behavior.end()
+                it.consume()
+            }
+        }
         track!!.setOnMousePressed { me ->
             if (!thumb!!.isPressed && me.button == MouseButton.PRIMARY) {
                 if (trackLength != 0.0) {
@@ -284,7 +330,7 @@ class ScrollBarSkin(
                  ** in 2.0 a horizontal scrollbar would scroll on a vertical
                  ** drag on a tracker-pad. We need to keep this behavior.
                  */
-                dx = if (Math.abs(dx) < Math.abs(dy)) dy else dx
+                dx = if (abs(dx) < abs(dy)) dy else dx
 
                 /*
                  ** we only consume an event that we've used.
@@ -318,7 +364,7 @@ class ScrollBarSkin(
         }
 
         children.clear()
-        children.addAll(trackBackground)
+        children.addAll(bottomButton)
         children.addAll(track, thumb)
 
     }
@@ -341,5 +387,13 @@ class ScrollBarSkin(
 
         thumb!!.translateX = snapPositionX(snappedLeftInset())
         thumb!!.translateY = snapPositionY(trackPos + snappedTopInset())
+    }
+
+    private fun showBottomButton(){
+        val s = skinnable
+        val pos: Double = if (s.max - s.min > 0) (s.value - s.min) / (s.max - s.min) else 1.0
+        val showButt = pos < .95
+        logger.trace { "pos $pos should show bottom button is $showButt" }
+        bottomButton.isVisible = showButt
     }
 }

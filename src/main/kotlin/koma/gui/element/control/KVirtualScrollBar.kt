@@ -1,12 +1,14 @@
 package koma.gui.element.control
 
-import javafx.scene.control.IndexedCell
 import javafx.scene.control.ListCell
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.Skin
 import koma.gui.element.control.skin.KVirtualFlow
 import koma.gui.element.control.skin.ScrollBarSkin
+import mu.KotlinLogging
 import org.controlsfx.tools.Utils
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * This custom ScrollBar is used to map the increment & decrement features
@@ -54,6 +56,15 @@ class KVirtualScrollBar<I, T>(
     fun pageDown(){
         val cell = flow.lastVisibleCell ?: return
         flow.scrollToTop(cell)
+    }
+
+    fun end() {
+        val s = flow.itemsSize()
+        if (s == null){
+            logger.error { "trying to get to the bottom of an empty list" }
+            return
+        }
+        flow.scrollToTop( s - 1)
     }
 
     override fun createDefaultSkin(): Skin<*> {

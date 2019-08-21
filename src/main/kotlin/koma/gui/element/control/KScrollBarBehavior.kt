@@ -6,6 +6,9 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 class KScrollBarBehavior(private val bar: KVirtualScrollBar<*, *>): ScrollBarBehavior(bar) {
+    fun end() {
+        bar.end()
+    }
     override fun trackPress(pos: Double) {
         val cur = (bar.getValue() - bar.getMin())/(bar.getMax() - bar.getMin())
         if (pos > cur) {

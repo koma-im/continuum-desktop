@@ -48,7 +48,7 @@ class ChatRecvSendView(
         with(root) {
             hgrow = Priority.ALWAYS
 
-            add(messageScroll)
+            add(messageScroll.root)
 
             add(createButtonBar(messageInput, currentRoom))
 
