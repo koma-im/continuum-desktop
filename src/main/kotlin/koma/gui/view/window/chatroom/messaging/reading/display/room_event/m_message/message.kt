@@ -58,7 +58,7 @@ class MRoomMessageViewNode(
     init {
         with(center) {
             paddingAll = 2.0
-            hbox {
+            hbox(4.0) {
                 minWidth = 1.0
                 prefWidth = 1.0
                 style {

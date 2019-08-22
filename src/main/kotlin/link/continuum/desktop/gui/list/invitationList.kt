@@ -1,5 +1,6 @@
 package link.continuum.desktop.gui.list
 
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.geometry.VPos
 import javafx.scene.control.Label

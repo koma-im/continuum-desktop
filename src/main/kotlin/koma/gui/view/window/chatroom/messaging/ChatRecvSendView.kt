@@ -1,6 +1,7 @@
 package koma.gui.view.window.chatroom.messaging
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Insets
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import koma.Koma
@@ -24,7 +25,9 @@ class ChatRecvSendView(
         km: Koma,
         store: AppStore
 ): View() {
-    override val root = vbox(10.0)
+    override val root = vbox(5.0).apply {
+        padding = Insets(0.0, 0.0, 5.0, 0.0)
+    }
 
     private val messageScroll = MessagesListScrollPane(km, store)
     private val messageInput = TextField()
@@ -56,6 +59,7 @@ class ChatRecvSendView(
         }
 
         with(messageInput) {
+            promptText = "Compose a message"
             hgrow = Priority.ALWAYS
             action {
                 val msg = text

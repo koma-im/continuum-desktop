@@ -54,10 +54,10 @@ class InitialIcon(
         })
     }
     init {
-        val font = Font.font("serif", FontWeight.BOLD, 0.5 * iSize)
+        val font = Font.font("sans", 0.5 * iSize)
         charL.font = font
         charR.font = font
-        charC.font = Font.font("serif", FontWeight.BOLD, 0.9 * iSize)
+        charC.font = Font.font("sans", 0.9 * iSize)
     }
 
     fun show() {

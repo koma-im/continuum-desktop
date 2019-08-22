@@ -9,6 +9,7 @@ class StartScreen(): View() {
 
     override val root = VBox()
     init {
+        title = "Continuum"
         with(root) {
             alignment = Pos.CENTER
             hbox {

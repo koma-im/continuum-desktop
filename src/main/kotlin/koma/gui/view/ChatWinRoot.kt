@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import koma.Failure
 import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
@@ -55,6 +56,7 @@ class ChatWindowBars(
     init {
         with(content) {
             style {
+                backgroundColor = multi(Color.WHITE)
                 fontSize= settings.scaling.em
             }
             center = this@ChatWindowBars.center.root

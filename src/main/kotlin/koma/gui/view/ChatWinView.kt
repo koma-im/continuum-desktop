@@ -7,6 +7,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.layout.Border
 import javafx.scene.layout.Priority
 import koma.Koma
 import koma.Server
@@ -70,7 +71,7 @@ class ChatView(roomList: ObservableList<Room>,
         with(root) {
             vgrow = Priority.ALWAYS
 
-            vbox(5.0) {
+            vbox() {
                 add(invitationsView.list)
                 add(roomListView)
             }

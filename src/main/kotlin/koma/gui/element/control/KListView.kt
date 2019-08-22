@@ -12,6 +12,7 @@ import javafx.scene.AccessibleAttribute
 import javafx.scene.control.FocusModel
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
+import javafx.scene.layout.Border
 import javafx.scene.layout.Region
 import koma.gui.element.control.skin.KListViewSkin
 import koma.gui.element.control.skin.KVirtualFlow

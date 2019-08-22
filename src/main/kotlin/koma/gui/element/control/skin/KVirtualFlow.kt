@@ -17,6 +17,7 @@ import javafx.scene.control.IndexedCell
 import javafx.scene.control.ListCell
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
+import javafx.scene.layout.Border
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import koma.gui.element.control.*

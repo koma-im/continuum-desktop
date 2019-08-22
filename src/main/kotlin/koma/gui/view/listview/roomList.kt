@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.layout.Border
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import koma.Koma
@@ -29,6 +30,7 @@ class RoomListView(
     override val root = listview(roomlist)
 
     init {
+        root.border = Border.EMPTY
         root.isFocusTraversable = false
         val gettingStarted = VBox(15.0)
         with(gettingStarted) {
@@ -53,12 +55,6 @@ class RoomListView(
             }
         }
         root.placeholder = gettingStarted
-        root.addEventFilter(KeyEvent.KEY_PRESSED, { e ->
-            // these keys are only used to scroll chat messages
-            if (e.code == KeyCode.PAGE_UP || e.code == KeyCode.PAGE_DOWN) {
-                e.consume()
-            }
-        })
         setup(root)
         if (roomlist.isNotEmpty()) {
             root.selectionModel.selectFirst()
