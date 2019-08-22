@@ -3,7 +3,6 @@ package koma.gui.element.control.skin
 import javafx.beans.Observable
 import javafx.beans.property.*
 import javafx.beans.value.ChangeListener
-import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.event.Event
 import javafx.event.EventDispatchChain
@@ -49,7 +48,6 @@ class KVirtualFlow<I, T>(
     : Region()
         where I : ListCell<T> {
 
-    val visibleIndexRange = SimpleObjectProperty<NullableIndexRange>()
     fun visibleFirst(): T? {
         val i = firstVisibleCell?.item
         return i
@@ -614,12 +612,6 @@ class KVirtualFlow<I, T>(
         position.set(value)
     }
 
-    private fun updateVisibleIndices() {
-            visibleIndexRange.set(NullableIndexRange(
-                    firstVisibleCell?.index,
-                    lastVisibleCell?.index))
-    }
-
     /**
      * scroll by percent of view height
      */
@@ -1159,8 +1151,6 @@ class KVirtualFlow<I, T>(
         updateScrollBarsAndCells(false)
         lastPosition = getPosition()
 
-        // notify
-        updateVisibleIndices()
         return delta // TODO fake
     }
 

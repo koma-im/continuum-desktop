@@ -3,26 +3,20 @@ package koma.gui.element.control
 import javafx.beans.InvalidationListener
 import javafx.beans.Observable
 import javafx.beans.WeakInvalidationListener
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.WeakListChangeListener
 import javafx.event.Event
-import javafx.event.EventHandler
 import javafx.event.EventType
 import javafx.scene.AccessibleAttribute
-import javafx.scene.control.Control
 import javafx.scene.control.FocusModel
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.layout.Region
-import javafx.util.Callback
 import koma.gui.element.control.skin.KListViewSkin
 import koma.gui.element.control.skin.KVirtualFlow
 import koma.gui.element.emoji.keyboard.NoSelectionModel
 import mu.KotlinLogging
-import tornadofx.onChange
-import tornadofx.onHover
 import java.lang.ref.WeakReference
 
 private val logger = KotlinLogging.logger {}
@@ -40,7 +34,6 @@ class KListView<T, I: ListCell<T>>(
             listView.items = value
         }
     fun<E: Event> addEventFilter(t: EventType<E>, filter: (E)->Unit) = listView.addEventFilter(t, filter)
-    val visibleIndexRange: SimpleObjectProperty<NullableIndexRange>
     val flow: KVirtualFlow<I, T>
     init {
         val skin = KListViewSkin(listView, cellPool, this)
@@ -54,32 +47,15 @@ class KListView<T, I: ListCell<T>>(
             flow.vbar.isVisible = hover
             flow.vbar.isManaged = hover
         }
-        val f = skin.flow
-        visibleIndexRange = f.visibleIndexRange
     }
     fun visibleFirst(): T? = flow.visibleFirst()
+    fun visibleLastCell(): I? = flow.lastVisibleCell
     fun<K: Comparable<K>> scrollBinarySearch(key: K, selector: (T)->K) {
         val items = listView.items ?: return
         val i = items.binarySearchBy(key, 0, items.size, selector)
         listView.scrollTo(i)
     }
     fun scrollTo(index: Int) = listView.scrollTo(index)
-}
-
-class NullableIndexRange(
-        val start: Int?,
-        val endInclusive: Int?
-) {
-    override fun equals(other: Any?): Boolean =
-            other is NullableIndexRange && (start == other.start && endInclusive == other.endInclusive)
-
-    override fun toString(): String = "$start..$endInclusive"
-
-    override fun hashCode(): Int {
-        var result = start ?: 0
-        result = 31 * result + (endInclusive ?: 0)
-        return result
-    }
 }
 
 internal class KListViewFocusModel<T>(private val listView: ListView<T>) : FocusModel<T>() {
