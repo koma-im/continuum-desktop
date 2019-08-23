@@ -60,6 +60,7 @@ class MessagesListScrollPane(
     }
 
     fun setList(msgs: ObservableList<EventItem>, roomId: RoomId) {
+        listView.view.requestFocus()
         val cur = currentViewing
         if (cur != null) {
             val first = virtualList.visibleFirst()

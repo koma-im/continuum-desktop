@@ -57,7 +57,7 @@ dependencies {
 }
 
 group = "link.continuum"
-version = "0.9.16"
+version = "0.9.17"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"
