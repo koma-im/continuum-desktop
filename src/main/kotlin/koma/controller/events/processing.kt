@@ -21,9 +21,7 @@ import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.events.handleInvitedRoom
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.Account
-import link.continuum.libutil.`?or`
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 
 private val logger = KotlinLogging.logger {}
 

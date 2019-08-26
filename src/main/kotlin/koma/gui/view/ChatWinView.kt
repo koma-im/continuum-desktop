@@ -5,12 +5,8 @@ import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
-import javafx.scene.layout.Border
 import javafx.scene.layout.Priority
 import koma.Koma
-import koma.Server
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
@@ -30,11 +26,9 @@ import link.continuum.database.models.saveRoomName
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.util.Account
-import link.continuum.libutil.getOrNull
+import link.continuum.desktop.util.getOrNull
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap

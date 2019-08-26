@@ -24,7 +24,7 @@ import link.continuum.database.models.*
 import link.continuum.desktop.gui.checkUiThread
 import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.DedupList
-import link.continuum.libutil.getOrNull
+import link.continuum.desktop.util.getOrNull
 import okhttp3.HttpUrl
 import tornadofx.*
 import java.util.*

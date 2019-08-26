@@ -15,7 +15,7 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
-import link.continuum.libutil.getOrNull
+import link.continuum.desktop.util.getOrNull
 import model.Room
 import okhttp3.OkHttpClient
 import tornadofx.*

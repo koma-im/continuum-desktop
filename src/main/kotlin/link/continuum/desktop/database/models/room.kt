@@ -4,18 +4,13 @@ import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
-import koma.matrix.user.identity.UserId_new
 import koma.network.media.parseMxc
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.util.http.MediaServer
-import link.continuum.libutil.`?or?`
-import link.continuum.libutil.getOrNull
-import link.continuum.libutil.onNull
+import link.continuum.desktop.util.onNull
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 
 private val logger = KotlinLogging.logger {}
 

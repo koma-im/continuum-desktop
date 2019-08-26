@@ -4,8 +4,6 @@ import koma.util.KResult
 import koma.util.getFailureOr
 import koma.util.getOr
 import koma.util.given
-import link.continuum.libutil.`?or?`
-import link.continuum.libutil.`?or`
 import kotlin.test.*
 
 internal class ResultKtTest {

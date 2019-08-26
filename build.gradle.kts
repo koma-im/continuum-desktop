@@ -51,13 +51,16 @@ dependencies {
     implementation("com.vdurmont:emoji-java:4.0.0")
     implementation("org.slf4j:slf4j-api:1.8.0-beta2")
     implementation("org.slf4j:slf4j-simple:1.8.0-beta2")
-    compile(project(":libutil"))
-    compile(project(":libdatabase"))
     implementation("io.requery:requery-kotlin:1.6.1")
+    implementation("io.requery:requery:1.6.1")
+    implementation("com.h2database:h2:1.4.199")
+    implementation("javax.annotation:javax.annotation-api:1.3.2")
+
+    kapt("io.requery:requery-processor:1.6.1")
 }
 
 group = "link.continuum"
-version = "0.9.17"
+version = "0.9.18"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"

@@ -1,21 +1,19 @@
 package koma.gui.element.emoji.icon
 
 import com.vdurmont.emoji.EmojiManager
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableValue
-import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.Cursor
-import javafx.scene.control.*
-import javafx.scene.control.skin.LabeledSkinBase
+import javafx.scene.control.Hyperlink
+import javafx.scene.control.Tooltip
 import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import koma.koma_app.appState
-import link.continuum.libutil.`?or`
 import mu.KotlinLogging
-import tornadofx.*
+import tornadofx.add
+import tornadofx.booleanBinding
+import tornadofx.cleanBind
+import tornadofx.removeWhen
 
 private val logger = KotlinLogging.logger {}
 

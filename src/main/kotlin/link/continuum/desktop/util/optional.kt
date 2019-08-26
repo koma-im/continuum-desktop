@@ -24,3 +24,27 @@ fun <T>None(): Optional<T> = Optional.empty()
 fun <T>Some(value: T): Optional<T> = Optional.of(value)
 
 fun<T: Any> T?.toOption(): Optional<T> = Optional.ofNullable(this)
+
+inline infix fun<T: Any?> T.`?or?`(action: () -> T?): T? {
+    if (this != null) return this
+    return action()
+}
+
+inline infix fun<T: Any> T?.`?or`(action: () -> T): T {
+    if (this != null) return this
+    return action()
+}
+
+inline infix fun<T: Any> T?.onNull(action: ()->Unit): T? {
+    if (this == null) action()
+    return this
+}
+
+/**
+ * get value of Optional if it's not empty
+ * null otherwise
+ */
+fun <T> Optional<T>.getOrNull(): T? {
+    if (this.isPresent) return this.get()
+    return null
+}
