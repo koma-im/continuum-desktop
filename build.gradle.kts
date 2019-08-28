@@ -8,6 +8,7 @@ plugins {
     id("java")
     id("maven")
     id("application")
+    id("org.beryx.runtime") version "1.3.0"
     id("org.openjfx.javafxplugin").version("0.0.5")
 }
 
@@ -41,7 +42,7 @@ javafx {
 dependencies {
     implementation(kotlin("reflect"))
     implementation("no.tornado:tornadofx:1.7.18")
-    implementation("org.cache2k:cache2k-core:1.0.2.Final")
+    implementation("org.cache2k:cache2k-core:1.2.3.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
     implementation("de.jensd:fontawesomefx-commons:9.1.2")
@@ -60,7 +61,7 @@ dependencies {
 }
 
 group = "link.continuum"
-version = "0.9.18"
+version = "0.9.18.3"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"
@@ -91,4 +92,25 @@ tasks.withType<Jar> {
 
 tasks.withType<ShadowJar> {
     archiveClassifier.set("bundled")
+}
+
+runtime {
+    options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
+    modules.set(listOf(
+            "jdk.unsupported", "java.scripting",
+                "java.desktop",
+                "jdk.jfr",
+                "java.xml",
+                "jdk.unsupported",
+                "java.scripting",
+                "java.logging",
+                "java.prefs",
+                "java.sql",
+                "java.naming",
+                "java.management",
+                "java.sql.rowset",
+                "java.compiler",
+                "java.transaction.xa",
+                "java.instrument"
+            ))
 }
