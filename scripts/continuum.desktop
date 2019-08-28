@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Continuum
+GenericName=Internet Messenger
+Comment=Chat over Matrix.
+Exec=continuum-desktop
+Icon=koma
+Type=Application
+Categories=Network;InstantMessaging;
