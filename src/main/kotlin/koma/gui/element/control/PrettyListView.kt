@@ -1,6 +1,7 @@
 package koma.gui.element.control
 
 // from http://dlsc.com/2017/09/07/javafx-tip-28-pretty-list-view/
+import javafx.css.Stylesheet
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
@@ -17,7 +18,6 @@ class PrettyListView<T> : ListView<T>() {
             bindScrollBars()
             children.addAll(vBar, hBar)
         }
-
         styleClass.add("pretty-list-view")
         stylesheets.add("/css/prettylistview.css")
 

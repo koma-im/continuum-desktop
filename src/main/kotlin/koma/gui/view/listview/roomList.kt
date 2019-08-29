@@ -32,6 +32,7 @@ class RoomListView(
     init {
         root.border = Border.EMPTY
         root.isFocusTraversable = false
+        root.styleClass.add("chatroom-listview")
         val gettingStarted = VBox(15.0)
         with(gettingStarted) {
             alignment = Pos.CENTER

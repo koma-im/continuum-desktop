@@ -43,6 +43,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
 
     val primary = ChatWindowBars(userRooms, account, store)
     FX.primaryStage.scene.root = primary.root
+    FX.primaryStage.scene.stylesheets.add("/css/main.css")
 
     app.coroutineScope.launch {
         val rooms = loadUserRooms(data, userId)

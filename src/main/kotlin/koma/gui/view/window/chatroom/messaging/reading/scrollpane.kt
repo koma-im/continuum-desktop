@@ -44,6 +44,8 @@ class MessagesListScrollPane(
     private val virtualList: KListView<EventItem, MessageCell> = KListView(EventCellPool()) {
         logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
         createCell(it?.first?.getEvent(), km, store)
+    }.apply {
+        view.styleClass.add("message-list-view")
     }
     private val listView = virtualList
     val root
