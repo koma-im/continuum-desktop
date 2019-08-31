@@ -9,7 +9,6 @@
 /* Selected when control is not focused */
 .chatroom-listview > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
     -fx-background: #0096C950;
-    -fx-text-fill: red;
 }
 
 /* focused cell (keyboard navigation) not used, remove unnecessary border
