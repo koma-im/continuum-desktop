@@ -1,9 +1,14 @@
 package link.continuum.desktop.gui
 
 import com.sun.javafx.tk.Toolkit
+import javafx.geometry.Insets
 import javafx.scene.Node
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonType
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.CornerRadii
+import javafx.scene.paint.Color
 import javafx.stage.Window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -17,6 +22,8 @@ import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
+
+val whiteBackGround = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))
 
 fun<T: Node> T.showIf(show: Boolean) {
     this.isManaged = show

@@ -30,8 +30,7 @@ import okhttp3.HttpUrl
  */
 suspend fun onClickLogin(koma: Koma,
                          appData: AppStore,
-                         user: String, password: String, server: String) {
-    val userid = UserId_new(user)
+                         userid: UserId, password: String, server: String) {
     val url = HttpUrl.parse(server)
     if (url == null) {
         alert(Alert.AlertType.ERROR, "Invalid server url",
