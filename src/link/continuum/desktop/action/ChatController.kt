@@ -40,9 +40,6 @@ class SyncControl(
 
     init{
         val batch_key = if (full_sync) {
-            coroutineScope.launch {
-                statusChan.send(SyncStatusBar.Variants.FullSync())
-            }
             null
         }  else {
             getSyncBatchKey(appData.database, user)
@@ -66,14 +63,11 @@ class SyncControl(
                         saveSyncBatchKey(appData.database, user, nb)
                     }
                 }.onFailure {
-                    val deferred = CompletableDeferred<Unit>()
-                    statusChan.send(SyncStatusBar.Variants.NeedRetry(it, deferred))
-                    logger.warn { "sync stopped because of $s" }
-                    deferred.await()
-                    logger.info { "Retrying sync" }
-                    sync.startSyncing()
+                    statusChan.send(SyncStatusBar.Variants.NeedRetry(it))
+                    logger.warn { "sync issue $s" }
                 }
             }
+            logger.debug { "events are no longer processed" }
         }
     }
 }

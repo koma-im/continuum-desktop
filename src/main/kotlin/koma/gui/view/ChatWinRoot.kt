@@ -97,11 +97,6 @@ class SyncStatusBar(
 ): CoroutineScope by CoroutineScope(Dispatchers.Main) {
     val ctrl = Channel<Variants>(Channel.CONFLATED)
 
-    /**
-     * true unless there is error
-     */
-    private var syncing = true
-
     init {
         launch {
             for (s in ctrl) {
@@ -115,23 +110,8 @@ class SyncStatusBar(
             is Variants.Normal -> {
                 pane.hide()
             }
-            is Variants.FullSync -> {
-                pane.show("Doing a full sync", null, null)
-            }
             is Variants.NeedRetry -> {
-                syncing = false
-                val countDown = launch {
-                    for (i in 9 downTo 1) {
-                        pane.text = "Network issue, retrying in $i seconds"
-                        delay(1000)
-                    }
-                    setRetrying(s.retryNow)
-                }
-                pane.text = "Network issue"
-                pane.actions.setAll(Action("Retry Now") {
-                    countDown.cancel()
-                    setRetrying(s.retryNow)
-                })
+                pane.text = "Connecting"
                 if (!pane.isShowing) {
                     pane.show()
                 }
@@ -139,27 +119,10 @@ class SyncStatusBar(
         }
     }
 
-    private fun setRetrying(retryNow: CompletableDeferred<Unit>) {
-        syncing = true
-        pane.actions.clear()
-        pane.text = "Syncing"
-        if (!retryNow.isCompleted) retryNow.complete(Unit)
-        launch {
-            delay(3000)
-            // assume the long-polling sync api is working
-            if (syncing) {
-                pane.hide()
-            }
-        }
-    }
-
     // various states
     sealed class Variants {
         class Normal(): Variants()
-        class FullSync(): Variants()
         // network issue that may be temporary
-        class NeedRetry(val err: Failure, val retryNow: CompletableDeferred<Unit>): Variants()
-        // authentication error
-        class NeedRelogin(val err: Exception, val restart: CompletableDeferred<Unit>): Variants()
+        class NeedRetry(val err: Failure): Variants()
     }
 }
