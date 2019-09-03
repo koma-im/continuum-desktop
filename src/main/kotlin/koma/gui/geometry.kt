@@ -1,8 +1,8 @@
 package koma.gui
 
+import javafx.stage.Screen
 import javafx.stage.Stage
 import koma.gui.view.ChatView
-import java.awt.GraphicsEnvironment
 import java.util.prefs.Preferences
 
 
@@ -34,9 +34,9 @@ private fun setWidthHeight(stage: Stage, prefs: Preferences) {
         stage.width = sw
         stage.height = sh
     } else {
-        val gd = GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice
-        val width = gd.displayMode.width
-        val height = gd.displayMode.height
+        val rec = Screen.getPrimary().getVisualBounds()
+        val width = rec.width
+        val height = rec.height
         stage.width = width / 2.0
         stage.height = height / 2.0
     }
