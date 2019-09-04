@@ -6,6 +6,8 @@ import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.effect.DropShadow
 import javafx.scene.image.Image
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
@@ -24,6 +26,7 @@ import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.gui.whiteBackGround
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import org.controlsfx.control.MaskerPane
 import org.controlsfx.control.decoration.Decoration
 import org.controlsfx.control.textfield.TextFields
 import org.controlsfx.validation.Severity
@@ -41,6 +44,7 @@ private val settings: AppSettings = appState.store.settings
  * Created by developer on 2017/6/21.
  */
 class LoginScreen(
+        private val mask: MaskerPane,
         private val data: KDataStore = appState.store.database
 ): View(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
@@ -77,6 +81,7 @@ class LoginScreen(
             }
         }
     }
+    private var job: Job? = null
     init {
         val iconstream = javaClass.getResourceAsStream("/icon/koma.png");
         if (iconstream != null) {
@@ -111,6 +116,17 @@ class LoginScreen(
             }, "Server should be a valid HTTP/HTTPS URL"))
         }
         with(root) {
+            addEventFilter(KeyEvent.KEY_PRESSED) {
+                if (it.code == KeyCode.ESCAPE && mask.isVisible) {
+                    job?.let { launch(Dispatchers.Default) { it.cancel() } }
+                    logger.debug { "cancelling login"}
+                    mask.text = "Cancelling"
+                    launch(Dispatchers.Main) {
+                        delay(500)
+                        mask.isVisible = false
+                    }
+                }
+            }
             background = whiteBackGround
             style {
                 fontSize= settings.scaling.em
@@ -130,7 +146,9 @@ class LoginScreen(
                     isDefaultButton = true
                     this.disableProperty().bind(validation.invalidProperty())
                     action {
-                        GlobalScope.launch {
+                        mask.text = "Signing in"
+                        mask.isVisible = true
+                        job = launch {
                             val k = appState.koma
                             val d = appState.store
                             onClickLogin(k, d, userId.value, password.text, serverCombo.text)
