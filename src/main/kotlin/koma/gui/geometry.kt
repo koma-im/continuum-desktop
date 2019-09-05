@@ -2,35 +2,43 @@ package koma.gui
 
 import javafx.stage.Screen
 import javafx.stage.Stage
-import koma.gui.view.ChatView
-import java.util.prefs.Preferences
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.h2.mvstore.MVMap
+import org.h2.mvstore.MVStore
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
-
-
-fun save_win_geometry(stage: Stage) {
-    val prefs = Preferences.userNodeForPackage(ChatView::class.java)
-    prefs.putDouble("chat-stage-x", stage.x)
-    prefs.putDouble("chat-stage-y", stage.y)
-    prefs.putDouble("chat-stage-w", stage.width)
-    prefs.putDouble("chat-stage-h", stage.height)
+fun save_win_geometry(stage: Stage, kvStore: MVStore) {
+    val prefs = kvStore.openMap<String, Double>("window-size-settings")
+    prefs.put("chat-stage-x", stage.x)
+    prefs.put("chat-stage-y", stage.y)
+    prefs.put("chat-stage-w", stage.width)
+    prefs.put("chat-stage-h", stage.height)
 }
 
-fun setSaneStageSize(stage: Stage) {
-    val prefs = Preferences.userNodeForPackage(ChatView::class.java)
+@ExperimentalTime
+fun setSaneStageSize(stage: Stage, kvStore: MVStore) {
+    val (prefs, t) = measureTimedValue {
+        kvStore.openMap<String, Double>("window-size-settings")
+    }
+    val sx = prefs.get("chat-stage-x")
+    val sy = prefs.get("chat-stage-y")
     setWidthHeight(stage, prefs)
-    val sx = prefs.getDouble("chat-stage-x", -1.0)
-    val sy = prefs.getDouble("chat-stage-y", -1.0)
-    if (sx > 0 && sy > 0) {
+    if (sx != null && sy != null) {
         stage.x = sx
         stage.y = sy
     } else
         stage.centerOnScreen()
 }
 
-private fun setWidthHeight(stage: Stage, prefs: Preferences) {
-    val sw = prefs.getDouble("chat-stage-w", -1.0)
-    val sh = prefs.getDouble("chat-stage-h", -1.0)
-    if (sw > 0 && sh > 0) {
+@ExperimentalTime
+private fun setWidthHeight(stage: Stage, prefs: MVMap<String, Double>) {
+    val (sw, t) = measureTimedValue {
+        prefs.get("chat-stage-w")
+    }
+    val sh = prefs.get("chat-stage-h")
+    if (sw != null  && sh != null) {
         stage.width = sw
         stage.height = sh
     } else {

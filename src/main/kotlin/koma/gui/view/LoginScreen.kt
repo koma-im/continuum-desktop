@@ -15,6 +15,7 @@ import javafx.util.StringConverter
 import koma.controller.requests.account.login.onClickLogin
 import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
+import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.persistence.settings.AppSettings
@@ -38,14 +39,12 @@ import tornadofx.*
 
 
 private val logger = KotlinLogging.logger {}
-private val settings: AppSettings = appState.store.settings
 
 /**
  * Created by developer on 2017/6/21.
  */
 class LoginScreen(
-        private val mask: MaskerPane,
-        private val data: KDataStore = appState.store.database
+        private val mask: MaskerPane
 ): View(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
     override val root = VBox()
@@ -54,8 +53,8 @@ class LoginScreen(
         promptText = "@user:matrix.org"
         isEditable = true
         converter = object : StringConverter<UserId>() {
-            override fun toString(u: UserId): String =u.str
-            override fun fromString(string: String): UserId = UserId(string)
+            override fun toString(u: UserId?): String? =u?.str
+            override fun fromString(string: String?): UserId? = string?.let { UserId(it) }
         }
     }
     var serverCombo= TextFields.createClearableTextField().apply {
@@ -82,14 +81,20 @@ class LoginScreen(
         }
     }
     private var job: Job? = null
-    init {
-        val iconstream = javaClass.getResourceAsStream("/icon/koma.png");
-        if (iconstream != null) {
-            FX.primaryStage.icons.add(Image(iconstream))
-        } else {
-            logger.error { "Failed to load app icon from resources" }
+    private var database: KDataStore? = null
+    fun start(appStore: AppStore) {
+        root.isDisable = false
+        val settings = appStore.settings
+        root.style {
+            fontSize= settings.scaling.em
         }
-
+        val data = appStore.database
+        this.database = data
+        val recentUsers = getRecentUsers(data)
+        userId.itemsProperty().get().setAll(recentUsers)
+        userId.selectionModel.selectFirst()
+    }
+    init {
         val grid = GridPane()
         with(grid) {
             vgap = 10.0
@@ -97,8 +102,6 @@ class LoginScreen(
             paddingAll = 5.0
 
             add(Text("Username"), 0, 0)
-            val recentUsers = getRecentUsers(data)
-            userId.itemsProperty().get().setAll(recentUsers)
             add(userId, 1, 0)
             add(Text("Server"), 0, 1)
             add(serverCombo, 1,1)
@@ -116,6 +119,7 @@ class LoginScreen(
             }, "Server should be a valid HTTP/HTTPS URL"))
         }
         with(root) {
+            isDisable = true
             addEventFilter(KeyEvent.KEY_PRESSED) {
                 if (it.code == KeyCode.ESCAPE && mask.isVisible) {
                     job?.let { launch(Dispatchers.Default) { it.cancel() } }
@@ -128,17 +132,17 @@ class LoginScreen(
                 }
             }
             background = whiteBackGround
-            style {
-                fontSize= settings.scaling.em
-            }
+
             val buts = HBox(10.0).apply {
                 button("Options") {
                     action { prefWin.openModal() }
                 }
                 button("Register") {
                     action {
-                        val o2 = FX.primaryStage.scene.root
-                        openInternalWindow(RegistrationWizard(data), owner = o2)
+                        database?.let {
+                            openInternalWindow(RegistrationWizard(it),
+                                    owner = FX.primaryStage.scene.root)
+                        }
                     }
                 }
                 hbox { hgrow = Priority.ALWAYS }
@@ -175,6 +179,7 @@ class LoginScreen(
         }
         launch(Dispatchers.Default) {
             for (u in userInput) {
+                val data = database?:continue
                 val a = suggestedServerAddr(data, UserId(u))
                 if (userId.isFocused || serverCombo.text.isBlank()) {
                     withContext(Dispatchers.Main) {
@@ -183,7 +188,6 @@ class LoginScreen(
                 }
             }
         }
-        userId.selectionModel.selectFirst()
     }
 }
 
