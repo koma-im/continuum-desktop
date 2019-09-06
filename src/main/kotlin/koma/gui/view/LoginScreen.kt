@@ -134,7 +134,7 @@ class LoginScreen(
 
             val buts = HBox(10.0).apply {
                 button("Options") {
-                    action { prefWin.openModal() }
+                    action { prefWin.openModal(owner = JFX.primaryStage) }
                 }
                 button("Register") {
                     action {
