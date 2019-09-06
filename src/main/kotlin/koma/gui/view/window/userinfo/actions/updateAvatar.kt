@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -19,7 +20,7 @@ fun chooseUpdateUserAvatar() {
     api ?: return
     val dialog = FileChooser()
     dialog.title = "Upload a new avatar"
-    val file = dialog.showOpenDialog(FX.primaryStage)
+    val file = dialog.showOpenDialog(JFX.primaryStage)
     file ?: return
     GlobalScope.launch {
         val upload = uploadFile(api, file)
@@ -30,7 +31,7 @@ fun chooseUpdateUserAvatar() {
                     Notifications.create()
                             .title("Failed to upload new avatar")
                             .text(message.toString())
-                            .owner(FX.primaryStage)
+                            .owner(JFX.primaryStage)
                             .showWarning()
                 }
             }
@@ -43,7 +44,7 @@ fun chooseUpdateUserAvatar() {
                         Notifications.create()
                                 .title("Failed to set new avatar")
                                 .text(message.toString())
-                                .owner(FX.primaryStage)
+                                .owner(JFX.primaryStage)
                                 .showWarning()
                     }
                 }

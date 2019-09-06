@@ -28,6 +28,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
+import link.continuum.desktop.gui.JFX
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -88,7 +89,7 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
                 Notifications.create()
                         .title("Failed to delete room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")
-                        .owner(FX.primaryStage)
+                        .owner(JFX.primaryStage)
                         .showWarning()
             }
         }.onSuccess {

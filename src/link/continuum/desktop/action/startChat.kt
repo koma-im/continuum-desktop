@@ -2,22 +2,19 @@ package link.continuum.desktop.action
 
 import koma.Koma
 import koma.gui.view.ChatWindowBars
-import koma.gui.view.SyncStatusBar
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import link.continuum.database.KDataStore
 import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
 import link.continuum.desktop.database.models.loadRoom
+import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -26,7 +23,9 @@ private val logger = KotlinLogging.logger {}
  * updates the list of recently used accounts
  */
 @ExperimentalCoroutinesApi
-fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
+fun
+
+        startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
               appData: AppStore
               ) {
     val data = appData.database
@@ -42,8 +41,8 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     val userRooms = store.joinedRoom.list
 
     val primary = ChatWindowBars(userRooms, account, store)
-    FX.primaryStage.scene.root = primary.root
-    FX.primaryStage.scene.stylesheets.add("/css/main.css")
+    JFX.primaryStage.scene.root = primary.root
+    JFX.primaryStage.scene.stylesheets.add("/css/main.css")
 
     app.coroutineScope.launch {
         val rooms = loadUserRooms(data, userId)

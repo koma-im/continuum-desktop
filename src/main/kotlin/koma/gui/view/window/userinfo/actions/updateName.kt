@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -27,7 +28,7 @@ fun updateMyAlias() {
                 Notifications.create()
                         .title("Failed to update nick name")
                         .text(it.message.toString())
-                        .owner(FX.primaryStage)
+                        .owner(JFX.primaryStage)
                         .showWarning()
             }
         }

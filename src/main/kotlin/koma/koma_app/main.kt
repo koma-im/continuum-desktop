@@ -11,6 +11,7 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import kotlinx.coroutines.*
+import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import link.continuum.desktop.util.gui.alert
@@ -104,6 +105,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 
     override fun start(stage: Stage) {
         this.stage = stage
+        JFX.primaryStage = stage
         launch(Dispatchers.Main) {
             setSaneStageSize(stage, kvStore.await())
             log.debug("stage size set at {}", startTime.elapsedNow())

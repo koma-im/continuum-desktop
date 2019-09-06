@@ -6,6 +6,7 @@ import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.util.failureOrThrow
 import kotlinx.coroutines.*
+import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import model.Room
 import mu.KotlinLogging
@@ -36,7 +37,7 @@ fun leaveRoom(mxroom: Room, appData: AppStore = appState.store) {
                     Notifications.create()
                             .title("Had error leaving room $roomname")
                             .text("$ex")
-                            .owner(FX.primaryStage)
+                            .owner(JFX.primaryStage)
                             .showWarning()
                     if ((ex is HttpFailure && ex.http_code == 404)) {
                         logger.debug { "leaving room although there is exception $ex" }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -19,7 +20,7 @@ fun chooseUpdateRoomIcon(room: Room) {
     api ?: return
     val dialog = FileChooser()
     dialog.title = "Upload a icon for the room"
-    val file = dialog.showOpenDialog(FX.primaryStage)
+    val file = dialog.showOpenDialog(JFX.primaryStage)
     file ?: return
     GlobalScope.launch {
         val upload = uploadFile(api, file)
@@ -32,7 +33,7 @@ fun chooseUpdateRoomIcon(room: Room) {
                     Notifications.create()
                             .title("Failed to set room icon")
                             .text("In room ${room.displayName.get()}\n$message")
-                            .owner(FX.primaryStage)
+                            .owner(JFX.primaryStage)
                             .showWarning()
                 }
             }

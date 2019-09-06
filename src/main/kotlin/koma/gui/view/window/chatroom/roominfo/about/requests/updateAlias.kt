@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import model.Room
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -26,7 +27,7 @@ fun requestAddRoomAlias(room: Room, input: String?) {
                 Notifications.create()
                         .title("Failed to add room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")
-                        .owner(FX.primaryStage)
+                        .owner(JFX.primaryStage)
                         .showWarning()
             }
         }.onSuccess {
@@ -50,7 +51,7 @@ fun requestSetRoomCanonicalAlias(room: Room, alias: RoomAlias?) {
                 Notifications.create()
                         .title("Failed to set canonical room alias $alias")
                         .text("In room ${room.displayName.get()}\n$message")
-                        .owner(FX.primaryStage)
+                        .owner(JFX.primaryStage)
                         .showWarning()
             }
         }

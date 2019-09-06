@@ -17,6 +17,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import link.continuum.desktop.gui.JFX
 import okhttp3.MediaType
 import org.controlsfx.control.Notifications
 import tornadofx.*
@@ -37,7 +38,7 @@ fun sendFileMessage(room: RoomId) {
     val dialog = FileChooser()
     dialog.title = "Find a file to send"
 
-    val file = dialog.showOpenDialog(FX.primaryStage)
+    val file = dialog.showOpenDialog(JFX.primaryStage)
     file?:return
 
     val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
@@ -67,7 +68,7 @@ fun sendImageMessage(room: RoomId) {
     val dialog = FileChooser()
     dialog.title = "Find an image to send"
 
-    val file = dialog.showOpenDialog(FX.primaryStage)
+    val file = dialog.showOpenDialog(JFX.primaryStage)
     file?:return
 
     val type = file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!

@@ -9,6 +9,7 @@ import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Color
+import javafx.stage.Stage
 import javafx.stage.Window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -24,6 +25,10 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 val whiteBackGround = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))
+
+object JFX {
+    lateinit var primaryStage: Stage
+}
 
 fun<T: Node> T.showIf(show: Boolean) {
     this.isManaged = show

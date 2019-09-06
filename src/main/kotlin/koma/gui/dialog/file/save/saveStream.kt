@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import okhttp3.HttpUrl
 import tornadofx.*
 
@@ -16,7 +17,7 @@ fun downloadFileAs(url: HttpUrl, filename: String = url.guessFileName(), title: 
     dialog.title = title
     dialog.initialFileName = filename
 
-    val file = dialog.showSaveDialog(FX.primaryStage)
+    val file = dialog.showSaveDialog(JFX.primaryStage)
     file?:return
     GlobalScope.launch {
         if (!appState.koma.saveUrlToFile(url, file))

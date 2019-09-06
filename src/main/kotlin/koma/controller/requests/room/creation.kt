@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import org.controlsfx.control.Notifications
 import tornadofx.*
 
@@ -26,7 +27,7 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     result.onFailure {
         launch(Dispatchers.JavaFx) {
             Notifications.create()
-                    .owner(FX.primaryStage)
+                    .owner(JFX.primaryStage)
                     .position(Pos.CENTER)
                     .title("Failure to create room ${settings.room_alias_name}")
                     .text(it.toString())

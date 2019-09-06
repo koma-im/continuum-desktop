@@ -1,17 +1,9 @@
 package koma.gui.view
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
-import javafx.scene.control.Button
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import koma.Failure
-import koma.Koma
-import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.window.preferences.PreferenceWindow
@@ -21,17 +13,14 @@ import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.database.KDataStore
-import link.continuum.desktop.gui.UiDispatcher
+import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.util.Account
 import model.Room
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import org.controlsfx.control.NotificationPane
-import org.controlsfx.control.action.Action
 import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
@@ -70,7 +59,7 @@ class ChatWindowBars(
                         find(PreferenceWindow::class).openModal()
                     }
                     item("Quit").action {
-                        FX.primaryStage.close()
+                        JFX.primaryStage.close()
                     }
                 }
                 menu("Room") {

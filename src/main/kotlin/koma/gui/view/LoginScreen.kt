@@ -5,7 +5,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.effect.DropShadow
-import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.layout.*
@@ -18,13 +17,13 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getRecentUsers
 import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.gui.whiteBackGround
+import link.continuum.desktop.gui.JFX
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import org.controlsfx.control.MaskerPane
@@ -141,7 +140,7 @@ class LoginScreen(
                     action {
                         database?.let {
                             openInternalWindow(RegistrationWizard(it),
-                                    owner = FX.primaryStage.scene.root)
+                                    owner = JFX.primaryStage.scene.root)
                         }
                     }
                 }

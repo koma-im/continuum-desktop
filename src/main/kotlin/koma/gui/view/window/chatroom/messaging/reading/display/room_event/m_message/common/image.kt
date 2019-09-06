@@ -18,9 +18,9 @@ import koma.util.getOr
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.util.http.downloadHttp
+import link.continuum.desktop.gui.JFX
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
@@ -102,7 +102,7 @@ class ImageElement(
      * Display an overlay showing a picture occupying most of the entire window
      */
     fun viewBiggerPicture() {
-        val owner = FX.primaryStage.scene.root
+        val owner = JFX.primaryStage.scene.root
         biggerView.update(title, imageView.image)
         imageWin.open(view = biggerView, owner = owner)
     }
@@ -128,8 +128,8 @@ private class BiggerPictureView(): View() {
     init {
         with(root) {
             imageView = imageview() {
-                fitHeight = FX.primaryStage.height * 0.9
-                fitWidth = FX.primaryStage.width * 0.9
+                fitHeight = JFX.primaryStage.height * 0.9
+                fitWidth = JFX.primaryStage.width * 0.9
                 isPreserveRatio = true
                 isSmooth = true
             }
