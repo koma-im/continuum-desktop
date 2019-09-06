@@ -27,9 +27,12 @@ import link.continuum.desktop.action.startChat
 import link.continuum.desktop.gui.uialert
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.Ok
+import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*
 import kotlin.onFailure
+
+private val logger = KotlinLogging.logger {}
 
 class RegistrationWizard(private val data: KDataStore): View() {
 
@@ -263,15 +266,20 @@ private class Start(private val data: KDataStore): WizardState() {
             return null
         }
         saveServerAddr(data, s.host(), addr)
+        logger.debug { "saved server addrs" }
         val r = Register(s, appState.koma.http)
-        val f = r.getFlows() getOr {
+        logger.debug { "getting flows" }
+        val f = r.getFlows()
+        logger.debug { "got flows" }
+        if (f.isFailure) {
+            logger.debug { "flows isFailure" }
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR,
-                        "Failed to get authentication flows from server: ${it}")
+                        "Failed to get authentication flows from server: ${f}")
             }
             return null
         }
-        return r to f
+        return r to f.getOrThrow()
     }
 
     private val serverCombo: ComboBox<String>
