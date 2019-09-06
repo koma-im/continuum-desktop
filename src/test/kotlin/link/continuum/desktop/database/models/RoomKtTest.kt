@@ -12,7 +12,9 @@ import link.continuum.database.openStore
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 internal class RoomKtTest {
     val dir = Files.createTempDirectory("continuum-test").resolve("test")
     val data = openStore(dir.toString())

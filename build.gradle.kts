@@ -1,6 +1,8 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+version = "0.9.21"
+
 plugins {
     kotlin("jvm") version "1.3.50"
     kotlin("kapt") version "1.3.50"
@@ -61,7 +63,6 @@ dependencies {
 }
 
 group = "link.continuum"
-version = "0.9.20"
 description = "continuum-desktop"
 application {
     mainClassName = "koma.koma_app.MainKt"

@@ -8,7 +8,9 @@ import link.continuum.database.openStore
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 internal class ServerKtTest {
 
     val dir = Files.createTempDirectory("continuum-test")
