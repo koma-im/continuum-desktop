@@ -13,6 +13,7 @@ import javafx.scene.AccessibleRole
 import javafx.scene.control.Control
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
+import javafx.scene.effect.DropShadow
 import javafx.scene.input.MouseButton
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.*
@@ -70,6 +71,7 @@ class ScrollBarSkin(
             translateX = radius / 2
             translateY = radius
         })
+        effect = buttonShadow
         border = Border(BorderStroke(Color.GRAY, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT))
         shape = Circle(radius)
         background = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY))
@@ -395,5 +397,9 @@ class ScrollBarSkin(
         val showButt = pos < .95
         logger.trace { "pos $pos should show bottom button is $showButt" }
         bottomButton.isVisible = showButt
+    }
+
+    companion object {
+        private val buttonShadow = DropShadow(4.0, 2.0, 2.0, Color.color(.0, 0.0, .0, .3))
     }
 }
