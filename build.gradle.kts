@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.21"
+version = "0.9.22"
 
 plugins {
     kotlin("jvm") version "1.3.50"
@@ -98,20 +98,20 @@ tasks.withType<ShadowJar> {
 runtime {
     options.set(listOf("--strip-debug", "--compress", "2", "--no-header-files", "--no-man-pages"))
     modules.set(listOf(
-            "jdk.unsupported", "java.scripting",
-                "java.desktop",
-                "jdk.jfr",
-                "java.xml",
-                "jdk.unsupported",
-                "java.scripting",
-                "java.logging",
-                "java.prefs",
-                "java.sql",
-                "java.naming",
-                "java.management",
-                "java.sql.rowset",
-                "java.compiler",
-                "java.transaction.xa",
-                "java.instrument"
+            "java.compiler",
+            "java.desktop",
+            "java.instrument",
+            "java.logging",
+            "java.management",
+            "java.naming",
+            "java.prefs",
+            "java.scripting",
+            "java.sql",
+            "java.sql.rowset",
+            "java.transaction.xa",
+            "java.xml",
+            "jdk.crypto.ec",
+            "jdk.jfr",
+            "jdk.unsupported"
             ))
 }
