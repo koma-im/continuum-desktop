@@ -9,13 +9,13 @@ import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.icon.avatar.SelectUser
+import link.continuum.desktop.gui.label
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.switchUpdates
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -38,7 +38,7 @@ class StateEventUserView(private val store: UserDataStore,
         root.add(avatarView.root)
         val l = VBox().apply {
             alignment = Pos.CENTER
-            nameLabel = label() {
+            nameLabel = label {
                 minWidth = 50.0
                 maxWidth = 100.0
             }

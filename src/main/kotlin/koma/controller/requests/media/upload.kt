@@ -11,8 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import link.continuum.desktop.util.gui.alert
 import okhttp3.MediaType
-import tornadofx.*
 import java.io.File
 
 /**

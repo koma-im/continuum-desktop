@@ -16,23 +16,22 @@ import koma.gui.element.control.PrettyListView
 import koma.gui.view.usersview.fragment.MemberCell
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.model.user.UserState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.gui.icon.avatar.SelectUser
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.doubleBinding
 import link.continuum.desktop.gui.list.user.UserDataStore
-import okhttp3.OkHttpClient
-import tornadofx.*
-import kotlin.math.roundToInt
+import tornadofx.style
+import tornadofx.em
 
 private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
         userData: UserDataStore
-): View() {
+) {
 
-    override val root = VBox(5.0).apply {
+    val root = VBox(5.0).apply {
         padding = Insets(5.0)
     }
     private val userlist = PrettyListView<Pair<UserId, Server>>()
@@ -47,7 +46,6 @@ class RoomMemberListView(
             }
             val showavataronly = SimpleBooleanProperty(true)
             val button  = Pane().apply {
-                val radius = 8.0 * scale
                 fun Text.iconProp(): Text {
                     opacity = .5
                     fill = Color.FORESTGREEN
@@ -68,7 +66,7 @@ class RoomMemberListView(
             add(button)
             userlist.apply {
                 isFocusTraversable = false
-                vgrow = Priority.ALWAYS
+                VBox.setVgrow(this, Priority.ALWAYS)
                 minWidth = 50.0 * scale
                 val ulwidth = doubleBinding(showavataronly) { scale * if(value) 50.0 else 138.0}
                 maxWidthProperty().bind(ulwidth)

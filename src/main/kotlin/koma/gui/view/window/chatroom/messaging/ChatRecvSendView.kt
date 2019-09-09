@@ -3,7 +3,9 @@ package koma.gui.view.window.chatroom.messaging
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Insets
 import javafx.scene.control.TextField
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import koma.Koma
 import koma.controller.requests.sendMessage
 import koma.gui.view.window.chatroom.messaging.reading.MessagesListScrollPane
@@ -12,20 +14,17 @@ import koma.koma_app.AppStore
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.launch
-import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.add
 import model.Room
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import tornadofx.*
+import tornadofx.hgrow
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class ChatRecvSendView(
         km: Koma,
         store: AppStore
-): View() {
-    override val root = vbox(5.0).apply {
+) {
+     val root = VBox(5.0).apply {
         padding = Insets(0.0, 0.0, 5.0, 0.0)
     }
 
@@ -49,7 +48,7 @@ class ChatRecvSendView(
 
     init {
         with(root) {
-            hgrow = Priority.ALWAYS
+            HBox.setHgrow(this, Priority.ALWAYS)
 
             add(messageScroll.root)
 
@@ -61,7 +60,7 @@ class ChatRecvSendView(
         with(messageInput) {
             promptText = "Compose a message"
             hgrow = Priority.ALWAYS
-            action {
+            setOnAction {
                 val msg = text
                 text = ""
                 if (msg.isNotBlank()) {

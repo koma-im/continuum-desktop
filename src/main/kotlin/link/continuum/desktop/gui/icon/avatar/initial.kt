@@ -2,14 +2,14 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
-import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
-import koma.gui.element.icon.user.extract_key_chars
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.vbox
 import mu.KotlinLogging
-import tornadofx.*
 import java.util.*
 import kotlin.streams.toList
 
@@ -21,9 +21,11 @@ class InitialIcon(
     private val radii =  CornerRadii(iSize * 0.2)
     private var color: Color? = null
 
-    private val charL = Text().apply { style { fill = Color.WHITE } }
-    private val charR = Text().apply { style { fill = Color.WHITE } }
-    private val charC = Text().apply { style { fill = Color.WHITE } }
+    private val charL = Text().apply {
+        fill = Color.WHITE
+    }
+    private val charR = Text().apply { fill = Color.WHITE }
+    private val charC = Text().apply { fill = Color.WHITE }
 
     private val two = HBox().apply {
         alignment = Pos.CENTER
@@ -40,13 +42,11 @@ class InitialIcon(
         }
     }
     val root = StackPane().apply {
-        val s = iSize.px
-        style {
-            minWidth = s
-            minHeight = s
-            maxWidth = s
-            maxHeight = s
-        }
+        val s = iSize
+        minWidth = s
+        minHeight = s
+        maxWidth = s
+        maxHeight = s
         children.add(two)
         children.add(HBox().apply {
             alignment = Pos.CENTER

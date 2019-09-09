@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
 import model.Room
 import org.controlsfx.control.Notifications
-import tornadofx.*
 
 fun requestUpdateRoomName(room: Room, input: String?) {
     input?:return

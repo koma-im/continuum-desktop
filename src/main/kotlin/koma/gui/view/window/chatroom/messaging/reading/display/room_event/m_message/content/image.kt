@@ -3,6 +3,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
 import koma.Koma
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
@@ -11,9 +12,10 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.matrix.event.room_message.chat.ImageMessage
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.action
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.*
+import tornadofx.tooltip
 
 private val logger = KotlinLogging.logger {}
 
@@ -50,7 +52,9 @@ class MImageViewNode(km: Koma): ViewNode {
         }
 
         val copyUrl = MenuItem("Copy Image Address")
-        copyUrl.action { Clipboard.getSystemClipboard().putString(url.toString()) }
+        copyUrl.action {
+            Clipboard.getSystemClipboard().setContent(ClipboardContent().apply { putString(url) })
+        }
 
         return listOf(tm, copyUrl)
     }

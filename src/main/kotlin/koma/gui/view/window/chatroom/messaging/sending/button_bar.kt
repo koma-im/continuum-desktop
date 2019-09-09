@@ -5,14 +5,19 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
+import javafx.scene.control.Tooltip
 import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendImageMessage
 import koma.gui.element.emoji.keyboard.EmojiKeyboard
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.gui.action
+import link.continuum.desktop.gui.button
+import link.continuum.desktop.gui.tooltip
 import mu.KotlinLogging
-import tornadofx.*
+import tornadofx.em
+import tornadofx.style
 import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger {}
@@ -30,8 +35,8 @@ fun createButtonBar(inputField: TextField,
         }
         button {
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE, size)
-            tooltip("Send File")
-            action {
+            tooltip = Tooltip("Send File")
+            setOnAction {
                 currRoom.value?.let {
                     sendFileMessage(room = it)
                 }
@@ -41,7 +46,7 @@ fun createButtonBar(inputField: TextField,
         button {
             graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO, size)
             tooltip("Send image")
-            action {
+            setOnAction {
                 currRoom.value?.let {
                     sendImageMessage(room = it)
                 }

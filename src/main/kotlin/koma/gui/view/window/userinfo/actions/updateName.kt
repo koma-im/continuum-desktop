@@ -9,7 +9,6 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
 import org.controlsfx.control.Notifications
-import tornadofx.*
 
 fun updateMyAlias() {
     val dia = TextInputDialog()

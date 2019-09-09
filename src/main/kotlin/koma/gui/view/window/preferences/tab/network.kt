@@ -21,7 +21,7 @@ class NetworkSettingsTab(
 
     private val select: ComboBox<ProxyOption>
 
-    private val proxyField: AddProxyField by inject()
+    private val proxyField = AddProxyField()
 
     init {
         val proxyOptions: List<ProxyOption> =  settings.proxyList.list().map { ExistingProxy(it) } + NewProxy()
@@ -37,7 +37,7 @@ class NetworkSettingsTab(
             spacing = 5.0
             label("Proxy Option")
             add(select)
-            add(proxyField)
+            add(proxyField.root)
 
             buttonbar {
                 button("Ok") {

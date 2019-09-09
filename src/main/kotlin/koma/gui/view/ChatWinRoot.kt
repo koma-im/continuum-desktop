@@ -1,6 +1,9 @@
 package koma.gui.view
 
 import javafx.collections.ObservableList
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuBar
+import javafx.scene.control.MenuItem
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
 import koma.Failure
@@ -17,11 +20,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import model.Room
 import org.controlsfx.control.NotificationPane
-import tornadofx.*
+import tornadofx.em
+import tornadofx.find
+import tornadofx.style
 
 private val settings: AppSettings = appState.store.settings
 
@@ -44,19 +49,19 @@ class ChatWindowBars(
     private val roomFinder by lazy { RoomFinder(account) }
     init {
         with(content) {
+            background = whiteBackGround
             style {
-                backgroundColor = multi(Color.WHITE)
                 fontSize= settings.scaling.em
             }
             center = this@ChatWindowBars.center.root
-            top = menubar {
+            top = MenuBar().apply {
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }
                     item("Join Room") {
-                        action { roomFinder.open() }
+                        setOnAction { roomFinder.open() }
                     }
                     item("Preferences").action {
-                        find(PreferenceWindow::class).openModal()
+                        find(PreferenceWindow::class).openModal(owner = JFX.primaryStage)
                     }
                     item("Quit").action {
                         JFX.primaryStage.close()
@@ -71,11 +76,11 @@ class ChatWindowBars(
                     item("Update avatar").action { chooseUpdateUserAvatar() }
                     item("Update my name").action { updateMyAlias() }
                 }
-                contextmenu {
-                    item("Update my avatar").action { chooseUpdateUserAvatar() }
-                    item("Update my name").action { updateMyAlias() }
-                    item("Join Room").action { roomFinder.open() }
-                }
+                contextMenu = ContextMenu(
+                        MenuItem("Update my avatar").apply { setOnAction { chooseUpdateUserAvatar() } },
+                        MenuItem("Update my name").apply { setOnAction {  updateMyAlias() }},
+                        MenuItem("Join Room").apply { setOnAction { roomFinder.open() }}
+                )
             }
         }
     }

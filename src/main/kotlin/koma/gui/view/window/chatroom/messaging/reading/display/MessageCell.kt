@@ -16,10 +16,12 @@ import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.button
 import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.text
+import link.continuum.desktop.gui.vbox
 import model.Room
-import tornadofx.*
 
 @ExperimentalCoroutinesApi
 class HistoryVisibilityEventView(
@@ -116,15 +118,15 @@ class EventSourceViewer{
 
     init {
         textArea.isEditable = false
-        textArea.hgrow = Priority.ALWAYS
-        textArea.vgrow = Priority.ALWAYS
+        HBox.setHgrow(textArea, Priority.ALWAYS)
+        VBox.setVgrow(textArea, Priority.ALWAYS)
         val head = HBox().apply {
             vbox {
                 text("Room Event Source")
                 alignment = Pos.CENTER_LEFT
-                hgrow = Priority.ALWAYS
+                HBox.setHgrow(this, Priority.ALWAYS)
             }
-            buttonbar {
+            add(ButtonBar().apply {
                 button("Raw") {
                     tooltip = Tooltip("Json string from server")
                     setOnAction {
@@ -137,14 +139,14 @@ class EventSourceViewer{
                         textArea.text = processed
                     }
                 }
-            }
+            })
         }
         dialog.apply {
             title = "Room Event Source"
             isResizable = true
             dialogPane.apply {
                 content = VBox(5.0, head, textArea).apply {
-                    vgrow = Priority.ALWAYS
+                    VBox.setVgrow(this, Priority.ALWAYS)
                 }
                 buttonTypes.add(ButtonType.CLOSE)
             }

@@ -19,9 +19,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.util.http.downloadHttp
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.add
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.*
+import tornadofx.InternalWindow
+import tornadofx.View
+import tornadofx.c
 
 private val logger = KotlinLogging.logger {}
 
@@ -127,7 +130,7 @@ private class BiggerPictureView(): View() {
     private var imageView: ImageView
     init {
         with(root) {
-            imageView = imageview() {
+            imageView = ImageView().apply {
                 fitHeight = JFX.primaryStage.height * 0.9
                 fitWidth = JFX.primaryStage.width * 0.9
                 isPreserveRatio = true

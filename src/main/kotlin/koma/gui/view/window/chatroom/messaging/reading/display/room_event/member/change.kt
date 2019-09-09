@@ -7,6 +7,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
@@ -28,9 +29,9 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.gui.showIf
 import link.continuum.desktop.util.http.DL
 import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.http.urlChannelDownload
@@ -41,7 +42,6 @@ import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import tornadofx.*
 import java.util.*
 
 private val AppSettings = appState.store.settings
@@ -250,7 +250,7 @@ class ImageViewAsync: CoroutineScope by CoroutineScope(Dispatchers.Default) {
     }
 }
 
-private fun EventTarget.addArrowIcon() {
+private fun Pane.addArrowIcon() {
     val arrowico = FontAwesomeIconFactory.get().createIcon(
             FontAwesomeIcon.ARROW_RIGHT,
             AppSettings.scale_em(1f))

@@ -29,12 +29,13 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.KDataStore
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.hbox
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
 import model.Room
 import mu.KotlinLogging
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -58,11 +59,13 @@ class FallbackCell(store: AppStore):MessageCell(store){
     override val center = HBox(5.0).apply {
         alignment = Pos.CENTER
         add(text)
-        hyperlink("View source").action {
-            msg?.let {
-                sourceViewer.showAndWait(it)
+        add(Hyperlink().apply {
+            setOnAction {
+                msg?.let {
+                    sourceViewer.showAndWait(it)
+                }
             }
-        }
+        })
     }
     init {
         node.add(center)
@@ -95,7 +98,7 @@ abstract class MessageCell(
         }
     }
     protected val contextMenuShowSource = MenuItem("View Source").apply {
-        action {
+        setOnAction {
             current?.let {
                 sourceViewer.showAndWait(it)
             }

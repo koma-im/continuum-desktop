@@ -9,14 +9,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
+import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.onNone
 import link.continuum.desktop.util.onSome
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import tornadofx.*
 import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}

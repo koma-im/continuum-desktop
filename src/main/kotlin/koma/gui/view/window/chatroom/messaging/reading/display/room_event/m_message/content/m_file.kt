@@ -15,7 +15,10 @@ import koma.network.media.MHUrl
 import koma.network.media.parseMxc
 import koma.storage.persistence.settings.AppSettings
 import koma.util.onSuccess
-import tornadofx.*
+import link.continuum.desktop.gui.action
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.clipboardPutString
+import link.continuum.desktop.gui.label
 
 private val settings: AppSettings = appState.store.settings
 
@@ -50,7 +53,9 @@ class MFileViewNode(val content: FileMessage,
 
         val copyUrl = MenuItem("Copy File Address")
         copyUrl.isDisable = url == null
-        copyUrl.action { Clipboard.getSystemClipboard().putString(url.toString()) }
+        copyUrl.action {
+            clipboardPutString(url.toString())
+        }
 
         return listOf(mi, copyUrl)
     }

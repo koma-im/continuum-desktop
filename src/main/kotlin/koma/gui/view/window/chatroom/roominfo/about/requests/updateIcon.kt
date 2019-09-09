@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
 import model.Room
 import org.controlsfx.control.Notifications
-import tornadofx.*
 
 fun chooseUpdateRoomIcon(room: Room) {
     val api = appState.apiClient

@@ -13,12 +13,12 @@ import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
-import link.continuum.desktop.gui.switchUpdates
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
-import tornadofx.*
+import tornadofx.em
+import tornadofx.style
 
 private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
@@ -56,7 +56,6 @@ class MemberCell(
             }
 
             name = label() {
-                whenVisible {  }
                 removeWhen(showNoName)
             }
         }

@@ -4,7 +4,7 @@ import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.Koma
-import tornadofx.*
+import link.continuum.desktop.gui.add
 
 fun TextFlow.addStringWithElements(str: String, koma: Koma) {
     val textelements = tokenize_string(str)

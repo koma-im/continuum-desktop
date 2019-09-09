@@ -3,8 +3,8 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.VBox
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import link.continuum.desktop.gui.text
 import okhttp3.HttpUrl
-import tornadofx.*
 
 fun createGithubView(url: HttpUrl): GithubView? {
     val ps = url.pathSegments()

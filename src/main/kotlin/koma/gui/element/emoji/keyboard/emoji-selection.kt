@@ -8,6 +8,7 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -26,9 +27,10 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.hbox
 import mu.KotlinLogging
 import org.controlsfx.control.PopOver
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -75,22 +77,22 @@ class EmojiKeyboard {
         with(root) {
             val tg = ToggleGroup()
             hbox {
-                hgrow = Priority.ALWAYS
+                HBox.setHgrow(this, Priority.ALWAYS)
                 alignment = Pos.CENTER
                 for (cat in categories) {
                     val rows = cat.rows
                     val first = rows[0][0]
-                    togglebutton("") {
+                    add(ToggleButton().apply {
                         alignment = Pos.CENTER
                         styleClass.clear()
                         this.padding = Insets(size*0.1)
                         toggleGroup = tg
                         tooltip = Tooltip(cat.name)
                         graphic = EmojiIcon(first, size).node
-                        action {
+                        setOnAction {
                             emojicategoryrowlist.set(cat.rows)
                         }
-                    }
+                    })
                 }
             }
 
@@ -121,7 +123,7 @@ class EmojiKeyboard {
             for (i in 0..7) {
                 val icon = EmojiIcon(size)
                 val node = icon.node
-                node.action {
+                node.setOnAction {
                     logger.trace { "emoji icon action" }
                     onEmoji(icon.emoji)
                 }

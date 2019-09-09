@@ -1,5 +1,6 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message
 
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
@@ -24,16 +25,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.gui.switchUpdates
 import model.Room
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -55,23 +54,25 @@ class MRoomMessageViewNode(
     private val contentBox = HBox(5.0)
     private val content by  lazy { MessageView(userData, km) }
 
+    companion object {
+        private val pad2 = Insets(2.0)
+    }
     init {
         with(center) {
-            paddingAll = 2.0
+            padding = pad2
             hbox(4.0) {
                 minWidth = 1.0
                 prefWidth = 1.0
-                style {
-                    alignment = Pos.CENTER_LEFT
-                    paddingAll = 2.0
-                    backgroundColor = multi(Color.WHITE)
-                }
+                background = whiteBackGround
+                padding = pad2
+                alignment = Pos.CENTER_LEFT
                 add(avatarView.root)
 
-                vbox(spacing = 2.0) {
-                    hgrow = Priority.ALWAYS
+                vbox {
+                    spacing = 2.0
+                    HBox.setHgrow(this, Priority.ALWAYS)
                     hbox(spacing = 10.0) {
-                        hgrow = Priority.ALWAYS
+                        HBox.setHgrow(this, Priority.ALWAYS)
                         add(senderLabel)
                         add(timeView.root)
                     }
@@ -131,7 +132,7 @@ class MRoomMessageViewNode(
 
     fun copyText() {
         item?.content?.body?.let {
-            Clipboard.getSystemClipboard().putString(it)
+            clipboardPutString(it)
         }
     }
 

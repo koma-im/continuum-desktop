@@ -1,14 +1,19 @@
 package link.continuum.desktop.gui
 
 import javafx.application.Application
+import javafx.beans.Observable
+import javafx.beans.binding.*
+import javafx.beans.property.Property
+import javafx.beans.value.ObservableValue
+import javafx.event.ActionEvent
 import javafx.geometry.Insets
 import javafx.scene.Node
-import javafx.scene.control.Alert
-import javafx.scene.control.ButtonType
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
+import javafx.scene.control.*
+import javafx.scene.input.Clipboard
+import javafx.scene.input.ClipboardContent
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.text.Text
 import javafx.stage.Stage
 import javafx.stage.Window
 import kotlinx.coroutines.*
@@ -21,6 +26,9 @@ import kotlinx.coroutines.selects.select
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
+import java.util.concurrent.Callable
+import tornadofx.form
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -30,6 +38,119 @@ object JFX {
     lateinit var primaryStage: Stage
     lateinit var application: Application
     val hostServices by lazy { application.hostServices }
+}
+
+fun Pane.vbox(op: VBox.()->Unit) {
+    val b = VBox()
+    b.op()
+    this.children.add(b)
+}
+
+
+fun Pane.hbox(spacing: Double? = null, op: HBox.()->Unit={}): HBox {
+    val b = HBox()
+    if (spacing != null) b.spacing = spacing
+    b.op()
+    this.children.add(b)
+    return b
+}
+
+fun Pane.stackpane(op: StackPane.()->Unit={}): StackPane {
+    val b = StackPane()
+    b.op()
+    this.children.add(b)
+    return b
+}
+
+fun Pane.text(content: String?=null, op: Text.()->Unit={}) {
+    this.children.add(Text(content).apply(op))
+}
+
+fun Pane.label(content: String?=null, op: Label.()->Unit={}): Label {
+    val l = Label(content).apply(op)
+    this.children.add(l)
+    return l
+}
+
+fun ButtonBar.button(content: String?=null, op: Button.()->Unit={}) {
+    this.buttons.add(Button(content).apply(op))
+}
+
+fun Pane.button(content: String?=null, op: Button.()->Unit={}): Button {
+    val b = Button(content).apply(op)
+    this.children.add(b)
+    return b
+}
+fun Pane.add(node: Node) {
+    this.children.add(node)
+}
+
+fun Control.tooltip(text: String) {
+    this.tooltip = Tooltip(text)
+}
+
+fun Button.action(Action:  (ActionEvent)->Unit) {
+    this.setOnAction(Action)
+}
+
+fun MenuBar.menu(text: String, op: Menu.() -> Unit) {
+    val m = Menu(text).apply(op)
+    this.menus.add(m)
+}
+
+fun Menu.item(text: String, op: MenuItem.() -> Unit={}): MenuItem {
+    val m = MenuItem(text).apply(op)
+    this.items.add(m)
+    return m
+}
+
+fun ContextMenu.item(text: String, op: MenuItem.() -> Unit={}): MenuItem {
+    val m = MenuItem(text).apply(op)
+    this.items.add(m)
+    return m
+}
+
+fun MenuItem.action(action: (ActionEvent)-> Unit) {
+    this.setOnAction(action)
+}
+
+fun <T : Node> T.disableWhen(predicate: ObservableValue<Boolean>) = apply {
+    disableProperty().cleanBind(predicate)
+}
+fun <T : Node> T.visibleWhen(predicate: ObservableValue<Boolean>) = apply {
+    visibleProperty().cleanBind(predicate)
+    managedProperty().cleanBind(predicate)
+}
+
+fun <T : Node> T.removeWhen(predicate: ObservableValue<Boolean>) = apply {
+    val remove = booleanBinding(predicate) { predicate.value.not() }
+    visibleProperty().cleanBind(remove)
+    managedProperty().cleanBind(remove)
+}
+
+inline fun <T : Node> T.removeWhen(predicate: () ->ObservableValue<Boolean>) = removeWhen(predicate())
+
+fun <T> Property<T>.cleanBind(observable: ObservableValue<T>) {
+    unbind()
+    bind(observable)
+}
+fun <T : Observable> doubleBinding(receiver: T, op: T.() -> Double): DoubleBinding
+        = Bindings.createDoubleBinding(Callable { receiver.op() }, receiver)
+fun <T : Observable> stringBinding(receiver: T, op: T.() -> String): StringBinding
+        = Bindings.createStringBinding(Callable { receiver.op() }, receiver)
+fun <T : Observable> stringBindingNullable(receiver: T, op: T.() -> String?): StringBinding
+        = Bindings.createStringBinding(Callable { receiver.op() }, receiver)
+fun <T : Observable> booleanBinding(receiver: T, op: T.() -> Boolean): BooleanBinding
+        = Bindings.createBooleanBinding(Callable { receiver.op() }, receiver)
+
+fun <T : Observable, R> objectBinding(receiver: T, op: T.() -> R): ObjectBinding<R>
+        = Bindings.createObjectBinding(Callable { receiver.op() }, receiver)
+
+fun clipboardPutString(text: String){
+    Clipboard.getSystemClipboard().setContent(
+            ClipboardContent().apply {
+                putString(text)
+            })
 }
 
 fun<T: Node> T.showIf(show: Boolean) {

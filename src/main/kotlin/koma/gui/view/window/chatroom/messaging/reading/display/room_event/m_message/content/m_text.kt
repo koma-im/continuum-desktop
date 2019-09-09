@@ -14,15 +14,15 @@ import koma.matrix.event.room_message.chat.TextMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
-import tornadofx.*
 
 class MTextViewNode(private val koma: Koma): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     fun update(content: TextMessage) {
-        node.clear()
+        node.children.clear()
         node.addStringWithElements(content.body, koma)
     }
 }
@@ -32,7 +32,7 @@ class MNoticeViewNode(private val koma: Koma): ViewNode {
     override val menuItems: List<MenuItem> = listOf()
 
     fun update(content: NoticeMessage) {
-        node.clear()
+        node.children.clear()
         node.addStringWithElements(content.body, koma)
     }
 }
@@ -53,7 +53,7 @@ class MEmoteViewNode(
 
     fun update(content: EmoteMessage, sender: UserId) {
         userLabel.text = ""
-        node.clear()
+        node.children.clear()
         userLabel.textFill = userData.getUserColor(sender)
 
         nameUpdateChannel?.cancel()

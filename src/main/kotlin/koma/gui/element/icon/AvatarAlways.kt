@@ -16,11 +16,12 @@ import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.booleanBinding
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
+import link.continuum.desktop.gui.removeWhen
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
 val avatarSize: Double by lazy { settings.scaling * 32.0 }
@@ -40,7 +41,7 @@ class AvatarAlways(
     init {
         val imageAvl = booleanBinding(imageView.imageProperty()) { value != null }
         this.add(initialIcon.root)
-        initialIcon.root.removeWhen { imageAvl }
+        initialIcon.root.removeWhen(imageAvl)
         this.add(imageView)
 
         this.minHeight = avatarSize

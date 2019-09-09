@@ -1,16 +1,21 @@
 package koma.gui.view.window.preferences.tab
 
-import javafx.scene.Parent
+import javafx.scene.Node
+import javafx.scene.control.ButtonBar
 import javafx.scene.control.ComboBox
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.gui.booleanBinding
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.button
+import link.continuum.desktop.gui.disableWhen
 import tornadofx.*
 
 class AppearanceTab(
         parent: View,
         private val settings: AppSettings = appState.store.settings
-): View() {
-    override val root: Parent = Fieldset()
+) {
+    val root = Fieldset()
 
     val scalingSetting: ComboBox<String>
 
@@ -20,7 +25,8 @@ class AppearanceTab(
                     String.format("%.2f", it)
                 }
                 .distinct()
-        scalingSetting = combobox(values = scales) {
+        scalingSetting = ComboBox<String>().apply {
+            itemsProperty()?.value?.addAll(scales)
             isEditable = true
             selectionModel.select(0)
         }
@@ -32,21 +38,19 @@ class AppearanceTab(
             form {
                 fieldset("Appearance") {
                     field("Scaling (Needs restart)") {
-                        add(scalingSetting)
+                        inputs.add(scalingSetting)
                     }
                 }
             }
-            buttonbar {
+            add(ButtonBar().apply {
                 button("Ok") {
-                    disableWhen {
-                        !valid
-                    }
-                    action {
+                    disableWhen(!valid)
+                    setOnAction {
                         save()
                         parent.close()
                     }
                 }
-            }
+            })
         }
     }
 

@@ -5,22 +5,9 @@ import javafx.scene.Node
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.text.Text
-import tornadofx.*
+import link.continuum.desktop.gui.add
 import java.text.SimpleDateFormat
 import java.util.*
-
-fun showDatetime(node: Node, ts: Long) {
-    val datetime= Date(ts)
-    node.apply {
-        hbox {
-            hgrow = Priority.ALWAYS
-            text(SimpleDateFormat("MM-dd HH:mm").format(datetime)) {
-                opacity = 0.4
-                alignment = Pos.CENTER_RIGHT
-            }
-        }
-    }
-}
 
 class DatatimeView {
     val root = HBox()
@@ -32,7 +19,7 @@ class DatatimeView {
     }
     init {
         with(root) {
-            hgrow = Priority.ALWAYS
+            HBox.setHgrow(this, Priority.ALWAYS)
             alignment = Pos.CENTER_RIGHT
             add(text)
         }

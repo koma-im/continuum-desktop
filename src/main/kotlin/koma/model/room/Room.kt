@@ -22,8 +22,8 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.gui.list.DedupList
+import link.continuum.desktop.gui.stringBindingNullable as stringBinding
 import link.continuum.desktop.util.getOrNull
-import tornadofx.stringBinding
 import java.util.*
 
 class Room(

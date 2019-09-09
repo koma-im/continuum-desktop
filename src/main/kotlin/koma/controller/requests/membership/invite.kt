@@ -11,7 +11,10 @@ import koma.koma_app.appState.apiClient
 import koma.util.getOr
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import tornadofx.*
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.hbox
+import link.continuum.desktop.gui.label
+import link.continuum.desktop.util.gui.alert
 import java.util.*
 
 
@@ -45,7 +48,7 @@ private fun dialog_get_member(): Optional<String> {
     val usernamef = TextField()
     usernamef.promptText = "e.g. @chris:matrix.org"
     dialog.dialogPane.content = VBox(5.0).apply {
-        vgrow = Priority.ALWAYS
+        VBox.setVgrow(this, Priority.ALWAYS)
         hbox(5.0) {
             alignment = Pos.CENTER
             label("User ID:")

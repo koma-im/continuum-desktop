@@ -1,22 +1,20 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.room
 
 import javafx.geometry.Pos
-import javafx.scene.control.MenuItem
 import javafx.scene.layout.StackPane
-import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.StateEventUserView
 import koma.koma_app.AppStore
-import koma.koma_app.appState
 import koma.matrix.event.room_message.state.MRoomCreate
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.hbox
 import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.text
 import link.continuum.desktop.util.http.MediaServer
 import model.Room
-import tornadofx.*
 
 @ExperimentalCoroutinesApi
 class MRoomCreationViewNode constructor(

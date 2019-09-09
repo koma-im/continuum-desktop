@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import tornadofx.*
+import link.continuum.desktop.util.gui.alert
 import java.util.*
 
 fun runAskBanRoomMember()  {

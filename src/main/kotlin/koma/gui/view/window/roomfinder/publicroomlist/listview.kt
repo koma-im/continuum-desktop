@@ -7,6 +7,7 @@ import javafx.collections.ObservableList
 import javafx.collections.transformation.FilteredList
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
+import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -28,13 +29,15 @@ import koma.util.onSuccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
-import tornadofx.*
+import tornadofx.enableWhen
+import tornadofx.onChange
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
@@ -52,7 +55,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
         input = field.textProperty()
         roomlist = RoomListView(publicRoomList, input, account)
         createui(field)
-        ui.vgrow = Priority.ALWAYS
+        VBox.setVgrow(ui, Priority.ALWAYS)
     }
 
     fun clean() = roomlist.clean()
@@ -83,7 +86,7 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                         joinById(RoomId(inputid), inputid, this, account) }
                 }
             }
-            this+=roomlist
+            add(roomlist.root)
         }
     }
 
@@ -113,10 +116,10 @@ class RoomListView(
         input: StringProperty,
         private val account: Account,
         appData: AppStore = appState.store
-): View(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val matchRooms = FilteredList(roomlist)
 
-    override val root = listview(matchRooms)
+    val root = ListView(matchRooms)
 
     // whether displayed rooms don't fill a screen
     private val enoughRooms = SimpleBooleanProperty(false)
@@ -133,7 +136,7 @@ class RoomListView(
     init {
         existing.addAll(appData.joinedRoom.getIds())
         with(root) {
-            vgrow = Priority.ALWAYS
+            VBox.setVgrow(this, Priority.ALWAYS)
             cellFactory = Callback{
                 DiscoveredRoomFragment(account)
             }
@@ -146,7 +149,9 @@ class RoomListView(
             }
         }
         loadMoreRooms(10)
-        percent.onChange { if (it > 0.78) loadMoreRooms(10) }
+        percent.addListener { _, _, perc ->
+            if ((perc?:0).toDouble() > 0.78) loadMoreRooms(10)
+        }
         input.addListener { _, _, newValue -> if (newValue != null) updateFilter(newValue.trim()) }
     }
 

@@ -1,9 +1,12 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
+import javafx.geometry.Insets
 import javafx.scene.Node
+import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
-import javafx.scene.layout.VBox
+import javafx.scene.input.ClipboardContent
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import koma.Koma
@@ -14,8 +17,12 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.action
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.doubleBinding
+import link.continuum.desktop.gui.item
 import okhttp3.HttpUrl
-import tornadofx.*
+
 private val settings: AppSettings = appState.store.settings
 
 sealed class FlowElement {
@@ -84,23 +91,39 @@ class WebContentNode(private val link: String,
     }
 
     private fun setUpPrevie(view: ViewNode) {
-        node.style {
-            borderColor = multi(box(Color.LIGHTGRAY))
-            borderWidth = multi(box(0.1.em))
-            borderRadius = multi(box(0.5.em))
-            backgroundRadius = multi(box(0.5.em))
-        }
+        node.border = Border(BorderStroke(
+                Color.LIGHTGRAY,
+                BorderStrokeStyle.SOLID,
+                CornerRadii(0.5, true),
+                BorderWidths(1.0)
+        ))
+        node.background = Background(BackgroundFill(
+                Color.TRANSPARENT,
+                CornerRadii(0.5, true),
+                Insets.EMPTY))
 
         node.add(view.node)
 
         menuItems.addAll(view.menuItems)
     }
 
-    private fun setUpMenus() {
-        node.lazyContextmenu {
+    private val cmenu by lazy {
+        ContextMenu().apply {
             this.items.addAll(menuItems)
-            item("Copy URL").action { Clipboard.getSystemClipboard().putString(link) }
+            item("Copy URL").action {
+                Clipboard.getSystemClipboard().setContent(
+                        ClipboardContent().apply {
+                            putString(link)
+                        }
+                )
+            }
             item("Open in Browser").action { openInBrowser(link) }
+        }
+    }
+    private fun setUpMenus() {
+        node.setOnContextMenuRequested {
+            cmenu.show(this.node, it.screenX, it.screenY)
+            it.consume()
         }
     }
 }

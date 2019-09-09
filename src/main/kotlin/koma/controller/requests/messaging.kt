@@ -18,9 +18,9 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.util.gui.alert
 import okhttp3.MediaType
 import org.controlsfx.control.Notifications
-import tornadofx.*
 import kotlinx.coroutines.javafx.JavaFx as UI
 
 fun sendMessage(room: RoomId, message: String) {

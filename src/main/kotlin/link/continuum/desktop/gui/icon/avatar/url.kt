@@ -4,23 +4,14 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import koma.Server
-import koma.gui.element.icon.user.extract_key_chars
-import koma.matrix.UserId
 import koma.network.media.MHUrl
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.selects.select
-import link.continuum.desktop.gui.list.user.UserDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.booleanBinding
+import link.continuum.desktop.gui.removeWhen
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import tornadofx.add
-import tornadofx.booleanBinding
-import tornadofx.removeWhen
-import java.util.concurrent.atomic.AtomicInteger
-
 
 private val logger = KotlinLogging.logger {}
 
@@ -36,8 +27,9 @@ class UrlAvatar(
     private val imageView = ImageView()
 
     init {
+        imageView.imageProperty()
         val imageAvl = booleanBinding(imageView.imageProperty()) { value != null }
-        initialIcon.root.removeWhen { imageAvl }
+        initialIcon.root.removeWhen(imageAvl)
 
         root.minHeight = avatarSize
         root.minWidth = avatarSize

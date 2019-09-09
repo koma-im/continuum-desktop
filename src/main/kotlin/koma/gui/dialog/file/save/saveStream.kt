@@ -9,8 +9,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
-import tornadofx.*
 
 fun downloadFileAs(url: HttpUrl, filename: String = url.guessFileName(), title: String = "Save file as") {
     val dialog = FileChooser()

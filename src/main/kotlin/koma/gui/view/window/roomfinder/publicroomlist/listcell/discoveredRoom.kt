@@ -4,12 +4,15 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.image.ImageView
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.text.FontWeight
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppStore
@@ -22,13 +25,14 @@ import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
-import tornadofx.*
+import tornadofx.style
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,7 +41,7 @@ class DiscoveredRoomFragment(
         private val account: MatrixApi,
         private val avatarSize: Double = appState.store.settings.scaling * 32.0
 ): ListCell<DiscoveredRoom>(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    val root = hbox(spacing = 10.0)
+    val root = HBox( 10.0)
     private val imageView = ImageView()
     private val initialIcon = InitialIcon(avatarSize).apply {
         this.root.removeWhen(imageView.imageProperty().isNotNull)
@@ -49,10 +53,8 @@ class DiscoveredRoomFragment(
     val members = SimpleIntegerProperty(-1)
     private val topic = SimpleStringProperty("")
     private val roomId =  SimpleObjectProperty<RoomId>()
-    private val aliasesLabel = label() {
-        style {
-            opacity = 0.6
-        }
+    private val aliasesLabel = Label().apply {
+        opacity = 0.6
     }
 
     override fun updateItem(item: DiscoveredRoom?, empty: Boolean) {
@@ -87,19 +89,19 @@ class DiscoveredRoomFragment(
         with(root) { setUpCell() }
     }
 
-    private fun EventTarget.setUpCell(){
+    private fun Pane.setUpCell(){
         stackpane {
             add(initialIcon.root)
             add(imageView)
         }
         stackpane {
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
+            HBox.setHgrow(this, Priority.ALWAYS)
+            VBox.setVgrow(this, Priority.ALWAYS)
             vbox {
                 minWidth = 1.0
                 prefWidth = 1.0
-                hgrow = Priority.ALWAYS
-                vgrow = Priority.ALWAYS
+                HBox.setHgrow(this, Priority.ALWAYS)
+                VBox.setVgrow(this, Priority.ALWAYS)
                 hbox(9.0) {
                     label(name) {
                         style {
@@ -108,19 +110,23 @@ class DiscoveredRoomFragment(
                     }
                     label("World Readable") { removeWhen { worldRead.not() } }
                     label("Guest Joinable") { removeWhen { guestJoin.not() } }
-                    text("Members: ") { style { opacity = 0.5 } }
+                    text("Members: ") {  opacity = 0.5 }
                     text() {
                         textProperty().bind(stringBinding(members) { "$value" })
                     }
                 }
                 val topicLess = booleanBinding(topic) { value?.isEmpty() ?: true }
-                text(topic) { removeWhen { topicLess } }
+
+                text() {
+                    textProperty().bind(topic)
+                    removeWhen { topicLess }
+                }
                 add(aliasesLabel)
             }
             stackpane {
                 val h = hoverProperty()
                 button("Join") {
-                    visibleWhen { h }
+                    visibleWhen(h)
                     action { joinById(roomId.value, name, root, account) }
                 }
                 alignment = Pos.CENTER_RIGHT

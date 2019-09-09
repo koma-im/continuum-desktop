@@ -1,11 +1,12 @@
 package koma.gui.view.window.chatroom.messaging.reading
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import koma.Koma
 import koma.gui.element.control.KListView
 import koma.koma_app.AppStore
@@ -20,7 +21,6 @@ import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.message.createCell
 import model.Room
 import mu.KotlinLogging
-import tornadofx.*
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
@@ -98,9 +98,8 @@ class MessagesListScrollPane(
         msgs.addListener { e: ListChangeListener.Change<out EventItem> -> onAddedMessages(e, roomId) }
     }
     init {
-        root.vgrow = Priority.ALWAYS
-
-        virtualList.view.hgrow = Priority.ALWAYS
+        VBox.setVgrow(root, Priority.ALWAYS)
+        HBox.setHgrow(virtualList.view, Priority.ALWAYS)
     }
 
     private fun onAddedMessages(e : ListChangeListener.Change<out EventItem>,

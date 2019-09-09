@@ -1,8 +1,7 @@
 package koma.gui.view.window.auth
 
-import javafx.scene.control.Alert
-import javafx.scene.control.ComboBox
-import javafx.scene.control.Label
+import javafx.scene.Parent
+import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -24,13 +23,15 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.label
 import link.continuum.desktop.gui.uialert
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.Ok
+import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import tornadofx.*
-import kotlin.onFailure
 
 private val logger = KotlinLogging.logger {}
 
@@ -97,7 +98,9 @@ class RegistrationWizard(private val data: KDataStore): View() {
     }
 }
 
-sealed class WizardState(): View()
+sealed class WizardState() {
+    abstract val root: Parent
+}
 
 class Stage(
         private val register: Register,
@@ -113,30 +116,29 @@ class Stage(
                 .mapNotNull { flow -> flow.stages.firstOrNull() }
                 .map { AuthType.parse(it) }
         with(root) {
-            top {
-                hbox {
-                    label("Next step, continue with: ")
-                    hbox { hgrow = Priority.ALWAYS }
-                    combobox(values = options) {
-                        converter = object : StringConverter<AuthType>() {
-                            // This is not going to be called
-                            // because the ComboBox is editable
-                            override fun fromString(string: String?): AuthType {
-                                return AuthType.parse(string ?: "error")
-                            }
+            top = HBox().apply {
+                label("Next step, continue with: ")
+                add(HBox().apply { HBox.setHgrow(this, Priority.ALWAYS) })
+                add(ComboBox<AuthType>().apply {
+                    itemsProperty()?.value?.addAll(options)
+                    converter = object : StringConverter<AuthType>() {
+                        // This is not going to be called
+                        // because the ComboBox is editable
+                        override fun fromString(string: String?): AuthType {
+                            return AuthType.parse(string ?: "error")
+                        }
 
-                            override fun toString(item: AuthType): String {
-                                return item.toDisplay()
-                            }
+                        override fun toString(item: AuthType): String {
+                            return item.toDisplay()
                         }
-                        selectionModel.selectedItemProperty().onChange { item ->
-                            if (item != null) {
-                                switchAuthType(item)
-                            }
-                        }
-                        selectionModel.select(0)
                     }
-                }
+                    selectionModel.selectedItemProperty().addListener { observable, oldValue, item ->
+                        if (item != null) {
+                            switchAuthType(item)
+                        }
+                    }
+                    selectionModel.select(0)
+                })
             }
         }
     }
@@ -172,7 +174,8 @@ private class Success(user: RegisterdUser, server: HttpUrl, window: Registration
     }
 }
 
-abstract class AuthView: View() {
+abstract class AuthView {
+    abstract val root: Parent
     /**
      * if it returns non-null value, the stage is none
      * if the result is ok, registration is finished
@@ -208,8 +211,8 @@ class PasswordAuthView(
     }
 
     override val root = Form()
-    val user = textfield()
-    val pass = passwordfield()
+    val user = TextField()
+    val pass = PasswordField()
 
     init {
         with(root) {

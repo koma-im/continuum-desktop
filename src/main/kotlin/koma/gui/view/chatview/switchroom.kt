@@ -1,14 +1,10 @@
 package koma.gui.view.chatview
 
 import javafx.scene.control.Label
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.*
 import koma.Koma
 import koma.koma_app.AppStore
 import model.Room
-import tornadofx.View
-import tornadofx.hgrow
 
 /**
  * switch between chat rooms
@@ -16,8 +12,8 @@ import tornadofx.hgrow
 class SwitchableRoomView(
          km: Koma,
         appStore: AppStore
-): View() {
-    override val root = StackPane()
+) {
+    val root = StackPane()
 
     private val roomView = JoinedRoomView(km, appStore)
     private val view = BorderPane()
@@ -33,8 +29,8 @@ class SwitchableRoomView(
 
     init {
         // needed for centering the placeholder
-        root.hgrow = Priority.ALWAYS
-        view.hgrow = Priority.ALWAYS
+        HBox.setHgrow(root, Priority.ALWAYS)
+        VBox.setVgrow(view, Priority.ALWAYS)
         view.center = roomView.root
         val placeholder = Label("Select a room to start chatting")//VBox()
         root.children.addAll(

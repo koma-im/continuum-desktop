@@ -11,8 +11,9 @@ import javafx.scene.media.MediaView
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.gui.action
+import link.continuum.desktop.gui.add
 import okhttp3.HttpUrl
-import tornadofx.*
 
 private val settings: AppSettings = appState.store.settings
 

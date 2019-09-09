@@ -8,12 +8,13 @@ import javafx.scene.layout.HBox
 import koma.Failure
 import koma.storage.persistence.settings.encoding.KProxy
 import koma.util.KResult
-import tornadofx.*
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.booleanBinding
 import java.net.Proxy
 
 
-class AddProxyField(): View() {
-    override val root = HBox()
+class AddProxyField(){
+    val root = HBox()
 
     private val type = ComboBox<Proxy.Type>()
     private val host = TextField()

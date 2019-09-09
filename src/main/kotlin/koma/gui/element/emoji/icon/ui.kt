@@ -9,11 +9,10 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import javafx.scene.text.Font
 import javafx.scene.text.Text
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.cleanBind
+import link.continuum.desktop.gui.removeWhen
 import mu.KotlinLogging
-import tornadofx.add
-import tornadofx.booleanBinding
-import tornadofx.cleanBind
-import tornadofx.removeWhen
 
 private val logger = KotlinLogging.logger {}
 
@@ -22,7 +21,7 @@ class EmojiIcon (
 ) {
     private val imageView = ImageView()
     private val text = Text().apply {
-        val imageAvail= booleanBinding(imageView.imageProperty()) { value != null }
+        val imageAvail= imageView.imageProperty().isNotNull
         removeWhen { imageAvail }
         font = Font(size)
     }

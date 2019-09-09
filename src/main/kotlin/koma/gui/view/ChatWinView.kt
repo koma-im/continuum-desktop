@@ -3,9 +3,13 @@ package koma.gui.view
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
+import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
+import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
@@ -23,13 +27,12 @@ import kotlinx.coroutines.*
 import link.continuum.database.KDataStore
 import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
-import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
 import model.Room
 import mu.KotlinLogging
-import tornadofx.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -46,9 +49,8 @@ class ChatView(roomList: ObservableList<Room>,
                account: Account,
                storage: AppStore,
                scaling: Float = storage.settings.scaling
-): View() {
-
-    override val root = hbox (spacing = 5.0)
+) {
+    val root = HBox ( 5.0)
 
     val roomListView = RoomListView(roomList, account, storage.database)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
@@ -56,21 +58,20 @@ class ChatView(roomList: ObservableList<Room>,
     val switchableRoomView = SwitchableRoomView(account.server.km, storage)
 
     init {
-        roomListView.root.selectionModel.selectedItemProperty().onChange { room ->
+        roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
             if (room != null) {
                 switchableRoomView.setRoom(room)
             }
         }
 
         with(root) {
-            vgrow = Priority.ALWAYS
-
+            VBox.setVgrow(this, Priority.ALWAYS)
             vbox() {
                 add(invitationsView.list)
-                add(roomListView)
+                add(roomListView.root)
             }
 
-            add(switchableRoomView)
+            add(switchableRoomView.root)
         }
 
 
@@ -150,11 +151,11 @@ class RoomFragment(private val data: KDataStore, private val koma: Koma
         graphic = root
     }
 
-    private val root = hbox(spacing = 10.0) {
+    private val root = HBox(10.0).apply {
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT
-        contextmenu {
+        contextMenu = ContextMenu().apply {
             item("Room Info").action { openInfoView() }
             item("Invite Member"){
                 action {
@@ -163,7 +164,7 @@ class RoomFragment(private val data: KDataStore, private val koma: Koma
                     } ?: logger.warn { "No room selected" }
                 }
             }
-            separator()
+            items.add(SeparatorMenuItem())
             item("Leave").action {
                 room ?.let { leaveRoom(it) }
             }

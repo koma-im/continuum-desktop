@@ -1,10 +1,7 @@
 package koma.controller.requests.room
 
 import javafx.geometry.Pos
-import javafx.scene.control.ButtonBar
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Dialog
-import javafx.scene.control.TextField
+import javafx.scene.control.*
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
@@ -15,8 +12,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.disableWhen
 import org.controlsfx.control.Notifications
-import tornadofx.*
+import tornadofx.add
+import tornadofx.field
+import tornadofx.fieldset
+import tornadofx.form
 
 fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     val input = RoomCreationDialog().showAndWait()
@@ -41,7 +42,9 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
 private class RoomCreationDialog(): Dialog<CreateRoomSettings?>() {
 
     private val roomnamef = TextField()
-    private val visibilityChoice = combobox(values = RoomVisibility.values().toList())
+    private val visibilityChoice = ComboBox<RoomVisibility>().apply {
+        itemsProperty().value?.addAll(RoomVisibility.values())
+    }
 
     init {
         this.setTitle("Creation Dialog")
@@ -64,9 +67,9 @@ private class RoomCreationDialog(): Dialog<CreateRoomSettings?>() {
         }
 
         val creationButton = this.getDialogPane().lookupButton(createButtonType)
-        creationButton.disableWhen {
+        creationButton.disableWhen(
             roomnamef.textProperty().isEmpty.or(visibilityChoice.valueProperty().isNull)
-        }
+        )
 
         this.setResultConverter({ dialogButton ->
             if (dialogButton === createButtonType) {

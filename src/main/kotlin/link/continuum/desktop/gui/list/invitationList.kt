@@ -1,15 +1,12 @@
 package link.continuum.desktop.gui.list
 
-import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.geometry.VPos
 import javafx.scene.control.Label
-import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
-import koma.Koma
+import javafx.scene.text.TextFlow
 import koma.Server
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
@@ -20,11 +17,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.events.InviteData
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import tornadofx.*
+import tornadofx.textflow
 
 private val logger = KotlinLogging.logger {}
 
@@ -77,16 +73,17 @@ class InvitationsView(
             prefWidth = 1.0
             add(roomAvatar.root)
             vbox {
-                textflow {
+                add(TextFlow().apply {
                     add(inviterAvatar.root)
                     text(" ")
                     add(inviter)
                     text(" invited you to room ")
                     add(roomLabel)
-                }
+                })
                 hbox(2.0*scaling) {
                     alignment = Pos.CENTER_RIGHT
-                    hgrow = Priority.ALWAYS
+                    HBox.setHgrow(this, Priority.ALWAYS)
+
                     button("Join").action {
                         logger.debug { "Accepting invitation to $roomId" }
                         roomId?.let {

@@ -11,7 +11,6 @@ import link.continuum.desktop.gui.UiDispatcher
 import model.Room
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 

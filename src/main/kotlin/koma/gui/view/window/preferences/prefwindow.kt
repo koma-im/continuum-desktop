@@ -24,7 +24,7 @@ class PreferenceWindow(
                 add(nettab)
             }
             tab("Appearance") {
-                add(AppearanceTab(this@PreferenceWindow))
+                add(AppearanceTab(this@PreferenceWindow).root)
             }
         }
         with(root) {

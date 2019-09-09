@@ -6,12 +6,8 @@ import koma.Koma
 import koma.gui.view.usersview.RoomMemberListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.koma_app.AppStore
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.add
 import model.Room
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
-import tornadofx.*
 
 /**
  * the room the user is currently interacting with
@@ -20,8 +16,8 @@ import tornadofx.*
 class JoinedRoomView(
         km: Koma,
         store: AppStore
-): View() {
-    override val root = HBox()
+) {
+    val root = HBox()
 
     val messageRecvSendView = ChatRecvSendView(km, store)
     val usersListView = RoomMemberListView(store.userData)
@@ -32,9 +28,9 @@ class JoinedRoomView(
     }
     init {
         with(root) {
-            hgrow = Priority.ALWAYS
-            add(messageRecvSendView)
-            add(usersListView)
+            HBox.setHgrow(this, Priority.ALWAYS)
+            add(messageRecvSendView.root)
+            add(usersListView.root)
         }
     }
 }
