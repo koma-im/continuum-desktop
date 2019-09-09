@@ -1,16 +1,13 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
-import javafx.scene.control.Alert
 import javafx.scene.control.Hyperlink
 import javafx.scene.control.Tooltip
 import javafx.scene.input.MouseButton
 import javafx.scene.text.Font
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import tornadofx.*
-import java.awt.Desktop
+import link.continuum.desktop.gui.JFX
 import java.io.IOException
-import java.net.URI
 
 
 fun hyperlinkNode(
@@ -28,30 +25,8 @@ fun hyperlinkNode(
 }
 
 fun openInBrowser(url: String) {
-    val uri =try {
-        URI.create(url)
-    } catch (e: IllegalArgumentException) {
-        alert(Alert.AlertType.ERROR, "Can't open address", "$url is not valid URI")
-        return
-    }
-    if (!Desktop.isDesktopSupported()) {
-        alert(Alert.AlertType.ERROR, "Desktop isn't supported" )
-        return
-    }
-    val desktop = Desktop.getDesktop()
-    if (!desktop.isSupported(Desktop.Action.BROWSE)) {
-        if (!tryExecBrowsers(url)) {
-            alert(Alert.AlertType.ERROR,
-                    "The desktop doesn't support browsing",
-                   "Also, none of ${browserExes.joinToString(", ", limit = 10)} successfully starts" )
-        }
-        return
-    }
-    try {
-        desktop.browse(uri)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
+    if (tryExecBrowsers(url)) return
+    JFX.hostServices.showDocument(url)
 }
 
 val browserExes = listOf(

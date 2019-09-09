@@ -1,9 +1,9 @@
 package model
 
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import koma.Server
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
@@ -21,12 +21,9 @@ import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
-import link.continuum.desktop.gui.checkUiThread
-import link.continuum.desktop.gui.icon.avatar.SelectUser
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.util.getOrNull
-import okhttp3.HttpUrl
-import tornadofx.*
+import tornadofx.stringBinding
 import java.util.*
 
 class Room(
@@ -91,17 +88,17 @@ class Room(
 
 
     fun makeUserJoined(us: UserId) {
-        checkUiThread()
+        check(Platform.isFxApplicationThread())
         members.add(us to server)
     }
 
     fun removeMember(mid: UserId) {
-        checkUiThread()
+        check(Platform.isFxApplicationThread())
         members.remove(mid to server)
     }
 
     fun addAlias(alias: RoomAlias) {
-        checkUiThread()
+        check(Platform.isFxApplicationThread())
         aliases.add(alias)
     }
     fun addMembers(ms: List<UserId>) {

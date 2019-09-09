@@ -1,6 +1,7 @@
 package koma.koma_app
 
 import javafx.application.Application
+import javafx.application.HostServices
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.image.Image
@@ -51,6 +52,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private val kvStore = CompletableDeferred<MVStore>()
     val startTime = MonoClock.markNow()
     init {
+        JFX.application = this
         val arg = System.getenv()["CONTINUUM_DIR"]
         val data_dir = arg ?: getConfigDir()
         log.info("data dir set to {}", data_dir)

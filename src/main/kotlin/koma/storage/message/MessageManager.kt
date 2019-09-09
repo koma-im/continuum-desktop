@@ -6,13 +6,13 @@ import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import io.requery.kotlin.lte
 import io.requery.sql.KotlinEntityDataStore
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.transformation.SortedList
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
-import koma.matrix.room.naming.RoomId
 import koma.storage.message.fetch.fetchPreceding
 import koma.util.fold
 import kotlinx.coroutines.*
@@ -20,7 +20,6 @@ import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.toEventRowList
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.gui.checkUiThread
 import link.continuum.desktop.gui.list.DedupList
 import model.Room
 import mu.KotlinLogging
@@ -64,7 +63,7 @@ class MessageManager(val room: Room,
     private val startedFetchJobs = ConcurrentHashMap<Pair<String, FetchDirection>, SimpleBooleanProperty>()
     @ExperimentalCoroutinesApi
     fun fetchPrecedingRows(row: RoomEventRow): SimpleBooleanProperty {
-        checkUiThread()
+        check(Platform.isFxApplicationThread())
         val status = startedFetchJobs.computeIfAbsent(row.event_id to FetchDirection.Backward) {
             val loading = SimpleBooleanProperty(true)
             GlobalScope.launch {

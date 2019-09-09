@@ -1,6 +1,6 @@
 package link.continuum.desktop.gui
 
-import com.sun.javafx.tk.Toolkit
+import javafx.application.Application
 import javafx.geometry.Insets
 import javafx.scene.Node
 import javafx.scene.control.Alert
@@ -28,6 +28,8 @@ val whiteBackGround = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, 
 
 object JFX {
     lateinit var primaryStage: Stage
+    lateinit var application: Application
+    val hostServices by lazy { application.hostServices }
 }
 
 fun<T: Node> T.showIf(show: Boolean) {
@@ -36,10 +38,6 @@ fun<T: Node> T.showIf(show: Boolean) {
 }
 
 val UiDispatcher = Dispatchers.JavaFx
-
-fun checkUiThread() {
-    Toolkit.getToolkit().checkFxUserThread()
-}
 
 fun uialert(type: Alert.AlertType,
             header: String,
