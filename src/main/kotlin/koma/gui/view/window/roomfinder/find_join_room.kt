@@ -13,8 +13,6 @@ import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.util.Account
 import tornadofx.Fragment
-import tornadofx.em
-import tornadofx.style
 
 private val settings: AppSettings = appState.store.settings
 
@@ -42,9 +40,6 @@ class RoomFinder(
             this.minWidth = 600.0
             VBox.setVgrow(this, Priority.ALWAYS)
             padding = Insets(10.0)
-            style {
-                fontSize = settings.scaling.em
-            }
             add(pubs.ui)
         }
     }

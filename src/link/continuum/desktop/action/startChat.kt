@@ -23,11 +23,9 @@ private val logger = KotlinLogging.logger {}
  * updates the list of recently used accounts
  */
 @ExperimentalCoroutinesApi
-fun
-
-        startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
+fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
               appData: AppStore
-              ) {
+) {
     val data = appData.database
     updateAccountUsage(data, userId)
 
@@ -41,8 +39,7 @@ fun
     val userRooms = store.joinedRoom.list
 
     val primary = ChatWindowBars(userRooms, account, store)
-    JFX.primaryStage.scene.root = primary.root
-    JFX.primaryStage.scene.stylesheets.add("/css/main.css")
+    JFX.primaryPane.setChild(primary.root)
 
     app.coroutineScope.launch {
         val rooms = loadUserRooms(data, userId)

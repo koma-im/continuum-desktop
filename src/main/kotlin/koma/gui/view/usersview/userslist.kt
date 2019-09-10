@@ -41,9 +41,6 @@ class RoomMemberListView(
     init {
         with(root) {
             val scale = settings.scaling
-            style {
-                fontSize= scale.em
-            }
             val showavataronly = SimpleBooleanProperty(true)
             val button  = Pane().apply {
                 fun Text.iconProp(): Text {

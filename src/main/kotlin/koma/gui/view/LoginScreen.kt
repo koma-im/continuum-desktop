@@ -83,10 +83,6 @@ class LoginScreen(
     private var database: KDataStore? = null
     fun start(appStore: AppStore) {
         root.isDisable = false
-        val settings = appStore.settings
-        root.style {
-            fontSize= settings.scaling.em
-        }
         val data = appStore.database
         this.database = data
         val recentUsers = getRecentUsers(data)

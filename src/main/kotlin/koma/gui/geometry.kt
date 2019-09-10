@@ -2,8 +2,6 @@ package koma.gui
 
 import javafx.stage.Screen
 import javafx.stage.Stage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.h2.mvstore.MVMap
 import org.h2.mvstore.MVStore
 import kotlin.time.ExperimentalTime

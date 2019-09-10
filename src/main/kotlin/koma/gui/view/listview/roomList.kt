@@ -68,9 +68,6 @@ class RoomListView(
 
     private fun setup(node: ListView<Room>) {
         val scale = settings.scaling
-        node.style {
-            fontSize= scale.em
-        }
         node.minWidth = 178.0 * scale
         node.maxWidth = 178.0 * scale
         VBox.setVgrow(node, Priority.ALWAYS)

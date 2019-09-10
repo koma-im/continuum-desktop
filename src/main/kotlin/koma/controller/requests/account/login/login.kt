@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import link.continuum.desktop.action.startChat
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getToken
@@ -52,7 +53,9 @@ suspend fun onClickLogin(koma: Koma,
         t
     }
     token ?: return
-    startChat(koma, userid, token, url, appData)
+    withContext(Dispatchers.Main) {
+        startChat(koma, userid, token, url, appData)
+    }
 }
 
 /**

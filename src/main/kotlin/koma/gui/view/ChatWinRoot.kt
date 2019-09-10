@@ -24,9 +24,6 @@ import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import model.Room
 import org.controlsfx.control.NotificationPane
-import tornadofx.em
-import tornadofx.find
-import tornadofx.style
 
 private val settings: AppSettings = appState.store.settings
 
@@ -47,12 +44,10 @@ class ChatWindowBars(
     val status = SyncStatusBar(root)
 
     private val roomFinder by lazy { RoomFinder(account) }
+    private val prefWin by lazy { PreferenceWindow() }
     init {
         with(content) {
             background = whiteBackGround
-            style {
-                fontSize= settings.scaling.em
-            }
             center = this@ChatWindowBars.center.root
             top = MenuBar().apply {
                 menu("File") {
@@ -61,7 +56,7 @@ class ChatWindowBars(
                         setOnAction { roomFinder.open() }
                     }
                     item("Preferences").action {
-                        find(PreferenceWindow::class).openModal(owner = JFX.primaryStage)
+                        prefWin.openModal(owner = JFX.primaryStage)
                     }
                     item("Quit").action {
                         JFX.primaryStage.close()

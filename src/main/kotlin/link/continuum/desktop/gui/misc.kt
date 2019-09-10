@@ -23,6 +23,7 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
+import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
@@ -37,6 +38,7 @@ val whiteBackGround = Background(BackgroundFill(Color.WHITE, CornerRadii.EMPTY, 
 object JFX {
     lateinit var primaryStage: Stage
     lateinit var application: Application
+    lateinit var primaryPane: ScalingPane
     val hostServices by lazy { application.hostServices }
 }
 

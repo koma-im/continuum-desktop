@@ -28,9 +28,6 @@ class PreferenceWindow(
             }
         }
         with(root) {
-            style {
-                fontSize= settings.scaling.em
-            }
             add(tabs)
         }
     }

@@ -13,6 +13,7 @@ import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import link.continuum.desktop.util.gui.alert
@@ -111,13 +112,15 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         launch(Dispatchers.Main) {
             setSaneStageSize(stage, kvStore.await())
             log.debug("stage size set at {}", startTime.elapsedNow())
-            stage.scene = Scene(Pane())
+            val scalingPane = ScalingPane()
+            JFX.primaryPane = scalingPane
+            stage.scene = Scene(scalingPane.root)
             log.debug("Set the scene of stage at {}", startTime.elapsedNow())
             stage.show()
             log.debug("Called stage.show at {}", startTime.elapsedNow())
             stage.title = "Continuum"
             val s = startScreen.await()
-            stage.scene.root = s.root
+            scalingPane.setChild(s.root)
             log.debug("Root of the scene is set at {}", startTime.elapsedNow())
             s.initialize()
             javaClass.getResourceAsStream("/icon/koma.png")?.let {
@@ -125,7 +128,9 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             } ?: log.error("Failed to load app icon from resources")
             log.debug("icon loaded {}", startTime.elapsedNow())
             startLoad()
+            stage.scene.stylesheets.add("/css/main.css")
         }
+        stage.isResizable = true
     }
 
 }

@@ -45,10 +45,7 @@ class MemberCell(
             tooltip = toolTip
             minWidth = 1.0
             prefWidth = 1.0
-            style {
-                alignment = Pos.CENTER_LEFT
-                fontSize= scale.em
-            }
+            alignment = Pos.CENTER_LEFT
             stackpane {
                 add(avatarView.root)
                 minHeight = avsize

@@ -16,9 +16,6 @@ import link.continuum.desktop.gui.action
 import link.continuum.desktop.gui.button
 import link.continuum.desktop.gui.tooltip
 import mu.KotlinLogging
-import tornadofx.em
-import tornadofx.style
-import kotlin.math.roundToInt
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,13 +25,9 @@ fun createButtonBar(inputField: TextField,
                     ): ButtonBar {
     val bbar = ButtonBar()
     val scale = settings.scaling
-    val size = "${scale.roundToInt()}em"
     bbar.apply {
-        style {
-            fontSize = scale.em
-        }
         button {
-            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE, size)
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE)
             tooltip = Tooltip("Send File")
             setOnAction {
                 currRoom.value?.let {
@@ -44,7 +37,7 @@ fun createButtonBar(inputField: TextField,
             }
         }
         button {
-            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO, size)
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PHOTO)
             tooltip("Send image")
             setOnAction {
                 currRoom.value?.let {
@@ -53,7 +46,7 @@ fun createButtonBar(inputField: TextField,
             }
         }
         button{
-            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT, size)
+            graphic = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SMILE_ALT)
             action {
                 emojiKeyboard.onEmoji = {
                     logger.trace { "emoji input $it in $it" }
