@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.22"
+version = "0.9.23"
 
 plugins {
     kotlin("jvm") version "1.3.50"
@@ -42,8 +42,6 @@ javafx {
 }
 
 dependencies {
-    implementation(kotlin("reflect"))
-    implementation("no.tornado:tornadofx:1.7.18")
     implementation("org.cache2k:cache2k-core:1.2.3.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
@@ -104,7 +102,6 @@ runtime {
             "java.logging",
             "java.management",
             "java.naming",
-            "java.prefs",
             "java.scripting",
             "java.sql",
             "java.sql.rowset",

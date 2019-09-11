@@ -36,8 +36,6 @@ import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
-import tornadofx.enableWhen
-import tornadofx.onChange
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
 
@@ -75,12 +73,12 @@ class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                 add(field)
                 button("Join by Room Alias") {
                     removeWhen { inputStartAlias.not() }
-                    enableWhen { inputIsAlias }
+                    enableWhen(inputIsAlias)
                     action { joinRoomByAlias(input.get()) }
                 }
                 button("Join by Room Id") {
                     removeWhen { inputStartId.not() }
-                    enableWhen { inputIsId }
+                    enableWhen(inputIsId)
                     action {
                         val inputid = input.get()
                         joinById(RoomId(inputid), inputid, this, account) }

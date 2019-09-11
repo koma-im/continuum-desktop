@@ -3,8 +3,10 @@ package koma.gui.view.window.roomfinder
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Insets
+import javafx.scene.Scene
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.stage.Stage
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
 import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
@@ -12,30 +14,27 @@ import koma.storage.persistence.settings.AppSettings
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.util.Account
-import tornadofx.Fragment
-
-private val settings: AppSettings = appState.store.settings
 
 class RoomFinder(
         account: Account
-): Fragment() {
-    override val root = VBox(5.0)
+) {
+    val root = VBox(5.0)
 
     private val publicRoomList: ObservableList<DiscoveredRoom> = FXCollections.observableArrayList<DiscoveredRoom>()
     val pubs: PublicRoomsView
-
+    private val stage = Stage()
     fun open() {
-        val s = this.openWindow(owner = JFX.primaryStage)
-        s ?: return
-        s.setOnHidden {
-            // cleaning up
-            pubs.clean()
-        }
+        stage.show()
     }
 
     init {
-        this.title = "Room Finder"
+        stage.title = "Room Finder"
+        stage.initOwner(JFX.primaryStage)
+        stage.scene = Scene(root)
         pubs = PublicRoomsView(publicRoomList, account )
+        stage.setOnHidden {
+            pubs.clean()
+        }
         root.apply {
             this.minWidth = 600.0
             VBox.setVgrow(this, Priority.ALWAYS)

@@ -12,7 +12,6 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.util.StringConverter
 import koma.controller.requests.account.login.onClickLogin
-import koma.gui.view.window.auth.RegistrationWizard
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -22,8 +21,7 @@ import kotlinx.coroutines.channels.Channel
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getRecentUsers
 import link.continuum.database.models.getServerAddrs
-import link.continuum.desktop.gui.whiteBackGround
-import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.*
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import org.controlsfx.control.MaskerPane
@@ -34,8 +32,6 @@ import org.controlsfx.validation.ValidationMessage
 import org.controlsfx.validation.ValidationSupport
 import org.controlsfx.validation.Validator
 import org.controlsfx.validation.decoration.GraphicValidationDecoration
-import tornadofx.*
-
 
 private val logger = KotlinLogging.logger {}
 
@@ -44,9 +40,9 @@ private val logger = KotlinLogging.logger {}
  */
 class LoginScreen(
         private val mask: MaskerPane
-): View(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
-    override val root = VBox()
+    val root = VBox()
 
     var userId = ComboBox<UserId>().apply {
         promptText = "@user:matrix.org"
@@ -94,7 +90,7 @@ class LoginScreen(
         with(grid) {
             vgap = 10.0
             hgap = 10.0
-            paddingAll = 5.0
+            padding = Insets(5.0)
 
             add(Text("Username"), 0, 0)
             add(userId, 1, 0)
@@ -132,15 +128,9 @@ class LoginScreen(
                 button("Options") {
                     action { prefWin.openModal(owner = JFX.primaryStage) }
                 }
-                button("Register") {
-                    action {
-                        database?.let {
-                            openInternalWindow(RegistrationWizard(it),
-                                    owner = JFX.primaryStage.scene.root)
-                        }
-                    }
+                hbox {
+                    HBox.setHgrow(this, Priority.ALWAYS)
                 }
-                hbox { hgrow = Priority.ALWAYS }
                 button("Login") {
                     isDefaultButton = true
                     this.disableProperty().bind(validation.invalidProperty())

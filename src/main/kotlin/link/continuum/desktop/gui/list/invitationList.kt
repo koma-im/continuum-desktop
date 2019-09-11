@@ -20,7 +20,6 @@ import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import mu.KotlinLogging
-import tornadofx.textflow
 
 private val logger = KotlinLogging.logger {}
 

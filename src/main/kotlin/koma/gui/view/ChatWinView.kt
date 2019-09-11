@@ -177,7 +177,7 @@ class RoomFragment(private val data: KDataStore, private val koma: Koma
     private fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(room, user, data).openWindow()
+        RoomInfoDialog(room, user, data).openWindow(owner = JFX.primaryStage)
     }
 }
 

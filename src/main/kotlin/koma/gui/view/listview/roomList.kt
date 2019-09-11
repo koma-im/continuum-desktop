@@ -3,13 +3,10 @@ package koma.gui.view.listview
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Border
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.Koma
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
@@ -21,8 +18,6 @@ import link.continuum.desktop.gui.button
 import link.continuum.desktop.gui.label
 import link.continuum.desktop.util.Account
 import model.Room
-import tornadofx.em
-import tornadofx.style
 
 private val settings: AppSettings = appState.store.settings
 

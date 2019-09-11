@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.gui.add
 import model.Room
-import tornadofx.hgrow
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -59,7 +58,7 @@ class ChatRecvSendView(
 
         with(messageInput) {
             promptText = "Compose a message"
-            hgrow = Priority.ALWAYS
+            HBox.setHgrow(this, Priority.ALWAYS)
             setOnAction {
                 val msg = text
                 text = ""

@@ -13,7 +13,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.scene.text.FontWeight
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -23,16 +22,16 @@ import koma.matrix.room.naming.RoomId
 import koma.network.media.parseMxc
 import koma.util.onFailure
 import koma.util.onSuccess
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
-import tornadofx.style
 
 private val logger = KotlinLogging.logger {}
 
@@ -104,9 +103,7 @@ class DiscoveredRoomFragment(
                 VBox.setVgrow(this, Priority.ALWAYS)
                 hbox(9.0) {
                     label(name) {
-                        style {
-                            fontWeight = FontWeight.EXTRA_BOLD
-                        }
+                        style = "-fx-font-weight: bold;"
                     }
                     label("World Readable") { removeWhen { worldRead.not() } }
                     label("Guest Joinable") { removeWhen { guestJoin.not() } }

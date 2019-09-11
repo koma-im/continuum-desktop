@@ -28,8 +28,6 @@ import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 import java.util.concurrent.Callable
-import tornadofx.form
-import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -119,6 +117,11 @@ fun MenuItem.action(action: (ActionEvent)-> Unit) {
 fun <T : Node> T.disableWhen(predicate: ObservableValue<Boolean>) = apply {
     disableProperty().cleanBind(predicate)
 }
+
+fun <T : Node> T.enableWhen(predicate: BooleanBinding) = apply {
+    disableProperty().cleanBind(predicate.not())
+}
+
 fun <T : Node> T.visibleWhen(predicate: ObservableValue<Boolean>) = apply {
     visibleProperty().cleanBind(predicate)
     managedProperty().cleanBind(predicate)
@@ -155,11 +158,19 @@ fun clipboardPutString(text: String){
             })
 }
 
+fun<T: Node> T.tooltip(text: String) {
+    val t = Tooltip(text)
+    Tooltip.install(this, t)
+}
+
 fun<T: Node> T.showIf(show: Boolean) {
     this.isManaged = show
     this.isVisible = show
 }
 
+object UiConstants {
+    val insets5 = Insets(5.0)
+}
 val UiDispatcher = Dispatchers.JavaFx
 
 fun uialert(type: Alert.AlertType,

@@ -2,6 +2,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
+import javafx.scene.control.Tooltip
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import koma.Koma
@@ -15,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.action
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.tooltip
 
 private val logger = KotlinLogging.logger {}
 
@@ -27,7 +27,10 @@ class MImageViewNode(km: Koma): ViewNode {
     private var filename: String? =null
     private var image = ImageElement(km)
     override val node = image.node
-
+    private val tooltip = Tooltip()
+    init {
+        Tooltip.install(node, tooltip)
+    }
     fun update(content: ImageMessage, server: Server) {
         val u = content.url.parseMxc()
         if (u == null) {
@@ -36,7 +39,7 @@ class MImageViewNode(km: Koma): ViewNode {
             url = server.mxcToHttp(u)
             image.update(u, server)
         }
-        node.tooltip(content.body)
+        tooltip.text =content.body
     }
 
     private fun createMenuItems(): List<MenuItem> {

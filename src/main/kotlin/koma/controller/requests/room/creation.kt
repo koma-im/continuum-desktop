@@ -2,6 +2,8 @@ package koma.controller.requests.room
 
 import javafx.geometry.Pos
 import javafx.scene.control.*
+import javafx.scene.layout.GridPane
+import javafx.scene.text.Text
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.admin.CreateRoomSettings
 import koma.matrix.room.visibility.RoomVisibility
@@ -14,10 +16,6 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.disableWhen
 import org.controlsfx.control.Notifications
-import tornadofx.add
-import tornadofx.field
-import tornadofx.fieldset
-import tornadofx.form
 
 fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     val input = RoomCreationDialog().showAndWait()
@@ -54,16 +52,11 @@ private class RoomCreationDialog(): Dialog<CreateRoomSettings?>() {
         this.getDialogPane().getButtonTypes().addAll(createButtonType, ButtonType.CANCEL)
 
         roomnamef.setPromptText("Room")
-
-        this.dialogPane.content = form {
-            fieldset {
-                field("Room:") {
-                    add(roomnamef)
-                }
-                field("Visibility:") {
-                    add(visibilityChoice)
-                }
-            }
+        this.dialogPane.content = GridPane().apply {
+            add(Text("Room:"), 0, 0)
+            add(roomnamef, 1, 0)
+            add(Text("Visibility:"), 0, 1)
+            add(visibilityChoice, 1, 1)
         }
 
         val creationButton = this.getDialogPane().lookupButton(createButtonType)

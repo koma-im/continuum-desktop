@@ -17,8 +17,6 @@ import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
 import mu.KotlinLogging
-import tornadofx.em
-import tornadofx.style
 
 private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi

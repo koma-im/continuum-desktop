@@ -6,12 +6,13 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
-import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
-import javafx.scene.control.TextField
+import javafx.scene.control.*
+import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.text.FontWeight
+import javafx.stage.Stage
 import javafx.util.Callback
 import koma.gui.element.emoji.keyboard.NoSelectionModel
 import koma.gui.view.window.chatroom.roominfo.about.requests.requestAddRoomAlias
@@ -28,26 +29,28 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
-import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.stringBindingNullable as stringBinding
 import model.Room
 import org.controlsfx.control.Notifications
-import tornadofx.*
 import java.util.concurrent.Callable
 
 class RoomAliasForm(room: Room, user: UserId,
                     data: KDataStore
-                    ): Fragment() {
-    override val root: Fieldset
-
+                    ) {
+    val root: VBox
+    val stage = Stage()
     init {
         val canEditCanonAlias = getChangeStateAllowed(data, room.id, user, RoomEventType.CanonAlias.toString())
         val canEdit = getChangeStateAllowed(data, room.id, user)
 
-        this.title = "Update Aliases of Room ${room.displayName.value}"
+        stage.title = "Update Aliases of Room ${room.displayName.value}"
 
-        root = fieldset("Room Aliases") {
-            vbox(5) {
-                listview(room.aliases.list) {
+        root = VBox(5.0).apply {
+            text("Room Aliases")
+            vbox() {
+                spacing = 5.0
+                add(ListView<RoomAlias>(room.aliases.list).apply {
                     prefHeight = 200.0
                     selectionModel = NoSelectionModel()
                     cellFactory = object : Callback<ListView<RoomAlias>, ListCell<RoomAlias>> {
@@ -55,8 +58,8 @@ class RoomAliasForm(room: Room, user: UserId,
                             return RoomAliasCell(room, canEditCanonAlias, canEdit)
                         }
                     }
-                    vgrow = Priority.ALWAYS
-                }
+                    VBox.setVgrow(this, Priority.ALWAYS)
+                })
                 hbox(5.0) {
                     removeWhen(SimpleBooleanProperty(canEdit).not())
                     val field = TextField()
@@ -120,23 +123,23 @@ class RoomAliasCell(
             minWidth = 1.0
             alignment = Pos.CENTER_LEFT
             stackpane {
-                hyperlink(graphic = notstar) {
+                add(Hyperlink().apply {
+                    graphic = notstar
                     tooltip("Set as Canonical Alias")
-                    visibleWhen { cell.hoverProperty().and(canonEditAllowed) }
-                    action { requestSetRoomCanonicalAlias(room, roomAlias.value) }
-                }
-                hyperlink(graphic = star) {
+                    visibleWhen(booleanBinding(cell.hoverProperty()) {canonEditAllowed && value == true})
+                    setOnAction { requestSetRoomCanonicalAlias(room, roomAlias.value) }
+                })
+                add(Hyperlink().apply {
+                graphic = star
                     tooltip("Current Canonical Alias")
                     removeWhen { isCanon.not() }
-                }
+                })
             }
             label {
                 textProperty().bind(text)
-                style {
-                    fontWeight = FontWeight.EXTRA_BOLD
-                }
+                style = "-fx-font-weight: bold;"
             }
-            lazyContextmenu {
+            contextMenu = ContextMenu().apply {
                 item("Delete") {
                     removeWhen(SimpleBooleanProperty(editAllowedDef).not())
                     action { deleteRoomAlias(room, roomAlias.value) }
@@ -146,10 +149,11 @@ class RoomAliasCell(
                     action { requestSetRoomCanonicalAlias(room, roomAlias.value) }
                 }
             }
-            hyperlink(graphic = deleteIcon) {
-                visibleWhen { cell.hoverProperty().and(editAllowedDef) }
-                action { deleteRoomAlias(room, roomAlias.value) }
-            }
+            add(Hyperlink().apply {
+                graphic = deleteIcon
+                visibleWhen(booleanBinding(cell.hoverProperty(), { editAllowedDef && value == true}))
+                setOnAction { deleteRoomAlias(room, roomAlias.value) }
+            })
         }
     }
 

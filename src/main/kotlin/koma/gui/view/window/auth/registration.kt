@@ -1,11 +1,9 @@
 package koma.gui.view.window.auth
 
+import javafx.geometry.Insets
 import javafx.scene.Parent
 import javafx.scene.control.*
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
+import javafx.scene.layout.*
 import javafx.util.StringConverter
 import koma.AuthFailure
 import koma.Failure
@@ -23,37 +21,31 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.label
-import link.continuum.desktop.gui.uialert
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.Ok
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.*
 
 private val logger = KotlinLogging.logger {}
 
-class RegistrationWizard(private val data: KDataStore): View() {
+class RegistrationWizard(private val data: KDataStore) {
 
-    override val root = BorderPane()
+    val root = BorderPane()
     private var state: WizardState = Start(data)
     lateinit var register: Register
     init {
-        title = "Join the Matrix network"
 
         with(root) {
             center = state.root
-            bottom {
-                borderpane {
-                    right {
-                        button("OK") { action { GlobalScope.launch { nextStage() } } }
-                    }
-                }
-
-            }
+            bottom = BorderPane().apply {
+                right = Button("OK").apply {
+                    action { GlobalScope.launch { nextStage() } }
+                } }
         }
+    }
+    fun close() {
     }
     private suspend fun nextStage() {
         val cur = state
@@ -210,21 +202,13 @@ class PasswordAuthView(
         return null
     }
 
-    override val root = Form()
+    override val root = GridPane()
     val user = TextField()
     val pass = PasswordField()
 
     init {
         with(root) {
-            paddingAll = 5.0
-            fieldset {
-                field("Username") {
-                    add(user)
-                }
-                field("Password") {
-                    add(pass)
-                }
-            }
+            padding = Insets(5.0)
         }
     }
 }
@@ -290,8 +274,7 @@ private class Start(private val data: KDataStore): WizardState() {
     override val root = VBox()
     init {
         with(root) {
-            val serverCommonUrls = listOf("https://matrix.org")
-            serverCombo = combobox(values = serverCommonUrls) {
+            serverCombo = ComboBox<String>().apply {
                 isEditable = true
                 selectionModel.select(0)
             }

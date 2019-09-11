@@ -1,31 +1,39 @@
 package koma.gui.view.window.preferences
 
 import javafx.geometry.Side
+import javafx.scene.Scene
+import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.VBox
-import koma.gui.view.window.preferences.tab.AppearanceTab
+import javafx.stage.Stage
+import javafx.stage.Window
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import tornadofx.*
+import link.continuum.desktop.gui.add
 
-class PreferenceWindow(
-        private val settings: AppSettings = appState.store.settings): View() {
-    override val root = VBox()
+class PreferenceWindow {
+    val root = VBox()
 
     private val nettab = NetworkSettingsTab(this)
+    private val stage = Stage()
+    fun close() {
+        stage.close()
+    }
 
+    fun openModal(owner: Window) {
+        stage.initOwner(owner)
+        stage.scene = Scene(root)
+        stage.show()
+    }
     init {
         val tabs = TabPane()
         with(tabs) {
             this.tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
             this.side  = Side.LEFT
-            tab("Network") {
-                add(nettab)
-            }
-            tab("Appearance") {
-                add(AppearanceTab(this@PreferenceWindow).root)
-            }
+            getTabs().addAll(
+                    Tab("Network", nettab.root)
+            )
         }
         with(root) {
             add(tabs)

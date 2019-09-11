@@ -1,11 +1,17 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common
 
+import javafx.beans.binding.Bindings
+import javafx.event.EventHandler
+import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.StackPane
+import javafx.stage.Stage
 import koma.Failure
 import koma.Koma
 import koma.Server
@@ -22,9 +28,9 @@ import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.add
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import tornadofx.InternalWindow
-import tornadofx.View
-import tornadofx.c
+import java.util.concurrent.Callable
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
@@ -32,7 +38,7 @@ private val logger = KotlinLogging.logger {}
 class ImageElement(
         private val koma: Koma,
         private val imageSize: Double = 200.0 * appState.store.settings.scaling
-): ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
+) : ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
@@ -46,12 +52,14 @@ class ImageElement(
         title = url.toString()
         updateImage { downloadHttp(url, koma.http.client) }
     }
+
     fun update(mxc: MHUrl, server: Server) {
-        this.url =server.mxcToHttp(mxc)
+        this.url = server.mxcToHttp(mxc)
         title = mxc.toString()
-        updateImage {server.downloadMedia(mxc)}
+        updateImage { server.downloadMedia(mxc) }
     }
-    private fun updateImage(dl: suspend ()-> KResult<ByteArray, Failure>) {
+
+    private fun updateImage(dl: suspend () -> KResult<ByteArray, Failure>) {
         imageView.image = null
         job?.cancel()
         job = launch {
@@ -70,12 +78,13 @@ class ImageElement(
             }
         }
     }
+
     init {
         imageView = ImageView()
         node.add(imageView)
         node.setOnMouseClicked { event ->
             if (event.button == MouseButton.PRIMARY) {
-                viewBiggerPicture()
+                BiggerViews.show(title, imageView.image)
             }
         }
 
@@ -99,48 +108,70 @@ class ImageElement(
         }
         return listOf(tm)
     }
+}
 
+object BiggerViews {
+    private val views = mutableListOf<View>()
 
-    /**
-     * Display an overlay showing a picture occupying most of the entire window
-     */
-    fun viewBiggerPicture() {
-        val owner = JFX.primaryStage.scene.root
-        biggerView.update(title, imageView.image)
-        imageWin.open(view = biggerView, owner = owner)
+    fun show(title: String, image: Image?) {
+        val view = if (views.isEmpty()) {
+            logger.info { "creating img viewer window" }
+            View()
+        } else views.removeAt(views.size - 1)
+        view.show(title, image)
     }
-}
 
+    private class View() {
+        val root = StackPane()
+        private val scene = Scene(root)
+        private val stage = Stage().apply {
+            isResizable = true
+        }
+        private var imageView: ImageView
+        private val closed = AtomicBoolean(false)
 
-private val imageWin by lazy {
-    InternalWindow(
-            icon = null,
-            modal = true,
-            escapeClosesWindow = true,
-            closeButton = true,
-            overlayPaint = c("#000", 0.4))
-}
-
-private val biggerView by lazy {
-    BiggerPictureView()
-}
-
-private class BiggerPictureView(): View() {
-    override val root = StackPane()
-    private var imageView: ImageView
-    init {
-        with(root) {
+        init {
+            stage.scene = scene
+            stage.initOwner(JFX.primaryStage)
             imageView = ImageView().apply {
-                fitHeight = JFX.primaryStage.height * 0.9
-                fitWidth = JFX.primaryStage.width * 0.9
                 isPreserveRatio = true
                 isSmooth = true
             }
+            imageView.fitWidthProperty().bind(
+                    Bindings.createDoubleBinding(Callable {
+                        max(imageView.image?.width ?: 100.0,
+                                root.width)
+                    }, imageView.imageProperty(), root.widthProperty()))
+            imageView.fitHeightProperty().bind(
+                    Bindings.createDoubleBinding(Callable {
+                        max(imageView.image?.height ?: 50.0,
+                                root.height)
+                    }, imageView.imageProperty(), root.heightProperty()))
+            root.add(imageView)
+            stage.addEventFilter(KeyEvent.KEY_RELEASED) {
+                if (it.code != KeyCode.ESCAPE) return@addEventFilter
+                it.consume()
+                stage.close()
+            }
+            stage.onHidden = EventHandler{ close() }
         }
-    }
 
-    fun update(title: String, image: Image?) {
-        imageView.image = image
-        this.title = title
+
+        private fun close() {
+            imageView.image = null
+            if (closed.getAndSet(true)) {
+                logger.debug { "image viewer $this already closed" }
+                return
+            }
+            if (views.size < 3) views.add(this)
+        }
+
+        fun show(title: String, image: Image?) {
+            closed.set(false)
+            logger.debug { "viewing image $image" }
+            imageView.image = image
+            this.stage.title = title
+            stage.show()
+        }
     }
 }
