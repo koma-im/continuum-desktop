@@ -81,6 +81,13 @@ fun Pane.button(content: String?=null, op: Button.()->Unit={}): Button {
     this.children.add(b)
     return b
 }
+
+fun Pane.pane(op: Pane.()->Unit={}): Pane {
+    val b = Pane().apply(op)
+    this.children.add(b)
+    return b
+}
+
 fun Pane.add(node: Node) {
     this.children.add(node)
 }
