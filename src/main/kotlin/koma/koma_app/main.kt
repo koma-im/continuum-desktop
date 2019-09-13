@@ -12,6 +12,7 @@ import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import kotlinx.coroutines.*
+import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.disk.path.getConfigDir
@@ -52,6 +53,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private val configDir: File
     private val kvStore = CompletableDeferred<MVStore>()
     val startTime = MonoClock.markNow()
+    private var dataStore: KDataStore? = null
     init {
         JFX.application = this
         val arg = System.getenv()["CONTINUUM_DIR"]
@@ -88,6 +90,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private fun load() {
         val (settings, db) = loadSettings(configDir)
         log.debug("Database opened {}", startTime.elapsedNow())
+        dataStore = db
         val proxy = settings.proxyList.default()
         val k= Koma(proxy.toJavaNet(), path = configDir.canonicalPath,
                 addTrust = loadOptionalCert(configDir))
@@ -103,7 +106,14 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 
     override fun stop() {
         super.stop()
-        stage?.let { save_win_geometry(it, runBlocking { kvStore.await() }) }
+        dataStore?.run {
+            this.data.close()
+            log.info("closing database")
+            close()
+        }?: log.error("database not initialized")
+        val kv = runBlocking { kvStore.await() }
+        stage?.let { save_win_geometry(it, kv) }
+        kv.close()
     }
 
     override fun start(stage: Stage) {
