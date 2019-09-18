@@ -11,6 +11,7 @@ import koma.Koma
 import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
+import koma.network.client.okhttp.AppHttpClient
 import kotlinx.coroutines.*
 import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.JFX
@@ -41,6 +42,9 @@ fun main(args: Array<String>) {
 
     Application.launch(KomaApp::class.java, *args)
     appState.coroutineScope.cancel()
+    appState.koma.http.client.run {
+        dispatcher().executorService().shutdownNow()
+    }
 }
 
 
