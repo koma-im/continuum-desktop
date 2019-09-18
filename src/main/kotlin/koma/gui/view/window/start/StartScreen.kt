@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import org.controlsfx.control.MaskerPane
+import org.h2.mvstore.MVMap
 import kotlin.time.ClockMark
 import kotlin.time.ExperimentalTime
 
@@ -29,7 +30,7 @@ class StartScreen(
 
     val root = StackPane()
     private val login = CompletableDeferred<LoginScreen>()
-    fun initialize() {
+    fun initialize(keyValueMap: MVMap<String, String>) {
         val innerBox = HBox().apply {
             alignment = Pos.CENTER
         }
@@ -41,7 +42,7 @@ class StartScreen(
             isVisible = false
         }
         root.children.add(mask)
-        val l = LoginScreen(mask)
+        val l = LoginScreen( keyValueMap, mask)
         innerBox.children.add(l.root)
         login.complete(l)
     }

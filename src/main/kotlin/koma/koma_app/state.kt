@@ -26,7 +26,6 @@ import java.io.File
 private val logger = KotlinLogging.logger {}
 
 object appState {
-    var currentUser: UserId? = null
     lateinit var koma: Koma
     lateinit var store: AppStore
     val coroutineScope = CoroutineScope(Dispatchers.Main)

@@ -34,7 +34,6 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     val server = koma.server(url)
     val account  = server.account(userId, token)
     val apiClient  = account
-    app.currentUser = userId
     app.apiClient = apiClient
     val userRooms = store.joinedRoom.list
 

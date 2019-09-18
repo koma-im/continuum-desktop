@@ -32,6 +32,7 @@ import org.controlsfx.validation.ValidationMessage
 import org.controlsfx.validation.ValidationSupport
 import org.controlsfx.validation.Validator
 import org.controlsfx.validation.decoration.GraphicValidationDecoration
+import org.h2.mvstore.MVMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -39,6 +40,7 @@ private val logger = KotlinLogging.logger {}
  * Created by developer on 2017/6/21.
  */
 class LoginScreen(
+        private val keyValueMap: MVMap<String, String>,
         private val mask: MaskerPane
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
 
@@ -120,6 +122,7 @@ class LoginScreen(
                         delay(500)
                         mask.isVisible = false
                     }
+                    it.consume()
                 }
             }
             background = whiteBackGround
@@ -140,7 +143,14 @@ class LoginScreen(
                         job = launch {
                             val k = appState.koma
                             val d = appState.store
-                            onClickLogin(k, d, userId.value, password.text, serverCombo.text)
+                            onClickLogin(
+                                    k,
+                                    d,
+                                    userId.value,
+                                    password.text,
+                                    serverCombo.text,
+                                    keyValueMap
+                            )
                         }
                     }
                 }

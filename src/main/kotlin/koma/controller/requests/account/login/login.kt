@@ -22,8 +22,9 @@ import link.continuum.database.models.getToken
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.util.gui.alert
+import mu.KotlinLogging
 import okhttp3.HttpUrl
-
+import org.h2.mvstore.MVMap
 
 /**
  * when the login button is clicked
@@ -31,7 +32,9 @@ import okhttp3.HttpUrl
  */
 suspend fun onClickLogin(koma: Koma,
                          appData: AppStore,
-                         userid: UserId, password: String, server: String) {
+                         userid: UserId, password: String, server: String,
+                         keyValueMap: MVMap<String, String>
+) {
     val url = HttpUrl.parse(server)
     if (url == null) {
         alert(Alert.AlertType.ERROR, "Invalid server url",
@@ -52,6 +55,7 @@ suspend fun onClickLogin(koma: Koma,
         }
         t
     }
+    keyValueMap["active-account"] = userid.str
     token ?: return
     withContext(Dispatchers.Main) {
         startChat(koma, userid, token, url, appData)
