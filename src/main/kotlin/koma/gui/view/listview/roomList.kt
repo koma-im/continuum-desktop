@@ -67,7 +67,7 @@ class RoomListView(
         node.maxWidth = 178.0 * scale
         VBox.setVgrow(node, Priority.ALWAYS)
         node.setCellFactory {
-            RoomFragment(data, account.server.km)
+            RoomFragment(data)
         }
    }
 }

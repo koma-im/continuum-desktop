@@ -7,7 +7,7 @@ import javafx.beans.value.ObservableValue
 import javafx.beans.value.WeakChangeListener
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import koma.Koma
 import koma.Server
@@ -16,36 +16,31 @@ import koma.network.media.MHUrl
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.booleanBinding
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
-import link.continuum.desktop.gui.removeWhen
 import mu.KotlinLogging
+import kotlin.math.max
 
 private val settings: AppSettings = appState.store.settings
 val avatarSize: Double by lazy { settings.scaling * 32.0 }
 typealias AvatarUrl = MHUrl
 private val logger = KotlinLogging.logger {}
 
-
 class AvatarAlways(
-        private val koma: Koma,
-        private val avatarSize: Double = settings.scaling * 32.0
 ): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val initialIcon = InitialIcon()
-    private val imageView = ImageView()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK
 
     init {
-        val imageAvl = booleanBinding(imageView.imageProperty()) { value != null }
+        val imageAvl = booleanBinding(backgroundProperty()) { value != null }
         this.add(initialIcon.root)
         initialIcon.root.removeWhen(imageAvl)
-        this.add(imageView)
-
-        this.minHeight = avatarSize
-        this.minWidth = avatarSize
+        style {
+            prefWidth = 2.em()
+            prefHeight = 2.em()
+        }
         name.addListener { _, _, n: String? ->
             n?:return@addListener
             this.initialIcon.updateItem(n, color)
@@ -74,7 +69,7 @@ class AvatarAlways(
             im.value = null
             logger.debug { "new avatar url $it" }
             it ?: return
-            im.bind(downloadImageResized(it, avatarSize, server))
+            im.bind(downloadImageResized(it, max(this.width, 32.0), server))
         }
         changeUrl(urlV.value)
         listener = ChangeListener {
@@ -82,7 +77,20 @@ class AvatarAlways(
             changeUrl(newValue)
         }
         urlV.addListener(WeakChangeListener(listener))
-        this.imageView.imageProperty().unbind()
-        this.imageView.imageProperty().bind(im)
+        val bg = objectBinding(im) {
+            val image = this.value ?: return@objectBinding null
+            Background(BackgroundImage(image,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundRepeat.NO_REPEAT,
+                    BackgroundPosition.CENTER,
+                    bgSize
+            ))
+        }
+        this.backgroundProperty().cleanBind(bg)
+    }
+    companion object {
+        private val bgSize =  BackgroundSize(100.0, 100.0,
+                true, true,
+                false, true)
     }
 }

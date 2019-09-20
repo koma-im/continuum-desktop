@@ -31,7 +31,7 @@ class RoomInfoDialog(
         data: KDataStore
 ) {
     val root= VBox(10.0)
-    private val roomicon = AvatarAlways(room.account.server.km)
+    private val roomicon = AvatarAlways()
     val stage = Stage()
 
     fun openWindow(owner: Window) {

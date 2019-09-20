@@ -120,10 +120,10 @@ private fun CoroutineScope.fixRoomName(room: Room) {
 }
 
 @ExperimentalCoroutinesApi
-class RoomFragment(private val data: KDataStore, private val koma: Koma
+class RoomFragment(private val data: KDataStore
 ): ListCell<Room>(), CoroutineScope by CoroutineScope(Dispatchers.Default){
     var room: Room? = null
-    private val avatar = AvatarAlways(koma)
+    private val avatar = AvatarAlways()
     private val nameLabel = Label()
 
     private val avatarOptionalUrl = SimpleObjectProperty<Optional<MHUrl>>()
