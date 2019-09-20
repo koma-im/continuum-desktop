@@ -33,7 +33,7 @@ class AvatarAlways(
         private val koma: Koma,
         private val avatarSize: Double = settings.scaling * 32.0
 ): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val initialIcon = InitialIcon(avatarSize)
+    private val initialIcon = InitialIcon()
     private val imageView = ImageView()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK

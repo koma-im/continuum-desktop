@@ -23,7 +23,7 @@ class UrlAvatar(
         // roughly aligned with text vertically
         override fun getBaselineOffset(): Double = avatarSize * 0.75
     }
-    private val initialIcon = InitialIcon(avatarSize)
+    private val initialIcon = InitialIcon()
     private val imageView = ImageView()
 
     init {

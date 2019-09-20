@@ -33,7 +33,7 @@ class AvatarView(
         avatarSize: Double
 ) {
     val root = StackPane()
-    private val initialIcon = InitialIcon(avatarSize)
+    private val initialIcon = InitialIcon()
     private val imageView = ImageView()
 
     private val user = Channel<Pair<UserId, Server>>(Channel.CONFLATED)

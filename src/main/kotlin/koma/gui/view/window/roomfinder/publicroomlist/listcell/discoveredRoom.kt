@@ -42,7 +42,7 @@ class DiscoveredRoomFragment(
 ): ListCell<DiscoveredRoom>(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = HBox( 10.0)
     private val imageView = ImageView()
-    private val initialIcon = InitialIcon(avatarSize).apply {
+    private val initialIcon = InitialIcon().apply {
         this.root.removeWhen(imageView.imageProperty().isNotNull)
     }
     var name = ""

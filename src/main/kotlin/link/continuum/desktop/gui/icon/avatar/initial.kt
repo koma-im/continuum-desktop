@@ -2,13 +2,10 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.Node
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
-import javafx.scene.text.Font
 import javafx.scene.text.Text
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.vbox
+import link.continuum.desktop.gui.*
 import mu.KotlinLogging
 import java.util.*
 import kotlin.streams.toList
@@ -16,9 +13,8 @@ import kotlin.streams.toList
 private val logger = KotlinLogging.logger {}
 
 class InitialIcon(
-        private val iSize: Double
 ) {
-    private val radii =  CornerRadii(iSize * 0.2)
+    private val radii =  CornerRadii( 0.2, true)
     private var color: Color? = null
 
     private val charL = Text().apply {
@@ -28,36 +24,35 @@ class InitialIcon(
     private val charC = Text().apply { fill = Color.WHITE }
 
     private val two = HBox().apply {
+        style {
+            fontSize = 1.em()
+        }
         alignment = Pos.CENTER
         vbox {
             alignment = Pos.CENTER_RIGHT
             add(charL)
         }
         vbox {
-            minWidth = 0.05 * iSize
+            style {
+                prefWidth = 0.1.em()
+            }
         }
         vbox {
             alignment = Pos.CENTER_LEFT
             add(charR)
         }
     }
-    val root = StackPane().apply {
-        val s = iSize
-        minWidth = s
-        minHeight = s
-        maxWidth = s
-        maxHeight = s
-        children.add(two)
-        children.add(HBox().apply {
-            alignment = Pos.CENTER
-            children.add(charC)
-        })
+    private val one = HBox().apply {
+        alignment = Pos.CENTER
+        children.add(charC)
+        style { fontSize = 1.8.em() }
     }
-    init {
-        val font = Font.font("sans", 0.5 * iSize)
-        charL.font = font
-        charR.font = font
-        charC.font = Font.font("sans", 0.9 * iSize)
+    val root = StackPane().apply {
+        style {
+            prefHeight = 2.em()
+            prefWidth = 2.em()
+            fontFamily = GenericFontFamily.sansSerif
+        }
     }
 
     fun show() {
@@ -76,20 +71,19 @@ class InitialIcon(
             logger.debug { "initial icon $charL $charR $color" }
             Background(BackgroundFill(it, radii, Insets.EMPTY))
         }
-        charC.text = ""
         this.charL.text = charL
         this.charR.text = charR
+        root.children.setAll(two)
     }
 
     fun updateCenter(char: String, color: Color) {
         this.color = color
         root.background = backgrounds.computeIfAbsent(color) {
-            logger.debug { "initial icon $charL $charR $color" }
+            logger.debug { "initial icon $char $color" }
             Background(BackgroundFill(it, radii, Insets.EMPTY))
         }
-        this.charL.text = ""
-        this.charR.text = ""
         charC.text = char
+        root.children.setAll(one)
     }
 
     fun updateItem(input: String, color: Color) {

@@ -16,6 +16,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.stage.Stage
 import javafx.stage.Window
+import koma.util.given
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -123,6 +124,64 @@ fun MenuItem.action(action: (ActionEvent)-> Unit) {
 
 fun <T : Node> T.disableWhen(predicate: ObservableValue<Boolean>) = apply {
     disableProperty().cleanBind(predicate)
+}
+
+fun Node.style(op: StyleBuilder.()->Unit) {
+    style = StyleBuilder().apply(op).toString()
+}
+
+class StyleBuilder {
+    var prefWidth: SizeWithUnit? = null
+    var prefHeight: SizeWithUnit? = null
+    var fontSize: SizeWithUnit? = null
+    var fontFamily: GenericFontFamily? = null
+    override fun toString(): String {
+        val sb = StringBuilder().apply {
+            given(prefWidth) {
+                append("-fx-pref-width:")
+                append(prefWidth.toString())
+                append(';')
+            }
+            given(prefHeight) {
+                append("-fx-pref-height:")
+                append(prefHeight.toString())
+                append(';')
+            }
+            given(fontSize) {
+                append("-fx-font-size:")
+                append(fontSize.toString())
+                append(';')
+            }
+            given(fontFamily) {
+                append("-fx-font-family:")
+                append(fontFamily.toString())
+                append(';')
+            }
+        }
+        return sb.toString()
+    }
+}
+
+fun Number.em() = SizeWithUnit.Em(this)
+
+@Suppress("Unused")
+enum class GenericFontFamily {
+    serif, // (e.g., Times)
+    sansSerif, // (e.g., Helvetica)
+    cursive, // (e.g., Zapf-Chancery)
+    fantasy,// (e.g., Western)
+    monospace; // (e.g., Courier)
+
+    override fun toString() =
+            when(this) {
+                sansSerif -> "sans-serif"
+                else -> this.name
+            }
+}
+sealed class SizeWithUnit {
+    class Em(val value: Number): SizeWithUnit() {
+        override fun toString() = "${value}em"
+    }
 }
 
 fun <T : Node> T.enableWhen(predicate: BooleanBinding) = apply {
