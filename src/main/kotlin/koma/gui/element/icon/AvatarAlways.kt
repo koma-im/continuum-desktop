@@ -17,6 +17,7 @@ import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
@@ -32,9 +33,11 @@ class AvatarAlways(
     private val initialIcon = InitialIcon()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK
+    val imageRegion = FitImageRegion()
 
     init {
-        val imageAvl = booleanBinding(backgroundProperty()) { value != null }
+        val imageAvl = imageRegion.imageProperty.isNotNull
+        add(imageRegion)
         this.add(initialIcon.root)
         initialIcon.root.removeWhen(imageAvl)
         style {
@@ -77,20 +80,6 @@ class AvatarAlways(
             changeUrl(newValue)
         }
         urlV.addListener(WeakChangeListener(listener))
-        val bg = objectBinding(im) {
-            val image = this.value ?: return@objectBinding null
-            Background(BackgroundImage(image,
-                    BackgroundRepeat.NO_REPEAT,
-                    BackgroundRepeat.NO_REPEAT,
-                    BackgroundPosition.CENTER,
-                    bgSize
-            ))
-        }
-        this.backgroundProperty().cleanBind(bg)
-    }
-    companion object {
-        private val bgSize =  BackgroundSize(100.0, 100.0,
-                true, true,
-                false, true)
+        imageRegion.imageProperty.cleanBind(im)
     }
 }

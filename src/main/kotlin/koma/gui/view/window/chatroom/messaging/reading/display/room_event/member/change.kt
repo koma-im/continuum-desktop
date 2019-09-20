@@ -59,11 +59,11 @@ class MRoomMemberViewNode(
     private val avatarsize: Double = scaling * 32.0
     private val minWid: Double = scaling * 40.0
 
-    private val userView = StateEventUserView(store.userData, avatarsize)
+    private val userView = StateEventUserView(store.userData)
     private val timeView = DatatimeView()
     private val contentPane = StackPane()
 
-    private val inviterView = StateEventUserView(store.userData, avatarsize)
+    private val inviterView = StateEventUserView(store.userData)
     private val invitationContent by lazy {
         HBox(5.0).apply {
             alignment = Pos.CENTER
@@ -146,10 +146,9 @@ class MRoomMemberViewNode(
 @ExperimentalCoroutinesApi
 private class InvitationContent(
         client: OkHttpClient,
-        avatarsize: Double,
         store: UserDataStore
 ) {
-    val userView = StateEventUserView(store, avatarsize)
+    val userView = StateEventUserView(store )
     val root =  HBox(5.0).apply {
         alignment = Pos.CENTER
         text("invited")

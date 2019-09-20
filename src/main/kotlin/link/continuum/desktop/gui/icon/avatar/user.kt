@@ -9,7 +9,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
+import link.continuum.desktop.gui.StyleBuilder
 import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.em
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.onNone
@@ -29,8 +31,7 @@ typealias SelectUser = Pair<UserId, HttpUrl>
 
 @ExperimentalCoroutinesApi
 class AvatarView(
-        private val userData: UserDataStore,
-        avatarSize: Double
+        private val userData: UserDataStore
 ) {
     val root = StackPane()
     private val initialIcon = InitialIcon()
@@ -40,14 +41,20 @@ class AvatarView(
 
     init {
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
-        root.minHeight = avatarSize
-        root.minWidth = avatarSize
+        root.style = style
         root.add(initialIcon.root)
         root.add(imageView)
 
         GlobalScope.launch {
             switchUpdateUser(user)
         }
+    }
+
+    companion object {
+        private val style = StyleBuilder().apply {
+            prefHeight = 2.em()
+            prefWidth = 2.em()
+        }.toString()
     }
     fun updateUser(userId: UserId, server: MediaServer) {
         if (!user.offer(userId to server)) {

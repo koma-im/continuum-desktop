@@ -5,19 +5,16 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.EventSourceViewer
 import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
 import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
-import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
 import koma.koma_app.AppStore
-import koma.koma_app.appState
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.state.MRoomCreate
@@ -26,13 +23,11 @@ import koma.matrix.event.room_message.state.MRoomHistoryVisibility
 import koma.matrix.event.room_message.state.MRoomMember
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import link.continuum.database.KDataStore
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.hbox
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.showIf
 import model.Room
 import mu.KotlinLogging
@@ -109,9 +104,8 @@ abstract class MessageCell(
     }
     protected var current: RoomEventRow? = null
 
-    protected val avSize = store.settings.scaling * 32.0
     // share between different types of view
-    protected val senderAvatar = AvatarView(store.userData, avSize)
+    protected val senderAvatar = AvatarView(store.userData)
 
     protected fun updateEvent(message: RoomEventRow, room: Room) {
         loading.managedProperty().unbind()

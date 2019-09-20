@@ -22,7 +22,7 @@ class MRoomCreationViewNode constructor(
 ): MessageCell(store) {
     override val center = StackPane()
 
-    private val userView = StateEventUserView(store.userData, store.settings.scaling * 32.0)
+    private val userView = StateEventUserView(store.userData)
     private val timeView = DatatimeView()
 
 

@@ -33,7 +33,7 @@ class MemberCell(
 ) : ListCell<SelectUser>() {
     private val root = HBox( 5.0)
     private val toolTip = Tooltip()
-    private val avatarView = AvatarView(store, avsize)
+    private val avatarView = AvatarView(store)
     private val name: Label
 
     private val itemId = ConflatedBroadcastChannel<SelectUser>()

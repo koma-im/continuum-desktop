@@ -48,7 +48,7 @@ class MRoomMessageViewNode(
     private val userData = store.userData
     private var item: MRoomMessage? = null
     private val timeView = DatatimeView()
-    private val avatarView = AvatarView(avatarSize = avSize, userData = userData)
+    private val avatarView = AvatarView(userData = userData)
     private val senderLabel = Text()
     private val senderId = Channel<UserId>(Channel.CONFLATED)
     private val contentBox = HBox(5.0)

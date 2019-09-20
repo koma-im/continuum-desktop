@@ -23,10 +23,9 @@ private val logger = KotlinLogging.logger {}
  * view of user avatar and name when showing a state change event
  */
 @ExperimentalCoroutinesApi
-class StateEventUserView(private val store: UserDataStore,
-                         avatarSize: Double) {
+class StateEventUserView(private val store: UserDataStore) {
     val root = HBox(5.0)
-    private val avatarView = AvatarView(store, avatarSize)
+    private val avatarView = AvatarView(store)
     private val nameLabel: Label
     private val itemId = ConflatedBroadcastChannel<Pair<UserId, Server>>()
     fun updateUser(userId: UserId, mediaServer: MediaServer) {
