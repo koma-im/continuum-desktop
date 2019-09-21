@@ -19,7 +19,6 @@ class DatatimeView {
     }
     init {
         with(root) {
-            HBox.setHgrow(this, Priority.ALWAYS)
             alignment = Pos.CENTER_RIGHT
             add(text)
         }

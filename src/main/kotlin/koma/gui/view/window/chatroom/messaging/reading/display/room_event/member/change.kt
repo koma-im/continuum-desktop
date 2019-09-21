@@ -6,10 +6,7 @@ import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.image.ImageView
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
-import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
+import javafx.scene.layout.*
 import javafx.scene.text.Text
 import koma.Koma
 import koma.Server
@@ -30,6 +27,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.util.http.DL
@@ -40,7 +38,6 @@ import link.continuum.desktop.util.onSome
 import link.continuum.desktop.util.toOption
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.*
 
@@ -137,8 +134,8 @@ class MRoomMemberViewNode(
                 alignment = Pos.CENTER
                 add(userView.root)
                 add(contentPane)
+                add(timeView.root)
             }
-            add(timeView.root)
         }
     }
 }
@@ -163,8 +160,12 @@ class UserAppearanceUpdateView(
 ){
     val root = VBox()
     private val avatarChangeView: HBox
-    private val oldAvatar = ImageViewAsync()
-    private val newAvatar = ImageViewAsync()
+    private val oldAvatar = ImageViewAsync().apply {
+        root.style = avStyle
+    }
+    private val newAvatar = ImageViewAsync().apply {
+        root.style = avStyle
+    }
     private val nameChangeView: HBox
     private val oldName = Text()
     private val newName = Text()
@@ -188,20 +189,13 @@ class UserAppearanceUpdateView(
                 text("updated avatar") {
                     opacity = 0.5
                 }
-                stackpane {
-                    add(oldAvatar.root)
-                    minHeight = avatarsize
-                    minWidth = minWid
-                }
+                add(oldAvatar.root)
                 addArrowIcon()
-                stackpane {
-                    add(oldAvatar.root)
-                    minHeight = avatarsize
-                    minWidth = minWid
-                }
+                add(newAvatar.root)
             }
 
             nameChangeView = hbox(spacing = 5.0) {
+                alignment = Pos.CENTER
                 text("updated name") {
                     opacity = 0.5
                 }
@@ -217,10 +211,22 @@ class UserAppearanceUpdateView(
             }
         }
     }
+
+    companion object {
+        private val avStyle: String = StyleBuilder().apply {
+            val size = 2.em()
+            minHeight = size
+            minWidth = size
+            maxHeight = size
+            maxWidth = size
+            prefHeight = size
+            prefWidth = size
+        }.toString()
+    }
 }
 
 class ImageViewAsync: CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    val root = ImageView()
+    val root = FitImageRegion()
     private val urlChannel: SendChannel<DL>
     fun updateUrl(url: Optional<MHUrl>, server: Server) {
         logger.trace { "ImageViewAsync update url $url" }

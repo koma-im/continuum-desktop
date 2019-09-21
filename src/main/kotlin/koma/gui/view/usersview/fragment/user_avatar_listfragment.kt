@@ -19,17 +19,13 @@ import link.continuum.desktop.gui.list.user.UserDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
-@ExperimentalCoroutinesApi
-private val settings: AppSettings = appState.store.settings
 
 private typealias SelectUser = Pair<UserId, Server>
 
 @ExperimentalCoroutinesApi
 class MemberCell(
         private val showNoName: SimpleBooleanProperty,
-        private val store: UserDataStore,
-        scale: Float = settings.scaling,
-        avsize: Double = scale * 32.0
+        private val store: UserDataStore
 ) : ListCell<SelectUser>() {
     private val root = HBox( 5.0)
     private val toolTip = Tooltip()
@@ -44,11 +40,7 @@ class MemberCell(
             minWidth = 1.0
             prefWidth = 1.0
             alignment = Pos.CENTER_LEFT
-            stackpane {
-                add(avatarView.root)
-                minHeight = avsize
-                minWidth = avsize
-            }
+            add(avatarView.root)
 
             name = label() {
                 removeWhen(showNoName)

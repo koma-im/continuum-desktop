@@ -40,14 +40,22 @@ class AvatarAlways(
         add(imageRegion)
         this.add(initialIcon.root)
         initialIcon.root.removeWhen(imageAvl)
-        style {
-            prefWidth = 2.em()
-            prefHeight = 2.em()
-        }
+        style = AvatarAlways.Companion.style
         name.addListener { _, _, n: String? ->
             n?:return@addListener
             this.initialIcon.updateItem(n, color)
         }
+    }
+    companion object {
+        private val style = StyleBuilder().apply {
+            val size = 2.em() 
+            prefWidth = size
+            prefHeight = size
+            minWidth = size
+            minHeight = size
+            maxWidth = size
+            maxHeight = size
+        }.toString()
     }
 
     fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl?>,

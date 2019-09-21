@@ -11,6 +11,7 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
 import link.continuum.desktop.gui.StyleBuilder
 import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.em
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.http.MediaServer
@@ -23,19 +24,13 @@ import java.util.concurrent.atomic.AtomicInteger
 private val logger = KotlinLogging.logger {}
 private val counter = AtomicInteger(0)
 
-/**
- * the server through which we got this user
- * also where we should download the avatar from
- */
-typealias SelectUser = Pair<UserId, HttpUrl>
-
 @ExperimentalCoroutinesApi
 class AvatarView(
         private val userData: UserDataStore
 ) {
     val root = StackPane()
     private val initialIcon = InitialIcon()
-    private val imageView = ImageView()
+    private val imageView = FitImageRegion()
 
     private val user = Channel<Pair<UserId, Server>>(Channel.CONFLATED)
 
@@ -52,8 +47,13 @@ class AvatarView(
 
     companion object {
         private val style = StyleBuilder().apply {
-            prefHeight = 2.em()
-            prefWidth = 2.em()
+            val size = 2.em()
+            minHeight = size
+            minWidth = size
+            prefHeight = size
+            prefWidth = size
+            maxHeight = size
+            maxWidth = size
         }.toString()
     }
     fun updateUser(userId: UserId, server: MediaServer) {

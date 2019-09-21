@@ -133,6 +133,10 @@ fun Node.style(op: StyleBuilder.()->Unit) {
 class StyleBuilder {
     var prefWidth: SizeWithUnit? = null
     var prefHeight: SizeWithUnit? = null
+    var minWidth: SizeWithUnit? = null
+    var minHeight: SizeWithUnit? = null
+    var maxWidth: SizeWithUnit? = null
+    var maxHeight: SizeWithUnit? = null
     var fontSize: SizeWithUnit? = null
     var fontFamily: GenericFontFamily? = null
     override fun toString(): String {
@@ -145,6 +149,26 @@ class StyleBuilder {
             given(prefHeight) {
                 append("-fx-pref-height:")
                 append(prefHeight.toString())
+                append(';')
+            }
+            given(minWidth) {
+                append("-fx-min-width:")
+                append(minWidth.toString())
+                append(';')
+            }
+            given(minHeight) {
+                append("-fx-min-height:")
+                append(minHeight.toString())
+                append(';')
+            }
+            given(maxWidth) {
+                append("-fx-max-width:")
+                append(maxWidth.toString())
+                append(';')
+            }
+            given(maxHeight) {
+                append("-fx-max-height:")
+                append(maxHeight.toString())
                 append(';')
             }
             given(fontSize) {
