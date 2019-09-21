@@ -186,7 +186,7 @@ class StyleBuilder {
     }
 }
 
-fun Number.em() = SizeWithUnit.Em(this)
+val Number.em: SizeWithUnit get() = SizeWithUnit.Em(this)
 
 @Suppress("Unused")
 enum class GenericFontFamily {

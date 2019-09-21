@@ -47,7 +47,7 @@ class AvatarView(
 
     companion object {
         private val style = StyleBuilder().apply {
-            val size = 2.em()
+            val size = 2.em
             minHeight = size
             minWidth = size
             prefHeight = size

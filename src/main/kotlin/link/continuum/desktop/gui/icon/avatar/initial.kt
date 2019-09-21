@@ -25,7 +25,7 @@ class InitialIcon(
 
     private val two = HBox().apply {
         style {
-            fontSize = 1.em()
+            fontSize = 1.em
         }
         alignment = Pos.CENTER
         vbox {
@@ -34,7 +34,7 @@ class InitialIcon(
         }
         vbox {
             style {
-                prefWidth = 0.1.em()
+                prefWidth = 0.1.em
             }
         }
         vbox {
@@ -45,14 +45,10 @@ class InitialIcon(
     private val one = HBox().apply {
         alignment = Pos.CENTER
         children.add(charC)
-        style { fontSize = 1.8.em() }
+        style { fontSize = 1.8.em }
     }
     val root = StackPane().apply {
-        style {
-            prefHeight = 2.em()
-            prefWidth = 2.em()
-            fontFamily = GenericFontFamily.sansSerif
-        }
+        style = avStyle
     }
 
     fun show() {
@@ -97,6 +93,12 @@ class InitialIcon(
 
     companion object {
         private val backgrounds = WeakHashMap<Color, Background>()
+        private val avStyle = StyleBuilder().apply {
+            val s = 2.em
+            prefHeight = s
+            prefWidth = s
+            fontFamily = GenericFontFamily.sansSerif
+        }.toString()
     }
 }
 
