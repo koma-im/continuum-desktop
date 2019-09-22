@@ -28,7 +28,10 @@ import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
+import java.lang.StringBuilder
 import java.util.concurrent.Callable
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 private val logger = KotlinLogging.logger {}
 
@@ -131,80 +134,70 @@ fun Node.style(op: StyleBuilder.()->Unit) {
 }
 
 class StyleBuilder {
-    var prefWidth: SizeWithUnit? = null
-    var prefHeight: SizeWithUnit? = null
-    var minWidth: SizeWithUnit? = null
-    var minHeight: SizeWithUnit? = null
-    var maxWidth: SizeWithUnit? = null
-    var maxHeight: SizeWithUnit? = null
-    var fontSize: SizeWithUnit? = null
-    var fontFamily: GenericFontFamily? = null
-    override fun toString(): String {
-        val sb = StringBuilder().apply {
-            given(prefWidth) {
-                append("-fx-pref-width:")
-                append(prefWidth.toString())
-                append(';')
-            }
-            given(prefHeight) {
-                append("-fx-pref-height:")
-                append(prefHeight.toString())
-                append(';')
-            }
-            given(minWidth) {
-                append("-fx-min-width:")
-                append(minWidth.toString())
-                append(';')
-            }
-            given(minHeight) {
-                append("-fx-min-height:")
-                append(minHeight.toString())
-                append(';')
-            }
-            given(maxWidth) {
-                append("-fx-max-width:")
-                append(maxWidth.toString())
-                append(';')
-            }
-            given(maxHeight) {
-                append("-fx-max-height:")
-                append(maxHeight.toString())
-                append(';')
-            }
-            given(fontSize) {
-                append("-fx-font-size:")
-                append(fontSize.toString())
-                append(';')
-            }
-            given(fontFamily) {
-                append("-fx-font-family:")
-                append(fontFamily.toString())
-                append(';')
-            }
+    private val properties = linkedMapOf<String, ToCss>()
+    var prefWidth: SizeWithUnit? by cssProp("-fx-pref-width")
+    var prefHeight: SizeWithUnit? by cssProp("-fx-pref-height") 
+    var minWidth: SizeWithUnit?      by cssProp("-fx-min-width")
+    var minHeight: SizeWithUnit?   by cssProp("-fx-min-height")
+    var maxWidth: SizeWithUnit?   by cssProp("-fx-max-width")
+    var maxHeight: SizeWithUnit?   by cssProp("-fx-max-height")
+    var fontSize: SizeWithUnit?  by cssProp("-fx-font-size")
+    var fontFamily: GenericFontFamily?   by cssProp("-fx-font-family")
+    fun toStyle(): String {
+        val sb = StringBuilder()
+        properties.forEach { s, any ->
+            sb.append(s)
+            sb.append(':')
+            sb.append(any.toCss())
+            sb.append(';')
         }
         return sb.toString()
+    }
+    override fun toString()= toStyle()
+
+    private inline fun <reified V: ToCss?> cssProp(key: String): ReadWriteProperty<StyleBuilder, V> {
+        return object : ReadWriteProperty<StyleBuilder, V> {
+            override fun getValue(thisRef: StyleBuilder, property: KProperty<*>): V {
+                return thisRef.properties[key] as V
+            }
+
+            override fun setValue(thisRef: StyleBuilder, property: KProperty<*>, value: V) {
+                if (value == null) {
+                    thisRef.properties.remove(key)
+                } else {
+                    thisRef.properties[key] = value as ToCss
+                }
+            }
+        }
     }
 }
 
 val Number.em: SizeWithUnit get() = SizeWithUnit.Em(this)
 
+interface ToCss {
+    fun toCss(): String
+}
+
 @Suppress("Unused")
-enum class GenericFontFamily {
+enum class GenericFontFamily: ToCss {
     serif, // (e.g., Times)
     sansSerif, // (e.g., Helvetica)
     cursive, // (e.g., Zapf-Chancery)
     fantasy,// (e.g., Western)
     monospace; // (e.g., Courier)
 
-    override fun toString() =
+    override fun toString() = toCss()
+    
+    override fun toCss() =
             when(this) {
                 sansSerif -> "sans-serif"
                 else -> this.name
             }
 }
-sealed class SizeWithUnit {
+sealed class SizeWithUnit: ToCss {
     class Em(val value: Number): SizeWithUnit() {
-        override fun toString() = "${value}em"
+        override fun toCss() = "${value}em"
+        override fun toString() = toCss()
     }
 }
 

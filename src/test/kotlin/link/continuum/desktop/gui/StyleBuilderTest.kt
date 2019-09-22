@@ -2,6 +2,7 @@ package link.continuum.desktop.gui
 
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
+import kotlin.math.exp
 
 internal class StyleBuilderTest {
     @Test
@@ -15,6 +16,7 @@ internal class StyleBuilderTest {
             prefHeight = size
             prefWidth = size
         }.toString()
-        assertEquals("-fx-pref-width:2em;-fx-pref-height:2em;-fx-min-width:2em;-fx-min-height:2em;-fx-max-width:2em;-fx-max-height:2em;", s)
+        val expect = "-fx-min-height:2em;-fx-min-width:2em;-fx-max-height:2em;-fx-max-width:2em;-fx-pref-height:2em;-fx-pref-width:2em;"
+        assertEquals(expect, s)
     }
 }
