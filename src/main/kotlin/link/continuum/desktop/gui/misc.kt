@@ -253,6 +253,17 @@ fun clipboardPutString(text: String){
             })
 }
 
+fun <T> prop(property: Property<T>) = PropertyDelegate(property)
+
+class PropertyDelegate<T: Any?>(val fxProperty: Property<T>) : ReadWriteProperty<Any, T> {
+
+    override fun getValue(thisRef: Any, property: KProperty<*>): T = fxProperty.value
+
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        fxProperty.value = value
+    }
+
+}
 fun<T: Node> T.tooltip(text: String) {
     val t = Tooltip(text)
     Tooltip.install(this, t)

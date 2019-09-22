@@ -1,5 +1,6 @@
 package koma.gui.view
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
@@ -10,6 +11,7 @@ import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
@@ -34,6 +36,7 @@ import link.continuum.desktop.util.getOrNull
 import model.Room
 import mu.KotlinLogging
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -122,13 +125,19 @@ private fun CoroutineScope.fixRoomName(room: Room) {
 @ExperimentalCoroutinesApi
 class RoomFragment(private val data: KDataStore
 ): ListCell<Room>(), CoroutineScope by CoroutineScope(Dispatchers.Default){
-    var room: Room? = null
+    private val roomProperty = SimpleObjectProperty<Room?>()
+    var room: Room? by prop(roomProperty)
+
     private val avatar = AvatarAlways()
-    private val nameLabel = Label()
 
     private val avatarOptionalUrl = SimpleObjectProperty<Optional<MHUrl>>()
     private val avatarUrl = objectBinding(avatarOptionalUrl) {value?.getOrNull()}
-
+    private val color = Bindings.createObjectBinding(Callable<Color> {
+        if (isSelected) Color.WHITE else room?.color ?: Color.BLUE
+    }, roomProperty, selectedProperty())
+    private val nameLabel = Label().apply {
+        textFillProperty().bind(color)
+    }
     override fun updateItem(item: Room?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
@@ -146,7 +155,6 @@ class RoomFragment(private val data: KDataStore
         avatarOptionalUrl.cleanBind(item.avatar)
         avatar.bind(item.displayName, item.color, avatarUrl, item.account.server)
         nameLabel.textProperty().cleanBind(item.displayName)
-        nameLabel.textFill = item.color
 
         graphic = root
     }
