@@ -133,16 +133,26 @@ fun Node.style(op: StyleBuilder.()->Unit) {
     style = StyleBuilder().apply(op).toString()
 }
 
+enum class CssKey(val str: String) {
+    PrefWidth("-fx-pref-width"),
+    PrefHeight("-fx-pref-height"),
+    MinWidth("-fx-min-width"),
+    MinHeight("-fx-min-height"),
+    MaxWidth("-fx-max-width"),
+    MaxHeight("-fx-max-height"),
+    FontSize("-fx-font-size"),
+    FontFamily("-fx-font-family"),
+}
 class StyleBuilder {
     private val properties = linkedMapOf<String, ToCss>()
-    var prefWidth: SizeWithUnit? by cssProp("-fx-pref-width")
-    var prefHeight: SizeWithUnit? by cssProp("-fx-pref-height") 
-    var minWidth: SizeWithUnit?      by cssProp("-fx-min-width")
-    var minHeight: SizeWithUnit?   by cssProp("-fx-min-height")
-    var maxWidth: SizeWithUnit?   by cssProp("-fx-max-width")
-    var maxHeight: SizeWithUnit?   by cssProp("-fx-max-height")
-    var fontSize: SizeWithUnit?  by cssProp("-fx-font-size")
-    var fontFamily: GenericFontFamily?   by cssProp("-fx-font-family")
+    var prefWidth: SizeWithUnit? by cssProp(CssKey.PrefWidth.str)
+    var prefHeight: SizeWithUnit? by cssProp(CssKey.PrefHeight.str)
+    var minWidth: SizeWithUnit?      by cssProp(CssKey.MinWidth.str)
+    var minHeight: SizeWithUnit?   by cssProp(CssKey.MinHeight.str)
+    var maxWidth: SizeWithUnit?   by cssProp(CssKey.MaxWidth.str)
+    var maxHeight: SizeWithUnit?   by cssProp(CssKey.MaxHeight.str)
+    var fontSize: SizeWithUnit?  by cssProp(CssKey.FontSize.str)
+    var fontFamily: GenericFontFamily?   by cssProp(CssKey.FontFamily.str)
     fun toStyle(): String {
         val sb = StringBuilder()
         properties.forEach { s, any ->
@@ -153,6 +163,7 @@ class StyleBuilder {
         }
         return sb.toString()
     }
+    @Deprecated("Not guaranteed to work for CSS", replaceWith = ReplaceWith("toStyle"))
     override fun toString()= toStyle()
 
     private inline fun <reified V: ToCss?> cssProp(key: String): ReadWriteProperty<StyleBuilder, V> {
@@ -186,6 +197,7 @@ enum class GenericFontFamily: ToCss {
     fantasy,// (e.g., Western)
     monospace; // (e.g., Courier)
 
+    @Deprecated("Not guaranteed to work for CSS", replaceWith = ReplaceWith("toCss"))
     override fun toString() = toCss()
     
     override fun toCss() =
