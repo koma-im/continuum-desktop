@@ -1,6 +1,5 @@
 package link.continuum.desktop.gui.icon.avatar
 
-import javafx.scene.image.ImageView
 import javafx.scene.layout.StackPane
 import koma.Server
 import koma.matrix.UserId
@@ -18,7 +17,6 @@ import link.continuum.desktop.util.http.MediaServer
 import link.continuum.desktop.util.onNone
 import link.continuum.desktop.util.onSome
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
@@ -54,7 +52,7 @@ class AvatarView(
             prefWidth = size
             maxHeight = size
             maxWidth = size
-        }.toString()
+        }.toStyle()
     }
     fun updateUser(userId: UserId, server: MediaServer) {
         if (!user.offer(userId to server)) {
