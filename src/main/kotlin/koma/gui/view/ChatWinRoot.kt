@@ -36,6 +36,7 @@ private val settings: AppSettings = appState.store.settings
 class ChatWindowBars(
         roomList: ObservableList<Room>,
         account: Account,
+        keyValueMap: MVMap<String, String>,
         store: AppStore
 ) {
     private val content = BorderPane()
@@ -58,7 +59,8 @@ class ChatWindowBars(
                     item("Preferences").action {
                         prefWin.openModal(owner = JFX.primaryStage)
                     }
-                    item("Quit").action {
+                    item("Sign out").action {
+                        keyValueMap.remove("active-account")
                         JFX.primaryStage.close()
                     }
                 }

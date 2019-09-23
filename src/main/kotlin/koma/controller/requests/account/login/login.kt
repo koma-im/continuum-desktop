@@ -58,7 +58,9 @@ suspend fun onClickLogin(koma: Koma,
     keyValueMap["active-account"] = userid.str
     token ?: return
     withContext(Dispatchers.Main) {
-        startChat(koma, userid, token, url, appData)
+        startChat(koma, userid, token, url,
+                keyValueMap,
+                appData)
     }
 }
 

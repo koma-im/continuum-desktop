@@ -15,6 +15,7 @@ import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import org.h2.mvstore.MVMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,6 +25,7 @@ private val logger = KotlinLogging.logger {}
  */
 @ExperimentalCoroutinesApi
 fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
+              keyValueMap: MVMap<String, String>,
               appData: AppStore
 ) {
     val data = appData.database
@@ -37,7 +39,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
     app.apiClient = apiClient
     val userRooms = store.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, account, store)
+    val primary = ChatWindowBars(userRooms, account, keyValueMap, store)
     JFX.primaryPane.setChild(primary.root)
 
     app.coroutineScope.launch {

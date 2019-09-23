@@ -157,8 +157,6 @@ private class Success(user: RegisterdUser, server: HttpUrl, window: Registration
                 button("Login Now") {
                     action {
                         window.close()
-                        val k = appState.koma
-                        startChat(k, user.user_id, user.access_token, server, appState.store)
                     }
                 }
             }

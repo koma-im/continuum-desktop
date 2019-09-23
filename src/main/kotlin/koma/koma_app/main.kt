@@ -25,6 +25,7 @@ import link.continuum.desktop.util.disk.path.loadOptionalCert
 import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import org.h2.mvstore.MVMap
 import org.h2.mvstore.MVStore
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -140,7 +141,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             log.debug("Called stage.show at {}", startTime.elapsedNow())
             val map = kvs.openMap<String, String>("strings")
             val acc = map["active-account"]
-            if (acc == null || !loadSignedIn(scalingPane, acc)) {
+            if (acc == null || !loadSignedIn(scalingPane, acc, map)) {
                 val s = startScreen.await()
                 scalingPane.setChild(s.root)
                 log.debug("Root of the scene is set at {}", startTime.elapsedNow())
@@ -163,7 +164,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         stage.isResizable = true
     }
 
-    private suspend fun loadSignedIn(pane: ScalingPane, user: String): Boolean {
+    private suspend fun loadSignedIn(pane: ScalingPane, user: String, map: MVMap<String, String>): Boolean {
         pane.setChild(Text("Continuum").apply {
             fill = Color.GRAY
             font = Font.font(48.0)
@@ -174,7 +175,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         val a = getServerAddrs(db, u.server).firstOrNull()?: return false
         val s = HttpUrl.parse(a) ?: return false
         val t = getToken(db, u)?: return false
-        startChat(appState.koma, u, t, s, store)
+        startChat(appState.koma, u, t, s, map, store)
         return true
     }
 }
