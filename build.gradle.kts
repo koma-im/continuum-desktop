@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.24"
+version = "0.9.25"
 
 plugins {
     kotlin("jvm") version "1.3.50"
@@ -27,7 +27,7 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
-        implementation("io.github.koma-im:koma-library:0.8.14")
+        implementation("io.github.koma-im:koma-library:0.8.16")
         implementation("io.github.microutils:kotlin-logging:1.6.22")
 
         testImplementation(kotlin("test"))

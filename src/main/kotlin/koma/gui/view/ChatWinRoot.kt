@@ -16,16 +16,25 @@ import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import koma.util.coroutine.adapter.okhttp.await
+import koma.util.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import model.Room
+import mu.KotlinLogging
+import okhttp3.*
 import org.controlsfx.control.NotificationPane
+import org.controlsfx.control.textfield.TextFields
+import org.h2.mvstore.MVMap
+import java.lang.Exception
+import java.util.concurrent.TimeUnit
 
-private val settings: AppSettings = appState.store.settings
+private val logger = KotlinLogging.logger {}
 
 /**
  * everything inside the app window after login

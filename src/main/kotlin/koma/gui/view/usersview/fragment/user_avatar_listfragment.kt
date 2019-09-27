@@ -56,7 +56,7 @@ class MemberCell(
                 }
             }
         }
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             for (id in itemId.openSubscription()) {
                 avatarView.updateUser(id.first, id.second)
                 toolTip.text = id.first.str
