@@ -9,7 +9,6 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
-import koma.Koma
 import koma.Server
 import koma.koma_app.appState
 import koma.network.media.MHUrl

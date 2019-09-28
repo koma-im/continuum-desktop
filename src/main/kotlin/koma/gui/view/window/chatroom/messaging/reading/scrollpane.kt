@@ -2,12 +2,10 @@ package koma.gui.view.window.chatroom.messaging.reading
 
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import koma.Koma
 import koma.gui.element.control.KListView
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -21,10 +19,10 @@ import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.message.createCell
 import model.Room
 import mu.KotlinLogging
+import okhttp3.OkHttpClient
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
-private val settings = appState.store.settings
 
 typealias EventItem =Pair<RoomEventRow, Room>
 
@@ -38,7 +36,7 @@ private class ViewRoomState(
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
-        private val km: Koma,
+        private val km: OkHttpClient,
         store: AppStore
 ) {
     private val virtualList: KListView<EventItem, MessageCell> = KListView(EventCellPool()) {

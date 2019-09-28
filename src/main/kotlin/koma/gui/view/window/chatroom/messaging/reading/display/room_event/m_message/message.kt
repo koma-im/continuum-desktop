@@ -3,19 +3,14 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
-import javafx.scene.input.Clipboard
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
-import javafx.scene.paint.Color
 import javafx.scene.text.Text
-import koma.Koma
 import koma.Server
-import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.koma_app.AppStore
-import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.MRoomMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,18 +22,16 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        private val km: Koma,
+        km: OkHttpClient,
         store: AppStore
 ): MessageCell(store) {
     override val center = StackPane()

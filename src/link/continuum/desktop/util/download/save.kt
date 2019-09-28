@@ -1,18 +1,24 @@
 package link.continuum.desktop.util.download
 
-import koma.Koma
 import koma.network.media.getResponse
-import koma.util.getOr
+import koma.util.getOrThrow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import okio.Okio
 import java.io.File
 
-suspend fun Koma.saveUrlToFile(url: HttpUrl, file: File): Boolean {
-    val body = getResponse(url) getOr { return false }
+fun CoroutineScope.saveUrlToFile(url: HttpUrl, file: File, httpClient: OkHttpClient) = async(Dispatchers.IO){
+    val b = getResponse(httpClient, url)
+    if (b.isFailure) return@async false
+    val body = b.getOrThrow()
     val sink = Okio.sink(file)
     val bs = Okio.buffer(sink)
     bs.writeAll(body.source())
     bs.close()
     body.close()
-    return true
+    return@async true
 }

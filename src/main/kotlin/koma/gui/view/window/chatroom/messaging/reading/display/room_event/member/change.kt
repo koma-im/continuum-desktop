@@ -8,7 +8,6 @@ import javafx.scene.control.MenuItem
 import javafx.scene.image.ImageView
 import javafx.scene.layout.*
 import javafx.scene.text.Text
-import koma.Koma
 import koma.Server
 import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode

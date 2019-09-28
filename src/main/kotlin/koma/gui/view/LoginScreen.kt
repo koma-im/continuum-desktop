@@ -24,6 +24,7 @@ import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.gui.*
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane
 import org.controlsfx.control.decoration.Decoration
 import org.controlsfx.control.textfield.TextFields
@@ -79,7 +80,9 @@ class LoginScreen(
     }
     private var job: Job? = null
     private var database: KDataStore? = null
-    fun start(appStore: AppStore) {
+    private var httpClient: OkHttpClient? = null
+    fun start(appStore: AppStore, httpClient: OkHttpClient) {
+        this.httpClient = httpClient
         root.isDisable = false
         val data = appStore.database
         this.database = data
@@ -141,10 +144,10 @@ class LoginScreen(
                         mask.text = "Signing in"
                         mask.isVisible = true
                         job = launch {
-                            val k = appState.koma
+                            val c = httpClient ?: return@launch
                             val d = appState.store
                             onClickLogin(
-                                    k,
+                                    c,
                                     d,
                                     userId.value,
                                     password.text,

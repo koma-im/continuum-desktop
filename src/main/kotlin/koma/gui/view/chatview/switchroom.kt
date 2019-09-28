@@ -2,15 +2,15 @@ package koma.gui.view.chatview
 
 import javafx.scene.control.Label
 import javafx.scene.layout.*
-import koma.Koma
 import koma.koma_app.AppStore
 import model.Room
+import okhttp3.OkHttpClient
 
 /**
  * switch between chat rooms
  */
 class SwitchableRoomView(
-         km: Koma,
+        km: OkHttpClient,
         appStore: AppStore
 ) {
     val root = StackPane()

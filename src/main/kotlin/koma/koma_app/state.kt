@@ -2,31 +2,22 @@ package koma.koma_app
 
 import io.requery.Persistable
 import io.requery.sql.KotlinEntityDataStore
-import javafx.beans.property.SimpleObjectProperty
-import koma.Koma
-import koma.Server
 import koma.matrix.MatrixApi
-import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.rooms.RoomStore
 import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.database.openStore
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.util.http.MediaServer
 import model.Room
 import mu.KotlinLogging
-import java.io.File
 
 private val logger = KotlinLogging.logger {}
 
 object appState {
-    lateinit var koma: Koma
     lateinit var store: AppStore
     val coroutineScope = CoroutineScope(Dispatchers.Main)
     var apiClient: MatrixApi? = null
@@ -40,14 +31,13 @@ object appState {
  */
 class AppStore(
         val database: KotlinEntityDataStore<Persistable>,
-        val settings: AppSettings,
-        koma: Koma
-        ) {
+        val settings: AppSettings
+) {
     val userStore = UserStore(database)
     /**
      * users on the network
      */
-    val userData = UserDataStore(database, koma)
+    val userData = UserDataStore(database)
     /**
      * rooms on the network
      */

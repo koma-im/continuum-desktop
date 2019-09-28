@@ -9,11 +9,14 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 import javafx.stage.Stage
-import koma.Koma
 import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.matrix.UserId
+import koma.network.client.okhttp.KHttpClient
+import koma.storage.config.getHttpCacheDir
+import koma.storage.config.server.cert_trust.sslConfFromStream
+import koma.util.given
 import kotlinx.coroutines.*
 import link.continuum.database.models.getServerAddrs
 import link.continuum.database.models.getToken
@@ -23,6 +26,7 @@ import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import link.continuum.desktop.util.gui.alert
+import okhttp3.Cache
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.h2.mvstore.MVMap
@@ -48,9 +52,8 @@ fun main(args: Array<String>) {
 
     Application.launch(KomaApp::class.java, *args)
     appState.coroutineScope.cancel()
-    appState.koma.http.client.run {
-        dispatcher().executorService().shutdownNow()
-    }
+    // should work because instances all share the same dispatcher
+    KHttpClient.client.dispatcher().executorService().shutdownNow()
 }
 
 
@@ -103,10 +106,17 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         val (settings, db) = loadSettings(configDir)
         log.debug("Database opened {}", startTime.elapsedNow())
         val proxy = settings.proxyList.default()
-        val k= Koma(proxy.toJavaNet(), path = configDir.canonicalPath,
-                addTrust = loadOptionalCert(configDir))
-        appState.koma = k
-        val store = AppStore(db, settings, k)
+        val cacheDir = getHttpCacheDir(configDir.canonicalPath)
+        val addTrust = loadOptionalCert(configDir)
+        Globals.httpClient = KHttpClient.client.newBuilder()
+                .proxy(proxy.toJavaNet())
+                .given(cacheDir) { cache(Cache(it, 800*1024*1024))}
+                .given(addTrust) {
+                    val (s, m) = sslConfFromStream(it)
+                    sslSocketFactory(s.socketFactory, m)
+                }
+                .build()
+        val store = AppStore(db, settings)
         appState.store = store
         return store
     }
@@ -149,7 +159,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
                 appStorage.await()?.let {
                     launch(Dispatchers.Main) {
                         log.debug("Updating UI with data {}", startTime.elapsedNow())
-                        startScreen.await().start(it)
+                        startScreen.await().start(it, Globals.httpClient)
                         log.debug("UI updated at {}", startTime.elapsedNow())
                     }
                 }
@@ -175,7 +185,12 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         val a = getServerAddrs(db, u.server).firstOrNull()?: return false
         val s = HttpUrl.parse(a) ?: return false
         val t = getToken(db, u)?: return false
-        startChat(appState.koma, u, t, s, map, store)
+        store.settings
+        startChat(Globals.httpClient, u, t, s, map, store)
         return true
     }
+}
+
+object Globals {
+    internal lateinit var httpClient: OkHttpClient
 }

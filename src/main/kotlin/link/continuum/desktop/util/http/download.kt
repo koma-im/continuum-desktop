@@ -1,7 +1,6 @@
 package link.continuum.desktop.util.http
 
 import koma.Failure
-import koma.Koma
 import koma.Server
 import koma.network.media.MHUrl
 import koma.util.*

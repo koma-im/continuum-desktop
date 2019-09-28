@@ -7,7 +7,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.text.Text
-import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.EventSourceViewer
 import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
 import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
@@ -31,12 +30,13 @@ import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.showIf
 import model.Room
 import mu.KotlinLogging
+import okhttp3.OkHttpClient
 
 private val logger = KotlinLogging.logger {}
 
 private val sourceViewer by lazy { EventSourceViewer() }
 
-fun createCell(item: RoomEvent?, km: Koma, store: AppStore): MessageCell {
+fun createCell(item: RoomEvent?, km: OkHttpClient, store: AppStore): MessageCell {
     val x = when (item) {
         is MRoomMember -> MRoomMemberViewNode(store)
         is MRoomMessage -> MRoomMessageViewNode(km, store)

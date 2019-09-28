@@ -12,8 +12,6 @@ import javafx.scene.control.ScrollBar
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.util.Callback
-import koma.Koma
-import koma.Server
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.DiscoveredRoomFragment
 import koma.gui.view.window.roomfinder.publicroomlist.listcell.joinById
 import koma.koma_app.AppStore

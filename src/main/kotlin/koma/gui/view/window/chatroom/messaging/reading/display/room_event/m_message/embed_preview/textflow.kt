@@ -3,10 +3,10 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
-import koma.Koma
 import link.continuum.desktop.gui.add
+import okhttp3.OkHttpClient
 
-fun TextFlow.addStringWithElements(str: String, koma: Koma) {
+fun TextFlow.addStringWithElements(str: String, koma: OkHttpClient) {
     val textelements = tokenize_string(str)
     val nodes = textelements.map { it.toFlow(koma) }.toNodes()
     this.addNodes(nodes)

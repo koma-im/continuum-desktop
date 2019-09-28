@@ -9,7 +9,6 @@ import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
-import koma.Koma
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.MediaViewers
@@ -22,6 +21,7 @@ import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.doubleBinding
 import link.continuum.desktop.gui.item
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 
 private val settings: AppSettings = appState.store.settings
 
@@ -35,7 +35,7 @@ class InlineElement(override val node: Node): FlowElement() {
     fun endsWithNewline(): Boolean = this.node is Text && this.node.text.lastOrNull() == '\n'
 }
 
-fun TextSegment.toFlow(koma: Koma): FlowElement {
+fun TextSegment.toFlow(koma: OkHttpClient): FlowElement {
     return when(this) {
         is PlainTextSegment -> InlineElement(Text(this.text))
         is LinkTextSegment -> WebContentNode(this.text, koma)
@@ -53,7 +53,7 @@ private fun makeEmojiElement(emoji: String): InlineElement {
  */
 @ExperimentalCoroutinesApi
 class WebContentNode(private val link: String,
-                     koma: Koma
+                     koma: OkHttpClient
 ): FlowElement() {
     override val node = VBox()
     val multiLine: Boolean

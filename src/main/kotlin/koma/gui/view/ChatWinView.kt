@@ -12,7 +12,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import koma.Koma
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
@@ -58,7 +57,7 @@ class ChatView(roomList: ObservableList<Room>,
     val roomListView = RoomListView(roomList, account, storage.database)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(account.server.km, storage)
+    val switchableRoomView = SwitchableRoomView(account.server.httpClient, storage)
 
     init {
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->

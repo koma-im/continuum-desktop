@@ -13,7 +13,6 @@ import javafx.scene.input.MouseButton
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 import koma.Failure
-import koma.Koma
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
@@ -28,6 +27,7 @@ import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.add
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
@@ -36,7 +36,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class ImageElement(
-        private val koma: Koma,
+        private val httpClient: OkHttpClient,
         private val imageSize: Double = 200.0 * appState.store.settings.scaling
 ) : ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override val node = StackPane()
@@ -50,7 +50,7 @@ class ImageElement(
     fun update(url: HttpUrl) {
         this.url = url
         title = url.toString()
-        updateImage { downloadHttp(url, koma.http.client) }
+        updateImage { downloadHttp(url, httpClient) }
     }
 
     fun update(mxc: MHUrl, server: Server) {
@@ -103,7 +103,7 @@ class ImageElement(
                         "url is null"
                 )
             } else {
-                downloadFileAs(u, title = "Save Image As")
+                downloadFileAs(u, title = "Save Image As", httpClient = httpClient )
             }
         }
         return listOf(tm)

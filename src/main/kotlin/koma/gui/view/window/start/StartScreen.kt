@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
+import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane
 import org.h2.mvstore.MVMap
 import kotlin.time.ClockMark
@@ -47,7 +48,7 @@ class StartScreen(
         login.complete(l)
     }
 
-    suspend fun start(appStore: AppStore) {
-        login.await().start(appStore)
+    suspend fun start(appStore: AppStore, httpClient: OkHttpClient) {
+        login.await().start(appStore, httpClient)
     }
 }

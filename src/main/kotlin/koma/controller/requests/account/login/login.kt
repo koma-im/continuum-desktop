@@ -3,7 +3,6 @@ package koma.controller.requests.account.login
 import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
 import koma.IOFailure
-import koma.Koma
 import koma.koma_app.AppStore
 import koma.matrix.UserId
 import koma.matrix.UserPassword
@@ -24,13 +23,14 @@ import link.continuum.database.models.saveToken
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import org.h2.mvstore.MVMap
 
 /**
  * when the login button is clicked
  * accept text of text fields as parameters
  */
-suspend fun onClickLogin(koma: Koma,
+suspend fun onClickLogin(httpClient: OkHttpClient,
                          appData: AppStore,
                          userid: UserId, password: String, server: String,
                          keyValueMap: MVMap<String, String>
@@ -44,7 +44,7 @@ suspend fun onClickLogin(koma: Koma,
     val data = appData.database
     saveServerAddr(data, userid.server, server)
     val token = if (!password.isBlank()) {
-        getTokenWithPassword(userid, password, koma, data, server)
+        getTokenWithPassword(userid, password, httpClient, data, server)
     } else {
         val t = getToken(data, userid)
         if (t == null) {
@@ -58,7 +58,8 @@ suspend fun onClickLogin(koma: Koma,
     keyValueMap["active-account"] = userid.str
     token ?: return
     withContext(Dispatchers.Main) {
-        startChat(koma, userid, token, url,
+        startChat(httpClient,
+                userid, token, url,
                 keyValueMap,
                 appData)
     }
@@ -68,10 +69,10 @@ suspend fun onClickLogin(koma: Koma,
  * get token from server
  * saves the token to disk
  */
-private suspend fun getTokenWithPassword(userid: UserId, password: String, koma: Koma,
+private suspend fun getTokenWithPassword(userid: UserId, password: String, httpClient: OkHttpClient,
                                          data: KDataStore,
                                          server: String): String? {
-    login(UserPassword(user = userid.user, password = password), server, koma.http
+    login(UserPassword(user = userid.user, password = password), server, httpClient
     ).onSuccess {
         val u = it.user_id
         val t = it.access_token

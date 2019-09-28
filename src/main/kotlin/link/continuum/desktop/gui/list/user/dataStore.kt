@@ -2,18 +2,18 @@ package link.continuum.desktop.gui.list.user
 
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import koma.Koma
 import koma.Server
 import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
-import koma.util.onFailure
-import koma.util.onSuccess
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getLatestAvatar
 import link.continuum.database.models.getLatestNick
@@ -30,8 +30,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class UserDataStore(
-        private val data: KDataStore,
-        private val koma: Koma
+        private val data: KDataStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val nameUpdates = ConcurrentHashMap<UserId, UpdateConflater<String>>()
     suspend fun updateName(userId: UserId, name: String, time: Long) {

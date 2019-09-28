@@ -4,7 +4,6 @@ import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
-import koma.Koma
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.addStringWithElements
 import koma.matrix.UserId
@@ -16,8 +15,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
+import okhttp3.OkHttpClient
 
-class MTextViewNode(private val koma: Koma): ViewNode {
+class MTextViewNode(private val koma: OkHttpClient): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
@@ -27,13 +27,13 @@ class MTextViewNode(private val koma: Koma): ViewNode {
     }
 }
 
-class MNoticeViewNode(private val koma: Koma): ViewNode {
+class MNoticeViewNode(private val httpClient: OkHttpClient): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     fun update(content: NoticeMessage) {
         node.children.clear()
-        node.addStringWithElements(content.body, koma)
+        node.addStringWithElements(content.body, httpClient)
     }
 }
 
@@ -41,7 +41,7 @@ class MNoticeViewNode(private val koma: Koma): ViewNode {
 @ExperimentalCoroutinesApi
 class MEmoteViewNode(
         private val userData: UserDataStore,
-        private val koma: Koma
+        private val koma: OkHttpClient
 ): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()

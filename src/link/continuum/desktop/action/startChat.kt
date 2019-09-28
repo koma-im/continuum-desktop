@@ -1,6 +1,6 @@
 package link.continuum.desktop.action
 
-import koma.Koma
+import koma.Server
 import koma.gui.view.ChatWindowBars
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -15,6 +15,7 @@ import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 import org.h2.mvstore.MVMap
 
 private val logger = KotlinLogging.logger {}
@@ -24,7 +25,7 @@ private val logger = KotlinLogging.logger {}
  * updates the list of recently used accounts
  */
 @ExperimentalCoroutinesApi
-fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
+fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: HttpUrl,
               keyValueMap: MVMap<String, String>,
               appData: AppStore
 ) {
@@ -33,7 +34,7 @@ fun startChat(koma: Koma, userId: UserId, token: String, url: HttpUrl,
 
     val app = appState
     val store = app.store
-    val server = koma.server(url)
+    val server = Server(url, httpClient)
     val account  = server.account(userId, token)
     val apiClient  = account
     app.apiClient = apiClient

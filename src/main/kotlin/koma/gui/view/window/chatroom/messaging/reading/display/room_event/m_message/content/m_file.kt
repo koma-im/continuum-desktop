@@ -3,7 +3,6 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.scene.control.MenuItem
-import javafx.scene.input.Clipboard
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.HBox
 import koma.Server
@@ -62,7 +61,7 @@ class MFileViewNode(val content: FileMessage,
 
     private fun save() {
         url?.let {
-            downloadFileAs(server.mxcToHttp(it), filename = content.filename, title = "Save File As")
+            downloadFileAs(server.mxcToHttp(it), filename = content.filename, title = "Save File As", httpClient = server.httpClient)
         }
     }
 }

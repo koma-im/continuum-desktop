@@ -5,7 +5,6 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.Tooltip
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
-import koma.Koma
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
@@ -16,11 +15,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.action
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
 
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
-class MImageViewNode(km: Koma): ViewNode {
+class MImageViewNode(private val km: OkHttpClient): ViewNode {
     override val menuItems: List<MenuItem>  = createMenuItems()
 
     private var url: HttpUrl? = null
@@ -50,7 +50,7 @@ class MImageViewNode(km: Koma): ViewNode {
                 link.continuum.desktop.util.gui.alert(Alert.AlertType.ERROR,
                         "No url to download")
             } else {
-                downloadFileAs(u, filename = filename ?: "image", title = "Save Image As")
+                downloadFileAs(u, filename = filename ?: "image", title = "Save Image As", httpClient = km)
             }
         }
 

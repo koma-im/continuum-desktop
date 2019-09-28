@@ -7,6 +7,7 @@ import javafx.scene.layout.*
 import javafx.util.StringConverter
 import koma.AuthFailure
 import koma.Failure
+import koma.koma_app.Globals
 import koma.koma_app.appState
 import koma.matrix.user.auth.*
 import koma.util.*
@@ -252,7 +253,7 @@ private class Start(private val data: KDataStore): WizardState() {
         }
         saveServerAddr(data, s.host(), addr)
         logger.debug { "saved server addrs" }
-        val r = Register(s, appState.koma.http)
+        val r = Register(s, Globals.httpClient)
         logger.debug { "getting flows" }
         val f = r.getFlows()
         logger.debug { "got flows" }
