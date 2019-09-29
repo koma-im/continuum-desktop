@@ -4,7 +4,6 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
 import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseButton
-import javafx.scene.layout.HBox
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
@@ -14,10 +13,7 @@ import koma.network.media.MHUrl
 import koma.network.media.parseMxc
 import koma.storage.persistence.settings.AppSettings
 import koma.util.onSuccess
-import link.continuum.desktop.gui.action
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.clipboardPutString
-import link.continuum.desktop.gui.label
+import link.continuum.desktop.gui.*
 
 private val settings: AppSettings = appState.store.settings
 

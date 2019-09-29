@@ -1,8 +1,8 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.github
 
 import javafx.scene.control.MenuItem
-import javafx.scene.layout.VBox
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.text
 import okhttp3.HttpUrl
 

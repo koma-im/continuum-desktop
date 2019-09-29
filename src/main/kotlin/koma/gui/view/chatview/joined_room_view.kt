@@ -1,10 +1,10 @@
 package koma.gui.view.chatview
 
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import koma.gui.view.usersview.RoomMemberListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.koma_app.AppStore
+import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.add
 import model.Room
 import okhttp3.OkHttpClient

@@ -1,20 +1,12 @@
 package koma.gui.view.window.start
 
 import javafx.geometry.Pos
-import javafx.scene.Node
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
-import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
-import javafx.scene.text.Font
-import javafx.scene.text.Text
 import koma.gui.view.LoginScreen
 import koma.koma_app.AppStore
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.VBox
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane

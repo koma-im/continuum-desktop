@@ -9,10 +9,8 @@ import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.image.ImageView
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppStore
 import koma.koma_app.appState

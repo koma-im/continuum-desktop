@@ -2,9 +2,7 @@ package link.continuum.desktop.gui.list
 
 import javafx.geometry.Pos
 import javafx.scene.control.Label
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.Server

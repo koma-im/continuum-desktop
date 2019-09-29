@@ -22,6 +22,8 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.getRecentUsers
 import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.VBox
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient

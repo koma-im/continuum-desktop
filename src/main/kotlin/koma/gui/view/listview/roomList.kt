@@ -4,18 +4,14 @@ import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.layout.Border
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.database.KDataStore
-import link.continuum.desktop.gui.action
-import link.continuum.desktop.gui.button
-import link.continuum.desktop.gui.label
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import model.Room
 

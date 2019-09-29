@@ -6,8 +6,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.VPos
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.TextField
-import javafx.scene.control.Tooltip
-import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import koma.controller.requests.sendFileMessage
 import koma.controller.requests.sendImageMessage

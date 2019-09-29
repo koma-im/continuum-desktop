@@ -5,13 +5,12 @@ import javafx.collections.ObservableList
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import koma.gui.view.window.roomfinder.publicroomlist.PublicRoomsView
-import koma.koma_app.appState
 import koma.matrix.DiscoveredRoom
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.util.Account
 

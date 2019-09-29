@@ -3,7 +3,6 @@ package koma.controller.requests.membership
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import koma.gui.view.window.auth.uilaunch
 import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
@@ -11,6 +10,7 @@ import koma.koma_app.appState.apiClient
 import koma.util.getOr
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.hbox
 import link.continuum.desktop.gui.label

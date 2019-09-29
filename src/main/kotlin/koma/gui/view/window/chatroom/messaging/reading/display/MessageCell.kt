@@ -2,10 +2,8 @@ package koma.gui.view.window.chatroom.messaging.reading.display
 
 import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
-import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.koma_app.AppStore
 import koma.matrix.event.room_message.state.MRoomGuestAccess
@@ -16,11 +14,8 @@ import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.button
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.gui.text
-import link.continuum.desktop.gui.vbox
 import model.Room
 
 @ExperimentalCoroutinesApi

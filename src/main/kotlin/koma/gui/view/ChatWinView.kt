@@ -8,9 +8,7 @@ import javafx.scene.control.ContextMenu
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.SeparatorMenuItem
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom

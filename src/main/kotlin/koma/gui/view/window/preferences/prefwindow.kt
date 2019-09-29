@@ -4,12 +4,12 @@ import javafx.geometry.Side
 import javafx.scene.Scene
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import javafx.stage.Window
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 
 class PreferenceWindow {

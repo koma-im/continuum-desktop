@@ -2,18 +2,14 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.util
 
 import javafx.geometry.Pos
 import javafx.scene.control.Label
-import javafx.scene.layout.HBox
-import javafx.scene.layout.VBox
 import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.label
 import link.continuum.desktop.gui.list.user.UserDataStore
-import link.continuum.desktop.gui.switchUpdates
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 

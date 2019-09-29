@@ -3,9 +3,7 @@ package link.continuum.desktop.gui.message
 
 import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
-import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import koma.gui.view.window.chatroom.messaging.reading.display.EventSourceViewer
 import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
@@ -24,10 +22,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.hbox
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.showIf
 import model.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient

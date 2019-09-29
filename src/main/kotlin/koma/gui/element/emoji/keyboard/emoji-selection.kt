@@ -1,6 +1,5 @@
 package koma.gui.element.emoji.keyboard
 
-import com.vdurmont.emoji.EmojiManager
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -8,25 +7,16 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.*
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import javafx.scene.text.Font
 import javafx.util.Callback
 import koma.gui.element.control.PrettyListView
 import koma.gui.element.emoji.category.emojiCategories
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.koma_app.appState
-import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.hbox
 import mu.KotlinLogging

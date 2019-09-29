@@ -2,18 +2,16 @@ package koma.gui.view.window.chatroom.messaging.reading
 
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import koma.gui.element.control.KListView
 import koma.koma_app.AppStore
-import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.message.EventCellPool
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.message.createCell

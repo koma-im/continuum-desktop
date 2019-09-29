@@ -23,6 +23,8 @@ import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.util.Err
 import link.continuum.desktop.util.Ok
 import link.continuum.desktop.util.gui.alert

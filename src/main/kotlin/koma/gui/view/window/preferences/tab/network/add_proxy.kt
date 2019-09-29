@@ -4,10 +4,10 @@ import javafx.beans.binding.BooleanBinding
 import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
-import javafx.scene.layout.HBox
 import koma.Failure
 import koma.storage.persistence.settings.encoding.KProxy
 import koma.util.KResult
+import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.booleanBinding
 import java.net.Proxy

@@ -9,7 +9,6 @@ import javafx.geometry.VPos
 import javafx.scene.input.MouseButton
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import koma.Server
@@ -19,6 +18,7 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.doubleBinding
 import link.continuum.desktop.gui.list.user.UserDataStore

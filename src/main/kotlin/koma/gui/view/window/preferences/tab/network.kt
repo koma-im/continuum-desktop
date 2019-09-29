@@ -3,7 +3,6 @@ package koma.gui.view.window.preferences.tab
 import javafx.collections.FXCollections
 import javafx.scene.control.ButtonBar
 import javafx.scene.control.ComboBox
-import javafx.scene.layout.VBox
 import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.preferences.tab.network.AddProxyField
 import koma.gui.view.window.preferences.tab.network.ExistingProxy

@@ -8,15 +8,17 @@ import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.geometry.Insets
 import javafx.scene.Node
+import javafx.scene.Parent
 import javafx.scene.control.*
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
+import javafx.scene.layout.HBox as HBoxJ
+import javafx.scene.layout.VBox as VBoxJ
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.stage.Stage
 import javafx.stage.Window
-import koma.util.given
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -29,6 +31,8 @@ import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 import java.lang.StringBuilder
+import java.security.AccessController
+import java.security.PrivilegedAction
 import java.util.concurrent.Callable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -50,6 +54,89 @@ fun Pane.vbox(op: VBox.()->Unit) {
     this.children.add(b)
 }
 
+
+private object BoundsUpdater{
+    val parentMethod = Parent::class.java.getDeclaredMethod("updateBounds").apply {
+        logger.debug { "preparing to call updateBounds on a Parent" }
+        isAccessible = true
+    }
+    val nodeMethod = Node::class.java.getDeclaredMethod("updateBounds").apply {
+        logger.debug { "preparing to call updateBounds on a Node" }
+        isAccessible = true
+    }
+}
+
+fun Node.callUpdateBoundsReflectively() {
+    if (this is Parent) {
+        BoundsUpdater.parentMethod.invoke(this)
+    } else {
+        BoundsUpdater.nodeMethod.invoke(this)
+    }
+}
+/**
+ * HBox that tries to catch an exception
+ */
+class HBox: HBoxJ {
+    constructor(): super()
+    constructor(spacing: Double): super(spacing)
+
+    override fun updateBounds() {
+        children.forEach {
+            try {
+                it.callUpdateBoundsReflectively()
+            } catch (e: IndexOutOfBoundsException) {
+                logger.error {
+                    "error updating Bounds of $it: $e"
+                }
+                e.printStackTrace()
+            }
+        }
+        try {
+            super.updateBounds()
+        }catch (e: IndexOutOfBoundsException) {
+                logger.error {
+                    "error updating Bounds of $this: $e"
+                }
+                e.printStackTrace()
+        }
+    }
+
+    companion object {
+        fun setHgrow(child: Node, value: Priority) = HBoxJ.setHgrow(child, value)
+    }
+}
+
+
+class VBox : VBoxJ {
+    constructor(): super()
+    constructor(spacing: Double): super(spacing)
+    constructor(spacing: Double, vararg children: Node): super(spacing, *children)
+
+    override fun updateBounds() {
+        children.forEach {
+            try {
+                it.callUpdateBoundsReflectively()
+            } catch (e: IndexOutOfBoundsException) {
+                logger.error {
+                    "error updating Bounds of $it: $e"
+                }
+                e.printStackTrace()
+            }
+        }
+        try {
+            super.updateBounds()
+        }catch (e: IndexOutOfBoundsException) {
+            logger.error {
+                "error updating Bounds of $this: $e"
+            }
+            e.printStackTrace()
+        }
+    }
+
+    companion object {
+        fun setVgrow(child: Node, value: Priority) = VBoxJ.setVgrow(child, value)
+    }
+}
 
 fun Pane.hbox(spacing: Double? = null, op: HBox.()->Unit={}): HBox {
     val b = HBox()
