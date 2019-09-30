@@ -13,7 +13,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import javafx.util.Callback
 import koma.gui.element.control.CellPool
 import koma.gui.element.control.KListView

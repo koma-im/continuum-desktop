@@ -7,6 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.StackPane
 import mu.KotlinLogging
 import java.util.*
 import kotlin.streams.toList

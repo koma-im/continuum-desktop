@@ -1,6 +1,6 @@
 package link.continuum.desktop.gui.icon.avatar
 
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*

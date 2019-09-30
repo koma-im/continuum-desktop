@@ -15,6 +15,7 @@ import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
 import javafx.scene.layout.HBox as HBoxJ
 import javafx.scene.layout.VBox as VBoxJ
+import javafx.scene.layout.StackPane as StackPaneJ
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.stage.Stage
@@ -128,7 +129,6 @@ private tailrec fun checkChildren(children: List<Node>, found: BrokenList): Brok
             logger.error {
                 "found child $it that causes exception $e"
             }
-            e.printStackTrace()
             found.add(Pair(index, it))
             if (it is Parent)
                 brokenParent = it
@@ -164,6 +164,24 @@ class VBox : VBoxJ, SaveCreator {
     companion object {
         fun setVgrow(child: Node, value: Priority) = VBoxJ.setVgrow(child, value)
     }
+}
+
+
+open class StackPane: StackPaneJ {
+    constructor(): super()
+    constructor( vararg children: Node): super(*children)
+    internal var brokenChildren: BrokenList = mutableListOf()
+    val creator: Class<*> = SaveCreator.stackWalker.callerClass
+
+    override fun updateBounds() {
+        try {
+            super.updateBounds()
+        }catch (e: IndexOutOfBoundsException) {
+            brokenChildren = locateIndexException(this, e)
+        }
+
+    }
+    override fun toString() = "StackPane(from ${creator.canonicalName})"
 }
 
 private tailrec fun traceParents(node: Node) {

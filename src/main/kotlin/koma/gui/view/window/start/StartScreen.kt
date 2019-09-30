@@ -1,7 +1,7 @@
 package koma.gui.view.window.start
 
 import javafx.geometry.Pos
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import koma.gui.view.LoginScreen
 import koma.koma_app.AppStore
 import kotlinx.coroutines.CompletableDeferred

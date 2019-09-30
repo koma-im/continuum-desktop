@@ -2,7 +2,7 @@ package link.continuum.desktop.gui
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Parent
-import javafx.scene.layout.StackPane
+import javafx.scene.layout.StackPane as StackPaneJ
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import org.junit.Test
@@ -64,7 +64,7 @@ internal class MiscKtTest {
         assertSame(p2, h2.brokenChildren[0].second)
 
         val p3 = OutOfBoundsParent()
-        val s = StackPane().apply {
+        val s = StackPaneJ().apply {
             children.add(p3)
         }
         val h3 = HBox().apply {
@@ -76,7 +76,7 @@ internal class MiscKtTest {
         assertEquals(2, h3.brokenChildren.size)
         assertSame(s, h3.brokenChildren[0].second)
         assertSame(p3, h3.brokenChildren[1].second)
-        val su = StackPane(h3)
+        val su = StackPaneJ(h3)
         h3.callUpdateBoundsReflectively()
     }
 }

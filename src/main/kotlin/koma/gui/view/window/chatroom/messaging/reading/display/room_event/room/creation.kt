@@ -1,7 +1,7 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.room
 
 import javafx.geometry.Pos
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.StateEventUserView
 import koma.koma_app.AppStore

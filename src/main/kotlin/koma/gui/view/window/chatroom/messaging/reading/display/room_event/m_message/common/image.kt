@@ -10,7 +10,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseButton
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import javafx.stage.Stage
 import koma.Failure
 import koma.Server

@@ -27,6 +27,7 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.list.user.UserDataStore

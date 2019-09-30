@@ -4,7 +4,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.scene.control.Button
 import javafx.scene.control.MenuItem
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import javafx.scene.media.Media
 import javafx.scene.media.MediaPlayer
 import javafx.scene.media.MediaView

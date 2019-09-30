@@ -16,6 +16,7 @@ import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized

@@ -2,7 +2,7 @@ package link.continuum.desktop.gui.scene
 
 import javafx.scene.Node
 import javafx.scene.input.KeyEvent
-import javafx.scene.layout.StackPane
+import link.continuum.desktop.gui.StackPane
 import javafx.scene.text.Font
 
 class ScalingPane(
