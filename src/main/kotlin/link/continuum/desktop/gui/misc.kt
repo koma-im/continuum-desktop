@@ -7,6 +7,7 @@ import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.geometry.Insets
+import javafx.scene.Group
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.*
@@ -23,7 +24,6 @@ import javafx.stage.Window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
@@ -36,6 +36,8 @@ import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Callable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.channels.ReceiveChannel
 
 private val logger = KotlinLogging.logger {}
 
@@ -55,21 +57,40 @@ fun Pane.vbox(op: VBox.()->Unit) {
 }
 
 
-private object BoundsUpdater{
+internal object ParentReflection{
     val parentMethod = Parent::class.java.getDeclaredMethod("updateBounds").apply {
         isAccessible = true
     }
     val nodeMethod = Node::class.java.getDeclaredMethod("updateBounds").apply {
         isAccessible = true
     }
+
+    val dirtyChildrenField = Parent::class.java.getDeclaredField("dirtyChildren").apply {
+        isAccessible = true
+    }
+
+    val dirtyChildrenCountField = Parent::class.java.getDeclaredField("dirtyChildrenCount").apply {
+        isAccessible = true
+    }
+
+    fun setDirtyChildren(parent: Parent, children: ArrayList<Node>?) {
+        dirtyChildrenField.set(parent, children)
+    }
+    fun setDirtyChildrenCount(parent: Parent, count: Int) {
+        dirtyChildrenCountField.set(parent, count)
+    }
+    fun clearDirtyChildren(parent: Parent) {
+        setDirtyChildren(parent, arrayListOf())
+        setDirtyChildrenCount(parent, 0)
+    }
 }
 
 fun Node.callUpdateBoundsReflectively() {
     try {
         if (this is Parent) {
-            BoundsUpdater.parentMethod.invoke(this)
+            ParentReflection.parentMethod.invoke(this)
         } else {
-            BoundsUpdater.nodeMethod.invoke(this)
+            ParentReflection.nodeMethod.invoke(this)
         }
     } catch (e: InvocationTargetException) {
         e.cause?.run {
@@ -114,8 +135,18 @@ private fun locateIndexException(node: Parent, exception: Exception): BrokenList
     }
     exception.printStackTrace()
     val cl  = checkChildren(node.childrenUnmodifiable, mutableListOf())
-    cl.printChildren()
+    val ctp = cl.reversed()
+    ctp.forEach {(i, n) ->
+        logger.debug { "node trace: child ${i}: $n" }
+    }
     traceParents(node)
+    for ((_, n) in ctp) {
+        if (n is Parent) {
+            logger.warn { "trying to fix parent $n by clearing dirty children" }
+            ParentReflection.clearDirtyChildren(n)
+            break
+        }
+    }
     return cl
 }
 
@@ -138,11 +169,6 @@ private tailrec fun checkChildren(children: List<Node>, found: BrokenList): Brok
     if (p != null)
         return checkChildren(p.childrenUnmodifiable, found)
     return found
-}
-private fun BrokenList.printChildren() {
-    this.reversed().forEach {(i, n) ->
-        logger.debug { "node trace: child ${i}: $n" }
-    }
 }
 
 class VBox : VBoxJ, SaveCreator {
@@ -182,6 +208,31 @@ open class StackPane: StackPaneJ {
 
     }
     override fun toString() = "StackPane(from ${creator.canonicalName})"
+}
+
+
+/**
+ * for debugging
+ */
+class CatchingGroup() : Group() {
+
+    override fun updateBounds() {
+        try {
+            super.updateBounds()
+        }catch (e: IndexOutOfBoundsException) {
+            logger.error { "group $this caught $e. trying to fix by clearing dirty children" }
+            ParentReflection.clearDirtyChildren(this)
+        }
+    }
+    
+    @Suppress("UNCHECKED_CAST")
+    var dirtyChildren: ArrayList<Node>?
+        get() = ParentReflection.dirtyChildrenField.get(this) as ArrayList<Node>?
+        set(value) { ParentReflection.dirtyChildrenField.set(this, value) }
+
+    var dirtyChildrenCount: Int
+        get() = ParentReflection.dirtyChildrenCountField.get(this) as Int
+        set(value) { ParentReflection.dirtyChildrenCountField.set(this, value) }
 }
 
 private tailrec fun traceParents(node: Node) {

@@ -17,10 +17,10 @@ import javafx.scene.control.IndexedCell
 import javafx.scene.control.ListCell
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
-import javafx.scene.layout.Border
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import koma.gui.element.control.*
+import link.continuum.desktop.gui.CatchingGroup
 import link.continuum.desktop.util.ArrayLinkedList
 import mu.KotlinLogging
 import java.util.*
@@ -126,12 +126,15 @@ class KVirtualFlow<I, T>(
     /**
      * The group which holds the cells.
      */
-    internal val sheet: Group
+    private val sheet = CatchingGroup().apply {
+        styleClass.add("sheet")
+        isAutoSizeChildren = false
+    }
 
     /**
      * what for ?
      */
-    lateinit var sheetChildren: ObservableList<Node>
+    val sheetChildren: ObservableList<Node> = sheet.children
 
     /**
      * The scroll bar used to scrolling vertically.
@@ -143,7 +146,7 @@ class KVirtualFlow<I, T>(
      * viewportBreadth and viewportLength are simply the dimensions of the
      * clipView.
      */
-    internal var clipView: ClippedContainer
+    private val clipView = ClippedContainer(sheet)
 
     // used for panning the virtual flow
     private var lastX: Double = 0.toDouble()
@@ -414,17 +417,7 @@ class KVirtualFlow<I, T>(
         styleClass.add("virtual-flow")
         id = "virtual-flow"
 
-        // initContent
-        // --- sheet
-        sheet = Group()
-        sheet.styleClass.add("sheet")
-        sheet.isAutoSizeChildren = false
-
-        sheetChildren = sheet.children
-
         // --- clipView
-        clipView = ClippedContainer(this)
-        clipView.node = sheet
         children.add(clipView)
 
         // --- accumCellParent
@@ -1895,19 +1888,12 @@ class KVirtualFlow<I, T>(
      * A simple extension to Region that ensures that anything wanting to flow
      * outside of the bounds of the Region is clipped.
      */
-    internal class ClippedContainer(flow: KVirtualFlow<*, *>?) : Region() {
-
-        /**
-         * The Node which is embedded within this `ClipView`.
-         */
-        var node: Node? = null
-            set(n) {
-                field = n
-
-                children.clear()
-                children.add(this.node)
-            }
-
+    internal class ClippedContainer(
+            /**
+             * The Node which is embedded within this `ClipView`.
+             */
+            node: Node
+    ) : Region() {
         private val clipRect: Rectangle
 
         fun setClipY(clipY: Double) {
@@ -1916,10 +1902,7 @@ class KVirtualFlow<I, T>(
         }
 
         init {
-            if (flow == null) {
-                throw IllegalArgumentException("VirtualFlow can not be null")
-            }
-
+            children.setAll(node)
             styleClass.add("clipped-container")
 
             // clipping
