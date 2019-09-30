@@ -31,8 +31,7 @@ import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 import java.lang.StringBuilder
-import java.security.AccessController
-import java.security.PrivilegedAction
+import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Callable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -57,85 +56,121 @@ fun Pane.vbox(op: VBox.()->Unit) {
 
 private object BoundsUpdater{
     val parentMethod = Parent::class.java.getDeclaredMethod("updateBounds").apply {
-        logger.debug { "preparing to call updateBounds on a Parent" }
         isAccessible = true
     }
     val nodeMethod = Node::class.java.getDeclaredMethod("updateBounds").apply {
-        logger.debug { "preparing to call updateBounds on a Node" }
         isAccessible = true
     }
 }
 
 fun Node.callUpdateBoundsReflectively() {
-    if (this is Parent) {
-        BoundsUpdater.parentMethod.invoke(this)
-    } else {
-        BoundsUpdater.nodeMethod.invoke(this)
+    try {
+        if (this is Parent) {
+            BoundsUpdater.parentMethod.invoke(this)
+        } else {
+            BoundsUpdater.nodeMethod.invoke(this)
+        }
+    } catch (e: InvocationTargetException) {
+        e.cause?.run {
+            logger.debug { "got exception while calling updateBounds reflectively: $this" }
+            throw this
+        } ?: logger.error { "unknown cause of InvocationTargetException" }
     }
 }
+
+private interface SaveCreator {
+    val creator: Class<*>
+    companion object {
+        val stackWalker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
+    }
+}
+
 /**
  * HBox that tries to catch an exception
  */
-class HBox: HBoxJ {
+class HBox: HBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
-
+    internal var brokenChildren: BrokenList = mutableListOf()
+    override val creator: Class<*> = SaveCreator.stackWalker.callerClass
     override fun updateBounds() {
-        children.forEach {
-            try {
-                it.callUpdateBoundsReflectively()
-            } catch (e: IndexOutOfBoundsException) {
-                logger.error {
-                    "error updating Bounds of $it: $e"
-                }
-                e.printStackTrace()
-            }
-        }
         try {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
-                logger.error {
-                    "error updating Bounds of $this: $e"
-                }
-                e.printStackTrace()
+            brokenChildren = locateIndexException(this, e)
         }
     }
+    override fun toString() = "HBox(from ${creator.canonicalName})"
 
     companion object {
         fun setHgrow(child: Node, value: Priority) = HBoxJ.setHgrow(child, value)
     }
 }
 
+private fun locateIndexException(node: Parent, exception: Exception): BrokenList {
+    logger.error {
+        "error updating Bounds of $node: $exception"
+    }
+    exception.printStackTrace()
+    val cl  = checkChildren(node.childrenUnmodifiable, mutableListOf())
+    cl.printChildren()
+    traceParents(node)
+    return cl
+}
 
-class VBox : VBoxJ {
+private typealias BrokenList = MutableList<Pair<Int, Node>>
+private tailrec fun checkChildren(children: List<Node>, found: BrokenList): BrokenList {
+    var brokenParent: Parent? = null
+    children.forEachIndexed { index, it ->
+        try {
+            it.callUpdateBoundsReflectively()
+        } catch (e: IndexOutOfBoundsException) {
+            logger.error {
+                "found child $it that causes exception $e"
+            }
+            e.printStackTrace()
+            found.add(Pair(index, it))
+            if (it is Parent)
+                brokenParent = it
+        }
+    }
+    val p = brokenParent
+    if (p != null)
+        return checkChildren(p.childrenUnmodifiable, found)
+    return found
+}
+private fun BrokenList.printChildren() {
+    this.reversed().forEach {(i, n) ->
+        logger.debug { "node trace: child ${i}: $n" }
+    }
+}
+
+class VBox : VBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
     constructor(spacing: Double, vararg children: Node): super(spacing, *children)
+    internal var brokenChildren: BrokenList = mutableListOf()
+    override val creator: Class<*> = SaveCreator.stackWalker.callerClass
 
     override fun updateBounds() {
-        children.forEach {
-            try {
-                it.callUpdateBoundsReflectively()
-            } catch (e: IndexOutOfBoundsException) {
-                logger.error {
-                    "error updating Bounds of $it: $e"
-                }
-                e.printStackTrace()
-            }
-        }
         try {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
-            logger.error {
-                "error updating Bounds of $this: $e"
-            }
-            e.printStackTrace()
+            brokenChildren = locateIndexException(this, e)
         }
-    }
 
+    }
+    override fun toString() = "VBox(from ${creator.canonicalName})"
     companion object {
         fun setVgrow(child: Node, value: Priority) = VBoxJ.setVgrow(child, value)
     }
+}
+
+private tailrec fun traceParents(node: Node) {
+    val p = node.parent
+    p ?: return
+    logger.info { "parent trace: $p" }
+    traceParents(p)
 }
 
 fun Pane.hbox(spacing: Double? = null, op: HBox.()->Unit={}): HBox {
