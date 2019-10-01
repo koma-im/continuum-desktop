@@ -27,7 +27,7 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
-        implementation("io.github.koma-im:koma-library:0.9.0")
+        implementation("io.github.koma-im:koma-library:0.9.1")
         implementation("io.github.microutils:kotlin-logging:1.6.22")
 
         testImplementation(kotlin("test"))
