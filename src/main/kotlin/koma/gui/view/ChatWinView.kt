@@ -4,17 +4,15 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
-import javafx.scene.control.ContextMenu
-import javafx.scene.control.Label
-import javafx.scene.control.ListCell
-import javafx.scene.control.SeparatorMenuItem
+import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
-import koma.gui.view.chatview.SwitchableRoomView
 import koma.gui.view.listview.RoomListView
+import koma.gui.view.usersview.RoomMemberListView
+import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.AppStore
 import koma.koma_app.appState
@@ -50,31 +48,39 @@ class ChatView(roomList: ObservableList<Room>,
                storage: AppStore,
                scaling: Float = storage.settings.scaling
 ) {
-    val root = HBox ( 5.0)
+    val root = SplitPane ()
 
     val roomListView = RoomListView(roomList, account, storage.database)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
-    val switchableRoomView = SwitchableRoomView(account.server.httpClient, storage)
 
+    val messagingView by lazy { ChatRecvSendView(account.server.httpClient, storage) }
+    val membersView by lazy{ RoomMemberListView(storage.userData) }
+
+    private var initSelected = false
+
+    private fun setRoom(room: Room) {
+        messagingView.setRoom(room)
+        membersView.setList(room.members.list)
+        if (!initSelected) {
+            initSelected= true
+            root.items.add(membersView.root)
+            root.items.set(1, messagingView.root)
+        }
+    }
     init {
+        root.items.add(VBox().apply {
+            add(invitationsView.list)
+            add(roomListView.root)
+        })
+        val placeholder = HBox(Label("Select a room to start chatting"))
+        root.items.add(placeholder)
+
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
             if (room != null) {
-                switchableRoomView.setRoom(room)
+                setRoom(room)
             }
         }
-
-        with(root) {
-            VBox.setVgrow(this, Priority.ALWAYS)
-            vbox() {
-                add(invitationsView.list)
-                add(roomListView.root)
-            }
-
-            add(switchableRoomView.root)
-        }
-
-
     }
 
 }

@@ -8,14 +8,10 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
-import koma.koma_app.appState
-import koma.storage.persistence.settings.AppSettings
 import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
 import model.Room
-
-private val settings: AppSettings = appState.store.settings
 
 class RoomListView(
         roomlist: ObservableList<Room>,
@@ -51,6 +47,9 @@ class RoomListView(
             }
         }
         root.placeholder = gettingStarted
+        root.style {
+            prefWidth = 9.em
+        }
         setup(root)
         if (roomlist.isNotEmpty()) {
             root.selectionModel.selectFirst()
@@ -58,9 +57,6 @@ class RoomListView(
     }
 
     private fun setup(node: ListView<Room>) {
-        val scale = settings.scaling
-        node.minWidth = 178.0 * scale
-        node.maxWidth = 178.0 * scale
         VBox.setVgrow(node, Priority.ALWAYS)
         node.setCellFactory {
             RoomFragment(data)

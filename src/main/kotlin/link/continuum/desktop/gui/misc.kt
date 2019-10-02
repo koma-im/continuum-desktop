@@ -113,6 +113,7 @@ private interface SaveCreator {
 class HBox: HBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
+    constructor(vararg children: Node): super(*children)
     internal var brokenChildren: BrokenList = mutableListOf()
     override val creator: Class<*> = SaveCreator.stackWalker.callerClass
     override fun updateBounds() {

@@ -18,12 +18,8 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.gui.VBox
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.doubleBinding
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.list.user.UserDataStore
-
-private val settings: AppSettings = appState.store.settings
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
@@ -39,7 +35,7 @@ class RoomMemberListView(
     }
     init {
         with(root) {
-            val scale = settings.scaling
+
             val showavataronly = SimpleBooleanProperty(true)
             val button  = Pane().apply {
                 fun Text.iconProp(): Text {
@@ -48,7 +44,7 @@ class RoomMemberListView(
                     textOrigin = VPos.TOP
                     return this
                 }
-                val size = "${scale*13.5}px"
+                val size = "${13.5}px"
                 val expandIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PLUS_CIRCLE, size).iconProp()
                 val collapseIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.MINUS_CIRCLE, size).iconProp()
                 children.setAll(expandIcon)
@@ -62,16 +58,19 @@ class RoomMemberListView(
             add(button)
             userlist.apply {
                 isFocusTraversable = false
+                style = listStyle
                 VBox.setVgrow(this, Priority.ALWAYS)
-                minWidth = 50.0 * scale
-                val ulwidth = doubleBinding(showavataronly) { scale * if(value) 50.0 else 138.0}
-                maxWidthProperty().bind(ulwidth)
-                prefWidthProperty().bind(ulwidth)
                 setCellFactory {
-                    MemberCell(showavataronly, userData)
+                    MemberCell(userData)
                 }
             }
             add(userlist)
         }
+    }
+
+    companion object {
+        private val listStyle = StyleBuilder().apply {
+            minWidth = 3.em
+        }.toStyle()
     }
 }
