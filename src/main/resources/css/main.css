@@ -17,3 +17,13 @@
     -fx-background-color: white;
     -fx-background-insets: 0;
 }
+
+
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 0.1em 0 0.1em; /* 0 3 0 3 */
+}
+/* horizontal the two nodes are placed to the left/right of each other. */
+.split-pane:horizontal > .split-pane-divider {
+   -fx-background-color: white;
+   -fx-background-insets: 0;
+}
