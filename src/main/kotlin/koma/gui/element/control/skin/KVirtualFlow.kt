@@ -153,6 +153,7 @@ class KVirtualFlow<I, T>(
     private var lastY: Double = 0.toDouble()
     private var isPanning = false
 
+    private var needsRecreateCells = false
     private var needsReconfigureCells = false // when cell contents are the same
     private var needsRebuildCells = false // when cell contents have changed
     private var needsCellsLayout = false
@@ -576,6 +577,11 @@ class KVirtualFlow<I, T>(
         }
         vbar.valueProperty().addListener(listenerY)
 
+        super.heightProperty().addListener { _, oldHeight, newHeight ->
+            if (oldHeight == 0.0 && newHeight.toDouble() > 0) {
+                recreateCells()
+            }
+        }
         /*
         ** there are certain animations that need to know if the touch is
         ** happening.....
@@ -619,7 +625,16 @@ class KVirtualFlow<I, T>(
     fun itemsSize(): Int? = kListView.items?.size
 
     override fun layoutChildren() {
-        if (needsRebuildCells) {
+        if (needsRecreateCells) {
+            lastWidth = -1.0
+            lastHeight = -1.0
+            releaseCell(accumCell)
+            sheet.children.clear()
+            cells.forEach { it.updateIndex(-1) }
+            cells.clear()
+            pile.clear()
+            releaseAllPrivateCells()
+        } else if (needsRebuildCells) {
             logger.debug { "layoutChildren: needsRebuildCells" }
             lastWidth = -1.0
             lastHeight = -1.0
@@ -650,8 +665,9 @@ class KVirtualFlow<I, T>(
         }
 
         val hasSizeChange = sizeChanged
-        var recreatedOrRebuilt = needsRebuildCells || sizeChanged
+        var recreatedOrRebuilt = needsRebuildCells || needsRecreateCells || sizeChanged
 
+        needsRecreateCells = false
         needsReconfigureCells = false
         needsRebuildCells = false
         sizeChanged = false
@@ -810,6 +826,7 @@ class KVirtualFlow<I, T>(
                 setPosition(1.0)
                 //                setItemCount(cellCount);
             } else if (lastCell != null) {
+                // TODO first or lasy
                 getCellPosition(lastCell)
                 val lastCellIndex = getCellIndex(lastCell)
                 logger.debug { "adjustPosition using lastCell index  $lastCellIndex" }
@@ -997,7 +1014,9 @@ class KVirtualFlow<I, T>(
         if (cell != null) {
             scrollTo(cell)
         } else {
-            return
+            adjustPositionToIndex(itemIndex)
+            addAllToPile()
+            requestLayout()
         }
     }
 
@@ -1508,6 +1527,11 @@ class KVirtualFlow<I, T>(
 
     internal fun reconfigureCells() {
         needsReconfigureCells = true
+        requestLayout()
+    }
+
+    private fun recreateCells() {
+        needsRecreateCells = true
         requestLayout()
     }
 
