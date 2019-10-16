@@ -21,6 +21,7 @@ import kotlinx.coroutines.*
 import link.continuum.database.models.getServerAddrs
 import link.continuum.database.models.getToken
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.gui.CatchingGroup
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.disk.path.getConfigDir
@@ -193,4 +194,5 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 
 object Globals {
     internal lateinit var httpClient: OkHttpClient
+    internal lateinit var buggyParent: CatchingGroup
 }

@@ -58,10 +58,6 @@ internal class MiscKtTest {
         }
         assertEquals(0, p2.updateBoundsCount)
         h2.callUpdateBoundsReflectively()
-        assertEquals(2, p2.updateBoundsCount)
-        assertEquals(1, h2.brokenChildren.size)
-        assertSame(2, h2.brokenChildren[0].first)
-        assertSame(p2, h2.brokenChildren[0].second)
 
         val p3 = OutOfBoundsParent()
         val s = StackPaneJ().apply {
@@ -72,11 +68,6 @@ internal class MiscKtTest {
         }
         assertEquals(0, p3.updateBoundsCount)
         h3.callUpdateBoundsReflectively()
-        assertEquals(3, p3.updateBoundsCount)
-        assertEquals(2, h3.brokenChildren.size)
-        assertSame(s, h3.brokenChildren[0].second)
-        assertSame(p3, h3.brokenChildren[1].second)
         val su = StackPaneJ(h3)
-        h3.callUpdateBoundsReflectively()
     }
 }

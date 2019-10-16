@@ -1,5 +1,6 @@
 package koma.koma_app
 
+import link.continuum.desktop.gui.ParentReflection
 import mu.KotlinLogging
 import java.io.PrintStream
 import java.util.concurrent.ConcurrentLinkedDeque
@@ -11,6 +12,10 @@ class NoAlertErrorHandler: Thread.UncaughtExceptionHandler {
     private val recent = ConcurrentLinkedDeque<Pair<Long, Throwable?>>()
     override fun uncaughtException(t: Thread?, e: Throwable?) {
         try {
+            if (e is IndexOutOfBoundsException) {
+                logger.warn { "clearing message list sheet dirty children because of $e" }
+                ParentReflection.clearDirtyChildren(Globals.buggyParent)
+            }
             recent.add(System.nanoTime() to e)
             logger.error { "uncaught error $e" }
             e?.printStackTrace()

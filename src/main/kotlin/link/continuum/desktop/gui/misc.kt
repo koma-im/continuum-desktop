@@ -114,13 +114,12 @@ class HBox: HBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
     constructor(vararg children: Node): super(*children)
-    internal var brokenChildren: BrokenList = mutableListOf()
     override val creator: Class<*> = SaveCreator.stackWalker.callerClass
     override fun updateBounds() {
         try {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
-            brokenChildren = locateIndexException(this, e)
+            fixNodeChildren(this, e)
         }
     }
     override fun toString() = "HBox(from ${creator.canonicalName})"
@@ -130,60 +129,35 @@ class HBox: HBoxJ, SaveCreator {
     }
 }
 
-private fun locateIndexException(node: Parent, exception: Exception): BrokenList {
+private fun fixNodeChildren(node: Parent, exception: Exception) {
     logger.error {
         "error updating Bounds of $node: $exception"
     }
-    exception.printStackTrace()
-    val cl  = checkChildren(node.childrenUnmodifiable, mutableListOf())
-    val ctp = cl.reversed()
-    ctp.forEach {(i, n) ->
-        logger.debug { "node trace: child ${i}: $n" }
-    }
-    traceParents(node)
-    for ((_, n) in ctp) {
-        if (n is Parent) {
-            logger.warn { "trying to fix parent $n by clearing dirty children" }
-            ParentReflection.clearDirtyChildren(n)
-            break
-        }
-    }
-    return cl
+    ParentReflection.clearDirtyChildren(node)
+    fixChildren(node.childrenUnmodifiable)
+    logger.info { "Node ${node}'s ancestors: ${traceParents(node)}" }
 }
 
-private typealias BrokenList = MutableList<Pair<Int, Node>>
-private tailrec fun checkChildren(children: List<Node>, found: BrokenList): BrokenList {
-    var brokenParent: Parent? = null
-    children.forEachIndexed { index, it ->
-        try {
-            it.callUpdateBoundsReflectively()
-        } catch (e: IndexOutOfBoundsException) {
-            logger.error {
-                "found child $it that causes exception $e"
-            }
-            found.add(Pair(index, it))
-            if (it is Parent)
-                brokenParent = it
+private fun fixChildren(children: List<Node>) {
+    children.forEach {
+        if (it is Parent) {
+            ParentReflection.clearDirtyChildren(it)
+            fixChildren(it.childrenUnmodifiable)
         }
     }
-    val p = brokenParent
-    if (p != null)
-        return checkChildren(p.childrenUnmodifiable, found)
-    return found
 }
 
 class VBox : VBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
     constructor(spacing: Double, vararg children: Node): super(spacing, *children)
-    internal var brokenChildren: BrokenList = mutableListOf()
     override val creator: Class<*> = SaveCreator.stackWalker.callerClass
 
     override fun updateBounds() {
         try {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
-            brokenChildren = locateIndexException(this, e)
+            fixNodeChildren(this, e)
         }
 
     }
@@ -197,14 +171,13 @@ class VBox : VBoxJ, SaveCreator {
 open class StackPane: StackPaneJ {
     constructor(): super()
     constructor( vararg children: Node): super(*children)
-    internal var brokenChildren: BrokenList = mutableListOf()
     val creator: Class<*> = SaveCreator.stackWalker.callerClass
 
     override fun updateBounds() {
         try {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
-            brokenChildren = locateIndexException(this, e)
+            fixNodeChildren(this, e)
         }
 
     }
@@ -222,7 +195,7 @@ class CatchingGroup() : Group() {
             super.updateBounds()
         }catch (e: IndexOutOfBoundsException) {
             logger.error { "group $this caught $e. trying to fix by clearing dirty children" }
-            ParentReflection.clearDirtyChildren(this)
+            fixNodeChildren(this, e)
         }
     }
     
@@ -236,11 +209,11 @@ class CatchingGroup() : Group() {
         set(value) { ParentReflection.dirtyChildrenCountField.set(this, value) }
 }
 
-private tailrec fun traceParents(node: Node) {
+private tailrec fun traceParents(node: Node, parents: MutableList<Node> = mutableListOf()): List<Node> {
     val p = node.parent
-    p ?: return
-    logger.info { "parent trace: $p" }
-    traceParents(p)
+    p ?: return parents
+    parents.add(p)
+    return traceParents(p, parents)
 }
 
 fun Pane.hbox(spacing: Double? = null, op: HBox.()->Unit={}): HBox {

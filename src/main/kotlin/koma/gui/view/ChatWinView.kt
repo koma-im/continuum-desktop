@@ -75,11 +75,13 @@ class ChatView(roomList: ObservableList<Room>,
         })
         val placeholder = HBox(Label("Select a room to start chatting"))
         root.items.add(placeholder)
-
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
             if (room != null) {
                 setRoom(room)
             }
+        }
+        if (roomList.isNotEmpty()) {
+            roomListView.root.selectionModel.selectFirst()
         }
     }
 

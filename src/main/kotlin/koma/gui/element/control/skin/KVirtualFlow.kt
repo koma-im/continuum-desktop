@@ -20,7 +20,9 @@ import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import koma.gui.element.control.*
+import koma.koma_app.Globals
 import link.continuum.desktop.gui.CatchingGroup
+import link.continuum.desktop.gui.ParentReflection
 import link.continuum.desktop.util.ArrayLinkedList
 import mu.KotlinLogging
 import java.util.*
@@ -45,8 +47,7 @@ class KVirtualFlow<I, T>(
          */
         private
         val fixedCellSize: Double? = null
-)
-    : Region()
+): Region()
         where I : ListCell<T> {
 
     fun visibleFirst(): T? {
@@ -415,6 +416,7 @@ class KVirtualFlow<I, T>(
      * Creates a new VirtualFlow instance.
      */
     init {
+        Globals.buggyParent = sheet
         styleClass.add("virtual-flow")
         id = "virtual-flow"
 
@@ -1889,6 +1891,15 @@ class KVirtualFlow<I, T>(
         val cellCount = getCellCount().toDouble()
         val p = Utils.clamp(0.0, itemIndex.toDouble(), cellCount) / cellCount
         return -(viewportLength * p)
+    }
+
+    override fun updateBounds() {
+        try {
+            super.updateBounds()
+        }catch (e: IndexOutOfBoundsException) {
+            logger.error { "$this caught $e. Clearing dirty children" }
+            ParentReflection.clearDirtyChildren(this)
+        }
     }
 
     //    /**

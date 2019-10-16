@@ -42,7 +42,7 @@ class ChatRecvSendView(
             messageInput.appendText(it)
         }
         currentRoom.set(room.id)
-        messageScroll.setList(room.messageManager.shownList, room.id)
+        messageScroll.setRoom(room.messageManager.shownList, room.id)
     }
 
     init {

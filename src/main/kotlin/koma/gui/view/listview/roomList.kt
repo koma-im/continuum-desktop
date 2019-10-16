@@ -51,9 +51,6 @@ class RoomListView(
             prefWidth = 9.em
         }
         setup(root)
-        if (roomlist.isNotEmpty()) {
-            root.selectionModel.selectFirst()
-        }
     }
 
     private fun setup(node: ListView<Room>) {
