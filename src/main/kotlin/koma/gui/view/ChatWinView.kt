@@ -66,6 +66,7 @@ class ChatView(roomList: ObservableList<Room>,
             initSelected= true
             root.items.add(membersView.root)
             root.items.set(1, messagingView.root)
+            root.setDividerPosition(1, .9)
         }
     }
     init {
@@ -73,6 +74,7 @@ class ChatView(roomList: ObservableList<Room>,
             add(invitationsView.list)
             add(roomListView.root)
         })
+        root.setDividerPosition(0, .2)
         val placeholder = HBox(Label("Select a room to start chatting"))
         root.items.add(placeholder)
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
