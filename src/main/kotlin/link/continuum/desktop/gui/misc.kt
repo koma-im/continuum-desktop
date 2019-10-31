@@ -18,6 +18,9 @@ import javafx.scene.layout.HBox as HBoxJ
 import javafx.scene.layout.VBox as VBoxJ
 import javafx.scene.layout.StackPane as StackPaneJ
 import javafx.scene.paint.Color
+import javafx.scene.shape.Ellipse
+import javafx.scene.shape.SVGPath
+import javafx.scene.shape.Shape
 import javafx.scene.text.Text
 import javafx.stage.Stage
 import javafx.stage.Window

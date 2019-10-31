@@ -2,6 +2,7 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import koma.matrix.UserId
 import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +22,9 @@ class MessageView(
     private val image by lazy { MImageViewNode(km) }
     fun update(message: MRoomMessage, server: Server) {
         val content = message.content
+        update(content, server, message.sender)
+    }
+    fun update(content: M_Message?, server: Server, sender: UserId) {
         node = when(content) {
             is TextMessage ->text.apply {
                 update(content)
@@ -29,7 +33,7 @@ class MessageView(
                 update(content)
             }
             is EmoteMessage -> emote.apply{
-                update(content, message.sender)
+                update(content, sender)
             }
             is ImageMessage -> image.apply { update(content, server) }
             is FileMessage -> {

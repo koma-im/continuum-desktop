@@ -26,36 +26,13 @@ class RoomMemberListView(
         userData: UserDataStore
 ) {
 
-    val root = VBox(5.0).apply {
-        padding = Insets(5.0)
-    }
+    val root = VBox(5.0)
     private val userlist = PrettyListView<Pair<UserId, Server>>()
     fun setList(memList: ObservableList<Pair<UserId, Server>>){
         userlist.items = memList
     }
     init {
         with(root) {
-
-            val showavataronly = SimpleBooleanProperty(true)
-            val button  = Pane().apply {
-                fun Text.iconProp(): Text {
-                    opacity = .5
-                    fill = Color.FORESTGREEN
-                    textOrigin = VPos.TOP
-                    return this
-                }
-                val size = "${13.5}px"
-                val expandIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.PLUS_CIRCLE, size).iconProp()
-                val collapseIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.MINUS_CIRCLE, size).iconProp()
-                children.setAll(expandIcon)
-                setOnMouseClicked {
-                    if (it.button != MouseButton.PRIMARY) return@setOnMouseClicked
-                    val compact = showavataronly.get()
-                    children.setAll(if (compact) collapseIcon else expandIcon)
-                    showavataronly.set(!compact)
-                }
-            }
-            add(button)
             userlist.apply {
                 isFocusTraversable = false
                 style = listStyle

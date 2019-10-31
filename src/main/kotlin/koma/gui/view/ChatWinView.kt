@@ -26,6 +26,7 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.list.InvitationsView
+import link.continuum.desktop.gui.view.RightColumn
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
 import model.Room
@@ -55,16 +56,16 @@ class ChatView(roomList: ObservableList<Room>,
 
 
     val messagingView by lazy { ChatRecvSendView(account.server.httpClient, storage) }
-    val membersView by lazy{ RoomMemberListView(storage.userData) }
+    val rightColumn by lazy { RightColumn(account, storage, root) }
 
     private var initSelected = false
 
     private fun setRoom(room: Room) {
         messagingView.setRoom(room)
-        membersView.setList(room.members.list)
+        rightColumn.setRoom(room)
         if (!initSelected) {
             initSelected= true
-            root.items.add(membersView.root)
+            root.items.add(rightColumn.root)
             root.items.set(1, messagingView.root)
             root.setDividerPosition(1, .9)
         }
@@ -75,7 +76,13 @@ class ChatView(roomList: ObservableList<Room>,
             add(roomListView.root)
         })
         root.setDividerPosition(0, .2)
-        val placeholder = HBox(Label("Select a room to start chatting"))
+        val placeholder = HBox().apply {
+            alignment = Pos.CENTER
+            vbox {
+                alignment = Pos.CENTER
+                label("Select a room to start chatting")
+            }
+        }
         root.items.add(placeholder)
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
             if (room != null) {
