@@ -192,7 +192,11 @@ class PasswordAuthView(
      * if it's other exceptions, registration has failed
      */
     override suspend fun finish(): KResult<RegisterdUser, Failure>? {
-        val f = register.registerByPassword(user.text, pass.text).getFailureOr { return Ok(it) }
+        val (success, failure, result) = register.registerByPassword(user.text, pass.text)
+        if (!result.testFailure(success, failure)) {
+            return Ok(success)
+        }
+        val f = failure
         if (f is AuthFailure) return Err(f)
         uilaunch {
             alert(Alert.AlertType.WARNING,

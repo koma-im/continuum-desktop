@@ -14,7 +14,7 @@ import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
 import koma.storage.message.fetch.fetchPreceding
-import koma.util.fold
+import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.RoomEventRow
@@ -67,23 +67,24 @@ class MessageManager(val room: Room,
         val status = startedFetchJobs.computeIfAbsent(row.event_id to FetchDirection.Backward) {
             val loading = SimpleBooleanProperty(true)
             GlobalScope.launch {
-                fetchPreceding(row).fold({
-                    if (it.prevKey == row.preceding_batch) {
+                val (success, failure, result) = fetchPreceding(row)
+                if (!result.testFailure(success, failure)) {
+                    if (success.prevKey == row.preceding_batch) {
                         row.preceding_stored = true
                         logger.info { "reached earliest point at event $row" }
                         data.upsert(row)
                     } else {
-                        val rows = it.messages.toEventRowList(roomId)
-                        rows.firstOrNull()?.preceding_batch = it.prevKey
+                        val rows = success.messages.toEventRowList(roomId)
+                        rows.firstOrNull()?.preceding_batch = success.prevKey
                         insert(rows, tail = row)
                     }
                     withContext(UiDispatcher) {
                         logger.debug { "loading of messages before ${row.event_id} finished" }
                         loading.set(false)
                     }
-                }, {
+                } else {
                     logger.error { "fetch preceding events for $row ${it}" }
-                })
+                }
                 startedFetchJobs.remove(row.event_id to FetchDirection.Backward)
             }
             loading

@@ -11,7 +11,6 @@ import koma.matrix.event.room_message.chat.textToMessage
 import koma.matrix.room.naming.RoomId
 import koma.util.file.guessMediaType
 import koma.util.onFailure
-import koma.util.onSuccess
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -45,8 +44,7 @@ fun sendFileMessage(room: RoomId) {
     val api = apiClient
     api?:return
     GlobalScope.launch {
-        val uploadResult = uploadFile(api, file, type)
-        uploadResult.onSuccess { up ->
+        val up = uploadFile(api, file, type).getOrNull() ?: return@launch
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
@@ -59,8 +57,6 @@ fun sendFileMessage(room: RoomId) {
                             .showError()
                 }
             }
-
-        }
     }
 }
 

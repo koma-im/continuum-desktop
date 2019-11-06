@@ -10,6 +10,7 @@ import koma.matrix.login
 import koma.matrix.user.identity.UserId_new
 import koma.util.onFailure
 import koma.util.onSuccess
+import koma.util.testFailure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
@@ -72,13 +73,13 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
 private suspend fun getTokenWithPassword(userid: UserId, password: String, httpClient: OkHttpClient,
                                          data: KDataStore,
                                          server: String): String? {
-    login(UserPassword(user = userid.user, password = password), server, httpClient
-    ).onSuccess {
+    val (it, ex, result) = login(UserPassword(user = userid.user, password = password), server, httpClient)
+    if (!result.testFailure(it, ex)) {
         val u = it.user_id
         val t = it.access_token
         saveToken(data, u, t)
         return t
-    }.onFailure { ex ->
+    } else {
         val mes = ex.toString()
         System.err.println(mes)
         val message = if (ex is IOFailure && ex.throwable is JsonEncodingException) {
