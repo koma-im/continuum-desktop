@@ -86,9 +86,8 @@ class InvitationsView(
                         roomId?.let {
                             logger.debug { "joining $it" }
                             GlobalScope.launch {
-                                val j = appState.apiClient?.joinRoom(it)?.getOr {
+                                val j = appState.apiClient?.joinRoom(it)?.getOrNull()?: return@launch run {
                                     logger.warn { "failed to join $roomId, ${it}" }
-                                    return@launch
                                 }
                                 logger.debug { "joined room $j" }
                             }

@@ -1,9 +1,6 @@
 package link.continuum.desktop.util
 
-import koma.util.KResult
-import koma.util.getFailureOr
-import koma.util.getOr
-import koma.util.given
+import koma.util.*
 import kotlin.test.*
 
 internal class ResultKtTest {
@@ -13,7 +10,10 @@ internal class ResultKtTest {
         val ex = Exception("ex")
         fun returnEx(): KResult<Unit, Exception> {
             val e: KResult<Unit, Exception> = Err(ex)
-            val t = e getOr { return Err(it) }
+            val (t, err, r) = e
+            if (r.testFailure(t, err)) {
+                return Err(err)
+            }
             return Ok(t)
         }
 

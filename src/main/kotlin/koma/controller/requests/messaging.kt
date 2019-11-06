@@ -50,12 +50,12 @@ fun sendFileMessage(room: RoomId) {
             println("sending $file ${up.content_uri}")
             val fileinfo = FileInfo(type.toString(), file.length())
             val message = FileMessage(file.name, up.content_uri, fileinfo)
-            val r = api.sendMessage(room, message)
-            r.onFailure {
+            val r = api.sendMessage(room, message).failureOrNull()
+            if (r != null) {
                 withContext(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to send file $file")
-                            .text("Error ${it}")
+                            .text("Error ${r}")
                             .showError()
                 }
             }
@@ -75,18 +75,16 @@ fun sendImageMessage(room: RoomId) {
     val api = apiClient
     api?:return
     GlobalScope.launch {
-        val uploadResult = uploadFile(api, file, type)
-        uploadResult.onSuccess {up ->
+        val up = uploadFile(api, file, type).getOrNull()
+        if (up != null) {
             println("sending image $file ${up.content_uri}")
             val msg = ImageMessage(file.name, up.content_uri)
-            val r = api.sendMessage(room, msg)
-            r.onFailure {
-                withContext(Dispatchers.JavaFx) {
+            val it = api.sendMessage(room, msg).failureOrNull() ?: return@launch
+            withContext(Dispatchers.Main) {
                     Notifications.create()
                             .title("Failed to send image $file")
                             .text("Error ${it}")
                             .showError()
-                }
             }
         }
     }

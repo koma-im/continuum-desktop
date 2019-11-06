@@ -5,13 +5,11 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.listview.RoomListView
-import koma.gui.view.usersview.RoomMemberListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.AppStore
@@ -19,7 +17,7 @@ import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
 import koma.network.media.MHUrl
-import koma.util.getOr
+import koma.util.testFailure
 import kotlinx.coroutines.*
 import link.continuum.database.KDataStore
 import link.continuum.database.models.saveRoomAvatar
@@ -105,8 +103,9 @@ private fun CoroutineScope.fixAvatar(room: Room) {
     logger.debug { "fixing unknown avatar of $name" }
     val api = appState.apiClient ?: return
     launch {
-        val av = api.getRoomAvatar(room.id) getOr {
-            logger.warn { "error fixing room $name's avatar, ${it}" }
+        val (av, f, r) = api.getRoomAvatar(room.id)
+        if(r.testFailure(av, f)) {
+            logger.warn { "error fixing room $name's avatar, $f" }
             return@launch
         }
         withContext(UiDispatcher) {
@@ -125,8 +124,9 @@ private fun CoroutineScope.fixRoomName(room: Room) {
     logger.debug { "fixing unknown name of $name" }
     val api = appState.apiClient ?: return
     launch {
-        val n = api.getRoomName(room.id) getOr {
-            logger.warn { "error fixing room $name's name, ${it}" }
+        val (n, f, r) = api.getRoomName(room.id)
+        if (r.testFailure(n, f)){
+            logger.warn { "error fixing room $name's name, ${f}" }
             return@launch
         }
         withContext(UiDispatcher) {

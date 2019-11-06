@@ -5,6 +5,7 @@ import javafx.scene.image.Image
 import koma.Server
 import koma.network.media.MHUrl
 import koma.util.getOr
+import koma.util.testFailure
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.util.None
@@ -37,8 +38,9 @@ class DeferredImage(
     }
 
     private fun CoroutineScope.asyncImage(url: MHUrl, server: Server) = async {
-        val bs = server.downloadMedia(url) getOr {
-            logger.warn { "image $url not downloaded, ${it}, returning None" }
+        val (bs, f, result) = server.downloadMedia(url)
+        if (result.testFailure(bs, f)) {
+            logger.warn { "image $url not downloaded, $f, returning None" }
             return@async None<Image>()
         }
         val img = processing(bs.inputStream())
@@ -59,7 +61,8 @@ private typealias ImageProperty = SimpleObjectProperty<Image>
 fun CoroutineScope.downloadImageResized(url: MHUrl, size: Double, server: Server): ImageProperty {
     val prop = ImageProperty()
     launch {
-        val bs = server.downloadMedia(url) getOr  {
+        val (bs, it, result) = server.downloadMedia(url)
+        if (result.testFailure(bs, it)) {
             logger.error { "download of $url fails with ${it}" }
             return@launch
         }

@@ -10,6 +10,7 @@ import koma.matrix.MatrixApi
 import koma.matrix.UserId
 import koma.util.onFailure
 import koma.util.onSuccess
+import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.javafx.JavaFx
@@ -54,17 +55,17 @@ class SyncControl(
     @ObsoleteCoroutinesApi
     private fun CoroutineScope.startProcessing() {
         launch(Dispatchers.JavaFx) {
-            for (s in sync.events) {
-                s.onSuccess {
+            for ((s, f, r) in sync.events) {
+                if (!r.testFailure(s, f)) {
                     statusChan.send(SyncStatusBar.Variants.Normal())
-                    processEventsResult(it, apiClient, appData = appData, view = view)
+                    processEventsResult(s, apiClient, appData = appData, view = view)
                     val nb = sync.since
                     nb?.let {
                         saveSyncBatchKey(appData.database, user, nb)
                     }
-                }.onFailure {
-                    statusChan.send(SyncStatusBar.Variants.NeedRetry(it))
-                    logger.warn { "sync issue $s" }
+                } else {
+                    statusChan.send(SyncStatusBar.Variants.NeedRetry(f))
+                    logger.warn { "sync issue $f" }
                 }
             }
             logger.debug { "events are no longer processed" }

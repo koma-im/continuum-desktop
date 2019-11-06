@@ -8,6 +8,7 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.user.identity.UserId_new
 import koma.koma_app.appState.apiClient
 import koma.util.getOr
+import koma.util.testFailure
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.VBox
@@ -27,9 +28,10 @@ fun dialogInviteMember(roomId: RoomId) {
 
     val userid = UserId_new(username)
     GlobalScope.launch {
-        apiClient!!.inviteMember(roomId, userid) getOr {
+        val (s, f, r) = apiClient!!.inviteMember(roomId, userid)
+        if (r.testFailure(s, f)) {
             uilaunch {
-                val content = it.toString()
+                val content = f.toString()
                 alert(Alert.AlertType.ERROR, "failed to invite $userid to $roomId", content)
             }
             return@launch

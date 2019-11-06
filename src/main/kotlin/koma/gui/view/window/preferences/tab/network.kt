@@ -55,7 +55,7 @@ class NetworkSettingsTab(
         val proxy = if ( selection is ExistingProxy) {
             selection.proxy
         } else {
-            proxyField.getProxy() getOr {return}
+            proxyField.getProxy().getOrNull()?:return
         }
         settings.proxyList = settings.proxyList.setDefault(proxy)
     }

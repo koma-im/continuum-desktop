@@ -20,6 +20,7 @@ import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.util.KResult
 import koma.util.getOr
+import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.util.http.downloadHttp
@@ -63,7 +64,8 @@ class ImageElement(
         imageView.image = null
         job?.cancel()
         job = launch {
-            val res = dl() getOr {
+            val (res, failure, result) = dl()
+            if (result.testFailure(res, failure)) {
                 return@launch
             }
             val image = Image(res.inputStream())
