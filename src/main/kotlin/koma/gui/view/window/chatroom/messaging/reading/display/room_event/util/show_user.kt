@@ -19,7 +19,9 @@ private val logger = KotlinLogging.logger {}
  * view of user avatar and name when showing a state change event
  */
 @ExperimentalCoroutinesApi
-class StateEventUserView(private val store: UserDataStore) {
+class StateEventUserView(
+        private val store: UserDataStore
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = HBox(5.0)
     private val avatarView = AvatarView(store)
     private val nameLabel: Label
@@ -40,16 +42,13 @@ class StateEventUserView(private val store: UserDataStore) {
         }
         root.add(l)
 
-        GlobalScope.launch {
+        launch(Dispatchers.JavaFx) {
             val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it.first) }
             for (n in newName) {
-                withContext(Dispatchers.JavaFx) {
-                    nameLabel.text = n
-
-                }
+                nameLabel.text = n
             }
         }
-        GlobalScope.launch {
+        launch(Dispatchers.JavaFx) {
             for (id in itemId.openSubscription()) {
                 avatarView.updateUser(id.first, id.second)
                 nameLabel.textFill = store.getUserColor(id.first)
