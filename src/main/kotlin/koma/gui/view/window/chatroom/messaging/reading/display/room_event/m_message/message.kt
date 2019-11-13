@@ -130,7 +130,7 @@ class MRoomMessageViewNode(
 
     override fun toString(): String {
         val body=item?.content?.body
-        return "MessageCell index=$index, time=${timeView.text.text}, body=$body"
+        return "MessageCell index=$index, time=${timeView.root}, body=$body"
     }
 }
 
