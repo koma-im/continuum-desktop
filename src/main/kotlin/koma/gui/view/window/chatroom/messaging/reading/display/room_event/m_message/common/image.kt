@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.component.MxcImageView
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
@@ -100,26 +101,13 @@ object BiggerViews {
         private val stage = Stage().apply {
             isResizable = true
         }
-        private var imageView: ImageView
+        private val imageView = FitImageRegion(cover = false)
         private val closed = AtomicBoolean(false)
 
         init {
             stage.scene = scene
             stage.initOwner(JFX.primaryStage)
-            imageView = ImageView().apply {
-                isPreserveRatio = true
-                isSmooth = true
-            }
-            imageView.fitWidthProperty().bind(
-                    Bindings.createDoubleBinding(Callable {
-                        max(imageView.image?.width ?: 100.0,
-                                root.width)
-                    }, imageView.imageProperty(), root.widthProperty()))
-            imageView.fitHeightProperty().bind(
-                    Bindings.createDoubleBinding(Callable {
-                        max(imageView.image?.height ?: 50.0,
-                                root.height)
-                    }, imageView.imageProperty(), root.heightProperty()))
+
             root.add(imageView)
             stage.addEventFilter(KeyEvent.KEY_RELEASED) {
                 if (it.code != KeyCode.ESCAPE) return@addEventFilter
