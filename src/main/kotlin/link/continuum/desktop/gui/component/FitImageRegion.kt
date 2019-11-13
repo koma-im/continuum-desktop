@@ -25,6 +25,9 @@ class FitImageRegion(
     private val job = AtomicReference<Job?>()
     fun setMxc(mxc: MHUrl, server: Server) {
         val j = launch {
+            withContext(Dispatchers.Main) {
+                image = null
+            }
             val (bs, failure, result) = server.downloadMedia(mxc)
             if (result.testFailure(bs, failure)) {
                 logger.debug { "downloading of $mxc failed" }

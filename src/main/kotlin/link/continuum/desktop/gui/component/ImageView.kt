@@ -26,12 +26,15 @@ class MxcImageView(
     private val job = AtomicReference<Job?>()
     fun setMxc(mxc: MHUrl, server: Server) {
         val j = launch {
+            root as ImageView
+            withContext(Dispatchers.Main) {
+                root.image = null
+            }
             val (bs, failure, result) = server.downloadMedia(mxc)
             if (result.testFailure(bs, failure)) {
                 logger.debug { "downloading of $mxc failed" }
                 return@launch
             }
-            root as ImageView
             val w = 32.0.coerceAtLeast(fitWidth)
             val h = 32.0.coerceAtLeast(fitHeight)
             val img = bs.inputStream().use {

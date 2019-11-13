@@ -27,7 +27,6 @@ class UrlAvatar(
     private val imageView = ImageView()
 
     init {
-        imageView.imageProperty()
         val imageAvl = booleanBinding(imageView.imageProperty()) { value != null }
         initialIcon.root.removeWhen(imageAvl)
 

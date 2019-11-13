@@ -2,15 +2,10 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.membe
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import javafx.event.EventTarget
 import javafx.geometry.Pos
-import javafx.scene.control.MenuItem
-import javafx.scene.image.ImageView
-import javafx.scene.layout.*
+import javafx.scene.layout.Pane
 import javafx.scene.text.Text
 import koma.Server
-import koma.gui.element.icon.avatar.processing.processAvatar
-import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.StateEventUserView
 import koma.koma_app.AppStore
@@ -20,28 +15,17 @@ import koma.matrix.event.room_message.state.MRoomMember
 import koma.matrix.room.participation.Membership
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.HBox
-import link.continuum.desktop.gui.StackPane
-import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.util.http.DL
 import link.continuum.desktop.util.http.MediaServer
-import link.continuum.desktop.util.http.urlChannelDownload
-import link.continuum.desktop.util.onNone
-import link.continuum.desktop.util.onSome
-import link.continuum.desktop.util.toOption
 import model.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
-import java.util.*
 
 private val AppSettings = appState.store.settings
 private val logger = KotlinLogging.logger {}
@@ -54,9 +38,6 @@ class MRoomMemberViewNode(
     init {
         node.add(center)
     }
-    private val scaling: Float = store.settings.scaling
-    private val avatarsize: Double = scaling * 32.0
-    private val minWid: Double = scaling * 40.0
 
     private val userView = StateEventUserView(store.userData)
     private val timeView = DatatimeView()
@@ -73,7 +54,7 @@ class MRoomMemberViewNode(
             alignment = Pos.CENTER
         }
     }
-    private val userUpdate = UserAppearanceUpdateView(avatarsize = avatarsize, minWid = minWid)
+    private val userUpdate = UserAppearanceUpdateView()
 
     override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -157,16 +138,14 @@ private class InvitationContent(
 
 @ExperimentalCoroutinesApi
 class UserAppearanceUpdateView(
-        private val avatarsize: Double,
-        private val minWid: Double
 ){
     val root = VBox()
     private val avatarChangeView: HBox
-    private val oldAvatar = ImageViewAsync().apply {
-        root.style = avStyle
+    private val oldAvatar = FitImageRegion().apply {
+        style = avStyle
     }
-    private val newAvatar = ImageViewAsync().apply {
-        root.style = avStyle
+    private val newAvatar = FitImageRegion().apply {
+        style = avStyle
     }
     private val nameChangeView: HBox
     private val oldName = Text()
@@ -174,8 +153,12 @@ class UserAppearanceUpdateView(
 
     fun updateAvatar(old: MHUrl?, new: MHUrl?, mediaServer: Server) {
         avatarChangeView.showIf(old != new)
-        oldAvatar.updateUrl(old.toOption(), mediaServer)
-        newAvatar.updateUrl(new.toOption(),mediaServer)
+        if (old != null) {
+            oldAvatar.setMxc(old, mediaServer)
+        }
+        if (new != null) {
+            newAvatar.setMxc(new, mediaServer)
+        }
     }
     fun updateName(old: String?, new: String?) {
         nameChangeView.showIf(old != new)
@@ -191,9 +174,9 @@ class UserAppearanceUpdateView(
                 text("updated avatar") {
                     opacity = 0.5
                 }
-                add(oldAvatar.root)
+                add(oldAvatar)
                 addArrowIcon()
-                add(newAvatar.root)
+                add(newAvatar)
             }
 
             nameChangeView = hbox(spacing = 5.0) {
@@ -223,37 +206,7 @@ class UserAppearanceUpdateView(
             maxWidth = size
             prefHeight = size
             prefWidth = size
-        }.toString()
-    }
-}
-
-class ImageViewAsync: CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    val root = FitImageRegion()
-    private val urlChannel: SendChannel<DL>
-    fun updateUrl(url: Optional<MHUrl>, server: Server) {
-        logger.trace { "ImageViewAsync update url $url" }
-        if (!urlChannel.offer(url.map { it to server })) {
-            logger.error { "url $url not offered successfully" }
-        }
-    }
-
-    init {
-        val (tx, rx) = urlChannelDownload()
-        urlChannel = tx
-        launch {
-            for (i in rx) {
-                i.onSome {
-                    it.inputStream().use {
-                        val im = processAvatar(it)
-                        withContext(Dispatchers.JavaFx) {
-                            root.image = im
-                        }
-                    }
-                }.onNone {
-                    root.image = null
-                }
-            }
-        }
+        }.toStyle()
     }
 }
 
