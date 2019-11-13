@@ -26,16 +26,6 @@ internal class ResultKtTest {
     }
 
     @Test
-    fun nullableGetOr() {
-        assertEquals(1, null as Int? `?or` { 1 })
-        assertEquals(null, null as Int? `?or?` { null })
-        assertEquals(2, null as Int? `?or?` { null } `?or?` { 2 })
-        assertEquals(3, null as Int? `?or?` { 3 } `?or?` { null })
-        assertEquals(4, 4 as Int? `?or?` { 3 } `?or?` { null })
-        assertEquals(6, 6 as Int? `?or?` { 3 } `?or` { 5 })
-    }
-
-    @Test
     fun nullableWith() {
         assertEquals(3, 1.given(2) { this.plus(it)})
         assertEquals(1, 1.given(null as Int?) { this.plus(it)})

@@ -4,7 +4,6 @@ import koma.matrix.room.naming.RoomId
 import link.continuum.database.KDataStore
 import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.util.`?or`
 import model.Room
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -16,7 +15,7 @@ class RoomStore(private val data: KDataStore){
 
     fun getOrCreate(roomId: RoomId, account: Account): Room {
         val newRoom = store.computeIfAbsent(roomId) {
-            loadRoom(data, roomId, account) `?or` {
+            loadRoom(data, roomId, account) ?: run {
                 logger.info { "Room $roomId not in database" }
                 Room(roomId, data, account)
             }}

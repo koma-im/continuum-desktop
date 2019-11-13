@@ -9,8 +9,6 @@ import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import link.continuum.database.KDataStore
-import link.continuum.desktop.util.`?or?`
-import link.continuum.desktop.util.`?or`
 import mu.KotlinLogging
 import java.util.*
 
@@ -138,10 +136,10 @@ interface UserPower: Persistable {
 
 fun getRoomMemberPower(data: KDataStore, roomId: RoomId, userId: UserId): Float {
     return data.select(UserPower::class).where(UserPower::room.eq(roomId.id)
-            .and(UserPower::person.eq(userId.str))).get().firstOrNull()?.power?.toFloat()`?or?` {
+            .and(UserPower::person.eq(userId.str))).get().firstOrNull()?.power?.toFloat() ?: run {
         logger.debug { "no power level set for $userId in $roomId, querying room default" }
         data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()?.usersDefault
-    } `?or` {
+    }?: run {
         logger.debug { "no default power level set for user in $roomId, using default" }
         0f
     }
@@ -150,7 +148,7 @@ fun getRoomMemberPower(data: KDataStore, roomId: RoomId, userId: UserId): Float 
 fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId): Boolean {
     val u = getRoomMemberPower(data, roomId, userId)
     val req = data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()
-            ?.stateDefault`?or` {
+            ?.stateDefault ?:run {
         logger.debug { "no default power level set for state events in $roomId, using default 0" }
         0f
     }
@@ -160,10 +158,10 @@ fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId): Boo
 fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId, type: String): Boolean {
     val u = getRoomMemberPower(data, roomId, userId)
     val req = data.select(EventPower::class).where(EventPower::room.eq(roomId.id)
-            .and(EventPower::eventType.eq(type))).get().firstOrNull()?.power?.toFloat() `?or?` {
+            .and(EventPower::eventType.eq(type))).get().firstOrNull()?.power?.toFloat() ?: run {
         logger.debug { "no power level set for state event $type in $roomId, querying room default" }
         data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()?.stateDefault
-    } `?or` {
+    } ?:run {
         logger.debug { "no default power level set for state event $type in $roomId, using default" }
         0f
     }
