@@ -51,7 +51,7 @@ class MImageViewNode(): ViewNode {
         tm.action {
             val u = url
             if (u == null) {
-                link.continuum.desktop.util.gui.alert(Alert.AlertType.ERROR,
+                alert(Alert.AlertType.ERROR,
                         "No url to download")
                 return@action
             }

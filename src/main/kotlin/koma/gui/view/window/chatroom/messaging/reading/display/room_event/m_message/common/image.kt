@@ -11,76 +11,49 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseButton
 import javafx.stage.Stage
-import koma.Failure
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.network.media.MHUrl
-import koma.util.KResult
-import koma.util.testFailure
-import kotlinx.coroutines.*
-import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.component.MxcImageView
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
-@ExperimentalCoroutinesApi
 class ImageElement(
         private val imageSize: Double = 200.0
 ) : ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
-    private var imageView: ImageView
-    private var title: String = ""
-    private var url: HttpUrl? = null
-    private var job: Job? = null
+    private var imageView = MxcImageView().apply {
+        fitHeight = imageSize
+        fitWidth = imageSize
+    }
+    private var url: MHUrl? = null
     private var server: Server? = null
 
     fun update(mxc: MHUrl, server: Server) {
-        this.url = server.mxcToHttp(mxc)
-        title = mxc.toString()
-        updateImage { server.downloadMedia(mxc) }
-    }
-
-    private fun updateImage(dl: suspend () -> KResult<ByteArray, Failure>) {
-        imageView.image = null
-        job?.cancel()
-        job = launch {
-            val (res, failure, result) = dl()
-            if (result.testFailure(res, failure)) {
-                return@launch
-            }
-            val image = Image(res.inputStream())
-            if (image.width > imageSize) {
-                imageView.fitHeight = imageSize
-                imageView.fitWidth = imageSize
-                imageView.isPreserveRatio = true
-                imageView.isSmooth = true
-            }
-            withContext(Dispatchers.JavaFx) {
-                imageView.image = image
-            }
-        }
+        imageView.setMxc(mxc, server)
+        this.url = mxc
     }
 
     init {
-        imageView = ImageView()
-        node.add(imageView)
+        node.add(imageView.root)
         node.setOnMouseClicked { event ->
             if (event.button == MouseButton.PRIMARY) {
-                BiggerViews.show(title, imageView.image)
+                BiggerViews.show(url.toString(), imageView.image)
             }
         }
-
 
         menuItems = menuItems()
     }
@@ -88,8 +61,7 @@ class ImageElement(
     private fun menuItems(): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.setOnAction {
-            val u = url
-            if (u == null) {
+            val u = url?: run {
                 alert(
                         Alert.AlertType.ERROR,
                         "Can't download",
@@ -97,7 +69,7 @@ class ImageElement(
                 )
                 return@setOnAction
             }
-            val s = server?.httpClient ?: run {
+            val s = server ?: run {
                 alert(
                         Alert.AlertType.ERROR,
                         "Can't download",
@@ -105,7 +77,7 @@ class ImageElement(
                 )
                 return@setOnAction
             }
-            downloadFileAs(u, title = "Save Image As", httpClient = s )
+            downloadFileAs(s.mxcToHttp(u), title = "Save Image As", httpClient = s.httpClient)
         }
         return listOf(tm)
     }
