@@ -10,25 +10,22 @@ import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseButton
-import link.continuum.desktop.gui.StackPane
 import javafx.stage.Stage
 import koma.Failure
 import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
-import koma.koma_app.appState
 import koma.network.media.MHUrl
 import koma.util.KResult
-import koma.util.getOr
 import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import link.continuum.desktop.util.http.downloadHttp
 import link.continuum.desktop.gui.JFX
+import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.add
+import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
@@ -37,8 +34,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class ImageElement(
-        private val httpClient: OkHttpClient,
-        private val imageSize: Double = 200.0 * appState.store.settings.scaling
+        private val imageSize: Double = 200.0
 ) : ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
@@ -47,12 +43,7 @@ class ImageElement(
     private var title: String = ""
     private var url: HttpUrl? = null
     private var job: Job? = null
-
-    fun update(url: HttpUrl) {
-        this.url = url
-        title = url.toString()
-        updateImage { downloadHttp(url, httpClient) }
-    }
+    private var server: Server? = null
 
     fun update(mxc: MHUrl, server: Server) {
         this.url = server.mxcToHttp(mxc)
@@ -99,14 +90,22 @@ class ImageElement(
         tm.setOnAction {
             val u = url
             if (u == null) {
-                link.continuum.desktop.util.gui.alert(
+                alert(
                         Alert.AlertType.ERROR,
                         "Can't download",
                         "url is null"
                 )
-            } else {
-                downloadFileAs(u, title = "Save Image As", httpClient = httpClient )
+                return@setOnAction
             }
+            val s = server?.httpClient ?: run {
+                alert(
+                        Alert.AlertType.ERROR,
+                        "Can't download",
+                        "http client is null"
+                )
+                return@setOnAction
+            }
+            downloadFileAs(u, title = "Save Image As", httpClient = s )
         }
         return listOf(tm)
     }

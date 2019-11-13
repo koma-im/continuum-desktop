@@ -63,6 +63,9 @@ private object EmojiSeparator: EmojiParser() {
     }
 }
 
+/**
+ * string
+ */
 sealed class TextSegment()
 
 class PlainTextSegment(

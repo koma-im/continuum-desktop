@@ -9,6 +9,7 @@ import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
+import koma.Server
 import koma.gui.element.emoji.icon.EmojiIcon
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.MediaViewers
@@ -35,31 +36,30 @@ class InlineElement(override val node: Node): FlowElement() {
     fun endsWithNewline(): Boolean = this.node is Text && this.node.text.lastOrNull() == '\n'
 }
 
-fun TextSegment.toFlow(koma: OkHttpClient): FlowElement {
-    return when(this) {
-        is PlainTextSegment -> InlineElement(Text(this.text))
-        is LinkTextSegment -> WebContentNode(this.text, koma)
-        is EmojiTextSegment -> makeEmojiElement(this.emoji)
+fun messageSliceView(slice: TextSegment, server: Server): FlowElement {
+    return when(slice) {
+        is PlainTextSegment -> InlineElement(Text(slice.text))
+        is LinkTextSegment -> WebContentNode(slice.text, server)
+        is EmojiTextSegment -> {
+            val icon = EmojiIcon(slice.emoji, settings.fontSize)
+            InlineElement(icon.node)
+        }
     }
 }
 
-private fun makeEmojiElement(emoji: String): InlineElement {
-    val icon = EmojiIcon(emoji, settings.fontSize)
-    return InlineElement(icon.node)
-}
 
 /**
  * link with optional preview
  */
 @ExperimentalCoroutinesApi
 class WebContentNode(private val link: String,
-                     koma: OkHttpClient
+                     server: Server
 ): FlowElement() {
     override val node = VBox()
     val multiLine: Boolean
 
     private val menuItems = mutableListOf<MenuItem>()
-    private val mediaViewers = MediaViewers(koma)
+    private val mediaViewers = MediaViewers(server)
     init {
         val linknode = hyperlinkNode(link)
         node.add(linknode)

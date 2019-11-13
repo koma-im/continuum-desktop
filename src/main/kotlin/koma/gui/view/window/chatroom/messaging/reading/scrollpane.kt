@@ -40,7 +40,7 @@ class MessagesListScrollPane(
 ): CoroutineScope by CoroutineScope(Dispatchers.Main)  {
     private val virtualList: KListView<EventItem, MessageCell> = KListView(EventCellPool()) {
         logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
-        createCell(it?.first?.getEvent(), km, store)
+        createCell(it?.first?.getEvent(), store)
     }.apply {
         view.styleClass.add("message-list-view")
     }

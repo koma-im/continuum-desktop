@@ -11,20 +11,18 @@ import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.koma_app.AppStore
-import koma.koma_app.Globals
 import koma.matrix.NotificationResponse
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
-import koma.matrix.event.room_message.chat.M_Message
-import koma.matrix.json.MoshiInstance
 import koma.util.getOrThrow
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
-import java.io.File
 
 private typealias Notification = NotificationResponse.Notification
 private typealias Item = Notification
@@ -98,7 +96,7 @@ private class NotificationCell(
             add(center)
         }
     }
-    private val messageView = MessageView(store.userData, Globals.httpClient)
+    private val messageView = MessageView(store.userData)
     private val fallbackCell = TextFlow().apply {
         // wrap text
         minWidth = 1.0

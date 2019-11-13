@@ -3,6 +3,7 @@ package link.continuum.desktop.gui
 import javafx.application.Application
 import javafx.beans.Observable
 import javafx.beans.binding.*
+import javafx.beans.property.DoubleProperty
 import javafx.beans.property.Property
 import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
@@ -422,6 +423,12 @@ fun clipboardPutString(text: String){
 }
 
 fun <T> prop(property: Property<T>) = PropertyDelegate(property)
+fun prop(dproperty: DoubleProperty) = object: ReadWriteProperty<Any, Double> {
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: Double) {
+        dproperty.value = value
+    }
+    override fun getValue(thisRef: Any, property: KProperty<*>): Double = dproperty.value
+}
 
 class PropertyDelegate<T: Any?>(val fxProperty: Property<T>) : ReadWriteProperty<Any, T> {
 

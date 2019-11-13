@@ -22,6 +22,7 @@ import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.util.http.MediaServer
 import model.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
@@ -30,7 +31,6 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        km: OkHttpClient,
         store: AppStore
 ): MessageCell(store) {
     override val center = StackPane()
@@ -44,7 +44,7 @@ class MRoomMessageViewNode(
     private val senderLabel = Text()
     private val senderId = Channel<UserId>(Channel.CONFLATED)
     private val contentBox = HBox(5.0)
-    private val content by  lazy { MessageView(userData, km) }
+    private val content by  lazy { MessageView(userData) }
 
     companion object {
         private val pad2 = Insets(2.0)

@@ -5,7 +5,12 @@ import javafx.scene.image.Image
 import javafx.scene.layout.*
 
 
-class FitImageRegion: Region(){
+class FitImageRegion(
+        /**
+         * scale up the image to cover the entire region
+         */
+        cover: Boolean = true
+): Region(){
     val imageProperty = SimpleObjectProperty<Image?>()
     var image
         get() = imageProperty.get()
@@ -16,19 +21,29 @@ class FitImageRegion: Region(){
                 backgroundProperty().set(null)
                 return@addListener
             }
-            this.backgroundProperty().set(
-                    Background(BackgroundImage(image,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundRepeat.NO_REPEAT,
-                            BackgroundPosition.CENTER,
-                            bgSize
-                    ))
-            )
+            val backgroundImage = if (cover) {
+                BackgroundImage(image,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        bgSize
+                )
+            } else {
+                BackgroundImage(image,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundRepeat.NO_REPEAT,
+                        BackgroundPosition.CENTER,
+                        bgSizeContain)
+            }
+            this.backgroundProperty().set(Background(backgroundImage))
         }
     }
     companion object {
         private val bgSize =  BackgroundSize(100.0, 100.0,
                 true, true,
                 false, true)
+        private val bgSizeContain =  BackgroundSize(100.0, 100.0,
+                true, true,
+                true, false)
     }
 }

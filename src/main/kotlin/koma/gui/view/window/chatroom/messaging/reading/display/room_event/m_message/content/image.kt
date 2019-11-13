@@ -13,6 +13,8 @@ import koma.matrix.event.room_message.chat.ImageMessage
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.action
+import link.continuum.desktop.util.gui.alert
+import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -20,18 +22,20 @@ import okhttp3.OkHttpClient
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
-class MImageViewNode(private val km: OkHttpClient): ViewNode {
+class MImageViewNode(): ViewNode {
     override val menuItems: List<MenuItem>  = createMenuItems()
 
     private var url: HttpUrl? = null
     private var filename: String? =null
-    private var image = ImageElement(km)
+    private var image = ImageElement()
     override val node = image.node
     private val tooltip = Tooltip()
+    private var server: MediaServer? = null
     init {
         Tooltip.install(node, tooltip)
     }
     fun update(content: ImageMessage, server: Server) {
+        this.server = server
         val u = content.url.parseMxc()
         if (u == null) {
             logger.warn { "url ${content.url} not parsed" }
@@ -49,9 +53,14 @@ class MImageViewNode(private val km: OkHttpClient): ViewNode {
             if (u == null) {
                 link.continuum.desktop.util.gui.alert(Alert.AlertType.ERROR,
                         "No url to download")
-            } else {
-                downloadFileAs(u, filename = filename ?: "image", title = "Save Image As", httpClient = km)
+                return@action
             }
+            val httpClient = server?.httpClient ?: kotlin.run {
+                alert(Alert.AlertType.ERROR,
+                        "No server to download")
+                return@action
+            }
+            downloadFileAs(u, filename = filename ?: "image", title = "Save Image As", httpClient = httpClient)
         }
 
         val copyUrl = MenuItem("Copy Image Address")

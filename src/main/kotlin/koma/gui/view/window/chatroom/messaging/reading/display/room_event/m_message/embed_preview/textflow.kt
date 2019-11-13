@@ -3,19 +3,19 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
+import koma.Server
 import link.continuum.desktop.gui.add
 import okhttp3.OkHttpClient
 
-fun TextFlow.addStringWithElements(str: String, koma: OkHttpClient) {
+fun TextFlow.addStringWithElements(str: String, server: Server) {
     val textelements = tokenize_string(str)
-    val nodes = textelements.map { it.toFlow(koma) }.toNodes()
-    this.addNodes(nodes)
+    val nodes = textelements.map { messageSliceView(it, server) }.toNodes()
+    this.children.addAll(nodes)
 }
 
-fun TextFlow.addNodes(nodes: List<Node>) {
-    nodes.forEach {  this.add(it) }
-}
-
+/**
+ * put larger elements on new lines
+ */
 fun List<FlowElement>.toNodes(): List<Node> {
     val nodes = mutableListOf<Node>()
     var prev = this.firstOrNull()

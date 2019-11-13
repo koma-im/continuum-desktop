@@ -24,6 +24,7 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.util.http.MediaServer
 import model.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
@@ -32,10 +33,10 @@ private val logger = KotlinLogging.logger {}
 
 private val sourceViewer by lazy { EventSourceViewer() }
 
-fun createCell(item: RoomEvent?, km: OkHttpClient, store: AppStore): MessageCell {
+fun createCell(item: RoomEvent?, store: AppStore): MessageCell {
     val x = when (item) {
         is MRoomMember -> MRoomMemberViewNode(store)
-        is MRoomMessage -> MRoomMessageViewNode(km, store)
+        is MRoomMessage -> MRoomMessageViewNode(store)
         is MRoomCreate -> MRoomCreationViewNode(store)
         is MRoomGuestAccess -> GuestAccessUpdateView(store)
         is MRoomHistoryVisibility -> HistoryVisibilityEventView(store)

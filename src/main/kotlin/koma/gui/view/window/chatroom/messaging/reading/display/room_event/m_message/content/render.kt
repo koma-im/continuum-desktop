@@ -7,19 +7,19 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.http.MediaServer
 import okhttp3.OkHttpClient
 
 @ExperimentalCoroutinesApi
 class MessageView(
-        private val userDataStore: UserDataStore,
-        private val km: OkHttpClient
+        private val userDataStore: UserDataStore
 ) {
     var node: ViewNode? = null
 
-    private val emote by lazy { MEmoteViewNode(userDataStore, km) }
-    private val notice by lazy { MNoticeViewNode(km) }
-    private val text by lazy { MTextViewNode(km) }
-    private val image by lazy { MImageViewNode(km) }
+    private val emote by lazy { MEmoteViewNode(userDataStore) }
+    private val notice by lazy { MNoticeViewNode() }
+    private val text by lazy { MTextViewNode() }
+    private val image by lazy { MImageViewNode() }
     fun update(message: MRoomMessage, server: Server) {
         val content = message.content
         update(content, server, message.sender)
@@ -27,13 +27,13 @@ class MessageView(
     fun update(content: M_Message?, server: Server, sender: UserId) {
         node = when(content) {
             is TextMessage ->text.apply {
-                update(content)
+                update(content, server)
             }
             is NoticeMessage -> notice.apply{
-                update(content)
+                update(content, server)
             }
             is EmoteMessage -> emote.apply{
-                update(content, sender)
+                update(content, sender, server)
             }
             is ImageMessage -> image.apply { update(content, server) }
             is FileMessage -> {

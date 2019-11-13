@@ -15,33 +15,33 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.http.MediaServer
 import okhttp3.OkHttpClient
 
-class MTextViewNode(private val koma: OkHttpClient): ViewNode {
+class MTextViewNode(): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
-    fun update(content: TextMessage) {
+    fun update(content: TextMessage, server: MediaServer) {
         node.children.clear()
-        node.addStringWithElements(content.body, koma)
+        node.addStringWithElements(content.body, server)
     }
 }
 
-class MNoticeViewNode(private val httpClient: OkHttpClient): ViewNode {
+class MNoticeViewNode(): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
-    fun update(content: NoticeMessage) {
+    fun update(content: NoticeMessage, server: MediaServer) {
         node.children.clear()
-        node.addStringWithElements(content.body, httpClient)
+        node.addStringWithElements(content.body, server)
     }
 }
 
 
 @ExperimentalCoroutinesApi
 class MEmoteViewNode(
-        private val userData: UserDataStore,
-        private val koma: OkHttpClient
+        private val userData: UserDataStore
 ): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
@@ -51,7 +51,7 @@ class MEmoteViewNode(
     private var nameUpdateChannel: ReceiveChannel<String>? = null
     private var nameUpdateJob: Job? = null
 
-    fun update(content: EmoteMessage, sender: UserId) {
+    fun update(content: EmoteMessage, sender: UserId, server: MediaServer) {
         userLabel.text = ""
         node.children.clear()
         userLabel.textFill = userData.getUserColor(sender)
@@ -64,7 +64,7 @@ class MEmoteViewNode(
 
         node.add(userLabel)
         node.add(Text(" "))
-        node.addStringWithElements(content.body, koma)
+        node.addStringWithElements(content.body, server)
     }
 
     private suspend fun updateName(updates: ReceiveChannel<String>) = coroutineScope {
