@@ -46,13 +46,14 @@ class ImageElement(
     fun update(mxc: MHUrl, server: Server) {
         imageView.setMxc(mxc, server)
         this.url = mxc
+        this.server = server
     }
 
     init {
         node.add(imageView.root)
         node.setOnMouseClicked { event ->
             if (event.button == MouseButton.PRIMARY) {
-                BiggerViews.show(url.toString(), imageView.image)
+                BiggerViews.show(url.toString(), imageView.image, url, server)
             }
         }
 
@@ -87,12 +88,17 @@ class ImageElement(
 object BiggerViews {
     private val views = mutableListOf<View>()
 
-    fun show(title: String, image: Image?) {
+    fun show(title: String, image: Image?, url: MHUrl?, server: Server?) {
         val view = if (views.isEmpty()) {
             logger.info { "creating img viewer window" }
             View()
         } else views.removeAt(views.size - 1)
         view.show(title, image)
+        if (url != null && server != null) {
+            view.imageView.setMxc(url, server, 400.0, 400.0)
+        } else {
+            logger.debug { "url=$url, server=$server"}
+        }
     }
 
     private class View() {
@@ -101,7 +107,7 @@ object BiggerViews {
         private val stage = Stage().apply {
             isResizable = true
         }
-        private val imageView = FitImageRegion(cover = false)
+        val imageView = FitImageRegion(cover = false)
         private val closed = AtomicBoolean(false)
 
         init {
