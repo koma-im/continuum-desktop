@@ -1,7 +1,10 @@
 package link.continuum.desktop.gui.icon.avatar
 
 import javafx.application.Platform
+import javafx.geometry.Insets
+import javafx.scene.effect.DropShadow
 import javafx.scene.image.ImageView
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
@@ -11,14 +14,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.component.FitImageRegion
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-class UrlAvatar(
+abstract class UrlAvatar(
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    val root = object :StackPane() {
+    val root: Region = object :StackPane() {
         // roughly aligned with text vertically
         override fun getBaselineOffset(): Double = height * 0.75
     }
@@ -28,6 +32,7 @@ class UrlAvatar(
     init {
         initialIcon.root.removeWhen(imageView.imageProperty.isNotNull)
 
+        root as StackPane
         root.add(initialIcon.root)
         root.add(imageView)
     }
@@ -43,5 +48,40 @@ class UrlAvatar(
     }
 
     companion object {
+    }
+}
+
+/**
+ * width and height are about two lines
+ */
+class Avatar2L: UrlAvatar() {
+    init {
+        root as StackPane
+        root.style = rootStyle
+    }
+    companion object {
+        private val rootStyle = StyleBuilder {
+            fixHeight(2.2.em)
+            fixWidth(2.2.em)
+        }.toStyle()
+        private val clipStyle = StyleBuilder {
+        }
+    }
+}
+
+
+/**
+ * width and height are about two lines
+ */
+class AvatarInline: UrlAvatar() {
+    init {
+        root as StackPane
+        root.style = rootStyle
+    }
+    companion object {
+        private val rootStyle = StyleBuilder {
+            fixHeight(1.em)
+            fixWidth(1.em)
+        }.toStyle()
     }
 }

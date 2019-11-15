@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.component.FitImageRegion
+import link.continuum.desktop.gui.icon.avatar.Avatar2L
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
@@ -29,24 +30,16 @@ private val logger = KotlinLogging.logger {}
 
 class AvatarAlways(
 ): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val avatar = UrlAvatar()
+    private val avatar = Avatar2L()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK
 
     init {
         this.add(avatar.root)
-        avatar.root.style = avatarStyle
         name.addListener { _, _, n: String? ->
             n?:return@addListener
             this.avatar.updateName(n, color)
         }
-    }
-    companion object {
-        private val avatarStyle = StyleBuilder().apply {
-            val size = 2.em
-            fixWidth(size)
-            fixHeight(size)
-        }.toStyle()
     }
 
     fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl?>,

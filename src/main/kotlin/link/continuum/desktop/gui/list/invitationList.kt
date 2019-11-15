@@ -10,18 +10,16 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.appState
 import koma.matrix.room.naming.RoomId
 import koma.network.media.parseMxc
-import koma.util.getOr
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.icon.avatar.UrlAvatar
+import link.continuum.desktop.gui.icon.avatar.Avatar2L
+import link.continuum.desktop.gui.icon.avatar.AvatarInline
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-@ExperimentalCoroutinesApi
 class InvitationsView(
         private val scaling: Double = 1.0
 ) {
@@ -51,17 +49,12 @@ class InvitationsView(
         list.add(c.cell)
     }
 
-    @ExperimentalCoroutinesApi
     private inner class InvitationCell(
             private val scaling: Double = 1.0
     ) {
         private val inviter = Label()
-        private val inviterAvatar = UrlAvatar().also {
-            it.root.style = inlineAvatarStyle
-        }
-        private val roomAvatar = UrlAvatar().also {
-            it.root.style = avatarStyle
-        }
+        private val inviterAvatar = AvatarInline()
+        private val roomAvatar = Avatar2L()
         private val roomLabel = Text()
         private var roomId: RoomId? = null
 
@@ -125,22 +118,6 @@ class InvitationsView(
         fun remove() {
             list.children.remove(this.cell)
             spareCells.add(this)
-        }
-    }
-    private companion object {
-        private val avatarStyle: String
-        private val inlineAvatarStyle: String
-        init {
-            val size = 2.4.em
-            avatarStyle = StyleBuilder{
-                fixWidth(size)
-                fixHeight(size)
-            }.toStyle()
-            val inlineSize = 1.em
-            inlineAvatarStyle = StyleBuilder {
-                fixWidth(inlineSize)
-                fixHeight(inlineSize)
-            }.toStyle()
         }
     }
 }

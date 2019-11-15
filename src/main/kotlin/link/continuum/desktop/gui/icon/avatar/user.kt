@@ -1,5 +1,6 @@
 package link.continuum.desktop.gui.icon.avatar
 
+import javafx.scene.layout.Region
 import link.continuum.desktop.gui.StackPane
 import koma.Server
 import koma.matrix.UserId
@@ -25,28 +26,20 @@ private val counter = AtomicInteger(0)
 class AvatarView(
         private val userData: UserDataStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val avatar = UrlAvatar()
-    val root: StackPane
+    private val avatar = Avatar2L()
+    val root: Region
         get() = avatar.root
 
     private val user = Channel<Pair<UserId, Server>>(Channel.CONFLATED)
 
     init {
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
-        root.style = style
 
         launch {
             switchUpdateUser(user)
         }
     }
 
-    companion object {
-        private val style = StyleBuilder().apply {
-            val size = 2.em
-            fixWidth(size)
-            fixHeight(size)
-        }.toStyle()
-    }
     fun updateUser(userId: UserId, server: MediaServer) {
         if (!user.offer(userId to server)) {
             logger.error { "failed to update user of avatar view to $userId" }
