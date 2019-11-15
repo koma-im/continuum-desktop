@@ -71,7 +71,10 @@ tasks.withType<KotlinCompile> {
         jvmTarget = "9"
         freeCompilerArgs = listOf(
                 "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi")
+                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi"
+                , "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
+                , "-XXLanguage:+InlineClasses"
+        )
     }
 }
 
