@@ -1,9 +1,6 @@
 package link.continuum.desktop.gui.list.user
 
-import javafx.scene.image.Image
 import javafx.scene.paint.Color
-import koma.Server
-import koma.gui.element.icon.avatar.processing.processAvatar
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.network.media.MHUrl
@@ -11,7 +8,6 @@ import koma.network.media.parseMxc
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
 import link.continuum.database.KDataStore
@@ -20,9 +16,6 @@ import link.continuum.database.models.getLatestNick
 import link.continuum.database.models.saveUserAvatar
 import link.continuum.database.models.saveUserNick
 import link.continuum.desktop.gui.UpdateConflater
-import link.continuum.desktop.gui.icon.avatar.DeferredImage
-import link.continuum.desktop.gui.switchGetDeferred
-import link.continuum.desktop.util.Option
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 

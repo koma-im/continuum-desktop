@@ -2,22 +2,20 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.application.Platform
 import javafx.scene.image.ImageView
-import link.continuum.desktop.gui.StackPane
 import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
+import javafx.scene.shape.Rectangle
 import koma.Server
 import koma.network.media.MHUrl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.booleanBinding
+import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.component.FitImageRegion
-import link.continuum.desktop.gui.removeWhen
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-@ExperimentalCoroutinesApi
 class UrlAvatar(
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     val root = object :StackPane() {
@@ -42,5 +40,8 @@ class UrlAvatar(
     fun updateUrl(url: MHUrl?, server: Server) {
         url?:return
         imageView.setMxc(url, server)
+    }
+
+    companion object {
     }
 }

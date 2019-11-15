@@ -306,6 +306,8 @@ enum class CssKey(val str: String) {
     MaxHeight("-fx-max-height"),
     FontSize("-fx-font-size"),
     FontFamily("-fx-font-family"),
+    ArcHeight("-fx-arc-height"),
+    ArcWidth("-fx-arc-width"),
 }
 class StyleBuilder(block: StyleBuilder.() -> Unit = {}) {
     private val properties = linkedMapOf<String, ToCss>()
@@ -317,6 +319,8 @@ class StyleBuilder(block: StyleBuilder.() -> Unit = {}) {
     var maxHeight: SizeWithUnit?   by cssProp(CssKey.MaxHeight.str)
     var fontSize: SizeWithUnit?  by cssProp(CssKey.FontSize.str)
     var fontFamily: GenericFontFamily?   by cssProp(CssKey.FontFamily.str)
+    var arcWidth: SizeWithUnit?   by cssProp(CssKey.ArcWidth.str)
+    var arcHeight: SizeWithUnit? by cssProp(CssKey.ArcHeight.str)
     init {
         this.block()
     }
