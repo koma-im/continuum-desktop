@@ -6,8 +6,6 @@ import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.WeakChangeListener
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
-import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import koma.Server
 import koma.koma_app.appState
@@ -19,6 +17,7 @@ import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
+import link.continuum.desktop.gui.icon.avatar.UrlAvatar
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
 import kotlin.math.max
@@ -30,32 +29,24 @@ private val logger = KotlinLogging.logger {}
 
 class AvatarAlways(
 ): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val initialIcon = InitialIcon()
+    private val avatar = UrlAvatar()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK
-    val imageRegion = FitImageRegion()
 
     init {
-        val imageAvl = imageRegion.imageProperty.isNotNull
-        add(imageRegion)
-        this.add(initialIcon.root)
-        initialIcon.root.removeWhen(imageAvl)
-        style = AvatarAlways.Companion.style
+        this.add(avatar.root)
+        avatar.root.style = avatarStyle
         name.addListener { _, _, n: String? ->
             n?:return@addListener
-            this.initialIcon.updateItem(n, color)
+            this.avatar.updateName(n, color)
         }
     }
     companion object {
-        private val style = StyleBuilder().apply {
+        private val avatarStyle = StyleBuilder().apply {
             val size = 2.em
-            prefWidth = size
-            prefHeight = size
-            minWidth = size
-            minHeight = size
-            maxWidth = size
-            maxHeight = size
-        }.toString()
+            fixWidth(size)
+            fixHeight(size)
+        }.toStyle()
     }
 
     fun bind(name: ObservableValue<String>, color: Color, url: ObservableValue<AvatarUrl?>,
@@ -65,7 +56,7 @@ class AvatarAlways(
         bindImage(url, server)
     }
 
-    fun bindName(name: ObservableValue<String>, color: Color) {
+    private fun bindName(name: ObservableValue<String>, color: Color) {
         this.name.unbind()
         this.color = color
         this.name.bind(name)
@@ -73,14 +64,9 @@ class AvatarAlways(
 
     private var listener: ChangeListener<AvatarUrl?>? = null
 
-    fun bindImage(urlV: ObservableValue<AvatarUrl?>, server: Server) {
-        val im = SimpleObjectProperty<Image>()
+    private fun bindImage(urlV: ObservableValue<AvatarUrl?>, server: Server) {
         fun changeUrl(it: AvatarUrl?) {
-            im.unbind()
-            im.value = null
-            logger.debug { "new avatar url $it" }
-            it ?: return
-            im.bind(downloadImageResized(it, max(this.width, 32.0), server))
+            avatar.updateUrl(it, server)
         }
         changeUrl(urlV.value)
         listener = ChangeListener {
@@ -88,6 +74,5 @@ class AvatarAlways(
             changeUrl(newValue)
         }
         urlV.addListener(WeakChangeListener(listener))
-        imageRegion.imageProperty.cleanBind(im)
     }
 }

@@ -22,23 +22,20 @@ import java.util.concurrent.atomic.AtomicInteger
 private val logger = KotlinLogging.logger {}
 private val counter = AtomicInteger(0)
 
-@ExperimentalCoroutinesApi
 class AvatarView(
         private val userData: UserDataStore
-) {
-    val root = StackPane()
-    private val initialIcon = InitialIcon()
-    private val imageView = FitImageRegion()
+): CoroutineScope by CoroutineScope(Dispatchers.Default) {
+    private val avatar = UrlAvatar()
+    val root: StackPane
+        get() = avatar.root
 
     private val user = Channel<Pair<UserId, Server>>(Channel.CONFLATED)
 
     init {
         logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
         root.style = style
-        root.add(initialIcon.root)
-        root.add(imageView)
 
-        GlobalScope.launch {
+        launch {
             switchUpdateUser(user)
         }
     }
@@ -46,12 +43,8 @@ class AvatarView(
     companion object {
         private val style = StyleBuilder().apply {
             val size = 2.em
-            minHeight = size
-            minWidth = size
-            prefHeight = size
-            prefWidth = size
-            maxHeight = size
-            maxWidth = size
+            fixWidth(size)
+            fixHeight(size)
         }.toStyle()
     }
     fun updateUser(userId: UserId, server: MediaServer) {
@@ -60,45 +53,32 @@ class AvatarView(
         }
     }
 
-    @ExperimentalCoroutinesApi
     fun CoroutineScope.switchUpdateUser(input: ReceiveChannel<Pair<UserId, Server>>) {
         launch {
             var current = input.receive()
             var name = userData.getNameUpdates(current.first)
-            var image = userData.getAvatarImageUpdates(current.first, current.second)
+            var image = userData.getAvatarUrlUpdates(current.first)
             loop@ while (isActive) {
                 val noMore = select<Boolean> {
                     input.onReceiveOrNull { k ->
-                        k?.let {
-                            logger.trace { "switching to avatar for $k" }
-                            current = it
-                            name.cancel()
-                            image.cancel()
-                            initialIcon.show()
-                            imageView.image = null
-                            name = userData.getNameUpdates(current.first)
-                            image = userData.getAvatarImageUpdates(current.first, current.second)
-                            false
-                        } ?: true
+                        k?: return@onReceiveOrNull true
+                        logger.trace { "switching to avatar for $k" }
+                        current = k
+                        name.cancel()
+                        image.cancel()
+                        name = userData.getNameUpdates(current.first)
+                        image = userData.getAvatarUrlUpdates(current.first)
+                        false
                     }
                     image.onReceive {
-                        logger.trace { "got updated ${it.isPresent} image for $current" }
-                        withContext(Dispatchers.JavaFx) {
-                            it.onSome {
-                                imageView.image = it
-                                initialIcon.hide()
-                            }.onNone {
-                                initialIcon.show()
-                                imageView.image = null
-                            }
-                        }
+                        avatar.updateUrl(it, current.second)
                         false
                     }
                     name.onReceive {
                         logger.trace { "getting generated avatar for $current with name $it" }
+                        val color = userData.getUserColor(current.first)
                         withContext(Dispatchers.JavaFx) {
-                            val color = userData.getUserColor(current.first)
-                            initialIcon.updateItem(it, color)
+                            avatar.updateName(it, color)
                         }
                         false
                     }

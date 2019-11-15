@@ -60,9 +60,7 @@ class UserDataStore(
         val c = u.subscribe()
         return c
     }
-    val avatarFetcher = DeferredImage({ i -> processAvatar(i)})
     private val avatarUrlUpdates = ConcurrentHashMap<UserId, UpdateConflater<MHUrl>>()
-    private val avatarImageUpdates = ConcurrentHashMap<UserId, ConflatedBroadcastChannel<Option<Image>>>()
     suspend fun updateAvatarUrl(userId: UserId, avatarUrl: MHUrl, time: Long) {
         val c = avatarUrlUpdates.get(userId)
         if (c!= null) {
@@ -70,15 +68,6 @@ class UserDataStore(
             c.update(time, avatarUrl)
         }
         saveUserAvatar(data, userId, avatarUrl.toString(), time)
-    }
-    fun getAvatarImageUpdates(userId: UserId, server: Server): ReceiveChannel<Option<Image>> {
-        val imageBroadcast = avatarImageUpdates.computeIfAbsent(userId) {
-            val urls = getAvatarUrlUpdates(userId)
-            val av = ConflatedBroadcastChannel<Option<Image>>()
-            switchGetDeferred(urls, { u -> avatarFetcher.getDeferred(u, server) }, av)
-            av
-        }
-        return imageBroadcast.openSubscription()
     }
 
     fun getAvatarUrlUpdates(userId: UserId): ReceiveChannel<MHUrl> {

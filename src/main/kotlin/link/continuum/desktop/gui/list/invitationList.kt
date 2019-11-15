@@ -55,12 +55,13 @@ class InvitationsView(
     private inner class InvitationCell(
             private val scaling: Double = 1.0
     ) {
-        private val inviterAvatarSize = scaling * 12.0
-        private val roomAvatarSize = scaling * 32.0
-
         private val inviter = Label()
-        private val inviterAvatar = UrlAvatar(inviterAvatarSize)
-        private val roomAvatar = UrlAvatar(roomAvatarSize)
+        private val inviterAvatar = UrlAvatar().also {
+            it.root.style = inlineAvatarStyle
+        }
+        private val roomAvatar = UrlAvatar().also {
+            it.root.style = avatarStyle
+        }
         private val roomLabel = Text()
         private var roomId: RoomId? = null
 
@@ -124,6 +125,22 @@ class InvitationsView(
         fun remove() {
             list.children.remove(this.cell)
             spareCells.add(this)
+        }
+    }
+    private companion object {
+        private val avatarStyle: String
+        private val inlineAvatarStyle: String
+        init {
+            val size = 2.4.em
+            avatarStyle = StyleBuilder{
+                fixWidth(size)
+                fixHeight(size)
+            }.toStyle()
+            val inlineSize = 1.em
+            inlineAvatarStyle = StyleBuilder {
+                fixWidth(inlineSize)
+                fixHeight(inlineSize)
+            }.toStyle()
         }
     }
 }

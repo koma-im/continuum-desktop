@@ -15,19 +15,14 @@ import javafx.scene.control.*
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
-import javafx.scene.layout.HBox as HBoxJ
-import javafx.scene.layout.VBox as VBoxJ
-import javafx.scene.layout.StackPane as StackPaneJ
 import javafx.scene.paint.Color
-import javafx.scene.shape.Ellipse
-import javafx.scene.shape.SVGPath
-import javafx.scene.shape.Shape
 import javafx.scene.text.Text
 import javafx.stage.Stage
 import javafx.stage.Window
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.selects.select
@@ -35,13 +30,13 @@ import link.continuum.desktop.gui.scene.ScalingPane
 import link.continuum.desktop.util.None
 import link.continuum.desktop.util.Option
 import mu.KotlinLogging
-import java.lang.StringBuilder
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Callable
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.channels.ReceiveChannel
+import javafx.scene.layout.HBox as HBoxJ
+import javafx.scene.layout.StackPane as StackPaneJ
+import javafx.scene.layout.VBox as VBoxJ
 
 private val logger = KotlinLogging.logger {}
 
@@ -312,7 +307,7 @@ enum class CssKey(val str: String) {
     FontSize("-fx-font-size"),
     FontFamily("-fx-font-family"),
 }
-class StyleBuilder {
+class StyleBuilder(block: StyleBuilder.() -> Unit = {}) {
     private val properties = linkedMapOf<String, ToCss>()
     var prefWidth: SizeWithUnit? by cssProp(CssKey.PrefWidth.str)
     var prefHeight: SizeWithUnit? by cssProp(CssKey.PrefHeight.str)
@@ -322,6 +317,19 @@ class StyleBuilder {
     var maxHeight: SizeWithUnit?   by cssProp(CssKey.MaxHeight.str)
     var fontSize: SizeWithUnit?  by cssProp(CssKey.FontSize.str)
     var fontFamily: GenericFontFamily?   by cssProp(CssKey.FontFamily.str)
+    init {
+        this.block()
+    }
+    fun fixWidth(width: SizeWithUnit) {
+        minWidth = width
+        prefWidth = width
+        maxWidth = width
+    }
+    fun fixHeight(height: SizeWithUnit) {
+        minHeight = height
+        prefHeight = height
+        maxHeight = height
+    }
     fun toStyle(): String {
         val sb = StringBuilder()
         properties.forEach { s, any ->
