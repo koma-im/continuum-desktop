@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.27"
+version = "0.9.28"
 
 plugins {
     kotlin("jvm") version "1.3.50"

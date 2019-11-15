@@ -57,7 +57,6 @@ class MRoomMessageViewNode(
                 prefWidth = 1.0
                 background = whiteBackGround
                 padding = pad2
-                alignment = Pos.CENTER_LEFT
                 add(avatarView.root)
 
                 vbox {
