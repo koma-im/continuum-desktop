@@ -24,6 +24,6 @@
 }
 /* horizontal the two nodes are placed to the left/right of each other. */
 .split-pane:horizontal > .split-pane-divider {
-   -fx-background-color: white;
+   -fx-background-color: -fx-background;
    -fx-background-insets: 0;
 }
