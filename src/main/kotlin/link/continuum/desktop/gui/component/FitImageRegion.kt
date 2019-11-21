@@ -22,7 +22,7 @@ suspend fun downloadImageSized(
 ): KResult<Image, KomaFailure> {
     logger.trace { "downloading thumbnail sized ${width}x$height" }
     if (mxc is MHUrl.Mxc) {
-        val (success, failure, result) = server.getThumbnail(mxc, width.toShort(), height.toShort())
+        val (success, failure, result) = server.getThumbnail(mxc, width.toInt().toUShort(), height.toInt().toUShort())
         if (!result.testFailure(success, failure)) {
             val img = success.inputStream().use {
                 Image(it)
