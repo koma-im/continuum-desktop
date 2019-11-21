@@ -109,7 +109,7 @@ private interface SaveCreator {
 /**
  * HBox that tries to catch an exception
  */
-class HBox: HBoxJ, SaveCreator {
+open class HBox: HBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
     constructor(vararg children: Node): super(*children)
