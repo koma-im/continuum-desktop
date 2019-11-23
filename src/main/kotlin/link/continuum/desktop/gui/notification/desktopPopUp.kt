@@ -3,6 +3,7 @@ package link.continuum.desktop.gui.notification
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import javafx.scene.media.AudioClip
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
@@ -34,6 +35,15 @@ fun popNotify(notification: NotificationData, store: AppStore, server: MediaServ
     popup.show()
 }
 
+/**
+ * AudioClip can be played on any thread
+ * But there seems to be no sound when played without starting JFX
+ */
+object AudioResources {
+    val message by lazy {
+        AudioClip(javaClass.getResource("/sound/message.m4a").toExternalForm())
+    }
+}
 
 private class NotificationGraphic(
         private val store: AppStore
