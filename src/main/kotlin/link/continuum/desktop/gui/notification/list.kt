@@ -1,8 +1,7 @@
 package link.continuum.desktop.gui.notification
 
 import javafx.geometry.Pos
-import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
+import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
@@ -14,6 +13,7 @@ import koma.koma_app.AppStore
 import koma.matrix.NotificationResponse
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
+import koma.matrix.json.MoshiInstance
 import koma.util.getOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +79,15 @@ private class NotificationCell(
     private val avatarView = AvatarView(userData = store.userData)
     private val senderLabel = Text()
     private val center = StackPane()
+    private var server: Server? = null
+    private var item: Item? = null
+    private val menu by lazy {
+        ContextMenu(Menu("Debug", null,
+                MenuItem("Show popup").apply {
+                    action { showPopup() }
+                }
+        ))
+    }
     val root = HBox(4.0).apply {
         minWidth = 1.0
         prefWidth = 1.0
@@ -95,6 +104,9 @@ private class NotificationCell(
             }
             add(center)
         }
+        setOnContextMenuRequested {
+            menu.show(this, null, it.x, it.y)
+        }
     }
     private val messageView = MessageView(store.userData)
     private val fallbackCell = TextFlow().apply {
@@ -105,6 +117,11 @@ private class NotificationCell(
 
     private val senderId = Channel<UserId>(Channel.CONFLATED)
 
+    private fun showPopup() {
+        val s = server ?: return
+        val item = this.item ?: return
+        popNotify(item, store, s)
+    }
     override fun updateItem(item: Notification?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
@@ -118,6 +135,8 @@ private class NotificationCell(
             logger.error { "no server"}
             return
         }
+        this.server = s
+        this.item = item
         center.children.clear()
         senderId.offer(event.sender)
         timeView.updateTime(event.origin_server_ts)
