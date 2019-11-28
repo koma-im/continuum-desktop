@@ -15,7 +15,10 @@ import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.disableWhen
+import mu.KotlinLogging
 import org.controlsfx.control.Notifications
+
+private val logger = KotlinLogging.logger {}
 
 fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
     val input = RoomCreationDialog().showAndWait()
@@ -33,7 +36,7 @@ fun createRoomInteractive() = GlobalScope.launch(Dispatchers.JavaFx) {
                     .showWarning()
         }
     }.onSuccess{
-        println("Room created ${settings.room_alias_name}")
+        logger.debug { "Room created ${it}"}
     }
 }
 
