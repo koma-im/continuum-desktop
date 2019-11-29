@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package link.continuum.desktop.gui.notification
 
 import javafx.geometry.Pos
@@ -23,6 +25,7 @@ import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
+import java.io.File
 
 private typealias Notification = NotificationResponse.Notification
 private typealias Item = Notification

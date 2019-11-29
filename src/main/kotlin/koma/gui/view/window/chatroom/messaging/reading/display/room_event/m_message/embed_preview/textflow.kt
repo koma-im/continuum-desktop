@@ -1,15 +1,16 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
 import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.Server
-import link.continuum.desktop.gui.add
-import okhttp3.OkHttpClient
+import link.continuum.database.KDataStore
 
-fun TextFlow.addStringWithElements(str: String, server: Server) {
+fun TextFlow.addStringWithElements(str: String, server: Server, data: KDataStore) {
     val textelements = tokenize_string(str)
-    val nodes = textelements.map { messageSliceView(it, server) }.toNodes()
+    val nodes = textelements.map { messageSliceView(it, server, data) }.toNodes()
     this.children.addAll(nodes)
 }
 

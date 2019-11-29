@@ -18,43 +18,6 @@ import org.cache2k.configuration.Cache2kConfiguration
 import java.io.InputStream
 
 private val logger = KotlinLogging.logger {}
-private typealias Item = Deferred<Option<Image>>
-
-class DeferredImage(
-        val processing: (InputStream) -> Image
-): CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val cache: Cache<MHUrl, Item>
-
-    init {
-        cache = createCache()
-    }
-
-    fun getDeferred(url: MHUrl, server: Server): Item {
-        return cache.computeIfAbsent(url) { createImageProperty(url, server) }
-    }
-
-    private fun createImageProperty(url: MHUrl, server: Server): Item {
-        return asyncImage(url, server)
-    }
-
-    private fun CoroutineScope.asyncImage(url: MHUrl, server: Server) = async {
-        val (bs, f, result) = server.downloadMedia(url)
-        if (result.testFailure(bs, f)) {
-            logger.warn { "image $url not downloaded, $f, returning None" }
-            return@async None<Image>()
-        }
-        val img = processing(bs.inputStream())
-        Some(img)
-    }
-
-    private fun createCache(): Cache<MHUrl, Item> {
-        val conf = Cache2kConfiguration<MHUrl, Item>()
-        val cache = Cache2kBuilder.of(conf)
-                .entryCapacity(100)
-        return cache.build()
-    }
-}
-
 
 private typealias ImageProperty = SimpleObjectProperty<Image>
 

@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class UserDataStore(
-        private val data: KDataStore
+        val data: KDataStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val nameUpdates = ConcurrentHashMap<UserId, UpdateConflater<String>>()
     suspend fun updateName(userId: UserId, name: String, time: Long) {

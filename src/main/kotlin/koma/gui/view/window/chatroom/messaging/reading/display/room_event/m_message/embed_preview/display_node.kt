@@ -1,12 +1,18 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
+
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
 import javafx.geometry.Insets
+import javafx.geometry.Pos
+import javafx.geometry.VPos
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
+import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import javafx.scene.layout.*
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import koma.Server
@@ -15,12 +21,17 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.media.MediaViewers
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
 import koma.koma_app.appState
+import koma.matrix.UserId
+import koma.network.media.MHUrl
+import koma.network.media.parseMxc
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.gui.action
+import link.continuum.database.KDataStore
+import link.continuum.database.models.getLatestAvatar
+import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.add
-import link.continuum.desktop.gui.doubleBinding
-import link.continuum.desktop.gui.item
+import link.continuum.desktop.gui.icon.avatar.AvatarInline
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
@@ -36,7 +47,38 @@ class InlineElement(override val node: Node): FlowElement() {
     fun endsWithNewline(): Boolean = this.node is Text && this.node.text.lastOrNull() == '\n'
 }
 
-fun messageSliceView(slice: TextSegment, server: Server): FlowElement {
+class UserLinkElement(private val data: KDataStore): FlowElement() {
+    private val avatar = AvatarInline().apply {
+        root.background = whiteBackground
+    }
+    private val label = Text().apply {
+        fill = Color.WHITE
+    }
+    override val node = object: HBox(avatar.root, label) {
+        override fun getBaselineOffset(): Double = height * 0.75
+        init {
+            alignment = Pos.CENTER
+            background = orangeBackground
+        }
+    }
+    init {
+        HBox.setMargin(avatar.root, insets)
+        HBox.setMargin(label, insets)
+    }
+    fun update(name: String, userId: UserId, server: Server) {
+        label.text = name
+        val url = getLatestAvatar(data, userId) ?: return
+        avatar.updateUrl(url.avatar.parseMxc(), server)
+    }
+    companion object {
+        private val insets = Insets(0.0, 2.0, 0.0, 2.0)
+        private val orangeBackground = Background(BackgroundFill(Color.DARKORANGE, CornerRadii(4.0), Insets.EMPTY))
+        private val whiteBackground = Background(BackgroundFill(Color.WHITE, CornerRadii(2.0), Insets.EMPTY))
+    }
+}
+
+
+fun messageSliceView(slice: TextSegment, server: Server, data: KDataStore): FlowElement {
     return when(slice) {
         is PlainTextSegment -> InlineElement(Text(slice.text))
         is LinkTextSegment -> WebContentNode(slice.text, server)
@@ -44,7 +86,11 @@ fun messageSliceView(slice: TextSegment, server: Server): FlowElement {
             val icon = EmojiIcon(slice.emoji, settings.fontSize)
             InlineElement(icon.node)
         }
-        is UserIdLink -> InlineElement(Text(slice.text))
+        is UserIdLink -> {
+            val link = UserLinkElement(data)
+            link.update(slice.text, slice.userId, server)
+            link
+        }
     }
 }
 

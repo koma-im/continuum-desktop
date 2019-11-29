@@ -6,6 +6,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.media.AudioClip
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
+import javafx.util.Duration
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.koma_app.AppStore

@@ -125,6 +125,7 @@ open class HBox: HBoxJ, SaveCreator {
 
     companion object {
         fun setHgrow(child: Node, value: Priority) = HBoxJ.setHgrow(child, value)
+        fun setMargin(child: Node, value: Insets) = HBoxJ.setMargin(child, value)
     }
 }
 

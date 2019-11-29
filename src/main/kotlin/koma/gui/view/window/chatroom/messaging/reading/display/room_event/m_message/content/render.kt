@@ -17,8 +17,8 @@ class MessageView(
     var node: ViewNode? = null
 
     private val emote by lazy { MEmoteViewNode(userDataStore) }
-    private val notice by lazy { MNoticeViewNode() }
-    private val text by lazy { MTextViewNode() }
+    private val notice by lazy { MNoticeViewNode(userDataStore.data) }
+    private val text by lazy { MTextViewNode(userDataStore.data) }
     private val image by lazy { MImageViewNode() }
     fun update(message: MRoomMessage, server: Server) {
         val content = message.content
