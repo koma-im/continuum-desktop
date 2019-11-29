@@ -44,6 +44,7 @@ fun messageSliceView(slice: TextSegment, server: Server): FlowElement {
             val icon = EmojiIcon(slice.emoji, settings.fontSize)
             InlineElement(icon.node)
         }
+        is UserIdLink -> InlineElement(Text(slice.text))
     }
 }
 

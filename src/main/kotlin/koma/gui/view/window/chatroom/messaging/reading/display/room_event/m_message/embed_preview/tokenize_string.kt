@@ -1,6 +1,8 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview
 
 import com.vdurmont.emoji.EmojiParser
+import koma.matrix.UserId
+import okhttp3.HttpUrl
 
 private class StringElementTokenizer(private val text: String) {
     val elements = mutableListOf<TextSegment>()
@@ -77,11 +79,23 @@ class PlainTextSegment(
 }
 
 class LinkTextSegment(
-        val text: String
+        val text: String,
+        val url: String? = null
 ): TextSegment() {
     override fun toString(): String {
-        return "link: $text"
+        return "link:[$text]($url)"
     }
+}
+
+/***
+ * any user mentioned by ID
+ */
+class UserIdLink(
+        val userId: UserId,
+        val text: String,
+        val url: String? = null
+): TextSegment() {
+    override fun toString() = "UserId:$userId($text,$url)"
 }
 
 class EmojiTextSegment(
