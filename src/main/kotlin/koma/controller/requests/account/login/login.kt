@@ -1,28 +1,24 @@
 package koma.controller.requests.account.login
 
-import com.squareup.moshi.JsonEncodingException
 import javafx.scene.control.Alert
 import koma.IOFailure
+import koma.InvalidData
+import koma.Server
 import koma.koma_app.AppStore
 import koma.matrix.UserId
 import koma.matrix.UserPassword
-import koma.matrix.login
-import koma.matrix.user.identity.UserId_new
-import koma.util.onFailure
-import koma.util.onSuccess
 import koma.util.testFailure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import link.continuum.desktop.action.startChat
 import link.continuum.database.KDataStore
 import link.continuum.database.models.getToken
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
+import link.continuum.desktop.action.startChat
 import link.continuum.desktop.util.gui.alert
-import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.h2.mvstore.MVMap
@@ -44,8 +40,9 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
     }
     val data = appData.database
     saveServerAddr(data, userid.server, server)
+    val server = Server(url, httpClient)
     val token = if (!password.isBlank()) {
-        getTokenWithPassword(userid, password, httpClient, data, server)
+        getTokenWithPassword(userid, password, data, server)
     } else {
         val t = getToken(data, userid)
         if (t == null) {
@@ -70,10 +67,10 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
  * get token from server
  * saves the token to disk
  */
-private suspend fun getTokenWithPassword(userid: UserId, password: String, httpClient: OkHttpClient,
+private suspend fun getTokenWithPassword(userid: UserId, password: String,
                                          data: KDataStore,
-                                         server: String): String? {
-    val (it, ex, result) = login(UserPassword(user = userid.user, password = password), server, httpClient)
+                                         server: Server): String? {
+    val (it, ex, result) = server.login(UserPassword(user = userid.user, password = password))
     if (!result.testFailure(it, ex)) {
         val u = it.user_id
         val t = it.access_token
@@ -82,7 +79,7 @@ private suspend fun getTokenWithPassword(userid: UserId, password: String, httpC
     } else {
         val mes = ex.toString()
         System.err.println(mes)
-        val message = if (ex is IOFailure && ex.throwable is JsonEncodingException) {
+        val message = if (ex is InvalidData) {
             "Does ${server} have a valid JSON API?"
         } else mes
         GlobalScope.launch(Dispatchers.JavaFx) {

@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.31"
+version = "0.9.32"
 
 plugins {
     kotlin("jvm") version "1.3.60"
@@ -27,7 +27,6 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
-        implementation("io.github.koma-im:koma-library:0.9.10")
         implementation("io.github.microutils:kotlin-logging:1.6.22")
 
         testImplementation(kotlin("test"))
@@ -42,6 +41,8 @@ javafx {
 }
 
 dependencies {
+    val ktorVersion = "1.2.6"
+    implementation("io.github.koma-im:koma-library:0.9.17")
     implementation("org.cache2k:cache2k-core:1.2.3.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
@@ -55,8 +56,9 @@ dependencies {
     implementation("io.requery:requery-kotlin:1.6.1")
     implementation("io.requery:requery:1.6.1")
     implementation("com.h2database:h2:1.4.199")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
     implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime", "0.14.0")
+    implementation("io.ktor", "ktor-client-okhttp", ktorVersion)
+    implementation("io.ktor", "ktor-client-core", ktorVersion)
 
     kapt("io.requery:requery-processor:1.6.1")
 }

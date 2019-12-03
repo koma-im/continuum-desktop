@@ -3,7 +3,6 @@ package koma.koma_app
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Alert
-import javafx.scene.effect.DropShadow
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -14,7 +13,6 @@ import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.matrix.UserId
 import koma.network.client.okhttp.KHttpClient
-import koma.storage.config.getHttpCacheDir
 import koma.storage.config.server.cert_trust.sslConfFromStream
 import koma.util.given
 import kotlinx.coroutines.*
@@ -195,4 +193,13 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 object Globals {
     internal lateinit var httpClient: OkHttpClient
     internal lateinit var buggyParent: CatchingGroup
+}
+
+private fun getHttpCacheDir(dir: String): File? {
+    val p = File(dir).resolve("koma").resolve("cache").resolve("http")
+    return if (p.exists()) {
+        if (p.isDirectory) p else null
+    } else if(p.mkdirs()) {
+        p
+    } else null
 }

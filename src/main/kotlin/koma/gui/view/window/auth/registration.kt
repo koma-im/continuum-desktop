@@ -192,19 +192,7 @@ class PasswordAuthView(
      * if it's other exceptions, registration has failed
      */
     override suspend fun finish(): KResult<RegisterdUser, Failure>? {
-        val (success, failure, result) = register.registerByPassword(user.text, pass.text)
-        if (!result.testFailure(success, failure)) {
-            return Ok(success)
-        }
-        val f = failure
-        if (f is AuthFailure) return Err(f)
-        uilaunch {
-            alert(Alert.AlertType.WARNING,
-                    "Registration hasn't succeeded",
-                    "Error: $f"
-            )
-        }
-        return null
+        TODO()
     }
 
     override val root = GridPane()
@@ -251,27 +239,7 @@ class FallbackWebviewAuth(
 
 private class Start(private val data: KDataStore): WizardState() {
     suspend fun start(): Pair<Register, Unauthorized>? {
-        val addr = serverCombo.editor.text
-        val s = HttpUrl.parse(addr)
-        if (s == null) {
-            uialert(Alert.AlertType.ERROR, "$addr isn't valid server")
-            return null
-        }
-        saveServerAddr(data, s.host(), addr)
-        logger.debug { "saved server addrs" }
-        val r = Register(s, Globals.httpClient)
-        logger.debug { "getting flows" }
-        val f = r.getFlows()
-        logger.debug { "got flows" }
-        if (f.isFailure) {
-            logger.debug { "flows isFailure" }
-            GlobalScope.launch(Dispatchers.JavaFx) {
-                alert(Alert.AlertType.ERROR,
-                        "Failed to get authentication flows from server: ${f}")
-            }
-            return null
-        }
-        return r to f.getOrThrow()
+       TODO()
     }
 
     private val serverCombo: ComboBox<String>

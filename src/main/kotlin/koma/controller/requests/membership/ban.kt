@@ -3,8 +3,8 @@ package koma.controller.requests.membership
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import koma.matrix.room.naming.RoomId
-import koma.matrix.user.identity.UserId_new
 import koma.koma_app.appState.apiClient
+import koma.matrix.UserId
 import koma.util.onFailure
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -22,7 +22,7 @@ fun runAskBanRoomMember()  {
     val room_user: Pair<String, String> = response.get()
     val roomid = room_user.first
     val username = room_user.second
-    val userid = UserId_new(username)
+    val userid = UserId(username)
     GlobalScope.launch(Dispatchers.JavaFx) {
         val result = apiClient!!.banMember(RoomId(roomid), userid)
         result.onFailure {

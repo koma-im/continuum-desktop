@@ -12,15 +12,15 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.util.gui.alert
-import okhttp3.MediaType
 import java.io.File
+import koma.util.ContentType
 
 /**
  * upload file, displays alerts if failed
  */
-suspend fun uploadFile(api: MatrixApi, file: File, filetype: MediaType? = null
+suspend fun uploadFile(api: MatrixApi, file: File, filetype: ContentType? = null
 ): KResult<UploadResponse, Failure> {
-    val type = filetype ?: file.guessMediaType() ?: MediaType.parse("application/octet-stream")!!
+    val type = filetype ?: file.guessMediaType() ?: ContentType.parse("application/octet-stream")!!
     val uploadResult = api.uploadFile(file, type)
     uploadResult.onFailure { ex ->
         val error = "during upload: error $ex"

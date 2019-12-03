@@ -15,7 +15,6 @@ import koma.koma_app.AppStore
 import koma.matrix.NotificationResponse
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
-import koma.matrix.json.MoshiInstance
 import koma.util.getOrThrow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +29,6 @@ import java.io.File
 private typealias Notification = NotificationResponse.Notification
 private typealias Item = Notification
 private typealias List = ListView<Item>
-private typealias NotificationEvent = NotificationResponse.Event<NotificationResponse.Content>
 
 private val logger = KotlinLogging.logger {}
 

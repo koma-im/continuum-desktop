@@ -3,8 +3,9 @@ package koma.controller.room
 import koma.koma_app.AppStore
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
+import koma.matrix.event.room_message.MRoomMember
 import koma.matrix.event.room_message.RoomEvent
-import koma.matrix.event.room_message.state.*
+import koma.matrix.event.room_message.*
 import koma.matrix.room.participation.Membership
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +17,6 @@ import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
 import model.Room
 import mu.KotlinLogging
-import okhttp3.HttpUrl
 
 private val logger = KotlinLogging.logger {}
 

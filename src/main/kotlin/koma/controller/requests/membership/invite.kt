@@ -5,8 +5,8 @@ import javafx.scene.control.*
 import javafx.scene.layout.Priority
 import koma.gui.view.window.auth.uilaunch
 import koma.matrix.room.naming.RoomId
-import koma.matrix.user.identity.UserId_new
 import koma.koma_app.appState.apiClient
+import koma.matrix.UserId
 import koma.util.getOr
 import koma.util.testFailure
 import kotlinx.coroutines.GlobalScope
@@ -26,7 +26,7 @@ fun dialogInviteMember(roomId: RoomId) {
     }
     val username = res.get()
 
-    val userid = UserId_new(username)
+    val userid = UserId(username)
     GlobalScope.launch {
         val (s, f, r) = apiClient!!.inviteMember(roomId, userid)
         if (r.testFailure(s, f)) {

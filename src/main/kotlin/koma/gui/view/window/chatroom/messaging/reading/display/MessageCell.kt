@@ -6,9 +6,8 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.text.Text
 import koma.koma_app.AppStore
-import koma.matrix.event.room_message.state.MRoomGuestAccess
-import koma.matrix.event.room_message.state.MRoomHistoryVisibility
-import koma.matrix.json.MoshiInstance
+import koma.matrix.event.room_message.MRoomGuestAccess
+import koma.matrix.event.room_message.MRoomHistoryVisibility
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -106,7 +105,7 @@ class EventSourceViewer{
     private var processed: String = ""
     fun showAndWait(roomEvent: RoomEventRow) {
         raw = formatJson(roomEvent.json)
-        processed = formatJson(MoshiInstance.roomEventAdapter.toJson(roomEvent.getEvent()))
+        processed = roomEvent.getEvent()?.stringifyPretty() ?: ""
         textArea.text = raw
         dialog.showAndWait()
     }

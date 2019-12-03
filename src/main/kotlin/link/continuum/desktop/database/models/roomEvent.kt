@@ -2,10 +2,8 @@ package link.continuum.database.models
 
 import io.requery.*
 import koma.matrix.event.room_message.RoomEvent
-import koma.matrix.json.MoshiInstance
 import koma.matrix.json.RawJson
 import koma.matrix.room.naming.RoomId
-import link.continuum.database.models.RoomEventRowEntity
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -51,7 +49,7 @@ interface RoomEventRow: Persistable {
  */
 @Suppress("DEPRECATION")
 fun RoomEventRow.getEvent(): RoomEvent? {
-    this._event = this._event ?: MoshiInstance.roomEventAdapter.fromJson(this.json)
+    this._event = this._event ?: RoomEvent.parseOrNull(this.json)
     if (this._event == null) {
         logger.warn { "event ${this.event_id} decoding failure"}
     }
@@ -72,9 +70,7 @@ private fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): Roo
 
 fun List<RawJson<RoomEvent>>.toEventRowList(roomId: RoomId): List<RoomEventRow> {
     val rows = this.map {
-        val r = it.raw
-        newRoomEventRow(it.value, roomId,
-                MoshiInstance.mapAdapter.toJson(r))
+        newRoomEventRow(it.value, roomId, it.stringify())
     }
     rows.firstOrNull()?.preceding_stored = false
     rows.lastOrNull()?.following_stored = false

@@ -19,8 +19,6 @@ import koma.matrix.DiscoveredRoom
 import koma.matrix.publicapi.rooms.findPublicRooms
 import koma.matrix.publicapi.rooms.getPublicRooms
 import koma.matrix.room.naming.RoomId
-import koma.matrix.room.naming.canBeValidRoomAlias
-import koma.matrix.room.naming.canBeValidRoomId
 import koma.util.onFailure
 import koma.util.onSuccess
 import kotlinx.coroutines.*
@@ -28,13 +26,23 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
-import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import org.controlsfx.control.Notifications
 import org.controlsfx.control.textfield.CustomTextField
 import org.controlsfx.control.textfield.TextFields
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Predicate
+
+fun canBeValidRoomAlias(input: String): Boolean {
+    val ss = input.split(':')
+    if (ss.size != 2) return false
+    return ss[0].startsWith('#') && ss[1].isNotEmpty()
+}
+
+fun canBeValidRoomId(input: String): Boolean {
+    val ss = input.split(':')
+    if (ss.size != 2) return false
+    return ss[0].startsWith('!') && ss[1].isNotEmpty()
+}
 
 class PublicRoomsView(publicRoomList: ObservableList<DiscoveredRoom>,
                       private val account: Account

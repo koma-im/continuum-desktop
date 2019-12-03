@@ -55,7 +55,6 @@ class DiscoveredRoomFragment(
     }
 
     override fun updateItem(item: DiscoveredRoom?, empty: Boolean) {
-        logger.debug { "discovered room $item, empty=$empty" }
         super.updateItem(item, empty)
         if (empty || item == null) {
             text = null

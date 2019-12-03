@@ -1,18 +1,23 @@
 package link.continuum.desktop.events
 
-import com.squareup.moshi.Types
-import koma.matrix.json.MoshiInstance
 import koma.matrix.room.InvitedRoom
 import koma.matrix.room.naming.RoomId
+import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.internal.MapLikeSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.list
+import kotlinx.serialization.map
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class InvitationDeserialization {
+    @UnstableDefault
     @Test
     fun test1() {
-        val typeA = Types.newParameterizedType(Map::class.java, RoomId::class.java, InvitedRoom::class.java)
-        val adapter = MoshiInstance.moshi.adapter<Map<RoomId, InvitedRoom>>(typeA)
-        val data = adapter.fromJson(invite)
+        val j =Json(JsonConfiguration.Default.copy(strictMode = false))
+        val serializer = (RoomId.serializer() to InvitedRoom.serializer()).map
+        val data =j.parse(serializer, invite)
         val (room, invite) = data!!.toList().first()
         val invitation = InviteData(invite, room)
         assertEquals("#welc2:example.com", invitation.roomDisplayName)
