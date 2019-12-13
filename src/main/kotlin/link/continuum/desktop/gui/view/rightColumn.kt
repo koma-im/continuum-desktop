@@ -32,9 +32,7 @@ class RightColumn(
         private val parent: SplitPane
 ) {
     private val members = RoomMemberListView(storage.userData)
-    private val notifications by lazy { NotificationList(account, storage).apply {
-        updateServer(account.server)
-    }}
+    private val notifications by lazy { NotificationList(storage) }
     private val content = StackPane(members.root)
     private val toggleGroup = SingleSelection().also {
         it.selectionProperty.addListener { _, _, newValue ->
@@ -73,6 +71,7 @@ class RightColumn(
                     if (selected) it.node.background = whiteBackGround
                     else it.node.background = null
                     it.graphic.stroke = if (selected) darkerGray else Color.GRAY
+                    notifications.viewAccount(account)
                     expandOnce()
                 }
             }
@@ -86,7 +85,7 @@ class RightColumn(
     val root = VBox(0.0, tabs, content)
     fun setRoom(room: Room) {
         members.setList(room.members.list)
-        notifications.updateServer(room.account.server)
+        notifications.viewAccount(room.account)
     }
     private var expanded = false
     private fun expandOnce() {

@@ -49,7 +49,7 @@ object JFX {
     val hostServices by lazy { application.hostServices }
 }
 
-fun Pane.vbox(op: VBox.()->Unit) {
+internal fun Pane.vbox(op: VBox.()->Unit) {
     val b = VBox()
     b.op()
     this.children.add(b)
@@ -147,7 +147,7 @@ private fun fixChildren(children: List<Node>) {
     }
 }
 
-class VBox : VBoxJ, SaveCreator {
+open class VBox : VBoxJ, SaveCreator {
     constructor(): super()
     constructor(spacing: Double): super(spacing)
     constructor(spacing: Double, vararg children: Node): super(spacing, *children)

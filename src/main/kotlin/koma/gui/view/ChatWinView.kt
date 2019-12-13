@@ -1,5 +1,6 @@
 package koma.gui.view
 
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
@@ -59,6 +60,7 @@ class ChatView(roomList: ObservableList<Room>,
     private var initSelected = false
 
     private fun setRoom(room: Room) {
+        check(Platform.isFxApplicationThread())
         messagingView.setRoom(room)
         rightColumn.setRoom(room)
         if (!initSelected) {
