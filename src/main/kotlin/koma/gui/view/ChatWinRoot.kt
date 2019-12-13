@@ -112,8 +112,8 @@ class SyncStatusBar(
             }
             is Variants.NeedRetry -> {
                 pane.text = "Connecting"
+                @Suppress("ControlFlowWithEmptyBody")
                 if (!pane.isShowing) {
-                    pane.show()
                 }
             }
         }
