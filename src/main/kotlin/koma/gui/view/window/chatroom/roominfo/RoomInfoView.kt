@@ -3,7 +3,6 @@ package koma.gui.view.window.chatroom.roominfo
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Scene
 import javafx.scene.control.Hyperlink
@@ -21,7 +20,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.getOrNull
-import model.Room
+import link.continuum.desktop.Room
 
 class RoomInfoDialog(
         room: Room, user: UserId,

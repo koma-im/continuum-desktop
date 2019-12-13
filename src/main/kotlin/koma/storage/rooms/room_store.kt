@@ -4,7 +4,7 @@ import koma.matrix.room.naming.RoomId
 import link.continuum.database.KDataStore
 import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.util.Account
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 

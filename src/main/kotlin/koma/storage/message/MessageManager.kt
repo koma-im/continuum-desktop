@@ -21,7 +21,7 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.toEventRowList
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.DedupList
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 import java.util.concurrent.ConcurrentHashMap

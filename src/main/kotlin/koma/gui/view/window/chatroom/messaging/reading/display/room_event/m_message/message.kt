@@ -1,7 +1,6 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message
 
 import javafx.geometry.Insets
-import javafx.geometry.Pos
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.Priority
 import link.continuum.desktop.gui.StackPane
@@ -22,10 +21,8 @@ import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.util.http.MediaServer
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
 
 private val logger = KotlinLogging.logger {}
 

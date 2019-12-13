@@ -14,7 +14,7 @@ import link.continuum.desktop.gui.hbox
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.text
 import link.continuum.desktop.util.http.MediaServer
-import model.Room
+import link.continuum.desktop.Room
 
 @ExperimentalCoroutinesApi
 class MRoomCreationViewNode constructor(

@@ -9,7 +9,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.onNull
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

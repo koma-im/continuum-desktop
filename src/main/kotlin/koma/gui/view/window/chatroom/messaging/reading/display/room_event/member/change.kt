@@ -23,7 +23,7 @@ import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.util.http.MediaServer
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 

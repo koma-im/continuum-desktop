@@ -1,4 +1,4 @@
-package model
+package link.continuum.desktop
 
 import javafx.application.Platform
 import javafx.beans.binding.Bindings

@@ -13,7 +13,7 @@ import koma.matrix.event.room_message.state.MRoomHistoryVisibility
 import koma.matrix.event.room_message.state.MRoomMember
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

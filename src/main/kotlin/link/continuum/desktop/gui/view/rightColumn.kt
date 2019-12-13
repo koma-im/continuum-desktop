@@ -7,7 +7,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.SplitPane
 import javafx.scene.input.MouseButton
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.CornerRadii
@@ -21,7 +20,7 @@ import koma.koma_app.AppStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.notification.NotificationList
 import link.continuum.desktop.util.Account
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

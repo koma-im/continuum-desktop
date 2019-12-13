@@ -11,7 +11,7 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
-import model.Room
+import link.continuum.desktop.Room
 
 class RoomListView(
         roomlist: ObservableList<Room>,

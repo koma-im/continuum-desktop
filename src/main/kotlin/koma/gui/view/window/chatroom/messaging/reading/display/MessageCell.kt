@@ -15,7 +15,7 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.message.MessageCell
-import model.Room
+import link.continuum.desktop.Room
 
 @ExperimentalCoroutinesApi
 class HistoryVisibilityEventView(

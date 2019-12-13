@@ -15,7 +15,7 @@ import link.continuum.database.models.saveRoomAvatar
 import link.continuum.database.models.saveRoomName
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.gui.UiDispatcher
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

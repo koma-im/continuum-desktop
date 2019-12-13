@@ -7,9 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.*
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
-import javafx.scene.text.FontWeight
 import javafx.stage.Stage
 import javafx.util.Callback
 import koma.gui.element.emoji.keyboard.NoSelectionModel
@@ -29,7 +27,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.getChangeStateAllowed
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.stringBindingNullable as stringBinding
-import model.Room
+import link.continuum.desktop.Room
 import org.controlsfx.control.Notifications
 import java.util.concurrent.Callable
 

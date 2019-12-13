@@ -1,6 +1,5 @@
 package koma.gui.view.window.chatroom.messaging.reading
 
-import javafx.application.Platform
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
@@ -16,7 +15,7 @@ import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.message.EventCellPool
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.message.createCell
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import kotlin.math.max

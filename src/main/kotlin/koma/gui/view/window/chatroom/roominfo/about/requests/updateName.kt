@@ -8,7 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.JFX
-import model.Room
+import link.continuum.desktop.Room
 import org.controlsfx.control.Notifications
 
 fun requestUpdateRoomName(room: Room, input: String?) {

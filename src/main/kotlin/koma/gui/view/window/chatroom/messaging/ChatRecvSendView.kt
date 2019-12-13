@@ -14,7 +14,7 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
-import model.Room
+import link.continuum.desktop.Room
 import okhttp3.OkHttpClient
 
 @ExperimentalCoroutinesApi

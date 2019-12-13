@@ -28,7 +28,7 @@ import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.gui.view.RightColumn
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 import java.util.*
 import java.util.concurrent.Callable

@@ -8,7 +8,7 @@ import koma.util.failureOrThrow
 import kotlinx.coroutines.*
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
 

@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.Account
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

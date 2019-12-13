@@ -5,7 +5,6 @@ import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.BorderPane
-import javafx.scene.paint.Color
 import koma.Failure
 import koma.controller.requests.membership.runAskBanRoomMember
 import koma.controller.requests.room.createRoomInteractive
@@ -14,25 +13,16 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
-import koma.koma_app.appState
-import koma.storage.persistence.settings.AppSettings
-import koma.util.coroutine.adapter.okhttp.await
-import koma.util.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
-import model.Room
+import link.continuum.desktop.Room
 import mu.KotlinLogging
-import okhttp3.*
 import org.controlsfx.control.NotificationPane
-import org.controlsfx.control.textfield.TextFields
 import org.h2.mvstore.MVMap
-import java.lang.Exception
-import java.util.concurrent.TimeUnit
 
 private val logger = KotlinLogging.logger {}
 
