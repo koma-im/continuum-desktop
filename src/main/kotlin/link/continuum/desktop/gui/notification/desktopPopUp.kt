@@ -13,24 +13,30 @@ import koma.koma_app.AppStore
 import koma.matrix.NotificationResponse
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
+import java.io.Closeable
 
 private typealias NotificationData = NotificationResponse.Notification
 private val logger = KotlinLogging.logger {}
 
 fun popNotify(notification: NotificationData, store: AppStore, server: MediaServer) {
+    val graphic = NotificationGraphic(store)
     val popup = Notifications.create()
+            .onAction {
+                graphic.close()
+            }
             .title("Incoming message")
             .position(Pos.TOP_RIGHT)
-    val graphic = NotificationGraphic(store)
     graphic.updateItem(notification, server)
     popup.graphic(graphic.graphic)
     popup.show()
@@ -48,7 +54,8 @@ object AudioResources {
 
 private class NotificationGraphic(
         private val store: AppStore
-): CoroutineScope by CoroutineScope(Dispatchers.Default) {
+): Closeable {
+    private val scope = MainScope()
     var graphic: Node? = null
         get() = field
         private set(value) {field = value}
@@ -79,7 +86,7 @@ private class NotificationGraphic(
     private val messageView = MessageView(store.userData)
     private val fallbackCell = TextFlow()
 
-    private val senderId = Channel<UserId>(Channel.CONFLATED)
+    private val senderId = MutableObservable<UserId>()
 
     fun updateItem(item: NotificationData?, server: MediaServer) {
         if (null == item) {
@@ -89,7 +96,7 @@ private class NotificationGraphic(
         val event = item.event
         val content = event.content
         center.children.clear()
-        senderId.offer(event.sender)
+        senderId.set(event.sender)
         timeView.updateTime(event.origin_server_ts)
         avatarView.updateUser(event.sender, server)
         senderLabel.fill = store.userData.getUserColor(event.sender)
@@ -111,17 +118,20 @@ private class NotificationGraphic(
         graphic = root
     }
     init {
-        launch(Dispatchers.Main) {
-            val newName = switchUpdates(senderId) { store.userData.getNameUpdates(it) }
-            for (n in newName) {
-                senderLabel.text = n
-            }
-        }
+        senderId.flow().flatMapLatest {
+            store.userData.getNameUpdates(it)
+        }.onEach {
+            senderLabel.text = it
+        }.launchIn(scope)
     }
 
     companion object {
         private val boxStyle = StyleBuilder {
             prefWidth = 12.em
         }.toStyle()
+    }
+
+    override fun close() {
+        scope.cancel()
     }
 }

@@ -124,7 +124,7 @@ class LoginScreen(
                     job?.let { launch(Dispatchers.Default) { it.cancel() } }
                     logger.debug { "cancelling login"}
                     mask.text = "Cancelling"
-                    launch(Dispatchers.Main) {
+                    launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
                         delay(500)
                         mask.isVisible = false
                     }

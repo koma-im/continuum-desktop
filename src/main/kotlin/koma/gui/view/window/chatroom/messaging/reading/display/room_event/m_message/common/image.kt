@@ -17,6 +17,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.network.media.MHUrl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.add
@@ -32,7 +33,7 @@ private val logger = KotlinLogging.logger {}
 
 class ImageElement(
         private val imageSize: Double = 200.0
-) : ViewNode, CoroutineScope by CoroutineScope(Dispatchers.Default) {
+) : ViewNode, CoroutineScope by MainScope() {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 

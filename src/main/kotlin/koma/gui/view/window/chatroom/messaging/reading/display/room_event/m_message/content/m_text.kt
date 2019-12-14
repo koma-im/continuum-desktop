@@ -12,11 +12,15 @@ import koma.matrix.event.room_message.chat.NoticeMessage
 import koma.matrix.event.room_message.chat.TextMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.richtext.parseRichXml
+import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.http.MediaServer
 import okhttp3.OkHttpClient
 
@@ -54,36 +58,30 @@ class MNoticeViewNode(private val data: KDataStore): ViewNode {
 class MEmoteViewNode(
         private val userData: UserDataStore
 ): ViewNode {
+    private val scope = MainScope()
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
     private val userLabel = Label()
 
-    private var nameUpdateChannel: ReceiveChannel<String>? = null
-    private var nameUpdateJob: Job? = null
+    private val userIdFlow = MutableObservable<UserId>()
 
     fun update(content: EmoteMessage, sender: UserId, server: MediaServer) {
         userLabel.text = ""
         node.children.clear()
         userLabel.textFill = userData.getUserColor(sender)
 
-        nameUpdateChannel?.cancel()
-        val u = userData.getNameUpdates(sender)
-        nameUpdateChannel = u
-        nameUpdateJob?.cancel()
-        nameUpdateJob = GlobalScope.launch { updateName(u) }
-
         node.add(userLabel)
         node.add(Text(" "))
         node.addStringWithElements(content.body, server, userData.data)
     }
 
-    private suspend fun updateName(updates: ReceiveChannel<String>) = coroutineScope {
-        for (name in updates) {
-            withContext(UiDispatcher) {
-                userLabel.text = name
-            }
-        }
+    init {
+        userIdFlow.flow().flatMapLatest {
+            userData.getNameUpdates(it)
+        }.onEach {
+            userLabel.text = it
+        }.launchIn(scope)
     }
 }
 

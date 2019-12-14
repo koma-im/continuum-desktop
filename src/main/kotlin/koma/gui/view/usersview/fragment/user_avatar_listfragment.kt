@@ -1,20 +1,23 @@
 package koma.gui.view.usersview.fragment
 
+import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.Tooltip
 import koma.Server
 import koma.matrix.UserId
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.label
 import link.continuum.desktop.gui.list.user.UserDataStore
-import link.continuum.desktop.gui.switchUpdates
+import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -25,12 +28,13 @@ private typealias SelectUser = Pair<UserId, Server>
 class MemberCell(
         private val store: UserDataStore
 ) : ListCell<SelectUser>() {
+    private val scope = MainScope()
     private val root = HBox( 5.0)
     private val toolTip = Tooltip()
     private val avatarView = AvatarView(store)
     private val name: Label
 
-    private val itemId = ConflatedBroadcastChannel<SelectUser>()
+    private val itemId = MutableObservable<SelectUser>()
     init {
 
         root.apply {
@@ -44,22 +48,17 @@ class MemberCell(
                 ellipsisString = ""
             }
         }
-
-        GlobalScope.launch {
-            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it.first) }
-            for (n in newName) {
-                withContext(Dispatchers.JavaFx) {
-                    logger.debug { "updating name in user list: ${itemId.valueOrNull} is $n" }
-                    name.text = n
-                }
-            }
-        }
-        GlobalScope.launch(Dispatchers.Main) {
-            for (id in itemId.openSubscription()) {
-                avatarView.updateUser(id.first, id.second)
-                toolTip.text = id.first.str
-            }
-        }
+        itemId.flow().flatMapLatest {
+            store.getNameUpdates(it.first)
+        }.onEach {
+            logger.debug { "updating name in user list: ${itemId.getOrNull()} is $it" }
+            check(Platform.isFxApplicationThread())
+            name.text = it
+        }.launchIn(scope)
+        itemId.flow().onEach { id ->
+            avatarView.updateUser(id.first, id.second)
+            toolTip.text = id.first.str
+        }.launchIn(scope)
     }
 
     override fun updateItem(item: SelectUser?, empty: Boolean) {
@@ -68,7 +67,7 @@ class MemberCell(
             graphic = null
             return
         }
-        itemId.offer(item)
+        itemId.set(item)
         name.textFill = store.getUserColor(item.first)
 
         graphic = root

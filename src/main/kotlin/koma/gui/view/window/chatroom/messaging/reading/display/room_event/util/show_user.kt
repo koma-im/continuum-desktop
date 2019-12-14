@@ -6,10 +6,14 @@ import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 
@@ -21,15 +25,14 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class StateEventUserView(
         private val store: UserDataStore
-): CoroutineScope by CoroutineScope(Dispatchers.Default) {
+) {
+    private val scope = MainScope()
     val root = HBox(5.0)
     private val avatarView = AvatarView(store)
     private val nameLabel: Label
-    private val itemId = ConflatedBroadcastChannel<Pair<UserId, Server>>()
+    private val itemId = MutableObservable<Pair<UserId, MediaServer>>()
     fun updateUser(userId: UserId, mediaServer: MediaServer) {
-        if (!itemId.offer(userId to mediaServer)) {
-            logger.error { "$userId not offered" }
-        }
+        itemId.set(userId to mediaServer)
     }
     init {
         root.add(avatarView.root)
@@ -42,17 +45,14 @@ class StateEventUserView(
         }
         root.add(l)
 
-        launch(Dispatchers.JavaFx) {
-            val newName = switchUpdates(itemId.openSubscription()) { store.getNameUpdates(it.first) }
-            for (n in newName) {
-                nameLabel.text = n
-            }
-        }
-        launch(Dispatchers.JavaFx) {
-            for (id in itemId.openSubscription()) {
-                avatarView.updateUser(id.first, id.second)
-                nameLabel.textFill = store.getUserColor(id.first)
-            }
-        }
+        itemId.flow().flatMapLatest {
+            store.getNameUpdates(it.first)
+        }.onEach {
+            nameLabel.text = it
+        }.launchIn(scope)
+        itemId.flow().onEach {
+            avatarView.updateUser(it.first, it.second)
+            nameLabel.textFill = store.getUserColor(it.first)
+        }.launchIn(scope)
     }
 }

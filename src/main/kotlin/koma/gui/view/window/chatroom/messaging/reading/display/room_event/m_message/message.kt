@@ -11,17 +11,18 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.D
 import koma.koma_app.AppStore
 import koma.matrix.UserId
 import koma.matrix.event.room_message.MRoomMessage
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.Room
+import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -30,6 +31,7 @@ private val logger = KotlinLogging.logger {}
 class MRoomMessageViewNode(
         store: AppStore
 ): MessageCell(store) {
+    private val scope = MainScope()
     override val center = StackPane()
     init {
         node.add(center)
@@ -39,7 +41,7 @@ class MRoomMessageViewNode(
     private val timeView = DatatimeView()
     private val avatarView = AvatarView(userData = userData)
     private val senderLabel = Text()
-    private val senderId = Channel<UserId>(Channel.CONFLATED)
+    private val senderId = MutableObservable<UserId>()
     private val contentBox = HBox(5.0)
     private val content by  lazy { MessageView(userData) }
 
@@ -68,14 +70,11 @@ class MRoomMessageViewNode(
                 }
             }
         }
-        GlobalScope.launch {
-            val newName = switchUpdates(senderId) { userData.getNameUpdates(it) }
-            for (n in newName) {
-                withContext(UiDispatcher) {
-                    senderLabel.text = n
-                }
-            }
-        }
+        senderId.flow().flatMapLatest {
+            store.userData.getNameUpdates(it)
+        }.onEach {
+            senderLabel.text = it
+        }.launchIn(scope)
     }
 
     override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
@@ -98,7 +97,7 @@ class MRoomMessageViewNode(
     }
     fun update(message: MRoomMessage, server: Server) {
         item = message
-        senderId.offer(message.sender)
+        senderId.set(message.sender)
         timeView.updateTime(message.origin_server_ts)
         avatarView.updateUser(message.sender, server)
         senderLabel.fill = userData.getUserColor(message.sender)

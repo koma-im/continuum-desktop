@@ -27,10 +27,15 @@ import koma.matrix.event.room_message.RoomEventType
 import koma.util.testFailure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
@@ -281,7 +286,8 @@ private class ListContext(
 private class NotificationCell(
         private val store: AppStore,
         private val context: ListContext
-): ListCell<Item>(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
+): ListCell<Item>() {
+    private val scope = MainScope()
     private val timeView = DatatimeView()
     private val avatarView = AvatarView(userData = store.userData)
     private val senderLabel = Text()
@@ -322,7 +328,7 @@ private class NotificationCell(
         prefWidth = 1.0
     }
 
-    private val senderId = Channel<UserId>(Channel.CONFLATED)
+    private val senderId = MutableObservable<UserId>()
 
     private fun showPopup() {
         val s = server ?: return
@@ -347,7 +353,7 @@ private class NotificationCell(
         this.server = s
         this.item = item
         center.children.clear()
-        senderId.offer(event.sender)
+        senderId.set(event.sender)
         timeView.updateTime(event.origin_server_ts)
         avatarView.updateUser(event.sender, s)
         senderLabel.fill = store.userData.getUserColor(event.sender)
@@ -369,11 +375,10 @@ private class NotificationCell(
         graphic = root
     }
     init {
-        launch(Dispatchers.Main) {
-            val newName = switchUpdates(senderId) { store.userData.getNameUpdates(it) }
-            for (n in newName) {
-                senderLabel.text = n
-            }
-        }
+        senderId.flow().flatMapLatest {
+            store.userData.getNameUpdates(it)
+        }.onEach {
+            senderLabel.text = it
+        }.launchIn(scope)
     }
 }
