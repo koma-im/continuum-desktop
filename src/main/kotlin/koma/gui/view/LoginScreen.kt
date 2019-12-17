@@ -58,10 +58,10 @@ class LoginScreen(
             override fun fromString(string: String?): UserId? = string?.let { UserId(it) }
         }
     }
-    var serverCombo= TextFields.createClearableTextField().apply {
+    var serverCombo: TextField = TextFields.createClearableTextField().apply {
         promptText = "https://matrix.org"
     }
-    var password = TextFields.createClearablePasswordField()
+    var password: PasswordField = TextFields.createClearablePasswordField()
 
     private val prefWin by lazy { PreferenceWindow() }
     private val validation = ValidationSupport().apply {

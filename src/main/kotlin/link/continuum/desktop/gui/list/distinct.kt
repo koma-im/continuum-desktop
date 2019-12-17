@@ -1,6 +1,7 @@
 package link.continuum.desktop.gui.list
 
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 
 /**
  * not synchronized, use on the UI thread
@@ -8,7 +9,7 @@ import javafx.collections.FXCollections
 class DedupList<T, U>(private val identify: (T)->U) {
     private val rwList = FXCollections.observableArrayList<T>()
     private val elementSet = mutableSetOf<U>()
-    val list = FXCollections.unmodifiableObservableList(rwList)
+    val list: ObservableList<T> = FXCollections.unmodifiableObservableList(rwList)
     fun getIds(): List<U> {
         return elementSet.toList()
     }

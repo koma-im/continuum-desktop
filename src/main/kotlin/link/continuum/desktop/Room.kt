@@ -2,6 +2,7 @@ package link.continuum.desktop
 
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
+import javafx.beans.property.ReadOnlyStringProperty
 import javafx.beans.property.ReadOnlyStringWrapper
 import javafx.beans.property.SimpleObjectProperty
 import koma.Server
@@ -57,7 +58,7 @@ class Room(
 
     // fallback in order: name, first alias, id
     private val _displayName = ReadOnlyStringWrapper(id.id)
-    val displayName = _displayName.readOnlyProperty
+    val displayName: ReadOnlyStringProperty = _displayName.readOnlyProperty
 
     val avatar = SimpleObjectProperty<Optional<MHUrl>>(null)
 

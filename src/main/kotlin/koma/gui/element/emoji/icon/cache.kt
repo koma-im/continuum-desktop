@@ -23,7 +23,7 @@ fun getEmojiCode(emoji: String): String {
         it != 0xfe0f && it != 0x200d
         && it != 0x2640 && it != 0x2640
     }.toList()
-    return points.map { String.format("%x", it) }.joinToString("-")
+    return points.joinToString("-") { String.format("%x", it) }
 }
 
 private fun getCdnEmojiUrl(code: String): HttpUrl {

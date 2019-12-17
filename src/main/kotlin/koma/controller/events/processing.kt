@@ -50,7 +50,7 @@ private suspend fun handle_joined_room(
         timeline.events.forEach { room.applyUpdate(it.value, appStore = appData) }
         room.messageManager.appendTimeline(timeline)
     }
-    room.handle_ephemeral(data.ephemeral.events.map { it.parse() }.filterNotNull())
+    room.handle_ephemeral(data.ephemeral.events.mapNotNull { it.parse() })
     // TODO:  account_data
 }
 

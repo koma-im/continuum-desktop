@@ -1,6 +1,7 @@
 package link.continuum.desktop.gui
 
 import javafx.application.Application
+import javafx.application.HostServices
 import javafx.beans.Observable
 import javafx.beans.binding.*
 import javafx.beans.property.DoubleProperty
@@ -45,7 +46,7 @@ object JFX {
     lateinit var primaryStage: Stage
     lateinit var application: Application
     lateinit var primaryPane: ScalingPane
-    val hostServices by lazy { application.hostServices }
+    val hostServices: HostServices by lazy { application.hostServices }
 }
 
 internal fun Pane.vbox(op: VBox.()->Unit) {

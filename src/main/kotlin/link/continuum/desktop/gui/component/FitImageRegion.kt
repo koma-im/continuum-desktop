@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater
 import java.util.concurrent.atomic.AtomicReference
 
 private val logger = KotlinLogging.logger {}
