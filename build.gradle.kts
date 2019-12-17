@@ -73,6 +73,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.apply {
         jvmTarget = "9"
         freeCompilerArgs = listOf(
+                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
                 "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi"
                 , "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"

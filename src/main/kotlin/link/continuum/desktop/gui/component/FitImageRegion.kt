@@ -9,6 +9,11 @@ import koma.network.media.MHUrl
 import koma.util.KResult
 import koma.util.testFailure
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicReference
 
@@ -50,37 +55,40 @@ class FitImageRegion(
          * scale up the image to cover the entire region
          */
         cover: Boolean = true
-): Region(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    val imageProperty = SimpleObjectProperty<Image?>()
+): Region() {
+    private val scope = MainScope()
+    val urlFlow = MutableObservable<Pair<MHUrl, Server>>()
+    val imageProperty = MutableObservable<Image?>()
     var image
         get() = imageProperty.get()
         set(value) {imageProperty.set(value)}
-    private val job = AtomicReference<Job?>()
     fun setMxc(
             mxc: MHUrl,
-            server: Server,
-            width: Double = this.width.coerceAtLeast(32.0),
-            height: Double = this.height.coerceAtLeast(32.0)
+            server: Server
     ) {
-        val j = launch {
-            withContext(Dispatchers.Main) {
-                image = null
-                val (img, failure, result) = downloadImageSized(mxc, server, width, height)
-                if (result.testFailure(img, failure)) {
-                    return@withContext
-                } else {
-                    image = img
-                }
-            }
-        }
-        val prev = job.getAndSet(j)
-        prev?.cancel()
+        urlFlow.set(mxc to server)
     }
     init {
-        imageProperty.addListener { _, _, image ->
+        urlFlow.flow()
+                .distinctUntilChanged { old, new -> old.first != new.first }
+                .onEach {
+                    backgroundProperty().set(null)
+                }
+                .mapLatest {
+                    val w = this.width.coerceAtLeast(32.0)
+                    val h = this.height.coerceAtLeast(32.0)
+                    logger.trace { "Image view size $w $h" }
+                    downloadImageSized(it.first, it.second, w, h)
+                }.onEach {
+                    val (img, failure, result) = it
+                    if (!result.testFailure(img, failure)) {
+                        imageProperty.set(img)
+                    }
+                }.launchIn(scope)
+        imageProperty.flow().onEach {
             if (image == null) {
                 backgroundProperty().set(null)
-                return@addListener
+                return@onEach
             }
             val backgroundImage = if (cover) {
                 BackgroundImage(image,
@@ -97,7 +105,10 @@ class FitImageRegion(
                         bgSizeContain)
             }
             this.backgroundProperty().set(Background(backgroundImage))
-        }
+        }.launchIn(scope)
+    }
+    fun close() {
+        scope.cancel()
     }
     companion object {
         private val bgSize =  BackgroundSize(100.0, 100.0,

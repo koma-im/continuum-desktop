@@ -13,6 +13,9 @@ import koma.network.media.MHUrl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.component.FitImageRegion
@@ -21,7 +24,8 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 abstract class UrlAvatar(
-): CoroutineScope by CoroutineScope(Dispatchers.Default) {
+) {
+    private val scope = MainScope()
     val root: Region = object :StackPane() {
         // roughly aligned with text vertically
         override fun getBaselineOffset(): Double = height * 0.75
@@ -30,7 +34,12 @@ abstract class UrlAvatar(
     private val imageView = FitImageRegion()
 
     init {
-        initialIcon.root.removeWhen(imageView.imageProperty.isNotNull)
+        imageView.imageProperty.flow().onEach {
+            if (it != null) initialIcon.root.apply {
+                isVisible = false
+                isManaged = false
+            }
+        }.launchIn(scope)
 
         root as StackPane
         root.add(initialIcon.root)

@@ -96,7 +96,7 @@ object BiggerViews {
         } else views.removeAt(views.size - 1)
         view.show(title, image)
         if (url != null && server != null) {
-            view.imageView.setMxc(url, server, 400.0, 400.0)
+            view.imageView.setMxc(url, server)
         } else {
             logger.debug { "url=$url, server=$server"}
         }
