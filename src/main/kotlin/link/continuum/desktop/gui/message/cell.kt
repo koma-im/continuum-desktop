@@ -22,9 +22,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.Room
+import link.continuum.desktop.gui.*
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -98,10 +97,6 @@ abstract class MessageCell(
         items.add(contextMenuShowSource)
     }
     protected var current: RoomEventRow? = null
-
-    // share between different types of view
-    protected val senderAvatar = AvatarView(store.userData)
-
     protected fun updateEvent(message: RoomEventRow, room: Room) {
         loading.managedProperty().unbind()
         loading.visibleProperty().unbind()

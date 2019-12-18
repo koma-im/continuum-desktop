@@ -5,17 +5,19 @@ import javafx.scene.image.ImageView
 import koma.Server
 import koma.network.media.MHUrl
 import koma.util.testFailure
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.gui.prop
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
-import java.util.concurrent.atomic.AtomicReference
 
 private val logger = KotlinLogging.logger {}
 
-class MxcImageView(
-) {
+class MxcImageView {
     private val scope = MainScope()
     val root: Node = ImageView().apply {
         isPreserveRatio = true
@@ -46,7 +48,7 @@ class MxcImageView(
                     }
                 }.launchIn(scope)
     }
-    fun close() {
+    fun cancelScope() {
         scope.cancel()
     }
 }

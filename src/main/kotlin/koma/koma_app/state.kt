@@ -9,10 +9,10 @@ import koma.storage.rooms.RoomStore
 import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import link.continuum.desktop.Room
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -27,12 +27,13 @@ object appState {
 }
 
 /**
- * some components need to access the network to download avatars, etc
+ * data
  */
 class AppStore(
         val database: KotlinEntityDataStore<Persistable>,
         val settings: AppSettings
 ) {
+    @Deprecated("")
     val userStore = UserStore(database)
     /**
      * users on the network

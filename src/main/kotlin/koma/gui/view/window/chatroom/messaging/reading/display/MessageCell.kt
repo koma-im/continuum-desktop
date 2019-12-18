@@ -13,9 +13,10 @@ import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.Room
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.Room
+import link.continuum.desktop.gui.util.Recyclable
 
 @ExperimentalCoroutinesApi
 class HistoryVisibilityEventView(
@@ -23,6 +24,7 @@ class HistoryVisibilityEventView(
 ): MessageCell(store) {
     private val sender = HBox()
     private val text = Text()
+    private val avatar = Recyclable(store.userData.avatarPool)
     override val center = HBox(5.0).apply {
         alignment = Pos.CENTER
         children.addAll(sender, text)
@@ -38,26 +40,25 @@ class HistoryVisibilityEventView(
             val ev = item.first.getEvent()
             if (ev !is MRoomHistoryVisibility) {
                 graphic = null
+                avatar.recycle()
             } else {
                 updateEvent(item.first, item.second)
-                update(ev)
+                val a = avatar.get()
+                a.updateUser(ev.sender, item.second.account.server)
+                sender.children.clear()
+                sender.children.add(a.root)
+                val t = when(ev.content.history_visibility) {
+                    HistoryVisibility.Invited -> "made events accessible to newly joined members " +
+                            "from the point they were invited onwards"
+                    HistoryVisibility.Joined -> "made events accessible to newly joined members " +
+                            "from the point they joined the room onwards"
+                    HistoryVisibility.Shared -> "made future room history visible to all members"
+                    HistoryVisibility.WorldReadable -> "made new events visible to the world"
+                }
+                text.text = t
                 graphic = node
             }
         }
-    }
-
-    fun update(ev: MRoomHistoryVisibility) {
-        sender.children.clear()
-        sender.children.add(senderAvatar.root)
-        val t = when(ev.content.history_visibility) {
-            HistoryVisibility.Invited -> "made events accessible to newly joined members " +
-                    "from the point they were invited onwards"
-            HistoryVisibility.Joined -> "made events accessible to newly joined members " +
-                    "from the point they joined the room onwards"
-            HistoryVisibility.Shared -> "made future room history visible to all members"
-            HistoryVisibility.WorldReadable -> "made new events visible to the world"
-        }
-        text.text = t
     }
 }
 
@@ -66,6 +67,7 @@ class GuestAccessUpdateView(store: AppStore): MessageCell(store) {
     override val center = HBox(5.0).apply {
         alignment = Pos.CENTER
     }
+    private val avatar = Recyclable(store.userData.avatarPool)
     init {
         node.add(center)
     }
@@ -77,18 +79,18 @@ class GuestAccessUpdateView(store: AppStore): MessageCell(store) {
             val ev = item.first.getEvent()
             if (ev !is MRoomGuestAccess) {
                 graphic = null
+                avatar.recycle()
             } else {
                 updateEvent(item.first, item.second)
-                update(ev)
+                val a = avatar.get()
+                a.updateUser(ev.sender, item.second.account.server)
+                center.children.clear()
+                center.children.addAll(a.root,
+                        Text("set guest access to ${ev.content.guest_access}")
+                )
                 graphic = node
             }
         }
-    }
-    fun update(event: MRoomGuestAccess) {
-        center.children.clear()
-        center.children.addAll(senderAvatar.root,
-                Text("set guest access to ${event.content.guest_access}")
-                )
     }
 }
 

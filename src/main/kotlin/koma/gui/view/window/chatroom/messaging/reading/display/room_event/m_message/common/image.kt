@@ -1,12 +1,10 @@
 package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.common
 
-import javafx.beans.binding.Bindings
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.MenuItem
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseButton
@@ -15,9 +13,6 @@ import koma.Server
 import koma.gui.dialog.file.save.downloadFileAs
 import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
 import koma.network.media.MHUrl
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.add
@@ -25,15 +20,13 @@ import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.component.MxcImageView
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
-import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
 class ImageElement(
         private val imageSize: Double = 200.0
-) : ViewNode, CoroutineScope by MainScope() {
+) : ViewNode {
     override val node = StackPane()
     override val menuItems: List<MenuItem>
 
@@ -61,6 +54,10 @@ class ImageElement(
         menuItems = menuItems()
     }
 
+    fun cancelScope() {
+        imageView.cancelScope()
+    }
+
     private fun menuItems(): List<MenuItem> {
         val tm = MenuItem("Save Image")
         tm.setOnAction {
@@ -80,7 +77,7 @@ class ImageElement(
                 )
                 return@setOnAction
             }
-            downloadFileAs(s.mxcToHttp(u), title = "Save Image As", httpClient = s.httpClient)
+            downloadFileAs(s.mxcToHttp(u), title = "Save Image As", httpClient = s.okHttpClient)
         }
         return listOf(tm)
     }
@@ -102,7 +99,7 @@ object BiggerViews {
         }
     }
 
-    private class View() {
+    private class View {
         val root = StackPane()
         private val scene = Scene(root)
         private val stage = Stage().apply {

@@ -17,6 +17,8 @@ import link.continuum.database.models.getLatestAvatar
 import link.continuum.database.models.getLatestNick
 import link.continuum.database.models.saveUserAvatar
 import link.continuum.database.models.saveUserNick
+import link.continuum.desktop.gui.icon.avatar.AvatarView
+import link.continuum.desktop.gui.util.UiPool
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -28,6 +30,7 @@ class UserDataStore(
         val data: KDataStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val scope = CoroutineScope(Dispatchers.Default)
+    val avatarPool = UiPool { AvatarView(this) }
     private val nameUpdates = ConcurrentHashMap<UserId, MutableObservable<Pair<Long, String?>>>()
     suspend fun updateName(userId: UserId, name: String, time: Long) {
         val c = nameUpdates.get(userId)
