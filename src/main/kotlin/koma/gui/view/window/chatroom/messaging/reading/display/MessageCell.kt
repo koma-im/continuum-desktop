@@ -13,84 +13,56 @@ import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.Room
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.message.MessageCellContent
 import link.continuum.desktop.gui.util.Recyclable
+import link.continuum.desktop.util.http.MediaServer
 
 @ExperimentalCoroutinesApi
 class HistoryVisibilityEventView(
         store: AppStore
-): MessageCell(store) {
+): MessageCellContent<MRoomHistoryVisibility> {
     private val sender = HBox()
     private val text = Text()
     private val avatar = Recyclable(store.userData.avatarPool)
-    override val center = HBox(5.0).apply {
+    override val root = HBox(5.0).apply {
         alignment = Pos.CENTER
         children.addAll(sender, text)
     }
     init {
-        node.add(center)
     }
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-        } else {
-            val ev = item.first.getEvent()
-            if (ev !is MRoomHistoryVisibility) {
-                graphic = null
-                avatar.recycle()
-            } else {
-                updateEvent(item.first, item.second)
-                val a = avatar.get()
-                a.updateUser(ev.sender, item.second.account.server)
-                sender.children.clear()
-                sender.children.add(a.root)
-                val t = when(ev.content.history_visibility) {
-                    HistoryVisibility.Invited -> "made events accessible to newly joined members " +
-                            "from the point they were invited onwards"
-                    HistoryVisibility.Joined -> "made events accessible to newly joined members " +
-                            "from the point they joined the room onwards"
-                    HistoryVisibility.Shared -> "made future room history visible to all members"
-                    HistoryVisibility.WorldReadable -> "made new events visible to the world"
-                }
-                text.text = t
-                graphic = node
-            }
+    override fun update(message: MRoomHistoryVisibility, server: MediaServer) {
+        val a = avatar.get()
+        a.updateUser(message.sender, server)
+        sender.children.clear()
+        sender.children.add(a.root)
+        val t = when (message.content.history_visibility) {
+            HistoryVisibility.Invited -> "made events accessible to newly joined members " +
+                    "from the point they were invited onwards"
+            HistoryVisibility.Joined -> "made events accessible to newly joined members " +
+                    "from the point they joined the room onwards"
+            HistoryVisibility.Shared -> "made future room history visible to all members"
+            HistoryVisibility.WorldReadable -> "made new events visible to the world"
         }
+        text.text = t
+
     }
 }
 
 @ExperimentalCoroutinesApi
-class GuestAccessUpdateView(store: AppStore): MessageCell(store) {
-    override val center = HBox(5.0).apply {
+class GuestAccessUpdateView(store: AppStore): MessageCellContent<MRoomGuestAccess> {
+    override val root = HBox(5.0).apply {
         alignment = Pos.CENTER
     }
     private val avatar = Recyclable(store.userData.avatarPool)
-    init {
-        node.add(center)
-    }
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-        } else {
-            val ev = item.first.getEvent()
-            if (ev !is MRoomGuestAccess) {
-                graphic = null
-                avatar.recycle()
-            } else {
-                updateEvent(item.first, item.second)
-                val a = avatar.get()
-                a.updateUser(ev.sender, item.second.account.server)
-                center.children.clear()
-                center.children.addAll(a.root,
-                        Text("set guest access to ${ev.content.guest_access}")
-                )
-                graphic = node
-            }
-        }
+
+    override fun update(message: MRoomGuestAccess, server: MediaServer) {
+        val a = avatar.get()
+        a.updateUser(message.sender, server)
+        root.children.clear()
+        root.children.addAll(a.root,
+                Text("set guest access to ${message.content.guest_access}")
+        )
     }
 }
 

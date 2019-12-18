@@ -13,28 +13,22 @@ import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
 import javafx.scene.input.MouseEvent
-import link.continuum.desktop.gui.StackPane
-import javafx.util.Callback
-import koma.gui.element.control.CellPool
 import koma.gui.element.control.KListView
 import koma.gui.element.control.behavior.ListViewBehavior
+import link.continuum.desktop.gui.StackPane
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
 class KListViewSkin<T, I>(
         control: ListView<T>,
-        private val cellPool: CellPool<I, T>,
         private val kListView: KListView<T, I>
 ): KVirtualContainerBase<ListView<T>, I, T>(control)
         where I: ListCell<T>{
 
     public override val flow = KVirtualFlow<I, T>(
-            cellCreator = {item ->
-                createCell(item)
-            },
+            cellCreator = ::createCell,
             kListView = kListView,
-            pile = cellPool,
             fixedCellSize = control.fixedCellSize.let { if (it > 0) it else null})
     /**
      * Region placed over the top of the flow (and possibly the header row) if
@@ -263,8 +257,8 @@ class KListViewSkin<T, I>(
 
 
 
-    private fun createCell(item: T?): I {
-        val cell: I = kListView.cellCreator(item)
+    private fun createCell(): I {
+        val cell: I = kListView.cellCreator()
         cell.updateListView(skinnable)
 
         return cell

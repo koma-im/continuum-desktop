@@ -11,19 +11,16 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.S
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.matrix.event.room_message.state.MRoomMember
+import koma.matrix.event.room_message.MRoomMember
 import koma.matrix.room.participation.Membership
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.list.user.UserDataStore
-import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.message.MessageCellContent
 import link.continuum.desktop.util.http.MediaServer
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 
@@ -33,15 +30,16 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class MRoomMemberViewNode(
         store: AppStore
-): MessageCell(store) {
-    override val center = StackPane()
-    init {
-        node.add(center)
-    }
-
+): MessageCellContent<MRoomMember> {
     private val userView = StateEventUserView(store.userData)
     private val timeView = DatatimeView()
     private val contentPane = StackPane()
+    override val root = HBox(spacing = 5.0).apply {
+        alignment = Pos.CENTER
+        add(userView.root)
+        add(contentPane)
+        add(timeView.root)
+    }
 
     private val inviterView = StateEventUserView(store.userData)
     private val invitationContent by lazy {
@@ -56,22 +54,7 @@ class MRoomMemberViewNode(
     }
     private val userUpdate = UserAppearanceUpdateView()
 
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-        } else {
-            val ev = item.first.getEvent()
-            if (ev !is MRoomMember) {
-                graphic = null
-            } else {
-                updateEvent(item.first, item.second)
-                update(ev, item.second.account.server)
-                graphic = node
-            }
-        }
-    }
-    private fun update(message: MRoomMember, server: MediaServer) {
+    override fun update(message: MRoomMember, server: MediaServer) {
         userView.updateUser(message.sender, server)
         timeView.updateTime(message.origin_server_ts)
         contentPane.children.clear()
@@ -109,16 +92,6 @@ class MRoomMemberViewNode(
             }
             joinedContent.children.addAll(Text("joined"))
             contentPane.children.addAll(joinedContent)
-        }
-    }
-    init {
-        node.apply {
-            hbox(spacing = 5.0) {
-                alignment = Pos.CENTER
-                add(userView.root)
-                add(contentPane)
-                add(timeView.root)
-            }
         }
     }
 }

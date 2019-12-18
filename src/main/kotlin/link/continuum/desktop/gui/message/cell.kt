@@ -2,7 +2,11 @@ package link.continuum.desktop.gui.message
 
 
 import javafx.geometry.Pos
-import javafx.scene.control.*
+import javafx.scene.Node
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.Label
+import javafx.scene.control.ListCell
+import javafx.scene.control.MenuItem
 import javafx.scene.layout.Region
 import javafx.scene.text.Text
 import koma.gui.view.window.chatroom.messaging.reading.display.EventSourceViewer
@@ -10,74 +14,46 @@ import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdate
 import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.room.MRoomCreationViewNode
 import koma.koma_app.AppStore
-import koma.matrix.event.room_message.MRoomMessage
-import koma.matrix.event.room_message.RoomEvent
-import koma.matrix.event.room_message.state.MRoomCreate
-import koma.matrix.event.room_message.state.MRoomGuestAccess
-import koma.matrix.event.room_message.state.MRoomHistoryVisibility
-import koma.matrix.event.room_message.state.MRoomMember
+import koma.matrix.event.room_message.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
 import link.continuum.desktop.Room
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
 private val sourceViewer by lazy { EventSourceViewer() }
 
-fun createCell(item: RoomEvent?, store: AppStore): MessageCell {
-    val x = when (item) {
-        is MRoomMember -> MRoomMemberViewNode(store)
-        is MRoomMessage -> MRoomMessageViewNode(store)
-        is MRoomCreate -> MRoomCreationViewNode(store)
-        is MRoomGuestAccess -> GuestAccessUpdateView(store)
-        is MRoomHistoryVisibility -> HistoryVisibilityEventView(store)
-        else -> FallbackCell(store)
-    }
-    return x
-}
-
-class FallbackCell(store: AppStore):MessageCell(store){
+class FallbackCell():MessageCellContent<RoomEvent> {
     private val text= Text()
     private var msg: RoomEventRow? = null
-    override val center = HBox(5.0).apply {
+    override val root = HBox(5.0).apply {
         alignment = Pos.CENTER
         add(text)
-        add(Hyperlink().apply {
-            setOnAction {
-                msg?.let {
-                    sourceViewer.showAndWait(it)
-                }
-            }
-        })
     }
-    init {
-        node.add(center)
+
+    override fun update(message: RoomEvent, server: MediaServer) {
+        text.text= message.type.toString()
     }
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-        } else {
-            updateEvent(item.first, item.second)
-            text.text= item.first.getEvent()?.type.toString()
-            msg = item.first
-            graphic = node
-        }
-    }
+}
+
+interface MessageCellContent<T> {
+    val root: Node
+    fun menuItems(): List<MenuItem> = listOf()
+    fun update(message: T, server: MediaServer)
 }
 
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
-abstract class MessageCell(
+open class MessageCell(
         protected val store: AppStore
 ): ListCell<Pair<RoomEventRow, Room>>() {
-    protected abstract val center: Region
+    protected open val center: Region = StackPane()
     private val loading = Label("Loading older messages...")
 
     val node = VBox(3.0).apply {
@@ -93,10 +69,56 @@ abstract class MessageCell(
             }
         }
     }
-    protected val menu: ContextMenu = ContextMenu().apply {
-        items.add(contextMenuShowSource)
-    }
+    protected val menu: ContextMenu = ContextMenu()
     protected var current: RoomEventRow? = null
+    private var currentContent: Any? = null
+
+    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
+        super.updateItem(item, empty)
+        releaseContentCell()
+        if (empty || item == null) {
+            graphic = null
+            return
+        }
+        val event = item.first.getEvent() ?: return
+        val server = item.second.account.server
+        val content = when (event) {
+            is MRoomMessage -> store.messageCells.take().apply {
+                update(event, server)
+            }
+            is MRoomMember -> store.membershipCells.take().apply {
+                update(event, server)
+            }
+            is MRoomGuestAccess -> store.guestAccessCells.take().apply {
+                update(event, server)
+            }
+            is MRoomHistoryVisibility -> store.historyVisibilityCells.take().apply {
+                update(event, server)
+            }
+            else -> store.fallbackCells.take().apply {
+                update(event, server)
+            }
+        }
+        node.children.run {
+            if (size > 1) set(1, content.root)
+            else add(content.root)
+            Unit
+        }
+        updateEvent(item.first, item.second)
+        graphic = node
+    }
+    private fun releaseContentCell() {
+        val c = currentContent?: return
+        currentContent = null
+        when (c) {
+            is MRoomMessageViewNode -> store.messageCells.pushBack(c)
+            is MRoomMemberViewNode -> store.membershipCells.pushBack(c)
+            is GuestAccessUpdateView -> store.guestAccessCells.pushBack(c)
+            is HistoryVisibilityEventView -> store.historyVisibilityCells.pushBack(c)
+            is FallbackCell -> store.fallbackCells.pushBack(c)
+            else -> error("Unexpected node $c")
+        }
+    }
     protected fun updateEvent(message: RoomEventRow, room: Room) {
         loading.managedProperty().unbind()
         loading.visibleProperty().unbind()
@@ -112,6 +134,14 @@ abstract class MessageCell(
     }
     init {
         node.setOnContextMenuRequested { event ->
+            val c = currentContent
+            if (c is MessageCellContent<*>) {
+                menu.items.run {
+                    clear()
+                    addAll(c.menuItems())
+                    add(contextMenuShowSource)
+                }
+            }
             menu.show(node, event.screenX, event.screenY)
             event.consume()
         }

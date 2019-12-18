@@ -9,13 +9,10 @@ import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
+import link.continuum.desktop.Room
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
-import link.continuum.desktop.gui.message.EventCellPool
 import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.gui.message.createCell
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import kotlin.math.max
@@ -37,9 +34,8 @@ class MessagesListScrollPane(
         private val km: OkHttpClient,
         store: AppStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Main)  {
-    private val virtualList: KListView<EventItem, MessageCell> = KListView(EventCellPool()) {
-        logger.trace { "creating cell for ${it?.first?.getEvent()?.type}" }
-        createCell(it?.first?.getEvent(), store)
+    private val virtualList: KListView<EventItem, MessageCell> = KListView() {
+        MessageCell(store)
     }.apply {
         view.styleClass.add("message-list-view")
     }

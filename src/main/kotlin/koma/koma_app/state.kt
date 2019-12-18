@@ -2,6 +2,10 @@ package koma.koma_app
 
 import io.requery.Persistable
 import io.requery.sql.KotlinEntityDataStore
+import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
+import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
@@ -12,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.Room
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.message.FallbackCell
+import link.continuum.desktop.gui.util.UiPool
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
 
@@ -51,4 +57,11 @@ class AppStore(
             roomStore.getOrCreate(it, account)
         }
     }
+
+    // reuse components in ListView of events
+    val messageCells = UiPool{ MRoomMessageViewNode(this) }
+    val membershipCells = UiPool{ MRoomMemberViewNode(this) }
+    val guestAccessCells = UiPool{ GuestAccessUpdateView(this) }
+    val historyVisibilityCells = UiPool{ HistoryVisibilityEventView(this)}
+    val fallbackCells = UiPool{ FallbackCell() }
 }

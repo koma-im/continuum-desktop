@@ -1,7 +1,9 @@
 package koma.gui.element.control.skin
 
 import javafx.beans.Observable
-import javafx.beans.property.*
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ChangeListener
 import javafx.collections.ObservableList
 import javafx.event.Event
@@ -19,7 +21,9 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.input.ScrollEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
-import koma.gui.element.control.*
+import koma.gui.element.control.KListView
+import koma.gui.element.control.KVirtualScrollBar
+import koma.gui.element.control.Utils
 import koma.koma_app.Globals
 import link.continuum.desktop.gui.CatchingGroup
 import link.continuum.desktop.gui.ParentReflection
@@ -32,21 +36,14 @@ private val logger = KotlinLogging.logger {}
  * Implementation of a virtualized container using a cell based mechanism.
  */
 class KVirtualFlow<I, T>(
-        private val cellCreator: (T?)-> I,
+        private val cellCreator: ()-> I,
         private val kListView: KListView<T, I>,
-        /**
-         * A structure containing cells that can be reused later. These are cells
-         * that at one time were needed to populate the view, but now are no longer
-         * needed. We keep them here until they are needed again.
-         */
-        private val pile: CellPool<I, T>,
         /**
          * For optimisation purposes, some use cases can trade dynamic cell length
          * for speed - if fixedCellSize is not null we'll use that rather
          * than determine it by querying the cell itself.
          */
-        private
-        val fixedCellSize: Double? = null
+        private val fixedCellSize: Double? = null
 ): Region()
         where I : ListCell<T> {
 
@@ -109,6 +106,12 @@ class KVirtualFlow<I, T>(
      */
     internal val cells = ArrayLinkedList<I>()
 
+    /**
+     * A structure containing cells that can be reused later. These are cells
+     * that at one time were needed to populate the view, but now are no longer
+     * needed. We keep them here until they are needed again.
+     */
+    private val pile = ArrayLinkedList<I>()
     /**
      * A special cell used to accumulate bounds, such that we reduce object
      * churn. This cell must be recreated whenever the cell factory function
@@ -899,11 +902,11 @@ class KVirtualFlow<I, T>(
      * @param prefIndex the preferred index
      * @return the available cell
      */
-    protected fun getAvailableCell(prefIndex: Int, item: T?): I {
-        val cell: I = pile.removeFirst( {
+    protected fun getAvailableCell(prefIndex: Int): I {
+        val cell: I = pile.removeFirst {
             // Fix for RT-12822. We try to retrieve the cell from the pile rather
             // than just grab a random cell from the pile (or create another cell).
-            getCellIndex(it) == prefIndex }, item) ?: pile.removeLastOrNull(item) ?: cellCreator(item).apply {
+            getCellIndex(it) == prefIndex } ?: pile.removeLast() ?: cellCreator().apply {
                 properties[NEW_CELL] = null
             }
 
@@ -926,7 +929,7 @@ class KVirtualFlow<I, T>(
         var i = 0
         val max = cells.size
         while (i < max) {
-            pile.add(cells.removeFirst()!!)
+            pile.addLast(cells.removeFirst()!!)
             i++
         }
     }
@@ -1186,32 +1189,32 @@ class KVirtualFlow<I, T>(
      * any reason.
      * @return the cell
      */
-    fun getCell(index: Int, item: T?): I {
+    fun getCell(index: Int): I {
         // If there are cells, then we will attempt to get an existing cell
         if (!cells.isEmpty()) {
             // First check the cells that have already been created and are
             // in use. If this call returns a value, then we can use it
             val cell = getVisibleCell(index)
             if (cell != null) {
-                logger.trace { "got cell $cell at $index for $item" }
+                logger.trace { "got cell $cell at $index" }
                 return cell
             }
         }
 
         // check the pile
-        pile.find(item) { getCellIndex(it) == index }?.let {
+        pile.find { getCellIndex(it) == index }?.let {
             // Note that we don't remove from the pile: if we do it leads
             // to a severe performance decrease. This seems to be OK, as
             // getCell() is only used for cell measurement purposes.
             return it
         }
 
-        pile.firstOrNull(item)?.let { return it }
+        pile.firstOrNull()?.let { return it }
 
         // We need to use the accumCell and return that
         if (accumCell == null) {
-            accumCell = cellCreator(item)
-            logger.debug { "creating accumCell $accumCell for $item" }
+            accumCell = cellCreator()
+            logger.debug { "creating accumCell $accumCell" }
             accumCell!!.properties[NEW_CELL] = null
             accumCellParent.children.setAll(accumCell)
 
@@ -1277,8 +1280,7 @@ class KVirtualFlow<I, T>(
      */
     internal fun getCellLength(index: Int): Double {
         if (fixedCellSize != null) return fixedCellSize
-        val item = kListView.items!!.getOrNull(index)
-        val cell = getCell(index, item)
+        val cell = getCell(index)
         val length = getCellLength(cell)
         releaseCell(cell)
         return length
@@ -1287,8 +1289,7 @@ class KVirtualFlow<I, T>(
     /**
      */
     internal fun getCellBreadth(index: Int): Double {
-        val item = kListView.items!!.getOrNull(index)
-        val cell = getCell(index, item)
+        val cell = getCell(index)
         val b = getCellBreadth(cell)
         releaseCell(cell)
         return b
@@ -1372,8 +1373,7 @@ class KVirtualFlow<I, T>(
             first = false
         }
         while (index >= 0 && (offset > 0 || first)) {
-            val item = kListView.items!!.getOrNull(index)
-            cell = getAvailableCell(index, item)
+            cell = getAvailableCell(index)
             setCellIndex(cell, index)
             resizeCellSize(cell) // resize must be after config
             cells.addFirst(cell)
@@ -1456,8 +1456,7 @@ class KVirtualFlow<I, T>(
                     return filledWithNonEmpty
                 }
             }
-            val item = kListView.items!!.getOrNull(index)
-            val cell = getAvailableCell(index, item)
+            val cell = getAvailableCell(index)
             setCellIndex(cell, index)
             resizeCellSize(cell) // resize happens after config!
             cells.addLast(cell)
@@ -1489,8 +1488,7 @@ class KVirtualFlow<I, T>(
             val distance = viewportLength - end
             while (prospectiveEnd < viewportLength && index != 0 && -start < distance) {
                 index--
-                val item = kListView.items!!.getOrNull(index)
-                val cell = getAvailableCell(index, item)
+                val cell = getAvailableCell(index)
                 setCellIndex(cell, index)
                 resizeCellSize(cell) // resize must be after config
                 cells.addFirst(cell)
@@ -1678,12 +1676,12 @@ class KVirtualFlow<I, T>(
                 val c = cells.removeAt(i)
                 logger.trace { "recycling cell below bottom cellStart $cellStart" +
                         ">= viewportLength $viewportLength, index=$i, cell=$c" }
-                pile.add(c)
+                pile.addLast(c)
             } else if(cellEnd < 0) {
                 val c = cells.removeAt(i)
                 logger.trace { "recycling cell above top cellStart $cellStart" +
                         "<0, index=$i, cell=$c" }
-                pile.add(c)
+                pile.addLast(c)
             }
         }
     }

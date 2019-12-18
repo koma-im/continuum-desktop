@@ -1,6 +1,7 @@
 package link.continuum.desktop.util
 
-import java.util.AbstractList
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * A List-like implementation that is exceedingly efficient for the purposes
@@ -108,6 +109,14 @@ internal class ArrayLinkedList<T> : AbstractList<T>() {
 
     fun removeFirst(): T? {
         return if (isEmpty()) null else removeAt(0)
+    }
+
+    fun removeFirst(predicate: (T)-> Boolean): T? {
+        for (i in 0 until size) {
+            if (predicate(get(i)!!))
+                return removeAt(i)
+        }
+        return null
     }
 
     fun removeLast(): T? {

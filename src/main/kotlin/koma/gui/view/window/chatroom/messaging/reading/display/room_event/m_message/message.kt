@@ -3,7 +3,6 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 import javafx.geometry.Insets
 import javafx.scene.control.MenuItem
 import javafx.scene.layout.Priority
-import link.continuum.desktop.gui.StackPane
 import javafx.scene.text.Text
 import koma.Server
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
@@ -11,17 +10,14 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.D
 import koma.koma_app.AppStore
 import koma.matrix.UserId
 import koma.matrix.event.room_message.MRoomMessage
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.gui.message.MessageCell
-import link.continuum.desktop.Room
+import link.continuum.desktop.gui.message.MessageCellContent
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 
@@ -29,13 +25,10 @@ private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 class MRoomMessageViewNode(
-        store: AppStore
-): MessageCell(store) {
+   private val store: AppStore
+): MessageCellContent<MRoomMessage> {
     private val scope = MainScope()
-    override val center = StackPane()
-    init {
-        node.add(center)
-    }
+    override val root = StackPane()
     private val userData = store.userData
     private var item: MRoomMessage? = null
     private val timeView = DatatimeView()
@@ -49,7 +42,7 @@ class MRoomMessageViewNode(
         private val pad2 = Insets(2.0)
     }
     init {
-        with(center) {
+        with(root) {
             padding = pad2
             hbox(4.0) {
                 minWidth = 1.0
@@ -77,25 +70,7 @@ class MRoomMessageViewNode(
         }.launchIn(scope)
     }
 
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-            text = null
-        } else {
-            val ev = item.first.getEvent()
-            if (ev !is MRoomMessage) {
-                graphic = null
-                text = "ev $ev"
-            } else {
-                text = null
-                updateEvent(item.first, item.second)
-                update(ev, item.second.account.server)
-                graphic = node
-            }
-        }
-    }
-    fun update(message: MRoomMessage, server: Server) {
+    override fun update(message: MRoomMessage, server: Server) {
         item = message
         senderId.set(message.sender)
         timeView.updateTime(message.origin_server_ts)
@@ -106,15 +81,12 @@ class MRoomMessageViewNode(
             clear()
             content.node?.node?.let { this.add(it) }
         }
-
-        menu.items.apply {
-            clear()
-            content.node?.menuItems?.let { addAll(it) }
-            add(MenuItem("Copy text").apply {
-                action { copyText() }
-            })
-            add(contextMenuShowSource)
-        }
+    }
+    private val copyTextMenuItem = MenuItem("Copy text").apply {
+        action { copyText() }
+    }
+    override fun menuItems(): List<MenuItem> {
+        return (content.node?.menuItems?: listOf()) + copyTextMenuItem
     }
 
     fun copyText() {
@@ -125,7 +97,7 @@ class MRoomMessageViewNode(
 
     override fun toString(): String {
         val body=item?.content?.body
-        return "MessageCell index=$index, time=${timeView.root}, body=$body"
+        return "MessageCell(time=${timeView.root}, body=$body)"
     }
 }
 

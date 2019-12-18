@@ -12,7 +12,6 @@ import javafx.scene.AccessibleAttribute
 import javafx.scene.control.FocusModel
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
-import javafx.scene.layout.Border
 import javafx.scene.layout.Region
 import koma.gui.element.control.skin.KListViewSkin
 import koma.gui.element.control.skin.KVirtualFlow
@@ -23,8 +22,7 @@ import java.lang.ref.WeakReference
 private val logger = KotlinLogging.logger {}
 
 class KListView<T, I: ListCell<T>>(
-        cellPool: CellPool<I, T> = SimpleCellPool<I, T>(),
-        val cellCreator: (T?)->I
+        val cellCreator: ()->I
 ) {
     private val listView = ListView<T>()
     val view: Region
@@ -37,7 +35,7 @@ class KListView<T, I: ListCell<T>>(
     fun<E: Event> addEventFilter(t: EventType<E>, filter: (E)->Unit) = listView.addEventFilter(t, filter)
     val flow: KVirtualFlow<I, T>
     init {
-        val skin = KListViewSkin(listView, cellPool, this)
+        val skin = KListViewSkin(listView, this)
         listView.apply {
             selectionModel = NoSelectionModel()
             focusModel = KListViewFocusModel(this)
