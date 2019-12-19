@@ -10,19 +10,17 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.chat.EmoteMessage
 import koma.matrix.event.room_message.chat.NoticeMessage
 import koma.matrix.event.room_message.chat.TextMessage
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import link.continuum.database.KDataStore
-import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.richtext.parseRichXml
 import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.http.MediaServer
-import okhttp3.OkHttpClient
 
 class MTextViewNode(private val data: KDataStore): ViewNode {
     override val node = TextFlow()
@@ -40,6 +38,11 @@ class MTextViewNode(private val data: KDataStore): ViewNode {
         } else {
             node.addStringWithElements(content.body, server, data)
         }
+    }
+
+    fun updatePlainText(text: String, server: MediaServer) {
+        node.children.clear()
+        node.addStringWithElements(text, server, data)
     }
 }
 

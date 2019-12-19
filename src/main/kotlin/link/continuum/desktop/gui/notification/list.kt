@@ -18,8 +18,6 @@ import javafx.scene.text.TextFlow
 import javafx.util.Callback
 import koma.Failure
 import koma.Server
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.koma_app.AppStore
 import koma.matrix.NotificationResponse
 import koma.matrix.UserId
@@ -27,15 +25,9 @@ import koma.matrix.event.room_message.RoomEventType
 import koma.util.testFailure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.icon.avatar.AvatarView
-import link.continuum.desktop.observable.MutableObservable
+import link.continuum.desktop.gui.util.Recyclable
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
@@ -287,11 +279,6 @@ private class NotificationCell(
         private val store: AppStore,
         private val context: ListContext
 ): ListCell<Item>() {
-    private val scope = MainScope()
-    private val timeView = DatatimeView()
-    private val avatarView = AvatarView(userData = store.userData)
-    private val senderLabel = Text()
-    private val center = StackPane()
     private var server: Server? = null
     private var item: Item? = null
     private val menu by lazy {
@@ -301,34 +288,21 @@ private class NotificationCell(
                 }
         ))
     }
-    val root = HBox(4.0).apply {
+    val root = StackPane().apply {
         minWidth = 1.0
         prefWidth = 1.0
         background = whiteBackGround
         alignment = Pos.TOP_LEFT
-        add(avatarView.root)
-
-        vbox {
-            spacing = 2.0
-            HBox.setHgrow(this, Priority.ALWAYS)
-            hbox(spacing = 10.0) {
-                add(senderLabel)
-                add(timeView.root)
-            }
-            add(center)
-        }
         setOnContextMenuRequested {
             menu.show(this, null, it.x, it.y)
         }
     }
-    private val messageView = MessageView(store.userData)
+    private val messageView = Recyclable(store.messageCells)
     private val fallbackCell = TextFlow().apply {
         // wrap text
         minWidth = 1.0
         prefWidth = 1.0
     }
-
-    private val senderId = MutableObservable<UserId>()
 
     private fun showPopup() {
         val s = server ?: return
@@ -337,6 +311,7 @@ private class NotificationCell(
     }
     override fun updateItem(item: Notification?, empty: Boolean) {
         super.updateItem(item, empty)
+        messageView.recycle()
         if (empty || item == null) {
             graphic = null
             return
@@ -352,33 +327,24 @@ private class NotificationCell(
         val s = account.account.server
         this.server = s
         this.item = item
-        center.children.clear()
-        senderId.set(event.sender)
-        timeView.updateTime(event.origin_server_ts)
-        avatarView.updateUser(event.sender, s)
-        senderLabel.fill = store.userData.getUserColor(event.sender)
+        root.children.clear()
         when {
             event.type == RoomEventType.Message -> if(content is NotificationResponse.Content.Message) {
                 val msg = content.message
-                messageView.update(msg, s, event.sender)
-                messageView.node?.let {
-                    center.children.add(it.node)
-                }
+
+                val msgView = messageView.get()
+                msgView.update(event, s, msg)
+                root.children.add(msgView.root)
             } else {
                 logger.debug { "msg content $content"}
             }
             else -> {
-                fallbackCell.children.setAll(Text("type: ${event.type}, content: ${event.content}"))
-                center.children.add(fallbackCell)
+                fallbackCell.children.setAll(Text("${event.sender}: ${event.type}, content: ${event.content}"))
+                root.children.add(fallbackCell)
             }
         }
         graphic = root
     }
     init {
-        senderId.flow().flatMapLatest {
-            store.userData.getNameUpdates(it)
-        }.onEach {
-            senderLabel.text = it
-        }.launchIn(scope)
     }
 }

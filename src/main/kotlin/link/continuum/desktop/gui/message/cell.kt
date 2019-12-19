@@ -99,6 +99,7 @@ open class MessageCell(
                 update(event, server)
             }
         }
+        currentContent = content
         node.children.run {
             if (size > 1) set(1, content.root)
             else add(content.root)

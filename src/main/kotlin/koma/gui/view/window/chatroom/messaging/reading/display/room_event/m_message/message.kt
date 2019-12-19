@@ -5,11 +5,14 @@ import javafx.scene.control.MenuItem
 import javafx.scene.layout.Priority
 import javafx.scene.text.Text
 import koma.Server
-import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MessageView
+import koma.gui.view.window.chatroom.messaging.reading.display.ViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.*
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.util.DatatimeView
 import koma.koma_app.AppStore
+import koma.matrix.NotificationResponse
 import koma.matrix.UserId
 import koma.matrix.event.room_message.MRoomMessage
+import koma.matrix.event.room_message.chat.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.flatMapLatest
@@ -36,7 +39,7 @@ class MRoomMessageViewNode(
     private val senderLabel = Text()
     private val senderId = MutableObservable<UserId>()
     private val contentBox = HBox(5.0)
-    private val content by  lazy { MessageView(userData) }
+    private var content: ViewNode? = null
 
     companion object {
         private val pad2 = Insets(2.0)
@@ -72,26 +75,77 @@ class MRoomMessageViewNode(
 
     override fun update(message: MRoomMessage, server: Server) {
         item = message
+        releaseContentNode()
         senderId.set(message.sender)
         timeView.updateTime(message.origin_server_ts)
         avatarView.updateUser(message.sender, server)
         senderLabel.fill = userData.getUserColor(message.sender)
-        content.update(message, server)
+        val c = getContentNode(message, server)
+        content = c
         contentBox.children.apply {
             clear()
-            content.node?.node?.let { this.add(it) }
+            add(c.node)
+        }
+    }
+
+    fun update(message: NotificationResponse.Event, server: Server, msg: M_Message) {
+        item = null
+        releaseContentNode()
+        senderId.set(message.sender)
+        timeView.updateTime(message.origin_server_ts)
+        avatarView.updateUser(message.sender, server)
+        senderLabel.fill = userData.getUserColor(message.sender)
+        val c = getContentNode(msg, server, message.sender)
+        content = c
+        contentBox.children.apply {
+            clear()
+            add(c.node)
         }
     }
     private val copyTextMenuItem = MenuItem("Copy text").apply {
         action { copyText() }
     }
     override fun menuItems(): List<MenuItem> {
-        return (content.node?.menuItems?: listOf()) + copyTextMenuItem
+        return (content?.menuItems?: listOf()) + copyTextMenuItem
     }
 
     fun copyText() {
         item?.content?.body?.let {
             clipboardPutString(it)
+        }
+    }
+
+    private fun getContentNode(message: MRoomMessage, server: Server): ViewNode {
+        val content = message.content
+        val sender = message.sender
+        return getContentNode(content, server, sender)
+    }
+    private fun getContentNode(content: M_Message?, server: Server, sender: UserId): ViewNode {
+        return when(content) {
+            is TextMessage -> store.uiPools.msgText.take().apply {
+                update(content, server)
+            }
+            is NoticeMessage -> store.uiPools.msgNotice.take().apply{
+                update(content, server)
+            }
+            is EmoteMessage -> store.uiPools.msgEmote.take().apply{
+                update(content, sender, server)
+            }
+            is ImageMessage -> store.uiPools.msgImage.take().apply{ update(content, server) }
+            is FileMessage -> MFileViewNode(content, server)
+            else ->store.uiPools.msgText.take().apply {
+                updatePlainText(content?.body.toString(), server)
+            }
+        }
+    }
+    private fun releaseContentNode() {
+        val c = content?: return
+        when (c) {
+            is MEmoteViewNode -> store.uiPools.msgEmote.pushBack(c)
+            is MNoticeViewNode -> store.uiPools.msgNotice.pushBack(c)
+            is MTextViewNode -> store.uiPools.msgText.pushBack(c)
+            is MImageViewNode -> store.uiPools.msgImage.pushBack(c)
+            else -> error("Unexpected node $c")
         }
     }
 

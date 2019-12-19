@@ -5,6 +5,10 @@ import io.requery.sql.KotlinEntityDataStore
 import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
 import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.MRoomMessageViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MEmoteViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MImageViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MNoticeViewNode
+import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MTextViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
@@ -32,10 +36,11 @@ object appState {
     }
 }
 
+typealias AppStore = AppData
 /**
  * data
  */
-class AppStore(
+class AppData(
         val database: KotlinEntityDataStore<Persistable>,
         val settings: AppSettings
 ) {
@@ -64,4 +69,16 @@ class AppStore(
     val guestAccessCells = UiPool{ GuestAccessUpdateView(this) }
     val historyVisibilityCells = UiPool{ HistoryVisibilityEventView(this)}
     val fallbackCells = UiPool{ FallbackCell() }
+    val uiPools = ComponentPools(this)
+}
+
+/**
+ * some components need to access data to get avatar urls, etc.
+ */
+class ComponentPools(private val data: AppData){
+    // UI for content of messages
+    val msgEmote = UiPool { MEmoteViewNode(data.userData) }
+    val msgNotice = UiPool { MNoticeViewNode(data.database) }
+    val msgText = UiPool { MTextViewNode(data.database) }
+    val msgImage = UiPool { MImageViewNode() }
 }
