@@ -45,7 +45,8 @@ suspend fun Room.applyUpdate(
             dataStorage.latestName.update(room.id, n, t)
         }
         is MRoomAliases -> {
-            // TODO
+            val aliases = update.content.aliases.map { it.full }
+            dataStorage.latestAliasList.update(room.id, aliases, t)
         }
         is MRoomAvatar -> {
             val u = update.content.url

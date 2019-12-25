@@ -17,6 +17,7 @@ import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import link.continuum.database.models.getChangeStateAllowed
 import link.continuum.desktop.Room
@@ -46,14 +47,14 @@ class RoomInfoDialog(
         val datas = room.dataStorage
         datas.latestAvatarUrl.receiveUpdates(room.id).onEach {
             roomicon.updateUrl(it.getOrNull(), room.account.server)
-        }
+        }.launchIn(scope)
         val color = room.id.hashColor()
         var name: String? = null
         datas.latestDisplayName(room).onEach {
             name = it
             roomicon.updateName(it, color)
             stage.title = "$it Info"
-        }
+        }.launchIn(scope)
         val data = datas.data
         val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
         val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())

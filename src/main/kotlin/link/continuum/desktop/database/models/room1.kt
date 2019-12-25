@@ -77,13 +77,21 @@ fun defaultRoomPowerSettings(id: RoomId): RoomPowerSettings {
 }
 
 @Entity
-interface RoomAliasRecord: Persistable  {
+interface RoomAliasList: Persistable  {
     @get:Key
     var roomId: String
 
-    var alias: String
+    var aliases: String
     var since: Long
-    var canonical: Boolean
+}
+
+@Entity
+interface RoomCanonicalAlias: Persistable  {
+    @get:Key
+    var roomId: String
+
+    var alias: String?
+    var since: Long
 }
 
 /**

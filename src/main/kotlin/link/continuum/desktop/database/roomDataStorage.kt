@@ -9,12 +9,16 @@ import koma.network.media.parseMxc
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.serialization.internal.StringSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.list
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
+import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -48,20 +52,43 @@ class RoomDataStorage(
                 }
             })
     val latestCanonAlias = LatestFlowMap(
-            save = { RoomId: RoomId, s: Optional<String>, l: Long ->
+            save = { roomId: RoomId, s: Optional<String>, l: Long ->
+                val rec: RoomCanonicalAlias = RoomCanonicalAliasEntity()
+                rec.roomId = roomId.full
+                rec.alias = s.getOrNull()
+                rec.since = l
+                data.upsert(rec)
             },
             init = {
+                data.select(RoomCanonicalAlias::class).where(RoomCanonicalAlias::roomId.eq(it.full))
+                        .get().firstOrNull() ?.let {
+                            it.since to it.alias.toOption()
+                        } ?:
                 0L to Optional.empty<String>()
             })
     val latestAliasList = LatestFlowMap(
-            save = { RoomId: RoomId, s: List<String>, l: Long ->
+            save = { roomId: RoomId, s: List<String>, l: Long ->
+                val ser = try {
+                    Json.plain.stringify(StringSerializer.list, s)
+                } catch (e: Exception) {
+                    return@LatestFlowMap
+                }
+                val rec = RoomAliasListEntity()
+                rec.roomId = roomId.full
+                rec.aliases = ser
+                rec.since = l
+                data.upsert(rec)
             },
             init = {roomId ->
-                val rs = data.select(RoomAliasRecord::class).where(
-                        RoomAliasRecord::roomId.eq(roomId.id)
-                ).get().toList()
-                val t = rs.firstOrNull()?.since ?: 0L
-                t to rs.map { it.alias }
+                val rec = data.select(RoomAliasList::class)
+                        .where(RoomAliasList::roomId.eq(roomId.full))
+                        .get().firstOrNull() ?: return@LatestFlowMap  0L to listOf()
+                val aliases = try {
+                    Json.plain.parse(StringSerializer.list, rec.aliases)
+                } catch (e: Exception) {
+                    return@LatestFlowMap 0L to listOf()
+                }
+                rec.since to aliases
             })
     val latestAvatarUrl = LatestFlowMap(
             save = { RoomId: RoomId, url: Optional<MHUrl>, l: Long ->

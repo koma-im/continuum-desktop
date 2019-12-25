@@ -28,9 +28,11 @@ import link.continuum.desktop.Room
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.getOrNull
+import mu.KotlinLogging
 import org.controlsfx.control.Notifications
 import java.util.concurrent.Callable
 
+private val logger = KotlinLogging.logger {}
 private typealias RoomAlias = String
 
 class RoomAliasForm(room: Room, user: UserId,
@@ -181,5 +183,6 @@ class RoomAliasCell(
             return
         }
         roomAlias.set(item)
+        graphic = cell
     }
 }
