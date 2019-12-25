@@ -5,10 +5,13 @@ import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.util.failureOrThrow
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import link.continuum.desktop.Room
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
 
@@ -17,11 +20,11 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 fun leaveRoom(mxroom: Room, appData: AppStore = appState.store) {
     val roomId = mxroom.id
-    val roomname = mxroom.displayName.get()
-    logger.debug { "Leaving $roomname" }
+    logger.debug { "Leaving $roomId" }
     val api = appState.apiClient
     api ?: return
     GlobalScope.launch {
+        val roomname = mxroom.displayName()
         val result = api.leavingRoom(roomId)
         when {
             result.isSuccess -> {

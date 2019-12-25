@@ -1,6 +1,5 @@
 package link.continuum.desktop.gui.component
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.image.Image
 import javafx.scene.layout.*
 import koma.KomaFailure
@@ -8,15 +7,15 @@ import koma.Server
 import koma.network.media.MHUrl
 import koma.util.KResult
 import koma.util.testFailure
-import kotlinx.coroutines.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater
-import java.util.concurrent.atomic.AtomicReference
 
 private val logger = KotlinLogging.logger {}
 
@@ -58,34 +57,39 @@ class FitImageRegion(
         cover: Boolean = true
 ): Region() {
     private val scope = MainScope()
-    val urlFlow = MutableObservable<Pair<MHUrl, Server>>()
+    val urlFlow = MutableObservable<Pair<MHUrl?, Server>>()
     val imageProperty = MutableObservable<Image?>()
     var image
         get() = imageProperty.get()
         set(value) {imageProperty.set(value)}
+
+    /**
+     * null url clears the image
+     */
     fun setMxc(
-            mxc: MHUrl,
+            mxc: MHUrl?,
             server: Server
     ) {
         urlFlow.set(mxc to server)
     }
     init {
-        urlFlow.flow()
-                .distinctUntilChanged { old, new -> old.first != new.first }
-                .onEach {
-                    backgroundProperty().set(null)
-                }
-                .mapLatest {
-                    val w = this.width.coerceAtLeast(32.0)
-                    val h = this.height.coerceAtLeast(32.0)
-                    logger.trace { "Image view size $w $h" }
-                    downloadImageSized(it.first, it.second, w, h)
-                }.onEach {
-                    val (img, failure, result) = it
-                    if (!result.testFailure(img, failure)) {
+        scope.launch {
+            urlFlow.flow()
+                    .distinctUntilChanged { old, new -> old.first == new.first }
+                    .collectLatest {
+                        val u = it.first ?: run {
+                            imageProperty.set(null)
+                            return@collectLatest
+                        }
+                        val r = this@FitImageRegion
+                        val w = r.width.coerceAtLeast(32.0)
+                        val h = r.height.coerceAtLeast(32.0)
+                        logger.trace { "Image view size $w $h" }
+                        val (img, _, _) = downloadImageSized(u, it.second, w, h)
+                        img ?: return@collectLatest
                         imageProperty.set(img)
                     }
-                }.launchIn(scope)
+        }
         imageProperty.flow().onEach {
             if (image == null) {
                 backgroundProperty().set(null)

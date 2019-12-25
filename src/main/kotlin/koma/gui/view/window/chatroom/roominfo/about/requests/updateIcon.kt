@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.Room
+import link.continuum.desktop.gui.JFX
 import org.controlsfx.control.Notifications
 
 fun chooseUpdateRoomIcon(room: Room) {
@@ -30,7 +30,7 @@ fun chooseUpdateRoomIcon(room: Room) {
                 launch(Dispatchers.JavaFx) {
                     Notifications.create()
                             .title("Failed to set room icon")
-                            .text("In room ${room.displayName.get()}\n$message")
+                            .text("In room ${room.displayName()}\n$message")
                             .owner(JFX.primaryStage)
                             .showWarning()
                 }

@@ -4,6 +4,7 @@ import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 // experimental
 
@@ -21,6 +22,14 @@ open class Observable<T>() {
             }
         }
         return f
+    }
+
+    fun<R> map(mapper: suspend (T) -> R) = Mapped(this, mapper)
+
+    class Mapped<T, R>(private val original: Observable<T>,
+                       private val mapper: suspend (T) -> R
+                       ) {
+        fun flow(): Flow<R> = original.flow().map(mapper)
     }
 }
 

@@ -8,15 +8,15 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
-import link.continuum.database.KDataStore
+import link.continuum.desktop.Room
+import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.Room
 
 class RoomListView(
         roomlist: ObservableList<Room>,
         private val account: Account,
-        private val data: KDataStore
+        private val data: RoomDataStorage
 ) {
     val root = ListView(roomlist)
 

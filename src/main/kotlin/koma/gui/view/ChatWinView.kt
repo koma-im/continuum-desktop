@@ -1,37 +1,40 @@
 package koma.gui.view
 
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.paint.Color
 import koma.controller.requests.membership.dialogInviteMember
 import koma.controller.requests.membership.leaveRoom
-import koma.gui.element.icon.AvatarAlways
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
 import koma.koma_app.AppStore
-import koma.koma_app.appState
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
-import koma.network.media.MHUrl
+import koma.network.media.parseMxc
 import koma.util.testFailure
-import kotlinx.coroutines.*
-import link.continuum.database.KDataStore
-import link.continuum.database.models.saveRoomAvatar
-import link.continuum.database.models.saveRoomName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import link.continuum.desktop.Room
+import link.continuum.desktop.database.RoomDataStorage
+import link.continuum.desktop.database.hashColor
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.icon.avatar.Avatar2L
 import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.gui.view.RightColumn
+import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 import java.util.*
-import java.util.concurrent.Callable
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
@@ -50,7 +53,7 @@ class ChatView(roomList: ObservableList<Room>,
 ) {
     val root = SplitPane ()
 
-    val roomListView = RoomListView(roomList, account, storage.database)
+    val roomListView = RoomListView(roomList, account, storage.roomStore)
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
 
@@ -99,79 +102,62 @@ class ChatView(roomList: ObservableList<Room>,
 private val gettingRoomAvatar = ConcurrentHashMap<RoomId, Unit>()
 private val gettingRoomName = ConcurrentHashMap<RoomId, Unit>()
 
-private fun CoroutineScope.fixAvatar(room: Room) {
+fun CoroutineScope.fixAvatar(room: Room) {
     if (gettingRoomAvatar.putIfAbsent(room.id, Unit) != null) return
-    val name = room.displayName.get()
+    val name = room.id.localstr
     logger.debug { "fixing unknown avatar of $name" }
-    val api = appState.apiClient ?: return
+    val api = room.account
+    val data = room.dataStorage
     launch {
         val (av, f, r) = api.getRoomAvatar(room.id)
         if(r.testFailure(av, f)) {
             logger.warn { "error fixing room $name's avatar, $f" }
             return@launch
         }
-        withContext(UiDispatcher) {
-            room.setAvatar(av)
+        val str = av.getOrNull()
+        val time = System.currentTimeMillis()
+        if (str != null) {
+            str.parseMxc()?.let {
+                data.latestAvatarUrl.update(room.id, Optional.of(it), time)
+            }
+        } else {
+            data.latestAvatarUrl.update(room.id, Optional.empty(), time)
         }
-        saveRoomAvatar(appState.store.database, room.id,
-                av.getOrNull()?.toString(),
-                System.currentTimeMillis())
     }
 }
 
 @ExperimentalCoroutinesApi
 private fun CoroutineScope.fixRoomName(room: Room) {
     if (gettingRoomName.putIfAbsent(room.id, Unit) != null) return
-    val name = room.displayName.get()
+    val name = room.id.localstr
     logger.debug { "fixing unknown name of $name" }
-    val api = appState.apiClient ?: return
+    val api = room.account
+    val data = room.dataStorage
     launch {
         val (n, f, r) = api.getRoomName(room.id)
         if (r.testFailure(n, f)){
             logger.warn { "error fixing room $name's name, ${f}" }
             return@launch
         }
-        withContext(UiDispatcher) {
-            room.initName(n)
-        }
-        saveRoomName(appState.store.database, room.id, n.getOrNull(), System.currentTimeMillis())
+        val time = System.currentTimeMillis()
+        data.latestName.update(room.id, n, time)
     }
 }
 
 @ExperimentalCoroutinesApi
-class RoomFragment(private val data: KDataStore
-): ListCell<Room>(), CoroutineScope by CoroutineScope(Dispatchers.Default){
-    private val roomProperty = SimpleObjectProperty<Room?>()
-    var room: Room? by prop(roomProperty)
-
-    private val avatar = AvatarAlways()
-
-    private val avatarOptionalUrl = SimpleObjectProperty<Optional<MHUrl>>()
-    private val avatarUrl = objectBinding(avatarOptionalUrl) {value?.getOrNull()}
-    private val color = Bindings.createObjectBinding(Callable<Color> {
-        if (isSelected) Color.WHITE else room?.color ?: Color.BLUE
-    }, roomProperty, selectedProperty())
-    private val nameLabel = Label().apply {
-        textFillProperty().bind(color)
-    }
+class RoomFragment(private val data: RoomDataStorage
+): ListCell<Room>() {
+    private val scope = MainScope()
+    private val roomObservable = MutableObservable<Room>()
+    private val avatar = Avatar2L()
+    private val nameLabel = Label()
     override fun updateItem(item: Room?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
             graphic = null
             return
         }
-        room = item
-        if (item.avatar.value == null) {
-            fixAvatar(item)
-        }
-        if (item.name.value == null) {
-            fixRoomName(item)
-        }
-
-        avatarOptionalUrl.cleanBind(item.avatar)
-        avatar.bind(item.displayName, item.color, avatarUrl, item.account.server)
-        nameLabel.textProperty().cleanBind(item.displayName)
-
+        roomObservable.set(item)
         graphic = root
     }
 
@@ -183,6 +169,7 @@ class RoomFragment(private val data: KDataStore
             item("Room Info").action { openInfoView() }
             item("Invite Member"){
                 action {
+                    val room = roomObservable.getOrNull()
                     room?.let {
                         dialogInviteMember(it.id)
                     } ?: logger.warn { "No room selected" }
@@ -190,18 +177,59 @@ class RoomFragment(private val data: KDataStore
             }
             items.add(SeparatorMenuItem())
             item("Leave").action {
+                val room = roomObservable.getOrNull()
                 room ?.let { leaveRoom(it) }
             }
 
         }
-        add(avatar)
+        add(avatar.root)
         add(nameLabel)
+    }
+
+    init {
+        val selected = MutableObservable<Boolean>(false)
+        selectedProperty().addListener { _, _, newValue -> selected.set(newValue) }
+        val roomColor = roomObservable.map { it.id.hashColor() }
+        roomColor.flow().onEach {
+            avatar.initialIcon.updateColor(it)
+        }.launchIn(scope)
+
+        roomObservable.flow()
+                .onEach {
+                    avatar.initialIcon.updateString("")
+                    nameLabel.text = ""
+                }
+                .flatMapLatest {
+                    data.latestDisplayName(it)
+                }.onEach {
+                    nameLabel.text = it
+                    avatar.initialIcon.updateString(it)
+                }
+                .launchIn(scope)
+
+        // reverse text brightness when selected
+        val textColor = selected.flow().combine(roomColor.flow()) { sel, c ->
+            if (sel) Color.WHITE else c
+        }
+        textColor.onEach {
+            nameLabel.textFill = it
+        }.launchIn(scope)
+
+        roomObservable.flow()
+                .onEach {
+                    avatar.updateUrl(null, it.account.server)
+                }
+                .flatMapLatest {
+                    data.latestAvatarUrl.receiveUpdates(it.id)
+                }.onEach {
+                    avatar.updateUrl(it.getOrNull(), roomObservable.get().account.server)
+                }.launchIn(scope)
     }
 
     private fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(room, user, data).openWindow(owner = JFX.primaryStage)
+        RoomInfoDialog(room, user).openWindow(owner = JFX.primaryStage)
     }
 }
 

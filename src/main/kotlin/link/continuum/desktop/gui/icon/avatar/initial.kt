@@ -2,12 +2,12 @@ package link.continuum.desktop.gui.icon.avatar
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.*
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.HBox
-import link.continuum.desktop.gui.StackPane
 import mu.KotlinLogging
 import java.util.*
 import kotlin.streams.toList
@@ -17,7 +17,6 @@ private val logger = KotlinLogging.logger {}
 class InitialIcon(
 ) {
     private val radii =  CornerRadii( 0.2, true)
-    private var color: Color? = null
 
     private val charL = Text().apply {
         fill = Color.WHITE
@@ -63,27 +62,42 @@ class InitialIcon(
         this.root.isVisible = false
     }
 
-    fun updateItem(charL: String, charR: String, color: Color) {
-        this.color = color
+    fun updateColor(color: Color) {
         root.background = backgrounds.computeIfAbsent(color) {
             logger.debug { "initial icon $charL $charR $color" }
             Background(BackgroundFill(it, radii, Insets.EMPTY))
         }
+    }
+
+    fun updateItem(charL: String, charR: String, color: Color) {
+        updateColor(color)
+        updateCharPair(charL, charR)
+    }
+
+    fun updateCharPair(charL: String, charR: String) {
         this.charL.text = charL
         this.charR.text = charR
         root.children.setAll(two)
     }
 
     fun updateCenter(char: String, color: Color) {
-        this.color = color
-        root.background = backgrounds.computeIfAbsent(color) {
-            logger.debug { "initial icon $char $color" }
-            Background(BackgroundFill(it, radii, Insets.EMPTY))
-        }
+        updateColor(color)
+        updateCharSingle(char)
+    }
+
+    fun updateCharSingle(char: String) {
         charC.text = char
         root.children.setAll(one)
     }
 
+    fun updateString(input: String) {
+        val (c1, c2) = extractKeyChar(input)
+        if (c2 != null) {
+            updateCharPair(c1, c2)
+        } else {
+            updateCharSingle(c1)
+        }
+    }
     fun updateItem(input: String, color: Color) {
         val (c1, c2) = extractKeyChar(input)
         if (c2 != null) {

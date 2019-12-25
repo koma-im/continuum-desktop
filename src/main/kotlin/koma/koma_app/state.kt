@@ -13,11 +13,11 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member
 import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
-import koma.storage.rooms.RoomStore
 import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import link.continuum.desktop.Room
+import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.FallbackCell
@@ -51,9 +51,9 @@ class AppData(
      */
     val userData = UserDataStore(database)
     /**
-     * rooms on the network
+     * any known rooms on the network
      */
-    val roomStore = RoomStore(database)
+    val roomStore = RoomDataStorage(database)
     val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
 
     fun joinRoom(roomId: RoomId, account: Account){

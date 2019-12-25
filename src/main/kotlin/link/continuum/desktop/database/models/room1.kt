@@ -9,6 +9,7 @@ import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import link.continuum.database.KDataStore
+import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
 import java.util.*
 
@@ -212,7 +213,7 @@ fun saveRoomName(data: KDataStore, roomId: RoomId,
     data.insert(t)
 }
 
-fun getLatestRoomName(data: KDataStore, roomId: RoomId): Optional<String>? {
+fun getLatestRoomName(data: KDataStore, roomId: RoomId): Pair<Long, Optional<String>>? {
      data.select(RoomName::class)
             .where(RoomName::roomId.eq(roomId.str))
             .orderBy(RoomName::since.desc())
@@ -223,10 +224,10 @@ fun getLatestRoomName(data: KDataStore, roomId: RoomId): Optional<String>? {
                          val n = rec.roomName
                          if (n == null) {
                              logger.debug { "room $roomId has empty name in db" }
-                             return Optional.empty()
+                             return rec.since to Optional.empty()
                          } else {
                              logger.debug { "room $roomId has name $n in db" }
-                             return Optional.of(n)
+                             return rec.since to Optional.of( n)
                          }
                      } else {
                          logger.debug { "no name recorded for room $roomId" }
@@ -254,11 +255,11 @@ fun saveRoomAvatar(data: KDataStore, roomId: RoomId, avatar: String?, timestamp:
     data.insert(t)
 }
 
-fun getLatestAvatar(data: KDataStore, roomId: RoomId): Optional<String>? {
+fun getLatestAvatar(data: KDataStore, roomId: RoomId): Pair<Long, Optional<String>>? {
     return data.select(RoomAvatar::class)
             .where(RoomAvatar::roomId.eq(roomId.str))
             .orderBy(RoomAvatar::since.desc())
             .get().use { it.firstOrNull() }?.let {
-                it.avatar?.let { Optional.of(it) }?: Optional.empty()
+                it.since to it.avatar.toOption()
             }
 }

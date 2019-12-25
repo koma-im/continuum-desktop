@@ -13,7 +13,6 @@ import link.continuum.database.models.updateAccountUsage
 import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
-import link.continuum.desktop.gui.notification.AudioResources
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -49,7 +48,7 @@ fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: Http
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
             rooms.forEach {
-                loadRoom(store.database, it, account)?.let {
+                loadRoom(store.roomStore, it, account)?.let {
                     store.joinRoom(it.id, apiClient)
                 }
             }

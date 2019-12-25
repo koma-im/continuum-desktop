@@ -5,8 +5,6 @@ import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.matrix.UserId
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import link.continuum.database.KDataStore
@@ -26,7 +24,6 @@ private val logger = KotlinLogging.logger {}
 class UserDataStore(
         val data: KDataStore
 ) {
-    private val scope = CoroutineScope(Dispatchers.Default)
     val avatarPool = UiPool { AvatarView(this) }
     val latestNames = LatestFlowMap(
             save = { userId: UserId, s: String?, l: Long ->
@@ -42,7 +39,7 @@ class UserDataStore(
     fun getUserColor(userId: UserId): Color {
         return color.computeIfAbsent(userId) { hashStringColorDark(it.str) }
     }
-    suspend fun getNameUpdates(userId: UserId): Flow<String?> {
+    fun getNameUpdates(userId: UserId): Flow<String?> {
         return latestNames.receiveUpdates(userId)
     }
 
@@ -60,7 +57,7 @@ class UserDataStore(
     suspend fun updateAvatarUrl(userId: UserId, avatarUrl: MHUrl, time: Long) {
         latestAvatarUrls.update(userId, avatarUrl, time)
     }
-    suspend fun getAvatarUrlUpdates(userId: UserId): Flow<MHUrl?> {
+    fun getAvatarUrlUpdates(userId: UserId): Flow<MHUrl?> {
         return latestAvatarUrls.receiveUpdates(userId)
     }
 }

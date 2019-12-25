@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  * save and and get newest values
  * update names and avatar urls in real time
  */
-class LatestFlowMap<K, V>(
+open class LatestFlowMap<K, V>(
         private val init: suspend (K)-> Pair<Long, V>,
         private val save: suspend (K, V, Long) -> Unit
 ){

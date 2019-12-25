@@ -1,36 +1,23 @@
 package koma.gui.element.icon
 
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.beans.value.WeakChangeListener
-import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import koma.Server
-import koma.koma_app.appState
 import koma.network.media.MHUrl
-import koma.storage.persistence.settings.AppSettings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.StackPane
-import link.continuum.desktop.gui.component.FitImageRegion
+import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.icon.avatar.Avatar2L
-import link.continuum.desktop.gui.icon.avatar.InitialIcon
-import link.continuum.desktop.gui.icon.avatar.UrlAvatar
-import link.continuum.desktop.gui.icon.avatar.downloadImageResized
 import mu.KotlinLogging
-import kotlin.math.max
 
-private val settings: AppSettings = appState.store.settings
-val avatarSize: Double by lazy { settings.scaling * 32.0 }
 typealias AvatarUrl = MHUrl
 private val logger = KotlinLogging.logger {}
 
 class AvatarAlways(
-): StackPane(), CoroutineScope by CoroutineScope(Dispatchers.Default) {
-    private val avatar = Avatar2L()
+): StackPane() {
+    val avatar = Avatar2L()
     private val name = SimpleStringProperty()
     private var color = Color.BLACK
 

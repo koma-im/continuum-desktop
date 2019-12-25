@@ -32,7 +32,7 @@ class MxcImageView {
     }
     init {
         urlFlow.flow()
-                .distinctUntilChanged { old, new -> old.first != new.first }
+                .distinctUntilChanged { old, new -> old.first == new.first }
                 .onEach {
                     (root as ImageView).image = null
                 }

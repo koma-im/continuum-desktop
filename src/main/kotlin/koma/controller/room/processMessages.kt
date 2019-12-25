@@ -3,20 +3,18 @@ package koma.controller.room
 import koma.koma_app.AppStore
 import koma.matrix.event.ephemeral.EphemeralEvent
 import koma.matrix.event.ephemeral.TypingEvent
-import koma.matrix.event.room_message.MRoomMember
-import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.event.room_message.*
 import koma.matrix.room.participation.Membership
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import link.continuum.database.models.removeMembership
-import link.continuum.database.models.saveRoomAvatar
-import link.continuum.database.models.saveRoomName
 import link.continuum.database.models.saveUserInRoom
-import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.Room
+import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,25 +35,32 @@ suspend fun Room.applyUpdate(
         appStore: AppStore
 ) {
     val room = this
+    val dataStorage = appStore.roomStore
+    val t = update.origin_server_ts
     if (update !is RoomStateEvent) return
     when (update) {
         is MRoomMember -> this.updateMember(update, appStore = appStore)
+        is MRoomName -> {
+            val n = update.content.name.toOption()
+            dataStorage.latestName.update(room.id, n, t)
+        }
         is MRoomAliases -> {
-            withContext(UiDispatcher) {
-                room.aliases.addAll(0, update.content.aliases)
-            }
+            // TODO
         }
         is MRoomAvatar -> {
-            room.setAvatar(update.content.url)
-            saveRoomAvatar(appStore.database, room.id,
-                    update.content.url,
-                    update.origin_server_ts
-            )
+            val u = update.content.url
+            if (u == null) {
+                dataStorage.latestAvatarUrl.update(room.id, Optional.empty(), t)
+            } else {
+                u.parseMxc()?.also {
+                    dataStorage.latestAvatarUrl.update(room.id, Optional.of(it), t)
+                }
+            }
         }
         is MRoomCanonAlias -> {
-            withContext(UiDispatcher) {
-                room.canonicalAlias.set(update.content.alias)
-            }
+                dataStorage.latestCanonAlias.update(room.id,
+                        update.content.alias?.full.toOption()
+                        , t)
         }
         is MRoomJoinRule -> this.joinRule = update.content.join_rule
         is MRoomHistoryVisibility -> this.histVisibility = update.content.history_visibility
@@ -63,10 +68,6 @@ suspend fun Room.applyUpdate(
         is MRoomCreate -> { }
         is MRoomPinnedEvents -> {}
         is MRoomTopic -> {}
-        is MRoomName -> {
-            room.setName(update.content.name)
-            saveRoomName(appStore.database, room.id, update.content.name, update.origin_server_ts)
-        }
         is MRoomGuestAccess -> {}
     }
 }
