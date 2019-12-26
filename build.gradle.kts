@@ -42,7 +42,7 @@ javafx {
 
 dependencies {
     val ktorVersion = "1.2.6"
-    implementation("io.github.koma-im:koma-library:0.9.17")
+    implementation("io.github.koma-im:koma-library:0.9.18")
     implementation("org.cache2k:cache2k-core:1.2.3.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")

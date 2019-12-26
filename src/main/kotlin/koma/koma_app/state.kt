@@ -53,7 +53,7 @@ class AppData(
     /**
      * any known rooms on the network
      */
-    val roomStore = RoomDataStorage(database)
+    val roomStore = RoomDataStorage(database, userData)
     val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
 
     fun joinRoom(roomId: RoomId, account: Account){

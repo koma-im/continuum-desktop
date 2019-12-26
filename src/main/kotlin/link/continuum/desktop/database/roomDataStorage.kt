@@ -1,21 +1,25 @@
 package link.continuum.desktop.database
 
+import io.requery.kotlin.asc
+import io.requery.kotlin.desc
 import io.requery.kotlin.eq
+import io.requery.kotlin.ne
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.*
 import kotlinx.serialization.internal.StringSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.list
 import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.models.loadRoom
+import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.Account
 import link.continuum.desktop.util.getOrNull
 import link.continuum.desktop.util.toOption
@@ -25,12 +29,15 @@ import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
+private val json = Json(JsonConfiguration.Stable)
+
 fun RoomId.hashColor(): Color {
     return hashStringColorDark(this.full)
 }
 
 class RoomDataStorage(
-        val data: KDataStore
+        val data: KDataStore,
+        private val userDatas: UserDataStore
 ) {
     private val store = ConcurrentHashMap<RoomId, Room>()
 
@@ -69,7 +76,7 @@ class RoomDataStorage(
     val latestAliasList = LatestFlowMap(
             save = { roomId: RoomId, s: List<String>, l: Long ->
                 val ser = try {
-                    Json.plain.stringify(StringSerializer.list, s)
+                    json.stringify(StringSerializer.list, s)
                 } catch (e: Exception) {
                     return@LatestFlowMap
                 }
@@ -84,7 +91,7 @@ class RoomDataStorage(
                         .where(RoomAliasList::roomId.eq(roomId.full))
                         .get().firstOrNull() ?: return@LatestFlowMap  0L to listOf()
                 val aliases = try {
-                    Json.plain.parse(StringSerializer.list, rec.aliases)
+                    json.parse(StringSerializer.list, rec.aliases)
                 } catch (e: Exception) {
                     return@LatestFlowMap 0L to listOf()
                 }
@@ -111,6 +118,25 @@ class RoomDataStorage(
                     0L to Optional.empty()
                 }
             })
+    val heroes = LatestFlowMap(save = { room: RoomId, heroes: List<UserId>, l: Long ->
+        data.saveHeroes(room, heroes, l)
+    }, init = { room: RoomId ->
+        val records = data.select(RoomHero::class)
+                .where(RoomHero::room.eq(room.id))
+                .orderBy(RoomHero::since.desc())
+                .limit(5).get().toList()
+        val first = records.firstOrNull()
+        if (first != null) {
+            (first.since ?: 0L) to records.map { UserId(it.hero) }
+        } else {
+            val mems = data.select(Membership::class).where(
+                    Membership::room.eq(room.id)
+                            .and(Membership::joiningRoom.ne(false))
+            ).orderBy(Membership::since.asc()).limit(5).get().map { it.person }
+            logger.info { "no known heros in $room, using $mems"}
+            0L to mems.map {UserId(it)}
+        }
+    })
     fun latestDisplayName(room: Room): Flow<String> {
         val id = room.id
         return latestName.receiveUpdates(id).flatMapLatest {
@@ -128,7 +154,7 @@ class RoomDataStorage(
                             if (first != null) {
                                 flowOf(first)
                             } else {
-                                roomDisplayName(room)
+                                roomDisplayName(room, heroes, userDatas)
                             }
                         }
                     }
@@ -138,6 +164,20 @@ class RoomDataStorage(
     }
 }
 
-fun roomDisplayName(room: Room): Flow<String> {
-    return flowOf(room.id.localstr)
+private fun roomDisplayName(
+        room: Room,
+        heroes: LatestFlowMap<RoomId, List<UserId>>,
+        userDatas: UserDataStore
+): Flow<String> {
+    return flow {
+        emit(room.id.localstr)
+        emitAll(heroes.receiveUpdates(room.id).flatMapLatest {
+            logger.info { "generating room name from heros $it" }
+            combine(it.map { userDatas.getNameUpdates(it) }) {
+                val n = it.filterNotNull().joinToString(", ")
+                logger.info { "generated name $n"}
+                n
+            }
+        })
+    }
 }

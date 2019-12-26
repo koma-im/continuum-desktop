@@ -1,6 +1,9 @@
 package link.continuum.database.models
 
-import io.requery.*
+import io.requery.Column
+import io.requery.Entity
+import io.requery.Key
+import io.requery.Persistable
 import io.requery.kotlin.eq
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
@@ -8,6 +11,29 @@ import link.continuum.database.KDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger { }
+
+@Entity
+interface RoomHero: Persistable {
+    /**
+     * id of room
+     */
+
+    @get:Key
+    @get:Column(length = Int.MAX_VALUE)
+    var room: String
+
+    /**
+     * user id
+     */
+    @get:Key
+    @get:Column(length = Int.MAX_VALUE)
+    var hero: String
+
+    /**
+     * timestamp
+     */
+    var since: Long?
+}
 
 @Entity
 interface Membership: Persistable {
@@ -31,6 +57,17 @@ interface Membership: Persistable {
      */
     var lastActive: Long?
 
+}
+
+fun KDataStore.saveHeroes(roomId: RoomId, heroes: List<UserId>, ts: Long) {
+    val records = heroes.map {
+        RoomHeroEntity().apply {
+            room = roomId.full
+            hero = it.full
+            since = ts
+        }
+    }
+    this.insert(records)
 }
 
 fun loadMembership(data: KDataStore, roomId: RoomId): List<Membership> {

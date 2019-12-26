@@ -231,10 +231,9 @@ fun getLatestRoomName(data: KDataStore, roomId: RoomId): Pair<Long, Optional<Str
                          val rec = it.next()
                          val n = rec.roomName
                          if (n == null) {
-                             logger.debug { "room $roomId has empty name in db" }
                              return rec.since to Optional.empty()
                          } else {
-                             logger.debug { "room $roomId has name $n in db" }
+                             logger.trace { "room $roomId has name $n in db" }
                              return rec.since to Optional.of( n)
                          }
                      } else {

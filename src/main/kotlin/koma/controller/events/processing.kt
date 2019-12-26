@@ -5,17 +5,13 @@ import koma.controller.room.handle_ephemeral
 import koma.gui.view.ChatView
 import koma.gui.view.window.auth.uilaunch
 import koma.koma_app.AppStore
-import koma.koma_app.appState
-import koma.matrix.UserId
 import koma.matrix.event.ephemeral.parse
-import koma.matrix.room.InvitedRoom
 import koma.matrix.room.JoinedRoom
 import koma.matrix.room.naming.RoomId
 import koma.matrix.sync.SyncResponse
 import koma.matrix.user.presence.PresenceMessage
 import koma.util.matrix.getUserState
 import kotlinx.coroutines.*
-import link.continuum.database.models._logger
 import link.continuum.database.models.removeMembership
 import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.events.handleInvitedRoom
@@ -42,6 +38,12 @@ private suspend fun handle_joined_room(
         account: Account,
         appData: AppStore
 ) {
+    val time = data.timeline.events.lastOrNull()?.value?.origin_server_ts ?: System.currentTimeMillis()
+    val roomDatas = appData.roomStore
+    data.summary?.heros?.also {
+        logger.info { "heros of $roomid: $it" }
+        roomDatas.heroes.update(roomid, it, time)
+    }
     val room = appData.roomStore.getOrCreate(roomid, account)
     withContext(UiDispatcher) {
         appData.joinRoom(roomid, account)
