@@ -16,6 +16,7 @@ import koma.storage.persistence.settings.AppSettings
 import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.list.DedupList
@@ -29,7 +30,8 @@ private val logger = KotlinLogging.logger {}
 
 object appState {
     lateinit var store: AppStore
-    val coroutineScope = CoroutineScope(Dispatchers.Main)
+    val job = SupervisorJob()
+    val coroutineScope = CoroutineScope(Dispatchers.Main + job)
     var apiClient: MatrixApi? = null
 
     init {

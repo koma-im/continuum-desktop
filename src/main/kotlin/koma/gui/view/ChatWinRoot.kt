@@ -13,13 +13,12 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
+import link.continuum.desktop.Room
+import link.continuum.desktop.action.SyncControl
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.Account
-import link.continuum.desktop.Room
 import mu.KotlinLogging
 import org.controlsfx.control.NotificationPane
 import org.h2.mvstore.MVMap
@@ -36,15 +35,21 @@ class ChatWindowBars(
         roomList: ObservableList<Room>,
         account: Account,
         keyValueMap: MVMap<String, String>,
+        parentJob: Job,
         store: AppStore
 ) {
+    private val scope = CoroutineScope(SupervisorJob(parentJob) + Dispatchers.Main)
     private val content = BorderPane()
     val root = NotificationPane(content)
     val center = ChatView(roomList, account, store)
-    val status = SyncStatusBar(root)
-
     private val roomFinder by lazy { RoomFinder(account) }
     private val prefWin by lazy { PreferenceWindow() }
+    val syncControl = SyncControl(
+            account,
+            appData = store,
+            parentJob = parentJob,
+            view = center
+    )
     init {
         with(content) {
             background = whiteBackGround
@@ -76,7 +81,17 @@ class ChatWindowBars(
                         MenuItem("Update my avatar").apply { setOnAction { chooseUpdateUserAvatar() } },
                         MenuItem("Update my name").apply { setOnAction {  updateMyAlias() }},
                         MenuItem("Join Room").apply { setOnAction { roomFinder.open() }}
-                )
+                ).apply {
+                    menu("Debug") {
+                        item("Force sync") {
+                            action {
+                                scope.launch {
+                                    syncControl.start(full_sync = true)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

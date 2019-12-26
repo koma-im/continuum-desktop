@@ -33,14 +33,14 @@ fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: Http
     updateAccountUsage(data, userId)
 
     val app = appState
-    val store = app.store
+    val store = appData
     val server = Server(url, httpClient)
     val account  = server.account(userId, token)
     val apiClient  = account
     app.apiClient = apiClient
     val userRooms = store.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, account, keyValueMap, store)
+    val primary = ChatWindowBars(userRooms, account, keyValueMap, app.job, store)
     JFX.primaryPane.setChild(primary.root)
 
     app.coroutineScope.launch {
@@ -53,19 +53,5 @@ fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: Http
                 }
             }
         }
-        val fullSync = userRooms.isEmpty()
-        if (fullSync) logger.warn {
-            "Doing a full sync because there " +
-                    "are no known rooms $userId has joined"
-        }
-        SyncControl(
-                apiClient,
-                userId,
-                coroutineScope = app.coroutineScope,
-                statusChan = primary.status.ctrl,
-                full_sync = fullSync,
-                appData = appData,
-                view = primary.center
-        )
     }
 }

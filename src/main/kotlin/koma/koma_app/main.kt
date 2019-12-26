@@ -51,6 +51,7 @@ fun main(args: Array<String>) {
 
     Application.launch(KomaApp::class.java, *args)
     appState.coroutineScope.cancel()
+    appState.job.cancel()
     // should work because instances all share the same dispatcher
     KHttpClient.client.dispatcher().executorService().shutdownNow()
 }
