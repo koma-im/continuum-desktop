@@ -30,9 +30,10 @@ abstract class UrlAvatar(
 
     init {
         imageView.imageProperty.flow().onEach {
-            if (it != null) initialIcon.root.apply {
-                isVisible = false
-                isManaged = false
+            val noImage = it == null
+            initialIcon.root.apply {
+                isVisible = noImage
+                isManaged = noImage
             }
         }.launchIn(scope)
 

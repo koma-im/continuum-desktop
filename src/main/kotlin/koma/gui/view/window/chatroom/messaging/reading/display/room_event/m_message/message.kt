@@ -145,6 +145,7 @@ class MRoomMessageViewNode(
             is MNoticeViewNode -> store.uiPools.msgNotice.pushBack(c)
             is MTextViewNode -> store.uiPools.msgText.pushBack(c)
             is MImageViewNode -> store.uiPools.msgImage.pushBack(c)
+            is MFileViewNode -> {}
             else -> error("Unexpected node $c")
         }
     }

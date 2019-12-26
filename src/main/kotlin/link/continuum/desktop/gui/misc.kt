@@ -286,6 +286,12 @@ fun ContextMenu.item(text: String, op: MenuItem.() -> Unit={}): MenuItem {
     return m
 }
 
+fun ContextMenu.menu(text: String, op: Menu.() -> Unit={}): MenuItem {
+    val m = Menu(text).apply(op)
+    this.items.add(m)
+    return m
+}
+
 fun MenuItem.action(action: (ActionEvent)-> Unit) {
     this.setOnAction(action)
 }
