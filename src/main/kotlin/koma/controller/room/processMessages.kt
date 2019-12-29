@@ -7,11 +7,8 @@ import koma.matrix.event.room_message.*
 import koma.matrix.room.participation.Membership
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.withContext
-import link.continuum.database.models.removeMembership
-import link.continuum.database.models.saveUserInRoom
 import link.continuum.desktop.Room
-import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.database.MembershipChanges
 import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
 import java.util.*
@@ -32,6 +29,7 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
 @ExperimentalCoroutinesApi
 suspend fun Room.applyUpdate(
         update: RoomEvent,
+        membershipChanges: MembershipChanges,
         appStore: AppStore
 ) {
     val room = this
@@ -39,7 +37,7 @@ suspend fun Room.applyUpdate(
     val t = update.origin_server_ts
     if (update !is RoomStateEvent) return
     when (update) {
-        is MRoomMember -> this.updateMember(update, appStore = appStore)
+        is MRoomMember -> this.updateMember(update, appStore = appStore, membershipChanges = membershipChanges)
         is MRoomName -> {
             val n = update.content.name.toOption()
             dataStorage.latestName.update(room.id, n, t)
@@ -77,38 +75,25 @@ suspend fun Room.applyUpdate(
 @ExperimentalCoroutinesApi
 suspend fun Room.updateMember(
         update: MRoomMember,
+        membershipChanges: MembershipChanges,
         appStore: AppStore
 ) {
     val room = this
+    val senderid = update.sender
+    val timestamp = update.origin_server_ts
     val userData = appStore.userData
     when(update.content.membership)  {
         Membership.join -> {
-            val senderid = update.sender
             update.content.avatar_url?.parseMxc()?.let {
                 userData.updateAvatarUrl(senderid, it, update.origin_server_ts)
             }
             update.content.displayname?.let {
                 userData.updateName(update.sender, it, update.origin_server_ts)
             }
-            saveUserInRoom(data = appStore.database, userId = senderid, roomId = room.id, time = update.origin_server_ts)
-            withContext(UiDispatcher) {
-                room.makeUserJoined(senderid)
-            }
+            membershipChanges.addJoin(senderid, room.id, timestamp)
         }
-        Membership.leave -> {
-            removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
-            withContext(UiDispatcher) {
-                room.removeMember(update.sender)
-                if (account.userId == update.sender) {
-                    appStore.joinedRoom.removeById(room.id)
-                }
-            }
-        }
-        Membership.ban -> {
-            removeMembership(data = appStore.database, userId = update.sender, roomId = room.id)
-            withContext(UiDispatcher) {
-                room.removeMember(update.sender)
-            }
+        Membership.leave, Membership.ban -> {
+            membershipChanges.addLeave(senderid, room.id, timestamp)
         }
         else -> {
             println("todo: handle membership ${update.content}")

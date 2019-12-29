@@ -1,6 +1,6 @@
 package link.continuum.desktop.database.models
 
-import io.requery.kotlin.desc
+import io.requery.kotlin.asc
 import io.requery.kotlin.eq
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
@@ -40,7 +40,7 @@ fun loadRoom(dataStorage: RoomDataStorage, roomId: RoomId,
     )
     val members = data.select(Membership::class).where(
             Membership::room.eq(roomId.id)
-    ).orderBy(Membership::lastActive.desc()).limit(200).get().toList()
+    ).orderBy(Membership::since.asc()).limit(200).get().toList()
     room.addMembers(members.map { UserId(it.person) })
     logger.debug { "loaded ${members.size} members, " +
             "there are now ${room.members.size()} members in $roomId" }

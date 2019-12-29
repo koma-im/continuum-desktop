@@ -2,6 +2,9 @@ package link.continuum.desktop.gui.list
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * not synchronized, use on the UI thread
@@ -14,7 +17,6 @@ class DedupList<T, U>(private val identify: (T)->U) {
         return elementSet.toList()
     }
     init {
-
     }
     fun add(element: T) {
         if (elementSet.add(identify(element))) {
@@ -35,6 +37,7 @@ class DedupList<T, U>(private val identify: (T)->U) {
         rwList.addAll(index, elements.filter { elementSet.add(identify(it)) })
     }
     fun remove(element: T) {
+        logger.debug { "remove $element"}
         if (elementSet.remove(identify(element))) {
             rwList.remove(element)
         }
@@ -42,6 +45,23 @@ class DedupList<T, U>(private val identify: (T)->U) {
     fun removeById(id: U) {
         if (elementSet.remove(id)) {
             rwList.removeIf { identify(it) == id }
+        }
+    }
+    fun removeAll(elements: Collection<T>) {
+        rwList.removeAll(elements.filter {
+            elementSet.remove(identify(it))
+        })
+    }
+    fun removeAllById(ids: Collection<U>) {
+        val rm = ids.toSet()
+        val oldSize = elementSet.size
+        elementSet.minusAssign(rm)
+        val newSize = elementSet.size
+        if (newSize == oldSize) {
+            return
+        }
+        rwList.removeAll {
+            rm.contains(identify(it))
         }
     }
 }

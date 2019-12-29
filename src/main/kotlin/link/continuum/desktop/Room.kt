@@ -1,6 +1,5 @@
 package link.continuum.desktop
 
-import javafx.application.Platform
 import koma.Server
 import koma.matrix.MatrixApi
 import koma.matrix.UserId
@@ -43,15 +42,6 @@ class Room(
         return dataStorage.latestDisplayName(this).first()
     }
 
-    fun makeUserJoined(us: UserId) {
-        check(Platform.isFxApplicationThread())
-        members.add(us to server)
-    }
-
-    fun removeMember(mid: UserId) {
-        check(Platform.isFxApplicationThread())
-        members.remove(mid to server)
-    }
     fun addMembers(ms: List<UserId>) {
         members.addAll(ms.map { it to server })
     }
