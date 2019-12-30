@@ -5,12 +5,9 @@ import koma.gui.view.ChatWindowBars
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
-import link.continuum.desktop.database.models.loadRoom
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
@@ -25,13 +22,11 @@ private val logger = KotlinLogging.logger {}
  * updates the list of recently used accounts
  */
 @ExperimentalCoroutinesApi
-fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: HttpUrl,
+suspend fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: HttpUrl,
               keyValueMap: MVMap<String, String>,
               appData: AppStore
 ) {
     val data = appData.database
-    updateAccountUsage(data, userId)
-
     val app = appState
     val server = Server(url, httpClient)
     val account  = server.account(userId, token)
@@ -40,16 +35,14 @@ fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: Http
 
     val primary = ChatWindowBars(userRooms, account, keyValueMap, app.job, appData)
     JFX.primaryPane.setChild(primary.root)
-
-    app.coroutineScope.launch {
+    coroutineScope {
+        launch(Dispatchers.Default) {
+            updateAccountUsage(data, userId)
+        }
         val rooms = loadUserRooms(data, userId)
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
-            rooms.forEach { roomId ->
-                loadRoom(appData.roomStore, roomId, account)?.let {
-                    appData.joinRoom(it.id)
-                }
-            }
+            appData.joinedRoom.addAll(rooms)
         }
     }
 }
