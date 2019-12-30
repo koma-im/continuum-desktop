@@ -129,7 +129,7 @@ class MembershipChanges(
     /**
      * save to database and update UI data
      */
-    suspend fun saveData(account: Account) {
+    suspend fun saveData() {
         val roomToJoins = hashMapOf<RoomId, HashSet<UserId>>()
         joins.forEach { (userId, map) ->
             map.forEach { (roomId, _) ->
@@ -147,7 +147,7 @@ class MembershipChanges(
         withContext(Dispatchers.Main) {
             appData.joinedRoom.removeAllById(ownerLeaves.keys)
             ownerJoins.forEach {
-                appData.joinRoom(it.key, account)
+                appData.joinRoom(it.key)
             }
             roomToLeaves.forEach {
                 val ml = appData.roomMemberships.get(it.key)

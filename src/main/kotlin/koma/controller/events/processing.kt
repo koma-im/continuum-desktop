@@ -77,6 +77,5 @@ suspend fun processEventsResult(syncRes: SyncResponse,
     }
     membershipChanges.ownerJoins(syncRes.rooms.join.keys.map { RoomId(it) })
     membershipChanges.ownerLeaves(syncRes.rooms.leave.keys)
-    membershipChanges.saveData(account)
-
+    membershipChanges.saveData()
 }

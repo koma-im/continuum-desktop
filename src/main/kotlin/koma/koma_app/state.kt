@@ -17,14 +17,12 @@ import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import link.continuum.desktop.Room
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.RoomMemberships
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.FallbackCell
 import link.continuum.desktop.gui.util.UiPool
-import link.continuum.desktop.util.Account
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -56,15 +54,12 @@ class AppData(
     /**
      * any known rooms on the network
      */
-    val roomStore = RoomDataStorage(database, userData)
+    val roomStore = RoomDataStorage(database, this, userData)
     val roomMemberships = RoomMemberships(database)
-    val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
+    val joinedRoom = DedupList<RoomId, RoomId> { it }
 
-    fun joinRoom(roomId: RoomId, account: Account){
-        joinedRoom.addIfAbsent(roomId) {
-            logger.debug { "Add user joined room; $roomId" }
-            roomStore.getOrCreate(it, account)
-        }
+    fun joinRoom(roomId: RoomId){
+        joinedRoom.addIfAbsent(roomId) { it }
     }
 
     // reuse components in ListView of events

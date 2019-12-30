@@ -17,6 +17,8 @@ import koma.gui.view.window.chatroom.roominfo.about.requests.requestSetRoomCanon
 import koma.koma_app.appState
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
+import koma.matrix.room.naming.RoomAlias
+import koma.matrix.room.naming.RoomId
 import koma.util.onFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -24,7 +26,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.javafx.JavaFx
 import link.continuum.database.models.getChangeStateAllowed
-import link.continuum.desktop.Room
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.getOrNull
@@ -33,9 +34,9 @@ import org.controlsfx.control.Notifications
 import java.util.concurrent.Callable
 
 private val logger = KotlinLogging.logger {}
-private typealias RoomAlias = String
+private typealias RoomAliasStr = String
 
-class RoomAliasForm(room: Room, user: UserId,
+class RoomAliasForm(room: RoomId, user: UserId,
                     dataStorage: RoomDataStorage
                     ) {
     private val scope = MainScope()
@@ -47,10 +48,10 @@ class RoomAliasForm(room: Room, user: UserId,
     }
     init {
         val data = dataStorage.data
-        val canEditCanonAlias = getChangeStateAllowed(data, room.id, user, RoomEventType.CanonAlias.toString())
-        val canEdit = getChangeStateAllowed(data, room.id, user)
+        val canEditCanonAlias = getChangeStateAllowed(data, room, user, RoomEventType.CanonAlias.toString())
+        val canEdit = getChangeStateAllowed(data, room, user)
         val canonAlias = SimpleStringProperty()
-        dataStorage.latestCanonAlias.receiveUpdates(room.id).onEach {
+        dataStorage.latestCanonAlias.receiveUpdates(room).onEach {
             val n = it.getOrNull()
             canonAlias.set(n)
             stage.title = "Update Aliases of $n"
@@ -60,21 +61,19 @@ class RoomAliasForm(room: Room, user: UserId,
             text("Room Aliases")
             vbox() {
                 spacing = 5.0
-                add(ListView<RoomAlias>().apply {
+                add(ListView<RoomAliasStr>().apply {
                     val listView = this
                     prefHeight = 200.0
                     selectionModel = NoSelectionModel()
-                    cellFactory = object : Callback<ListView<RoomAlias>, ListCell<RoomAlias>> {
-                        override fun call(param: ListView<RoomAlias>?): ListCell<RoomAlias> {
-                            return RoomAliasCell(room,
-                                    canEditCanonAlias,
-                                    canonAlias,
-                                    canEdit)
-                        }
+                    cellFactory = Callback<ListView<RoomAliasStr>, ListCell<RoomAliasStr>> {
+                        RoomAliasCell(room,
+                                canEditCanonAlias,
+                                canonAlias,
+                                canEdit)
                     }
                     VBox.setVgrow(this, Priority.ALWAYS)
                     scope.launch {
-                        dataStorage.latestAliasList.receiveUpdates(room.id).collect {
+                        dataStorage.latestAliasList.receiveUpdates(room).collect {
                             listView.items.setAll(it)
                         }
                     }
@@ -83,7 +82,7 @@ class RoomAliasForm(room: Room, user: UserId,
                     removeWhen(SimpleBooleanProperty(canEdit).not())
                     val field = TextField()
                     field.promptText = "additional-alias"
-                    val servername = room.id.servername
+                    val servername = room.servername
                     hbox {
                         alignment = Pos.CENTER
                         label("#")
@@ -99,7 +98,7 @@ class RoomAliasForm(room: Room, user: UserId,
     }
 }
 
-private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
+private fun deleteRoomAlias(room: RoomId, alias: RoomAliasStr?) {
     alias?:return
     val api = appState.apiClient
     api ?: return
@@ -110,7 +109,7 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .title("Failed to delete room alias $alias")
-                        .text("In room ${room.displayName()}\n$message")
+                        .text("In room ${room}\n$message")
                         .owner(JFX.primaryStage)
                         .showWarning()
             }
@@ -119,12 +118,12 @@ private fun deleteRoomAlias(room: Room, alias: RoomAlias?) {
 }
 
 class RoomAliasCell(
-        private val room: Room,
+        private val room: RoomId,
         private val canonEditAllowed: Boolean,
         private val canonicalAlias: SimpleStringProperty,
-        private val editAllowedDef: Boolean): ListCell<RoomAlias>() {
+        private val editAllowedDef: Boolean): ListCell<RoomAliasStr>() {
 
-    private val roomAlias = SimpleObjectProperty<RoomAlias>()
+    private val roomAlias = SimpleObjectProperty<RoomAliasStr>()
     private val cell = HBox(5.0)
 
     init {
@@ -145,7 +144,11 @@ class RoomAliasCell(
                     graphic = notstar
                     tooltip("Set as Canonical Alias")
                     visibleWhen(booleanBinding(cell.hoverProperty()) {canonEditAllowed && value == true})
-                    setOnAction { requestSetRoomCanonicalAlias(room, roomAlias.value) }
+                    setOnAction {
+                        roomAlias.get()?.also {
+                            requestSetRoomCanonicalAlias(room, RoomAlias( it))
+                        }
+                    }
                 })
                 add(Hyperlink().apply {
                 graphic = star
@@ -164,7 +167,11 @@ class RoomAliasCell(
                 }
                 item("Set Canonical") {
                     removeWhen(SimpleBooleanProperty(canonEditAllowed).not())
-                    action { requestSetRoomCanonicalAlias(room, roomAlias.value) }
+                    action {
+                        roomAlias.get()?.let {
+                            requestSetRoomCanonicalAlias(room, RoomAlias(it))
+                        }
+                    }
                 }
                 Unit
             }
@@ -176,7 +183,7 @@ class RoomAliasCell(
         }
     }
 
-    override fun updateItem(item: RoomAlias?, empty: Boolean) {
+    override fun updateItem(item: RoomAliasStr?, empty: Boolean) {
         super.updateItem(item, empty)
         if (empty || item == null) {
             graphic = null

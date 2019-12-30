@@ -15,19 +15,23 @@ import koma.gui.view.window.chatroom.roominfo.about.requests.chooseUpdateRoomIco
 import koma.gui.view.window.chatroom.roominfo.about.requests.requestUpdateRoomName
 import koma.matrix.UserId
 import koma.matrix.event.room_message.RoomEventType
+import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import link.continuum.database.models.getChangeStateAllowed
-import link.continuum.desktop.Room
+import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.hashColor
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.Avatar2L
+import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.util.getOrNull
 
 class RoomInfoDialog(
-        room: Room, user: UserId
+        datas: RoomDataStorage,
+        context: AccountContext,
+        room: RoomId, user: UserId
 ) {
     private val scope = MainScope()
     val root= VBox(10.0)
@@ -44,11 +48,10 @@ class RoomInfoDialog(
             roomicon.cancelScope()
             scope.cancel()
         }
-        val datas = room.dataStorage
-        datas.latestAvatarUrl.receiveUpdates(room.id).onEach {
-            roomicon.updateUrl(it.getOrNull(), room.account.server)
+        datas.latestAvatarUrl.receiveUpdates(room).onEach {
+            roomicon.updateUrl(it.getOrNull(), context.account.server)
         }.launchIn(scope)
-        val color = room.id.hashColor()
+        val color = room.hashColor()
         var name: String? = null
         datas.latestDisplayName(room).onEach {
             name = it
@@ -56,8 +59,8 @@ class RoomInfoDialog(
             stage.title = "$it Info"
         }.launchIn(scope)
         val data = datas.data
-        val canEditName = getChangeStateAllowed(data, room.id, user, RoomEventType.Name.toString())
-        val canEditAvatar = getChangeStateAllowed(data, room.id, user, RoomEventType.Avatar.toString())
+        val canEditName = getChangeStateAllowed(data, room, user, RoomEventType.Name.toString())
+        val canEditAvatar = getChangeStateAllowed(data, room, user, RoomEventType.Avatar.toString())
 
         stage.title = "Update Info of Room"
         val aliasDialog = RoomAliasForm(room, user, datas)

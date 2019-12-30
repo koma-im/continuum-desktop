@@ -13,11 +13,12 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
+import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import link.continuum.desktop.Room
 import link.continuum.desktop.action.SyncControl
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
 import org.controlsfx.control.NotificationPane
@@ -32,16 +33,17 @@ private val logger = KotlinLogging.logger {}
  * Created by developer on 2017/6/17.
  */
 class ChatWindowBars(
-        roomList: ObservableList<Room>,
+        roomList: ObservableList<RoomId>,
         account: Account,
         keyValueMap: MVMap<String, String>,
         parentJob: Job,
         store: AppStore
 ) {
     private val scope = CoroutineScope(SupervisorJob(parentJob) + Dispatchers.Main)
+    private val context = AccountContext(account)
     private val content = BorderPane()
     val root = NotificationPane(content)
-    val center = ChatView(roomList, account, store)
+    val center = ChatView( roomList, context, store)
     private val roomFinder by lazy { RoomFinder(account) }
     private val prefWin by lazy { PreferenceWindow() }
     val syncControl = SyncControl(

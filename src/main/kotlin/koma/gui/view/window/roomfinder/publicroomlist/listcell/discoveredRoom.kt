@@ -135,7 +135,7 @@ fun CoroutineScope.joinById(roomid: RoomId, name: String, owner: Node,
     launch {
         val rs = api.joinRoom(roomid)
         rs.onSuccess {
-            launch(Dispatchers.JavaFx) { store.joinRoom(roomid, api) }
+            launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
         }
         rs.onFailure {
             launch(Dispatchers.JavaFx) {

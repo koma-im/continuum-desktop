@@ -6,6 +6,7 @@ import io.requery.kotlin.eq
 import io.requery.kotlin.ne
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
+import koma.koma_app.AppData
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import koma.network.media.MHUrl
@@ -37,6 +38,7 @@ fun RoomId.hashColor(): Color {
 
 class RoomDataStorage(
         val data: KDataStore,
+        val appData: AppData,
         private val userDatas: UserDataStore
 ) {
     private val store = ConcurrentHashMap<RoomId, Room>()
@@ -137,8 +139,7 @@ class RoomDataStorage(
             0L to mems.map {UserId(it)}
         }
     })
-    fun latestDisplayName(room: Room): Flow<String> {
-        val id = room.id
+    fun latestDisplayName(id: RoomId): Flow<String> {
         return latestName.receiveUpdates(id).flatMapLatest {
             val name = it.getOrNull()
             if (name != null) {
@@ -154,7 +155,7 @@ class RoomDataStorage(
                             if (first != null) {
                                 flowOf(first)
                             } else {
-                                roomDisplayName(room, heroes, userDatas)
+                                roomDisplayName(id, heroes, userDatas)
                             }
                         }
                     }
@@ -165,13 +166,13 @@ class RoomDataStorage(
 }
 
 private fun roomDisplayName(
-        room: Room,
+        room: RoomId,
         heroes: LatestFlowMap<RoomId, List<UserId>>,
         userDatas: UserDataStore
 ): Flow<String> {
     return flow {
-        emit(room.id.localstr)
-        emitAll(heroes.receiveUpdates(room.id).flatMapLatest {
+        emit(room.localstr)
+        emitAll(heroes.receiveUpdates(room).flatMapLatest {
             logger.info { "generating room name from heros $it" }
             combine(it.map { userDatas.getNameUpdates(it) }) {
                 val n = it.filterNotNull().joinToString(", ")

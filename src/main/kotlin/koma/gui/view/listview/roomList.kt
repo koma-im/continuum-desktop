@@ -8,14 +8,14 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
-import link.continuum.desktop.Room
+import koma.matrix.room.naming.RoomId
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.util.Account
+import link.continuum.desktop.gui.view.AccountContext
 
 class RoomListView(
-        roomlist: ObservableList<Room>,
-        private val account: Account,
+        roomlist: ObservableList<RoomId>,
+        private val context: AccountContext,
         private val data: RoomDataStorage
 ) {
     val root = ListView(roomlist)
@@ -35,7 +35,7 @@ class RoomListView(
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder(account).open()
+                    RoomFinder(context.account).open()
                 }
             }
             button("Create") {
@@ -53,10 +53,10 @@ class RoomListView(
         setup(root)
     }
 
-    private fun setup(node: ListView<Room>) {
+    private fun setup(node: ListView<RoomId>) {
         VBox.setVgrow(node, Priority.ALWAYS)
         node.setCellFactory {
-            RoomFragment(data)
+            RoomFragment(data, context)
         }
    }
 }

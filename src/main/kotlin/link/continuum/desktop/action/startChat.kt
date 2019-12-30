@@ -33,23 +33,21 @@ fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: Http
     updateAccountUsage(data, userId)
 
     val app = appState
-    val store = appData
     val server = Server(url, httpClient)
     val account  = server.account(userId, token)
-    val apiClient  = account
-    app.apiClient = apiClient
-    val userRooms = store.joinedRoom.list
+    app.apiClient = account
+    val userRooms = appData.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, account, keyValueMap, app.job, store)
+    val primary = ChatWindowBars(userRooms, account, keyValueMap, app.job, appData)
     JFX.primaryPane.setChild(primary.root)
 
     app.coroutineScope.launch {
         val rooms = loadUserRooms(data, userId)
         logger.debug { "user is in ${rooms.size} rooms according database records" }
         withContext(UiDispatcher) {
-            rooms.forEach {
-                loadRoom(store.roomStore, it, account)?.let {
-                    store.joinRoom(it.id, apiClient)
+            rooms.forEach { roomId ->
+                loadRoom(appData.roomStore, roomId, account)?.let {
+                    appData.joinRoom(it.id)
                 }
             }
         }

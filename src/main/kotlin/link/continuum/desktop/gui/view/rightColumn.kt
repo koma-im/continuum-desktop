@@ -17,7 +17,7 @@ import javafx.scene.shape.SVGPath
 import javafx.scene.shape.Shape
 import koma.gui.view.usersview.RoomMemberListView
 import koma.koma_app.AppStore
-import link.continuum.desktop.Room
+import koma.matrix.room.naming.RoomId
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.notification.NotificationList
 import link.continuum.desktop.util.Account
@@ -28,11 +28,10 @@ private val logger = KotlinLogging.logger {}
 class AccountContext(var account: Account)
 
 class RightColumn(
-        account: Account,
+        private val context: AccountContext,
         private val storage: AppStore,
         private val parent: SplitPane
 ) {
-    private var context = AccountContext(account)
     private val members = RoomMemberListView(context, storage.userData)
     private val notifications by lazy { NotificationList(storage) }
     private val content = StackPane(members.root)
@@ -85,11 +84,10 @@ class RightColumn(
         }
     }
     val root = VBox(0.0, tabs, content)
-    suspend fun setRoom(room: Room) {
-        context.account = room.account
-        val ml = storage.roomMemberships.get(room.id)
+    suspend fun setRoom(room: RoomId, account: Account) {
+        val ml = storage.roomMemberships.get(room)
         members.setList(ml.list)
-        notifications.viewAccount(room.account)
+        notifications.viewAccount(account)
     }
     private var expanded = false
     private fun expandOnce() {

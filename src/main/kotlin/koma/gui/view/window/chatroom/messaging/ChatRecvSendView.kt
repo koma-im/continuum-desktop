@@ -14,14 +14,14 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
-import link.continuum.desktop.Room
+import link.continuum.desktop.util.Account
 import okhttp3.OkHttpClient
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class ChatRecvSendView(
         km: OkHttpClient,
-        store: AppStore
+        private val store: AppStore
 ) {
      val root = VBox(5.0).apply {
         padding = Insets(0.0, 0.0, 5.0, 0.0)
@@ -33,16 +33,17 @@ class ChatRecvSendView(
     // messages typed but not sent in each room
     private val roomInputs = mutableMapOf<RoomId, String>()
 
-    fun setRoom(room: Room) {
+    fun setRoom(room: RoomId, account: Account) {
         currentRoom.value?.let {
             roomInputs[it] =messageInput.text
         }
         messageInput.clear()
-        roomInputs[room.id]?.let {
+        roomInputs[room]?.let {
             messageInput.appendText(it)
         }
-        currentRoom.set(room.id)
-        messageScroll.setRoom(room.messageManager.shownList, room.id)
+        currentRoom.set(room)
+        val r = store.roomStore.getOrCreate(room, account)
+        messageScroll.setRoom(r.messageManager.shownList, room)
     }
 
     init {

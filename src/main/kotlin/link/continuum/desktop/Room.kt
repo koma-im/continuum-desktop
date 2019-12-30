@@ -8,7 +8,6 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import koma.storage.message.MessageManager
 import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.flow.first
 import link.continuum.database.models.*
 import link.continuum.desktop.database.RoomDataStorage
 
@@ -28,14 +27,10 @@ class Room(
     var visibility: RoomVisibility = RoomVisibility.Private
     var joinRule: RoomJoinRules = RoomJoinRules.Invite
     var histVisibility = HistoryVisibility.Shared
-    private val server = account.server
     init {
         historyVisibility?.let { histVisibility = it }
         joinRule?.let { this.joinRule = it }
         visibility?.let { this.visibility = visibility }
-    }
-    suspend fun displayName(): String {
-        return dataStorage.latestDisplayName(this).first()
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
