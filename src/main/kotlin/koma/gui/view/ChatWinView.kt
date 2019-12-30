@@ -18,6 +18,8 @@ import koma.util.testFailure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -51,6 +53,7 @@ class ChatView(roomList: ObservableList<Room>,
                storage: AppStore,
                scaling: Float = storage.settings.scaling
 ) {
+    private val scope = MainScope()
     val root = SplitPane ()
 
     val roomListView = RoomListView(roomList, account, storage.roomStore)
@@ -62,7 +65,12 @@ class ChatView(roomList: ObservableList<Room>,
 
     private var initSelected = false
 
-    private fun setRoom(room: Room) {
+    private val roomActor = scope.actor<Room>(capacity = Channel.CONFLATED) { // <--- Changed here
+        for (event in channel) {
+            setRoom(event)
+        }
+    }
+    private suspend fun setRoom(room: Room) {
         check(Platform.isFxApplicationThread())
         messagingView.setRoom(room)
         rightColumn.setRoom(room)
@@ -89,7 +97,7 @@ class ChatView(roomList: ObservableList<Room>,
         root.items.add(placeholder)
         roomListView.root.selectionModel.selectedItemProperty().addListener { _, _, room ->
             if (room != null) {
-                setRoom(room)
+                roomActor.offer(room)
             }
         }
         if (roomList.isNotEmpty()) {

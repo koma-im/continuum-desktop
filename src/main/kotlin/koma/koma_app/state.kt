@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.RoomDataStorage
+import link.continuum.desktop.database.RoomMemberships
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.FallbackCell
@@ -56,6 +57,7 @@ class AppData(
      * any known rooms on the network
      */
     val roomStore = RoomDataStorage(database, userData)
+    val roomMemberships = RoomMemberships(database)
     val joinedRoom = DedupList<Room, RoomId> { r -> r.id }
 
     fun joinRoom(roomId: RoomId, account: Account){

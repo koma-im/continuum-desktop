@@ -5,7 +5,6 @@ import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.ListCell
 import javafx.scene.control.Tooltip
-import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
@@ -17,15 +16,17 @@ import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.label
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-private typealias SelectUser = Pair<UserId, Server>
+private typealias SelectUser = UserId
 
 @ExperimentalCoroutinesApi
 class MemberCell(
+        private val context: AccountContext,
         private val store: UserDataStore
 ) : ListCell<SelectUser>() {
     private val scope = MainScope()
@@ -49,15 +50,15 @@ class MemberCell(
             }
         }
         itemId.flow().flatMapLatest {
-            store.getNameUpdates(it.first)
+            store.getNameUpdates(it)
         }.onEach {
             logger.debug { "updating name in user list: ${itemId.getOrNull()} is $it" }
             check(Platform.isFxApplicationThread())
             name.text = it
         }.launchIn(scope)
         itemId.flow().onEach { id ->
-            avatarView.updateUser(id.first, id.second)
-            toolTip.text = id.first.str
+            avatarView.updateUser(id, context.account.server)
+            toolTip.text = id.full
         }.launchIn(scope)
     }
 
@@ -68,7 +69,7 @@ class MemberCell(
             return
         }
         itemId.set(item)
-        name.textFill = store.getUserColor(item.first)
+        name.textFill = store.getUserColor(item)
 
         graphic = root
     }

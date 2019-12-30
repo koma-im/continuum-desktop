@@ -30,7 +30,7 @@ class DedupList<T, U>(private val identify: (T)->U) {
         rwList.add(compute(id))
     }
     fun size() = rwList.size
-    fun addAll(elements: List<T>) {
+    fun addAll(elements: Collection<T>) {
         rwList.addAll(elements.filter { elementSet.add(identify(it)) })
     }
     fun addAll(index: Int, elements: List<T>) {

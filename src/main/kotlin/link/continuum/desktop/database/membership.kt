@@ -1,23 +1,44 @@
 package link.continuum.desktop.database
 
 import io.requery.kotlin.`in`
+import io.requery.kotlin.asc
 import io.requery.kotlin.eq
 import koma.koma_app.AppData
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import link.continuum.database.KDataStore
 import link.continuum.database.models.Membership
 import link.continuum.database.models.newMembership
+import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
+class RoomMemberships(private val data: KDataStore) {
+    private val memberships = ConcurrentHashMap<RoomId, Deferred<DedupList<UserId, UserId>>>()
+    suspend fun get(roomId: RoomId): DedupList<UserId, UserId> {
+        return coroutineScope {
+            memberships.computeIfAbsent(roomId) {
+                async {
+                    val membersList = DedupList<UserId, UserId> {it}
+                    val members = data.select(Membership::class).where(
+                            Membership::room.eq(roomId.id))
+                            .orderBy(Membership::since.asc())
+                            .limit(200).get().map { UserId(it.person) }
+                    logger.debug { "loaded ${members.size} members in $roomId" }
+                    membersList.addAll(members)
+                    membersList
+                }
+            }.await()
+        }
+    }
+}
 /**
- * temporary class used to process a batch of changes
+ * holds changes temporarily for batch processing
  */
 class MembershipChanges(
         private val appData: AppData,
@@ -129,12 +150,12 @@ class MembershipChanges(
                 appData.joinRoom(it.key, account)
             }
             roomToLeaves.forEach {
-                val room = appData.roomStore.getOrCreate(it.key, account)
-                room.members.removeAllById(it.value)
+                val ml = appData.roomMemberships.get(it.key)
+                ml.removeAllById(it.value)
             }
             roomToJoins.forEach {
-                val room = appData.roomStore.getOrCreate(it.key, account)
-                room.members.addAll(it.value.map { it to account.server })
+                val ml = appData.roomMemberships.get(it.key)
+                ml.addAll(it.value)
             }
         }
         val s = sequence {
@@ -173,7 +194,7 @@ class MembershipChanges(
                 val roomId = RoomId(it.room)
                 val j = if (ownerJoinMut.containsKey(roomId)) {
                     ownerJoinMut
-                } else { ownerLeaveMut}.remove(roomId)!!
+                } else { ownerLeaveMut}.remove(roomId)
                 it.since = max(it.since ?: 0, j ?: 0)
                 it
             }

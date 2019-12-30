@@ -1,8 +1,6 @@
 package link.continuum.desktop
 
-import koma.Server
 import koma.matrix.MatrixApi
-import koma.matrix.UserId
 import koma.matrix.event.room_message.state.RoomPowerLevelsContent
 import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
@@ -13,7 +11,6 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.flow.first
 import link.continuum.database.models.*
 import link.continuum.desktop.database.RoomDataStorage
-import link.continuum.desktop.gui.list.DedupList
 
 class Room(
         val id: RoomId,
@@ -26,7 +23,6 @@ class Room(
 ) {
     @ObsoleteCoroutinesApi
     val messageManager by lazy { MessageManager(this, dataStorage.data ) }
-    val members = DedupList<Pair<UserId, Server>, UserId>({it.first})
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -40,10 +36,6 @@ class Room(
     }
     suspend fun displayName(): String {
         return dataStorage.latestDisplayName(this).first()
-    }
-
-    fun addMembers(ms: List<UserId>) {
-        members.addAll(ms.map { it to server })
     }
 
     fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {

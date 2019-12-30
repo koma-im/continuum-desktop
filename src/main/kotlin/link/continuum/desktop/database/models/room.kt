@@ -1,10 +1,7 @@
 package link.continuum.desktop.database.models
 
-import io.requery.kotlin.asc
 import io.requery.kotlin.eq
-import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
-import link.continuum.database.models.Membership
 import link.continuum.database.models.RoomPowerSettings
 import link.continuum.database.models.RoomSettings
 import link.continuum.database.models.defaultRoomPowerSettings
@@ -38,11 +35,5 @@ fun loadRoom(dataStorage: RoomDataStorage, roomId: RoomId,
             visibility = settings?.visibility,
             powerLevels = powers ?: defaultRoomPowerSettings(roomId)
     )
-    val members = data.select(Membership::class).where(
-            Membership::room.eq(roomId.id)
-    ).orderBy(Membership::since.asc()).limit(200).get().toList()
-    room.addMembers(members.map { UserId(it.person) })
-    logger.debug { "loaded ${members.size} members, " +
-            "there are now ${room.members.size()} members in $roomId" }
     return room
 }

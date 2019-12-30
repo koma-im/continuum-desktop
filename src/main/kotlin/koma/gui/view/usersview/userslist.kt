@@ -1,34 +1,27 @@
 package koma.gui.view.usersview
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.ObservableList
-import javafx.geometry.Insets
-import javafx.geometry.VPos
-import javafx.scene.input.MouseButton
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-import javafx.scene.text.Text
-import koma.Server
 import koma.gui.element.control.PrettyListView
 import koma.gui.view.usersview.fragment.MemberCell
-import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.StyleBuilder
+import link.continuum.desktop.gui.VBox
+import link.continuum.desktop.gui.add
+import link.continuum.desktop.gui.em
 import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.gui.view.AccountContext
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
+        context: AccountContext,
         userData: UserDataStore
 ) {
 
     val root = VBox(5.0)
-    private val userlist = PrettyListView<Pair<UserId, Server>>()
-    fun setList(memList: ObservableList<Pair<UserId, Server>>){
+    private val userlist = PrettyListView<UserId>()
+    fun setList(memList: ObservableList<UserId>){
         userlist.items = memList
     }
     init {
@@ -38,7 +31,7 @@ class RoomMemberListView(
                 style = listStyle
                 VBox.setVgrow(this, Priority.ALWAYS)
                 setCellFactory {
-                    MemberCell(userData)
+                    MemberCell(context, userData)
                 }
             }
             add(userlist)
