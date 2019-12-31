@@ -14,8 +14,8 @@ import mu.KotlinLogging
 import org.h2.jdbcx.JdbcConnectionPool
 import org.h2.jdbcx.JdbcDataSource
 import kotlin.time.ExperimentalTime
-import link.continuum.desktop.database.models.meta.Models as DbModels
 import kotlin.time.MonoClock
+import link.continuum.desktop.database.models.meta.Models as DbModels
 
 typealias KDataStore = KotlinEntityDataStore<Persistable>
 
@@ -30,17 +30,18 @@ fun openStore(dbPath: String, level: Int=1): KotlinEntityDataStore<Persistable> 
     val conf = KotlinConfiguration(dataSource = dataSourcePool, model = Models.DEFAULT)
     val s = KotlinEntityDataStore<Persistable>(conf)
     logger.trace { "opening db takes ${mark.elapsedNow()}"}
-    val columns = getDbColumns(dataSourcePool)
-    logger.trace { "opening db and getting columns takes ${mark.elapsedNow()}"}
     val sm = SchemaModifier(conf)
-    val addedTypes = Models.DEFAULT.types.filterNot {
-        columns.contains(it.name.toLowerCase())
+    getDbColumns(dataSourcePool).let { columns ->
+        logger.trace { "opening db and getting columns takes ${mark.elapsedNow()}"}
+        val addedTypes = Models.DEFAULT.types.filterNot {
+            columns.contains(it.name.toLowerCase())
+        }
+        if (addedTypes.isNotEmpty()) {
+            logger.info { "creating tables of ${addedTypes.map { it.name }}"}
+            sm.createTables(TableCreationMode.CREATE_NOT_EXISTS)
+        }
     }
-    if (addedTypes.isNotEmpty()) {
-        logger.info { "creating tables of $addedTypes"}
-        sm.createTables(TableCreationMode.CREATE_NOT_EXISTS)
-    }
-    addMissingColumn(columns, sm)
+    addMissingColumn(getDbColumns(dataSourcePool), sm)
     return s
 }
 

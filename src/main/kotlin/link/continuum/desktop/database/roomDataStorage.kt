@@ -1,9 +1,6 @@
 package link.continuum.desktop.database
 
-import io.requery.kotlin.asc
-import io.requery.kotlin.desc
-import io.requery.kotlin.eq
-import io.requery.kotlin.ne
+import io.requery.kotlin.*
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppData
@@ -133,7 +130,9 @@ class RoomDataStorage(
         } else {
             val mems = data.select(Membership::class).where(
                     Membership::room.eq(room.id)
-                            .and(Membership::joiningRoom.ne(false))
+                            .and(
+                                    Membership::joiningRoom.eq(true)
+                                            .or(Membership::joiningRoom.isNull()))
             ).orderBy(Membership::since.asc()).limit(5).get().map { it.person }
             logger.info { "no known heros in $room, using $mems"}
             0L to mems.map {UserId(it)}

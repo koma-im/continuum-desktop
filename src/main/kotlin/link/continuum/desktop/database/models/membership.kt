@@ -74,7 +74,7 @@ fun KDataStore.saveHeroes(roomId: RoomId, heroes: List<UserId>, ts: Long) {
             since = ts
         }
     }
-    this.insert(records)
+    this.upsert(records)
 }
 
 /**
