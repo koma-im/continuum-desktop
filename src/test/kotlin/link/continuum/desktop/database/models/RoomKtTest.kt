@@ -8,7 +8,7 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
 import link.continuum.database.models.*
 import link.continuum.database.openStore
-import link.continuum.database.openStore
+import org.junit.jupiter.api.AfterAll
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -16,9 +16,6 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 internal class RoomKtTest {
-    val dir = Files.createTempDirectory("continuum-test").resolve("test")
-    val data = openStore(dir.toString())
-
     @Test
     fun testDefaultRoomPowerSettings() {
         val room0 = RoomId("matrix.org", "room0")
@@ -40,7 +37,6 @@ internal class RoomKtTest {
 
         val d1 = openStore(dir.toString())
         val s1 = d1.select(RoomSettings::class).where(RoomSettings::roomId.eq(room0.id)).get().first()
-        println(s1)
         assertEquals(HistoryVisibility.Invited, s1.historyVisibility)
         assertEquals(RoomJoinRules.Invite, s1.joinRule)
         assertEquals(RoomVisibility.Private, s1.visibility)
@@ -86,5 +82,16 @@ internal class RoomKtTest {
 
     @Test
     fun testLoadRoom() {
+    }
+
+    companion object {
+        val tmp = Files.createTempDirectory("continuum-test")
+        val dir = tmp.resolve("test")
+        val data = openStore(dir.toString())
+        @AfterAll
+        @JvmStatic
+        fun teardown() {
+            tmp.toFile().deleteRecursively()
+        }
     }
 }

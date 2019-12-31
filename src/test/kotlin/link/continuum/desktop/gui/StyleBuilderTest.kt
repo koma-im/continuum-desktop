@@ -1,6 +1,6 @@
 package link.continuum.desktop.gui
 
-import org.junit.Test
+import kotlin.test.Test
 import org.junit.jupiter.api.Assertions.*
 import kotlin.math.exp
 

@@ -1,10 +1,10 @@
 package link.continuum.desktop.database.models
 
 import io.requery.kotlin.eq
-import link.continuum.database.KDataStore
 import link.continuum.database.models.ServerAddress
 import link.continuum.database.models.ServerAddressEntity
 import link.continuum.database.openStore
+import org.junit.jupiter.api.AfterAll
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,14 +12,6 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 internal class ServerKtTest {
-
-    val dir = Files.createTempDirectory("continuum-test")
-    val data: KDataStore
-
-    init {
-        val path = dir.resolve("test").toString()
-        data = openStore(path)
-    }
     @Test
     fun testAddServer() {
         val server = ServerAddressEntity()
@@ -39,5 +31,16 @@ internal class ServerKtTest {
                         .and(ServerAddress::address.eq("https://matrix.org/"))
         ).get().first()
         assertEquals(7, s.lastUse)
+    }
+
+    companion object {
+        val tmp = Files.createTempDirectory("continuum-test")
+        val dir = tmp.resolve("test")
+        val data = openStore(dir.toString())
+        @AfterAll
+        @JvmStatic
+        fun teardown() {
+            tmp.toFile().deleteRecursively()
+        }
     }
 }

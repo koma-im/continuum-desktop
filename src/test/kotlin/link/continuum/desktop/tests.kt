@@ -7,7 +7,7 @@ import koma.matrix.room.naming.RoomId
 import koma.network.client.okhttp.KHttpClient
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
-import org.junit.Test
+import kotlin.test.Test
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI

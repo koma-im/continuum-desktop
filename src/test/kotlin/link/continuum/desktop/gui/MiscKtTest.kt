@@ -5,7 +5,7 @@ import javafx.scene.Parent
 import javafx.scene.layout.StackPane as StackPaneJ
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
-import org.junit.Test
+import kotlin.test.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.assertThrows
 import kotlin.time.ExperimentalTime

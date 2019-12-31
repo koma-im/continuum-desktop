@@ -30,7 +30,7 @@ allprojects {
         implementation("io.github.microutils:kotlin-logging:1.6.22")
 
         testImplementation(kotlin("test"))
-        testImplementation(kotlin("test-junit"))
+        testImplementation(kotlin("test-junit5"))
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.1.0")
     }
 }

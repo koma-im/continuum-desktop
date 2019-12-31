@@ -3,6 +3,7 @@ package link.continuum.desktop.database.models
 import koma.matrix.UserId
 import link.continuum.database.models.*
 import link.continuum.database.openStore
+import org.junit.jupiter.api.AfterAll
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,9 +11,6 @@ import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
 internal class UserKtTest {
-    val dir = Files.createTempDirectory("continuum-test").resolve("test")
-    val data = openStore(dir.toString())
-
     @Test
     fun testInsertUser() {
         val userId = UserId("@user:matrix.org")
@@ -75,5 +73,16 @@ internal class UserKtTest {
         t.since = 99
         data.insert(t)
         assertEquals(3, data.count(UserAvatar::class).get().value())
+    }
+
+    companion object {
+        val tmp = Files.createTempDirectory("continuum-test")
+        val dir = tmp.resolve("test")
+        val data = openStore(dir.toString())
+        @AfterAll
+        @JvmStatic
+        fun teardown() {
+            tmp.toFile().deleteRecursively()
+        }
     }
 }
