@@ -119,3 +119,24 @@ runtime {
             "jdk.unsupported"
             ))
 }
+
+project.afterEvaluate {
+    task("depsize") {
+        listConfigurationDependencies(configurations.default.get())
+    }
+}
+
+fun listConfigurationDependencies(configuration: Configuration) {
+    val files = configuration.files.sortedByDescending { it.length() }
+    val total = files.sumBy { it.length().toInt() }
+    println("Total size ${total/1024/1024} MB")
+    var accum = 0L
+    files.forEach {
+        val l = it.length()
+        accum += l
+        val name = String.format("%-48s", it.name)
+        val perc = String.format("%.1f", l.toFloat()/total*100)
+        val accumPercent = String.format("%.1f", accum.toFloat()/total*100)
+        println("$name \t ${l/1024} KB \t $perc% \t ${accum/1024/1024} MB \t $accumPercent%")
+    }
+}
