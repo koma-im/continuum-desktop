@@ -1,6 +1,5 @@
 package koma.gui.view
 
-import javafx.application.Platform
 import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.control.*
@@ -34,6 +33,7 @@ import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.gui.view.RightColumn
 import link.continuum.desktop.observable.MutableObservable
+import link.continuum.desktop.util.debugAssertUiThread
 import link.continuum.desktop.util.getOrNull
 import mu.KotlinLogging
 import java.util.*
@@ -71,7 +71,7 @@ class ChatView(roomList: ObservableList<RoomId>,
         }
     }
     private suspend fun setRoom(room: RoomId) {
-        check(Platform.isFxApplicationThread())
+        debugAssertUiThread()
         messagingView.setRoom(room, context.account)
         rightColumn.setRoom(room, context.account)
         if (!initSelected) {

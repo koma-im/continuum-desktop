@@ -12,6 +12,7 @@ import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.StyleBuilder
 import link.continuum.desktop.gui.em
 import link.continuum.desktop.gui.util.Recyclable
+import link.continuum.desktop.util.debugAssertUiThread
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
@@ -20,6 +21,7 @@ private typealias NotificationData = NotificationResponse.Notification
 private val logger = KotlinLogging.logger {}
 
 fun popNotify(notification: NotificationData, store: AppStore, server: MediaServer) {
+    debugAssertUiThread()
     val graphic = NotificationGraphic(store)
     val popup = Notifications.create()
             .onAction {

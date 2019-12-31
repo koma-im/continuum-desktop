@@ -11,7 +11,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.Membership
 import link.continuum.database.models.newMembership
 import link.continuum.desktop.gui.list.DedupList
-import link.continuum.desktop.util.Account
+import link.continuum.desktop.util.whenDebugging
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.max
@@ -130,6 +130,15 @@ class MembershipChanges(
      * save to database and update UI data
      */
     suspend fun saveData() {
+        whenDebugging{
+            joins.forEach { j ->
+                val u = j.key
+                val uj = j.value.keys
+                val uL = leaves[u]?.keys?:return@forEach
+                val conflicts = uj.intersect(uL)
+                check(conflicts.isNotEmpty()) { "user $u joins $uj leaves $uL"}
+            }
+        }
         val roomToJoins = hashMapOf<RoomId, HashSet<UserId>>()
         joins.forEach { (userId, map) ->
             map.forEach { (roomId, _) ->

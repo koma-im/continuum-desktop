@@ -12,6 +12,7 @@ import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.em
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.view.AccountContext
+import link.continuum.desktop.util.debugAssertUiThread
 
 @ExperimentalCoroutinesApi
 class RoomMemberListView(
@@ -22,6 +23,7 @@ class RoomMemberListView(
     val root = VBox(5.0)
     private val userlist = PrettyListView<UserId>()
     fun setList(memList: ObservableList<UserId>){
+        debugAssertUiThread()
         userlist.items = memList
     }
     init {

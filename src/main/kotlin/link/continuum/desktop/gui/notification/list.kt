@@ -2,7 +2,6 @@
 
 package link.continuum.desktop.gui.notification
 
-import javafx.application.Platform
 import javafx.collections.FXCollections
 import javafx.collections.ListChangeListener
 import javafx.collections.WeakListChangeListener
@@ -29,6 +28,7 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.util.Recyclable
 import link.continuum.desktop.util.Account
+import link.continuum.desktop.util.debugAssertUiThread
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 
@@ -94,7 +94,7 @@ private class AccountNotifications(
      * get notifications
      */
     fun fetch() {
-        check(Platform.isFxApplicationThread())
+        debugAssertUiThread()
         if (state is NState.Loading) return
         if (state is NState.Finished) {
             return
@@ -146,6 +146,7 @@ private class PaginationStatusView(private val data: AccountNotifications) {
         background = whiteBackGround
     }
     fun updateState(state: NState) {
+        debugAssertUiThread()
         root.children.clear()
          when (state) {
             is NState.Loading -> {
@@ -264,6 +265,7 @@ class NotificationList(
         return accountNotification
     }
     fun viewAccount(account: Account) {
+        debugAssertUiThread()
         val notifications = setAccount(account)
         notifications.view()
         context.account = notifications

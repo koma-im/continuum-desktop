@@ -8,6 +8,7 @@ import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import java.util.*
 import kotlin.streams.toList
@@ -53,6 +54,7 @@ class InitialIcon(
     }
 
     fun show() {
+        debugAssertUiThread()
         this.root.isManaged = true
         this.root.isVisible = true
     }
@@ -63,6 +65,7 @@ class InitialIcon(
     }
 
     fun updateColor(color: Color) {
+        debugAssertUiThread()
         root.background = backgrounds.computeIfAbsent(color) {
             logger.debug { "initial icon $charL $charR $color" }
             Background(BackgroundFill(it, radii, Insets.EMPTY))
@@ -75,6 +78,7 @@ class InitialIcon(
     }
 
     fun updateCharPair(charL: String, charR: String) {
+        debugAssertUiThread()
         this.charL.text = charL
         this.charR.text = charR
         root.children.setAll(two)
@@ -86,6 +90,7 @@ class InitialIcon(
     }
 
     fun updateCharSingle(char: String) {
+        debugAssertUiThread()
         charC.text = char
         root.children.setAll(one)
     }

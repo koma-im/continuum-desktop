@@ -1,6 +1,6 @@
 package link.continuum.desktop.gui.util
 
-import javafx.application.Platform
+import link.continuum.desktop.util.debugAssertUiThread
 
 /**
  * use on UI thread
@@ -8,7 +8,7 @@ import javafx.application.Platform
 class UiPool<T>(private val factory: ()->T) {
     private val pool = mutableListOf<T>()
     fun take(): T {
-        check(Platform.isFxApplicationThread())
+        debugAssertUiThread()
         val i = pool.lastIndex
         if (i < 0)  return factory()
         val obj = pool.removeAt(pool.lastIndex)
@@ -16,7 +16,7 @@ class UiPool<T>(private val factory: ()->T) {
     }
 
     fun pushBack(value: T) {
-        check(Platform.isFxApplicationThread())
+        debugAssertUiThread()
         pool.add(value)
     }
 }

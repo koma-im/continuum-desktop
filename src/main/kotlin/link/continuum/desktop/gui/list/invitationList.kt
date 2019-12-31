@@ -16,6 +16,7 @@ import link.continuum.desktop.events.InviteData
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.Avatar2L
 import link.continuum.desktop.gui.icon.avatar.AvatarInline
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -33,6 +34,7 @@ class InvitationsView(
     }
 
     fun add(invite: InviteData, server: Server) {
+        debugAssertUiThread()
         if (added.contains(invite.id)) {
             logger.warn { "ignoring duplicate invite $invite" }
             return
@@ -100,6 +102,7 @@ class InvitationsView(
                 invitation: InviteData,
                 server: Server
         ) {
+            debugAssertUiThread()
             roomId = invitation.id
             inviter.text = invitation.inviterName
 
@@ -116,6 +119,7 @@ class InvitationsView(
         }
 
         fun remove() {
+            debugAssertUiThread()
             list.children.remove(this.cell)
             spareCells.add(this)
         }

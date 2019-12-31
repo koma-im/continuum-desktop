@@ -21,6 +21,7 @@ import koma.matrix.room.naming.RoomId
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.notification.NotificationList
 import link.continuum.desktop.util.Account
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -85,6 +86,7 @@ class RightColumn(
     }
     val root = VBox(0.0, tabs, content)
     suspend fun setRoom(room: RoomId, account: Account) {
+        debugAssertUiThread()
         val ml = storage.roomMemberships.get(room)
         members.setList(ml.list)
         notifications.viewAccount(account)

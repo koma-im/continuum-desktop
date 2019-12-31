@@ -7,7 +7,8 @@ import javafx.scene.control.*
 import javafx.scene.effect.DropShadow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.layout.*
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
 import javafx.util.StringConverter
@@ -22,9 +23,7 @@ import link.continuum.database.KDataStore
 import link.continuum.database.models.getRecentUsers
 import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.HBox
-import link.continuum.desktop.gui.StackPane
-import link.continuum.desktop.gui.VBox
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -85,6 +84,7 @@ class LoginScreen(
     private var database: KDataStore? = null
     private var httpClient: OkHttpClient? = null
     fun start(appStore: AppStore, httpClient: OkHttpClient) {
+        debugAssertUiThread()
         this.httpClient = httpClient
         root.isDisable = false
         val data = appStore.database

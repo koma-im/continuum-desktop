@@ -1,12 +1,13 @@
 package koma.gui.view.window.start
 
 import javafx.geometry.Pos
-import link.continuum.desktop.gui.StackPane
 import koma.gui.view.LoginScreen
 import koma.koma_app.AppStore
 import kotlinx.coroutines.CompletableDeferred
 import link.continuum.desktop.gui.HBox
+import link.continuum.desktop.gui.StackPane
 import link.continuum.desktop.gui.VBox
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane
@@ -24,6 +25,7 @@ class StartScreen(
     val root = StackPane()
     private val login = CompletableDeferred<LoginScreen>()
     fun initialize(keyValueMap: MVMap<String, String>) {
+        debugAssertUiThread()
         val innerBox = HBox().apply {
             alignment = Pos.CENTER
         }

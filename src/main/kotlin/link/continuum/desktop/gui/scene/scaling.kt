@@ -2,8 +2,9 @@ package link.continuum.desktop.gui.scene
 
 import javafx.scene.Node
 import javafx.scene.input.KeyEvent
-import link.continuum.desktop.gui.StackPane
 import javafx.scene.text.Font
+import link.continuum.desktop.gui.StackPane
+import link.continuum.desktop.util.debugAssertUiThread
 
 class ScalingPane(
         private var fontSize: Double? = null
@@ -13,6 +14,7 @@ class ScalingPane(
         return fontSize ?: Font.getDefault().size
     }
     fun setChild (node: Node) {
+        debugAssertUiThread()
         root.children.setAll(node)
     }
     init {

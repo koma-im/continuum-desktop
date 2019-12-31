@@ -1,6 +1,5 @@
 package link.continuum.desktop.gui.icon.avatar
 
-import javafx.application.Platform
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import koma.Server
@@ -14,6 +13,7 @@ import link.continuum.desktop.gui.StyleBuilder
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.component.FitImageRegion
 import link.continuum.desktop.gui.em
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -43,7 +43,7 @@ abstract class UrlAvatar(
     }
 
     fun updateName(name: String, color: Color) {
-        check(Platform.isFxApplicationThread())
+        debugAssertUiThread()
         this.initialIcon.updateItem(name, color)
     }
 
