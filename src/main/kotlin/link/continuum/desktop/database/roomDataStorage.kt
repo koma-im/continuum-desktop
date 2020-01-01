@@ -1,6 +1,9 @@
 package link.continuum.desktop.database
 
-import io.requery.kotlin.*
+import io.requery.kotlin.asc
+import io.requery.kotlin.desc
+import io.requery.kotlin.eq
+import io.requery.kotlin.isNull
 import javafx.scene.paint.Color
 import koma.gui.element.icon.placeholder.generator.hashStringColorDark
 import koma.koma_app.AppData
@@ -8,12 +11,14 @@ import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import koma.network.media.MHUrl
 import koma.network.media.parseMxc
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.serialization.internal.StringSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.list
-import link.continuum.database.KDataStore
 import link.continuum.database.models.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.models.loadRoom
@@ -38,22 +43,25 @@ class RoomDataStorage(
         val appData: AppData,
         private val userDatas: UserDataStore
 ) {
-    private val store = ConcurrentHashMap<RoomId, Room>()
+    private val store = ConcurrentHashMap<RoomId, Deferred<Room>>()
 
-    fun getOrCreate(roomId: RoomId, account: Account): Room {
-        val newRoom = store.computeIfAbsent(roomId) {
-            loadRoom(this, roomId, account) ?: run {
-                logger.info { "Room $roomId not in database" }
-                Room(roomId, this, account)
-            }}
-        return newRoom
+    suspend fun getOrCreate(roomId: RoomId, account: Account): Room {
+        return coroutineScope {
+            store.computeIfAbsent(roomId) {
+                async {
+                    loadRoom(this@RoomDataStorage, roomId, account)
+                }
+            }.await()
+        }
     }
     val latestName = LatestFlowMap<RoomId, Optional<String>>(
             save = { roomId: RoomId, s: Optional<String>, l: Long ->
-                saveRoomName(data, roomId, s.getOrNull(), l)
+                data.runOp {
+                    saveRoomName(this, roomId, s.getOrNull(), l)
+                }
             },
             init = {
-                getLatestRoomName(data, it) ?: run {
+                data.runOp { getLatestRoomName(this, it)} ?: run {
                     0L to Optional.empty<String>()
                 }
             })
@@ -63,14 +71,14 @@ class RoomDataStorage(
                 rec.roomId = roomId.full
                 rec.alias = s.getOrNull()
                 rec.since = l
-                data.upsert(rec)
+                data.runOp { upsert(rec) }
             },
             init = {
-                data.select(RoomCanonicalAlias::class).where(RoomCanonicalAlias::roomId.eq(it.full))
+                data.runOp { select(RoomCanonicalAlias::class).where(RoomCanonicalAlias::roomId.eq(it.full))
                         .get().firstOrNull() ?.let {
                             it.since to it.alias.toOption()
-                        } ?:
-                0L to Optional.empty<String>()
+                        }
+                }?: 0L to Optional.empty<String>()
             })
     val latestAliasList = LatestFlowMap(
             save = { roomId: RoomId, s: List<String>, l: Long ->
@@ -83,12 +91,12 @@ class RoomDataStorage(
                 rec.roomId = roomId.full
                 rec.aliases = ser
                 rec.since = l
-                data.upsert(rec)
+                data.runOp { upsert(rec) }
             },
             init = {roomId ->
-                val rec = data.select(RoomAliasList::class)
+                val rec = data.runOp {select(RoomAliasList::class)
                         .where(RoomAliasList::roomId.eq(roomId.full))
-                        .get().firstOrNull() ?: return@LatestFlowMap  0L to listOf()
+                        .get().firstOrNull() } ?: return@LatestFlowMap  0L to listOf()
                 val aliases = try {
                     json.parse(StringSerializer.list, rec.aliases)
                 } catch (e: Exception) {
@@ -98,10 +106,12 @@ class RoomDataStorage(
             })
     val latestAvatarUrl = LatestFlowMap(
             save = { RoomId: RoomId, url: Optional<MHUrl>, l: Long ->
-                saveRoomAvatar(data, RoomId, url.getOrNull()?.toString(), l)
+                data.runOp {
+                    saveRoomAvatar(this, RoomId, url.getOrNull()?.toString(), l)
+                }
             },
             init = { id ->
-                val rec = getLatestAvatar(data, id)
+                val rec = data.runOp {getLatestAvatar(this, id) }
                 if (rec != null) {
                     if (rec.second.isEmpty) {
                         return@LatestFlowMap rec.first to Optional.empty<MHUrl>()
@@ -118,22 +128,25 @@ class RoomDataStorage(
                 }
             })
     val heroes = LatestFlowMap(save = { room: RoomId, heroes: List<UserId>, l: Long ->
-        data.saveHeroes(room, heroes, l)
+        data.runOp { saveHeroes(room, heroes, l) }
     }, init = { room: RoomId ->
-        val records = data.select(RoomHero::class)
+        val records = data.runOp { select(RoomHero::class)
                 .where(RoomHero::room.eq(room.id))
                 .orderBy(RoomHero::since.desc())
                 .limit(5).get().toList()
+        }
         val first = records.firstOrNull()
         if (first != null) {
             (first.since ?: 0L) to records.map { UserId(it.hero) }
         } else {
-            val mems = data.select(Membership::class).where(
-                    Membership::room.eq(room.id)
-                            .and(
-                                    Membership::joiningRoom.eq(true)
-                                            .or(Membership::joiningRoom.isNull()))
-            ).orderBy(Membership::since.asc()).limit(5).get().map { it.person }
+            val mems = data.runOp {
+                select(Membership::class).where(
+                        Membership::room.eq(room.id)
+                                .and(
+                                        Membership::joiningRoom.eq(true)
+                                                .or(Membership::joiningRoom.isNull()))
+                ).orderBy(Membership::since.asc()).limit(5).get().map { it.person }
+            }
             logger.info { "no known heros in $room, using $mems"}
             0L to mems.map {UserId(it)}
         }

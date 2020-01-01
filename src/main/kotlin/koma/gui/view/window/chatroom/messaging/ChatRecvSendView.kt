@@ -33,7 +33,7 @@ class ChatRecvSendView(
     // messages typed but not sent in each room
     private val roomInputs = mutableMapOf<RoomId, String>()
 
-    fun setRoom(room: RoomId, account: Account) {
+    suspend fun setRoom(room: RoomId, account: Account) {
         currentRoom.value?.let {
             roomInputs[it] =messageInput.text
         }

@@ -48,8 +48,15 @@ class RoomAliasForm(room: RoomId, user: UserId,
     }
     init {
         val data = dataStorage.data
-        val canEditCanonAlias = getChangeStateAllowed(data, room, user, RoomEventType.CanonAlias.toString())
-        val canEdit = getChangeStateAllowed(data, room, user)
+        val canEditCanonAlias = SimpleBooleanProperty(false)
+        val canEdit = SimpleBooleanProperty(false)
+        scope.launch {
+            data.runOp {
+                val d = this
+                canEditCanonAlias.set(getChangeStateAllowed(d, room, user, RoomEventType.CanonAlias.toString()))
+                canEdit.set(getChangeStateAllowed(d, room, user))
+            }
+        }
         val canonAlias = SimpleStringProperty()
         dataStorage.latestCanonAlias.receiveUpdates(room).onEach {
             val n = it.getOrNull()
@@ -79,7 +86,7 @@ class RoomAliasForm(room: RoomId, user: UserId,
                     }
                 })
                 hbox(5.0) {
-                    removeWhen(SimpleBooleanProperty(canEdit).not())
+                    removeWhen(canEdit.not())
                     val field = TextField()
                     field.promptText = "additional-alias"
                     val servername = room.servername
@@ -119,9 +126,10 @@ private fun deleteRoomAlias(room: RoomId, alias: RoomAliasStr?) {
 
 class RoomAliasCell(
         private val room: RoomId,
-        private val canonEditAllowed: Boolean,
+        private val canonEditAllowed: SimpleBooleanProperty,
         private val canonicalAlias: SimpleStringProperty,
-        private val editAllowedDef: Boolean): ListCell<RoomAliasStr>() {
+        private val editAllowedDef: SimpleBooleanProperty
+): ListCell<RoomAliasStr>() {
 
     private val roomAlias = SimpleObjectProperty<RoomAliasStr>()
     private val cell = HBox(5.0)
@@ -143,7 +151,7 @@ class RoomAliasCell(
                 add(Hyperlink().apply {
                     graphic = notstar
                     tooltip("Set as Canonical Alias")
-                    visibleWhen(booleanBinding(cell.hoverProperty()) {canonEditAllowed && value == true})
+                    visibleWhen(cell.hoverProperty().and(canonEditAllowed))
                     setOnAction {
                         roomAlias.get()?.also {
                             requestSetRoomCanonicalAlias(room, RoomAlias( it))
@@ -162,11 +170,11 @@ class RoomAliasCell(
             }
             contextMenu = ContextMenu().apply {
                 item("Delete") {
-                    removeWhen(SimpleBooleanProperty(editAllowedDef).not())
+                    removeWhen(editAllowedDef.not())
                     action { deleteRoomAlias(room, roomAlias.value) }
                 }
                 item("Set Canonical") {
-                    removeWhen(SimpleBooleanProperty(canonEditAllowed).not())
+                    removeWhen(canonEditAllowed.not())
                     action {
                         roomAlias.get()?.let {
                             requestSetRoomCanonicalAlias(room, RoomAlias(it))
@@ -177,7 +185,7 @@ class RoomAliasCell(
             }
             add(Hyperlink().apply {
                 graphic = deleteIcon
-                visibleWhen(booleanBinding(cell.hoverProperty(), { editAllowedDef && value == true}))
+                visibleWhen(cell.hoverProperty().and(editAllowedDef))
                 setOnAction { deleteRoomAlias(room, roomAlias.value) }
             })
         }

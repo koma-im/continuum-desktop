@@ -4,7 +4,6 @@ import io.requery.*
 import io.requery.kotlin.desc
 import io.requery.kotlin.eq
 import koma.matrix.UserId
-import link.continuum.database.KDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}

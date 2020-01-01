@@ -1,7 +1,6 @@
 package koma.controller.requests.account.login
 
 import javafx.scene.control.Alert
-import koma.IOFailure
 import koma.InvalidData
 import koma.Server
 import koma.koma_app.AppStore
@@ -13,11 +12,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import link.continuum.database.KDataStore
 import link.continuum.database.models.getToken
 import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -39,12 +38,14 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
         return
     }
     val data = appData.database
-    saveServerAddr(data, userid.server, server)
+    data.runOp {
+        saveServerAddr(this, userid.server, server)
+    }
     val server = Server(url, httpClient)
     val token = if (!password.isBlank()) {
         getTokenWithPassword(userid, password, data, server)
     } else {
-        val t = getToken(data, userid)
+        val t = data.runOp { getToken(this, userid) }
         if (t == null) {
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Failed to login as $userid",
@@ -74,7 +75,9 @@ private suspend fun getTokenWithPassword(userid: UserId, password: String,
     if (!result.testFailure(it, ex)) {
         val u = it.user_id
         val t = it.access_token
-        saveToken(data, u, t)
+        data.runOp {
+            saveToken(this, u, t)
+        }
         return t
     } else {
         val mes = ex.toString()

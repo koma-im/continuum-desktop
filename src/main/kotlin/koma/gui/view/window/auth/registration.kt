@@ -3,33 +3,31 @@ package koma.gui.view.window.auth
 import javafx.geometry.Insets
 import javafx.scene.Parent
 import javafx.scene.control.*
-import javafx.scene.layout.*
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.Priority
 import javafx.util.StringConverter
 import koma.AuthFailure
 import koma.Failure
-import koma.koma_app.Globals
 import koma.koma_app.appState
-import koma.matrix.user.auth.*
-import koma.util.*
+import koma.matrix.user.auth.AuthType
+import koma.matrix.user.auth.Register
+import koma.matrix.user.auth.RegisterdUser
+import koma.matrix.user.auth.Unauthorized
 import koma.util.KResult
-import koma.util.KResult as Result
+import koma.util.testFailure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
-import link.continuum.database.KDataStore
-import link.continuum.database.models.saveServerAddr
+import link.continuum.database.models.KDataStore
 import link.continuum.database.models.saveToken
-import link.continuum.desktop.action.startChat
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.gui.HBox
-import link.continuum.desktop.gui.VBox
-import link.continuum.desktop.util.Err
-import link.continuum.desktop.util.Ok
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import koma.util.KResult as Result
 
 private val logger = KotlinLogging.logger {}
 
@@ -62,16 +60,15 @@ class RegistrationWizard(private val data: KDataStore) {
             }
         }
         else if (cur is Stage) {
-            val res = cur.submit()?: return
-            res.onSuccess { newUser ->
+            val (newUser, ex, res) = cur.submit()?: return
+            if (!res.testFailure(newUser, ex)) {
                 println("Successfully registered ${newUser.user_id}")
                 val k = appState.store.database
-                saveToken(k, newUser.user_id, newUser.access_token)
+                k.runOp { saveToken(this, newUser.user_id, newUser.access_token) }
                 val s = Success(newUser, register.server, this)
                 state = s
                 uilaunch { root.center = s.root }
-            }
-            res.onFailure { ex ->
+            } else {
                 when (ex) {
                     is AuthFailure -> {
                         GlobalScope.launch(Dispatchers.JavaFx) {

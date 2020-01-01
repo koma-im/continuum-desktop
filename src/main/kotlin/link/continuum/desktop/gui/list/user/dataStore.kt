@@ -7,11 +7,11 @@ import koma.network.media.MHUrl
 import koma.network.media.parseMxc
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import link.continuum.database.KDataStore
 import link.continuum.database.models.getLatestAvatar
 import link.continuum.database.models.getLatestNick
 import link.continuum.database.models.saveUserAvatar
 import link.continuum.database.models.saveUserNick
+import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.LatestFlowMap
 import link.continuum.desktop.gui.icon.avatar.AvatarView
 import link.continuum.desktop.gui.util.UiPool
@@ -27,10 +27,16 @@ class UserDataStore(
     val avatarPool = UiPool { AvatarView(this) }
     val latestNames = LatestFlowMap(
             save = { userId: UserId, s: String?, l: Long ->
-                s?.let { saveUserNick(data, userId, it, l) }
+                s?.let {
+                    data.runOp {
+                        saveUserNick(this, userId, it, l)
+                    }
+                }
             },
             init = {
-                getLatestNick(data, it)?.let { it.since to it.nickname } ?: 0L to null
+                data.runOp {
+                    getLatestNick(this, it)
+                }?.let { it.since to it.nickname } ?: 0L to null
             })
     suspend fun updateName(userId: UserId, name: String, time: Long) {
         latestNames.update(userId, name, time)
@@ -45,10 +51,14 @@ class UserDataStore(
 
     val latestAvatarUrls = LatestFlowMap(
             save = { userId: UserId, url: MHUrl?, l: Long ->
-                url?.let { saveUserAvatar(data, userId, it.toString(), l) }
+                url?.let {
+                    data.runOp {
+                        saveUserAvatar(this, userId, it.toString(), l)
+                    }
+                }
             },
             init = {
-                val n = getLatestAvatar(data, it)
+                val n = data.runOp { getLatestAvatar(this, it) }
                 val a = n?.avatar?.parseMxc()
                 if (n != null && a != null) {
                     n.since to a

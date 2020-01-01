@@ -6,9 +6,9 @@ import javafx.scene.Node
 import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import koma.Server
-import link.continuum.database.KDataStore
+import link.continuum.desktop.gui.list.user.UserDataStore
 
-fun TextFlow.addStringWithElements(str: String, server: Server, data: KDataStore) {
+fun TextFlow.addStringWithElements(str: String, server: Server, data: UserDataStore) {
     val textelements = tokenize_string(str)
     val nodes = textelements.map { messageSliceView(it, server, data) }.toNodes()
     this.children.addAll(nodes)

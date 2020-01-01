@@ -6,9 +6,6 @@ import io.requery.Key
 import io.requery.Persistable
 import io.requery.kotlin.desc
 import io.requery.kotlin.eq
-import link.continuum.database.KDataStore
-import link.continuum.database.models.ServerAddressEntity
-
 
 @Entity
 interface ServerAddress: Persistable {

@@ -32,10 +32,11 @@ class SyncControl(
     private val mutex = Mutex()
     private var sync: MatrixSyncReceiver
     init{
-        val batch_key = getSyncBatchKey(appData.database, apiClient.userId)
-        sync = MatrixSyncReceiver(apiClient, batch_key)
+
+        sync = MatrixSyncReceiver(apiClient, null)
         coroutineScope.startProcessing()
         job = coroutineScope.launch {
+            sync.since = appData.database.letOp { getSyncBatchKey(it, apiClient.userId)  }
             sync.startSyncing()
         }
     }
@@ -45,7 +46,7 @@ class SyncControl(
             val batch_key = if (full_sync) {
                 null
             } else {
-                getSyncBatchKey(appData.database, apiClient.userId)
+                appData.database.letOp { getSyncBatchKey(it, apiClient.userId)  }
             }
             job.cancel()
             sync = MatrixSyncReceiver(apiClient, batch_key)
@@ -63,7 +64,9 @@ class SyncControl(
                     processEventsResult(s, apiClient, appData = appData, view = view)
                     val nb = sync.since
                     nb?.let {
-                        saveSyncBatchKey(appData.database, apiClient.userId, nb)
+                        appData.database.letOp {
+                            saveSyncBatchKey(it, apiClient.userId, nb)
+                        }
                     }
                 } else {
                     logger.warn { "sync issue $f" }

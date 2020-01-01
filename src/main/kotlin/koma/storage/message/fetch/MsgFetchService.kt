@@ -4,16 +4,15 @@ import koma.Failure
 import koma.OtherFailure
 import koma.koma_app.appState
 import koma.matrix.Chunked
-import koma.matrix.event.EventId
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.naming.RoomId
 import koma.util.map
-import koma.util.KResult as Result
 import link.continuum.database.models.RoomEventRow
 import mu.KotlinLogging
+import koma.util.KResult as Result
 
 private val logger = KotlinLogging.logger {}
 
@@ -28,7 +27,7 @@ suspend fun fetchPreceding(
     return if (fetchkey == null) {
         val eventid = row.event_id
         logger.warn { "trying to get pagination token by getting the context of $eventid" }
-        service.getEventContext(RoomId(row.room_id), EventId(eventid)).map { res ->
+        service.getEventContext(RoomId(row.room_id), eventid).map { res ->
             FetchedBatch.fromContextBackward(res)
         }
     } else {

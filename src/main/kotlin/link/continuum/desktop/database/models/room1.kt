@@ -8,7 +8,6 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
-import link.continuum.database.KDataStore
 import link.continuum.desktop.util.toOption
 import mu.KotlinLogging
 import java.util.*

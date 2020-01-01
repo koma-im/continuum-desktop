@@ -7,7 +7,6 @@ import koma.koma_app.AppData
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
-import link.continuum.database.KDataStore
 import link.continuum.database.models.Membership
 import link.continuum.database.models.newMembership
 import link.continuum.desktop.gui.list.DedupList
@@ -25,10 +24,10 @@ class RoomMemberships(private val data: KDataStore) {
             memberships.computeIfAbsent(roomId) {
                 async {
                     val membersList = DedupList<UserId, UserId> {it}
-                    val members = data.select(Membership::class).where(
+                    val members = data.runOp { select(Membership::class).where(
                             Membership::room.eq(roomId.id))
                             .orderBy(Membership::since.asc())
-                            .limit(200).get().map { UserId(it.person) }
+                            .limit(200).get().map { UserId(it.person) } }
                     logger.debug { "loaded ${members.size} members in $roomId" }
                     membersList.addAll(members)
                     membersList
@@ -181,16 +180,18 @@ class MembershipChanges(
                 }
             }
         }
-        data.upsert(s.asIterable())
+        data.runOp { upsert(s.asIterable()) }
         val ownerRooms = ownerJoins.keys.plus(ownerLeaves.keys).map {it.full}
-        val records = data.select(Membership::class)
-                .where(Membership::room.eq(owner.full)
-                        .and(Membership::room.`in`(ownerRooms)))
-                .get().groupBy {
-                    val recordTs = it.since ?: return@groupBy true
-                    val roomId = RoomId(it.room)
-                    recordTs <= (ownerJoins[roomId]?:0) || recordTs <= (ownerLeaves[roomId]?:0)
-                }
+        val records = data.runOp {
+            select(Membership::class)
+                    .where(Membership::room.eq(owner.full)
+                            .and(Membership::room.`in`(ownerRooms)))
+                    .get().groupBy {
+                        val recordTs = it.since ?: return@groupBy true
+                        val roomId = RoomId(it.room)
+                        recordTs <= (ownerJoins[roomId] ?: 0) || recordTs <= (ownerLeaves[roomId] ?: 0)
+                    }
+        }
         val notUpdates = records[false]
         if (notUpdates != null) {
             logger.debug { "Membership in db is newer: $notUpdates" }
@@ -207,13 +208,13 @@ class MembershipChanges(
                 it.since = max(it.since ?: 0, j ?: 0)
                 it
             }
-            data.upsert(newTimes)
+            data.runOp { upsert(newTimes) }
         }
         val newMemberships =ownerJoinMut.asSequence().map {
             newMembership(roomId = it.key.full, userId = owner.full, timestamp = it.value, isJoin = true)
         }.plus(ownerLeaveMut.asSequence().map {
             newMembership(roomId = it.key.full, userId = owner.full, timestamp = it.value, isJoin = false)
         })
-        data.upsert(newMemberships.asIterable())
+        data.runOp { upsert(newMemberships.asIterable()) }
     }
 }

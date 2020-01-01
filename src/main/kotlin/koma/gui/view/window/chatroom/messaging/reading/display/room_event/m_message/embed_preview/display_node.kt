@@ -4,10 +4,8 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mes
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.geometry.VPos
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
-import javafx.scene.control.Label
 import javafx.scene.control.MenuItem
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
@@ -22,18 +20,21 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.embed_preview.site.siteViewConstructors
 import koma.koma_app.appState
 import koma.matrix.UserId
-import koma.network.media.MHUrl
-import koma.network.media.parseMxc
 import koma.storage.persistence.settings.AppSettings
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.database.KDataStore
-import link.continuum.database.models.getLatestAvatar
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.HBox
-import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.icon.avatar.AvatarInline
+import link.continuum.desktop.gui.list.user.UserDataStore
+import link.continuum.desktop.util.debugAssert
+import link.continuum.desktop.util.debugAssertUiThread
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 
 private val settings: AppSettings = appState.store.settings
 
@@ -47,7 +48,11 @@ class InlineElement(override val node: Node): FlowElement() {
     fun endsWithNewline(): Boolean = this.node is Text && this.node.text.lastOrNull() == '\n'
 }
 
-class UserLinkElement(private val data: KDataStore): FlowElement() {
+class UserLinkElement(
+        private val userDatas: UserDataStore
+): FlowElement() {
+    private val scope = MainScope()
+    private val channel = Channel<Pair<UserId, Server>>(Channel.CONFLATED)
     private val avatar = AvatarInline().apply {
         root.background = whiteBackground
     }
@@ -62,13 +67,23 @@ class UserLinkElement(private val data: KDataStore): FlowElement() {
         }
     }
     init {
+        var server: Server? = null
         HBox.setMargin(avatar.root, insets)
         HBox.setMargin(label, insets)
+        channel.consumeAsFlow().onEach {
+            server = it.second
+            avatar.updateUrl(null, it.second)
+        }.flatMapLatest {
+            userDatas.getAvatarUrlUpdates(it.first)
+        }.onEach { url->
+            debugAssert(server != null)
+            server?.let {avatar.updateUrl(url, it)}
+        }.launchIn(scope)
     }
     fun update(name: String, userId: UserId, server: Server) {
+        debugAssertUiThread()
         label.text = name
-        val url = getLatestAvatar(data, userId) ?: return
-        avatar.updateUrl(url.avatar.parseMxc(), server)
+        channel.offer(userId to server)
     }
     companion object {
         private val insets = Insets(0.0, 2.0, 0.0, 2.0)
@@ -78,7 +93,9 @@ class UserLinkElement(private val data: KDataStore): FlowElement() {
 }
 
 
-fun messageSliceView(slice: TextSegment, server: Server, data: KDataStore): FlowElement {
+fun messageSliceView(slice: TextSegment, server: Server,
+                     data: UserDataStore
+): FlowElement {
     return when(slice) {
         is PlainTextSegment -> InlineElement(Text(slice.text))
         is LinkTextSegment -> WebContentNode(slice.text, server)

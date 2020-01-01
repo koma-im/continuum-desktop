@@ -2,12 +2,14 @@ package link.continuum.database.models
 
 import io.requery.*
 import io.requery.kotlin.eq
+import io.requery.sql.KotlinEntityDataStore
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
-import link.continuum.database.KDataStore
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger { }
+
+typealias KDataStore = KotlinEntityDataStore<Persistable>
 
 @Entity
 interface RoomHero: Persistable {

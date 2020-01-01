@@ -182,9 +182,9 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         val store = appStorage.await() ?: return false
         val db = store.database
         val u = UserId(user)
-        val a = getServerAddrs(db, u.server).firstOrNull()?: return false
+        val a = db.letOp { getServerAddrs(it, u.server) }.firstOrNull()?: return false
         val s = HttpUrl.parse(a) ?: return false
-        val t = getToken(db, u)?: return false
+        val t = db.letOp { getToken(it, u) }?: return false
         store.settings
         startChat(Globals.httpClient, u, t, s, map, store)
         return true

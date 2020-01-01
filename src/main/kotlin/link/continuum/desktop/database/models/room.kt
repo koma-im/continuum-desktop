@@ -13,19 +13,21 @@ import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
-fun loadRoom(dataStorage: RoomDataStorage, roomId: RoomId,
+suspend fun loadRoom(dataStorage: RoomDataStorage, roomId: RoomId,
              account: Account
-): Room? {
+): Room {
     logger.debug { "Loading room with id $roomId" }
     val data = dataStorage.data
-    val settings = data.select(RoomSettings::class).where(
-            RoomSettings::roomId.eq(roomId.id)
-    ).get().firstOrNull() onNull {
+    val settings = data.runOp {
+        select(RoomSettings::class).where(
+                RoomSettings::roomId.eq(roomId.id)
+        ).get().firstOrNull()
+    } onNull {
         logger.warn { "no settings stored for room $roomId" }
     }
-    val powers = data.select(RoomPowerSettings::class).where(
+    val powers = data.runOp { select(RoomPowerSettings::class).where(
             RoomPowerSettings::roomId.eq(roomId.id)
-    ).get().firstOrNull() onNull  {
+    ).get().firstOrNull() } onNull  {
         logger.warn { "no power settings stored for room $roomId" }
     }
     val room = Room(roomId, dataStorage,

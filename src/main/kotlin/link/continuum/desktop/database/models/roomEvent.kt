@@ -59,7 +59,7 @@ fun RoomEventRow.getEvent(): RoomEvent? {
 private fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): RoomEventRow {
     val row = RoomEventRowEntity()
     row.room_id = roomId.id
-    row.event_id = event.event_id.str
+    row.event_id = event.event_id
     row._event = event
     row.server_time = event.origin_server_ts
     row.json = json

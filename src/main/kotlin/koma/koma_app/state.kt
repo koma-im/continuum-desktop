@@ -17,6 +17,7 @@ import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.RoomMemberships
 import link.continuum.desktop.gui.list.DedupList
@@ -42,11 +43,12 @@ typealias AppStore = AppData
  * data
  */
 class AppData(
-        val database: KotlinEntityDataStore<Persistable>,
+        db: KotlinEntityDataStore<Persistable>,
         val settings: AppSettings
 ) {
+    val database = KDataStore(db)
     @Deprecated("")
-    val userStore = UserStore(database)
+    val userStore = UserStore()
     /**
      * users on the network
      */
@@ -77,7 +79,7 @@ class AppData(
 class ComponentPools(private val data: AppData){
     // UI for content of messages
     val msgEmote = UiPool { MEmoteViewNode(data.userData) }
-    val msgNotice = UiPool { MNoticeViewNode(data.database) }
-    val msgText = UiPool { MTextViewNode(data.database) }
+    val msgNotice = UiPool { MNoticeViewNode(data.userData) }
+    val msgText = UiPool { MTextViewNode(data.userData) }
     val msgImage = UiPool { MImageViewNode() }
 }

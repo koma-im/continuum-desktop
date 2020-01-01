@@ -21,7 +21,7 @@ class Room(
         var powerLevels: RoomPowerSettings = defaultRoomPowerSettings(id)
 ) {
     @ObsoleteCoroutinesApi
-    val messageManager by lazy { MessageManager(this, dataStorage.data ) }
+    val messageManager by lazy { MessageManager(this, dataStorage.data._dataStore ) }
 
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
@@ -33,7 +33,7 @@ class Room(
         visibility?.let { this.visibility = visibility }
     }
 
-    fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
+    suspend fun updatePowerLevels(roomPowerLevel: RoomPowerLevelsContent) {
         powerLevels.usersDefault = roomPowerLevel.users_default
         powerLevels.stateDefault = roomPowerLevel.state_default
         powerLevels.eventsDefault = roomPowerLevel.events_default
@@ -42,9 +42,13 @@ class Room(
         powerLevels.kick = roomPowerLevel.kick
         powerLevels.redact = roomPowerLevel.redact
         val data = this.dataStorage.data
-        savePowerSettings(data, powerLevels)
-        saveEventPowerLevels(data, id, roomPowerLevel.events)
-        saveUserPowerLevels(data, id, roomPowerLevel.users)
+        data.runOp {
+            also {
+                savePowerSettings(it, powerLevels)
+                saveEventPowerLevels(it, id, roomPowerLevel.events)
+                saveUserPowerLevels(it, id, roomPowerLevel.users)
+            }
+        }
     }
 
     override fun toString(): String {

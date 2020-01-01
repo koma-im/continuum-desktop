@@ -19,9 +19,9 @@ import koma.koma_app.appState
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import link.continuum.database.KDataStore
 import link.continuum.database.models.getRecentUsers
 import link.continuum.database.models.getServerAddrs
+import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
@@ -45,8 +45,8 @@ private val logger = KotlinLogging.logger {}
 class LoginScreen(
         private val keyValueMap: MVMap<String, String>,
         private val mask: MaskerPane
-): CoroutineScope by CoroutineScope(Dispatchers.Default) {
-
+) {
+    private val scope = MainScope()
     val root = VBox()
 
     var userId = ComboBox<UserId>().apply {
@@ -89,9 +89,11 @@ class LoginScreen(
         root.isDisable = false
         val data = appStore.database
         this.database = data
-        val recentUsers = getRecentUsers(data)
-        userId.itemsProperty().get().setAll(recentUsers)
-        userId.selectionModel.selectFirst()
+        scope.launch {
+            val recentUsers = data.runOp { getRecentUsers(this) }
+            userId.itemsProperty().get().setAll(recentUsers)
+            userId.selectionModel.selectFirst()
+        }
     }
     init {
         val grid = GridPane()
@@ -121,10 +123,10 @@ class LoginScreen(
             isDisable = true
             addEventFilter(KeyEvent.KEY_PRESSED) {
                 if (it.code == KeyCode.ESCAPE && mask.isVisible) {
-                    job?.let { launch(Dispatchers.Default) { it.cancel() } }
+                    job?.let { scope.launch(Dispatchers.Default) { it.cancel() } }
                     logger.debug { "cancelling login"}
                     mask.text = "Cancelling"
-                    launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED) {
+                    scope.launch {
                         delay(500)
                         mask.isVisible = false
                     }
@@ -146,7 +148,7 @@ class LoginScreen(
                     action {
                         mask.text = "Signing in"
                         mask.isVisible = true
-                        job = launch {
+                        job = scope.launch {
                             val c = httpClient ?: return@launch
                             val d = appState.store
                             onClickLogin(
@@ -178,23 +180,22 @@ class LoginScreen(
         userId.editor.textProperty().addListener { _, _, newValue ->
             userInput.offer(newValue)
         }
-        launch(Dispatchers.Default) {
+        scope.launch {
             for (u in userInput) {
                 val data = database?:continue
                 val a = suggestedServerAddr(data, UserId(u))
                 if (userId.isFocused || serverCombo.text.isBlank()) {
-                    withContext(Dispatchers.Main) {
-                        serverCombo.text = a
-                    }
+                    serverCombo.text = a
                 }
             }
         }
     }
 }
 
-private fun suggestedServerAddr(data: KDataStore, userId: UserId): String {
+private suspend fun suggestedServerAddr(data: KDataStore, userId: UserId): String {
     val sn = userId.server
     if (sn.isBlank()) return "https://matrix.org"
-    getServerAddrs(data, sn).firstOrNull()?.let { return it }
+    data.runOp { getServerAddrs(this, sn)
+    }.firstOrNull()?.let { return it }
     return "https://$sn"
 }

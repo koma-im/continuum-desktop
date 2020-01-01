@@ -17,8 +17,6 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.MonoClock
 import link.continuum.desktop.database.models.meta.Models as DbModels
 
-typealias KDataStore = KotlinEntityDataStore<Persistable>
-
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalTime

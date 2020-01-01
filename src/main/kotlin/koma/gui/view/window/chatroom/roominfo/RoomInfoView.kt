@@ -20,6 +20,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import link.continuum.database.models.getChangeStateAllowed
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.hashColor
@@ -59,8 +60,17 @@ class RoomInfoDialog(
             stage.title = "$it Info"
         }.launchIn(scope)
         val data = datas.data
-        val canEditName = getChangeStateAllowed(data, room, user, RoomEventType.Name.toString())
-        val canEditAvatar = getChangeStateAllowed(data, room, user, RoomEventType.Avatar.toString())
+        val canEditName = SimpleBooleanProperty(false)
+        val canEditAvatar = SimpleBooleanProperty(false)
+        scope.launch {
+            val n =data.runOp {
+                getChangeStateAllowed(this, room, user, RoomEventType.Name.toString())
+            }
+            canEditName.set(n)
+            canEditAvatar.set(data.runOp {
+                getChangeStateAllowed(this, room, user, RoomEventType.Avatar.toString())
+            })
+        }
 
         stage.title = "Update Info of Room"
         val aliasDialog = RoomAliasForm(room, user, datas)
@@ -73,10 +83,10 @@ class RoomInfoDialog(
                             alignment = Pos.CENTER
                             text("Name")
                             val input = TextField(name)
-                            input.editableProperty().value = canEditName
+                            input.editableProperty().bind(canEditName)
                             add(input)
                             button("Set") {
-                                removeWhen(SimpleBooleanProperty(canEditName).not())
+                                removeWhen(canEditName.not())
                                 action {
                                     requestUpdateRoomName(room, input.text)
                                 }
@@ -92,7 +102,7 @@ class RoomInfoDialog(
                     val camera = MaterialIconFactory.get().createIcon(MaterialIcon.PHOTO_CAMERA)
                     add(Hyperlink().apply {
                         graphic = camera
-                        removeWhen(SimpleBooleanProperty(canEditAvatar).not())
+                        removeWhen(canEditAvatar.not())
                         setOnAction {
                             chooseUpdateRoomIcon(room)
                         }

@@ -15,14 +15,13 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import link.continuum.database.KDataStore
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.richtext.parseRichXml
 import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.http.MediaServer
 
-class MTextViewNode(private val data: KDataStore): ViewNode {
+class MTextViewNode(private val data: UserDataStore): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
@@ -46,7 +45,7 @@ class MTextViewNode(private val data: KDataStore): ViewNode {
     }
 }
 
-class MNoticeViewNode(private val data: KDataStore): ViewNode {
+class MNoticeViewNode(private val data: UserDataStore): ViewNode {
     override val node = TextFlow()
     override val menuItems: List<MenuItem> = listOf()
 
@@ -76,7 +75,7 @@ class MEmoteViewNode(
 
         node.add(userLabel)
         node.add(Text(" "))
-        node.addStringWithElements(content.body, server, userData.data)
+        node.addStringWithElements(content.body, server, userData)
     }
 
     init {
