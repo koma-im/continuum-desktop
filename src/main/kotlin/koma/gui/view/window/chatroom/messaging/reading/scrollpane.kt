@@ -6,13 +6,19 @@ import javafx.scene.layout.Priority
 import koma.gui.element.control.KListView
 import koma.koma_app.AppStore
 import koma.matrix.room.naming.RoomId
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import koma.storage.message.MessageManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import link.continuum.database.models.RoomEventRow
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.message.MessageCell
 import link.continuum.desktop.gui.view.AccountContext
+import link.continuum.desktop.observable.MutableObservable
 import mu.KotlinLogging
 import kotlin.math.max
 
@@ -32,7 +38,8 @@ private class ViewRoomState(
 class MessagesListScrollPane(
         context: AccountContext,
         store: AppStore
-): CoroutineScope by CoroutineScope(Dispatchers.Main)  {
+) {
+    private val scope = MainScope()
     private val virtualList: KListView<EventItem, MessageCell> = KListView() {
         MessageCell(context, store)
     }.apply {
@@ -42,20 +49,14 @@ class MessagesListScrollPane(
     val root
         get() = virtualList.view
 
+    val roomIdObservable = MutableObservable<RoomId>()
     private var currentViewing: RoomId? = null
     private val roomStates = mutableMapOf<RoomId, ViewRoomState>()
-
-    private val selectRoom = Channel<Pair<ObservableList<EventItem>, RoomId>>(Channel.CONFLATED)
-
     fun scrollToBottom() {
         currentViewing?.let { roomStates.get(it) }?.following = true
         virtualList.items?.let {
             virtualList.scrollTo(it.size - 1)
         }
-    }
-
-    fun setRoom(msgs: ObservableList<EventItem>, roomId: RoomId) {
-        selectRoom.offer(msgs to roomId)
     }
     private suspend fun setList(msgs: ObservableList<EventItem>, roomId: RoomId) {
         listView.view.requestFocus()
@@ -103,12 +104,28 @@ class MessagesListScrollPane(
     init {
         VBox.setVgrow(root, Priority.ALWAYS)
         HBox.setHgrow(virtualList.view, Priority.ALWAYS)
-        launch(Dispatchers.Main) {
-            for ((m, r) in selectRoom) {
-                setList(m, r)
-                delay(100)
+        var msgm: MessageManager? = null
+        roomIdObservable.map { store.messages.get(it) to it
+        }.flow().onEach {
+            val m = it.first
+            msgm = m
+            if (m.shownList.isEmpty()) {
+                m.loadMoreFromDatabase(null)
             }
-        }
+            setList(m.shownList, it.second)
+            delay(100)
+        }.launchIn(scope)
+        listView.flow.firstVisibleIndexObservable.flow().onEach {
+            val m = msgm ?: return@onEach
+            if (!(listView.items === m.shownList)) {
+                logger.warn { "listView.items and current list does not match"}
+                return@onEach
+            }
+            if (it != null && it < 1) {
+                val first = m.shownList.getOrNull(it)
+                m.loadMoreFromDatabase(first)
+            }
+        }.launchIn(scope)
     }
 
     private fun onAddedMessages(e : ListChangeListener.Change<out EventItem>,

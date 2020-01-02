@@ -15,7 +15,6 @@ import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 import link.continuum.desktop.gui.view.AccountContext
-import link.continuum.desktop.util.Account
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -33,7 +32,7 @@ class ChatRecvSendView(
     // messages typed but not sent in each room
     private val roomInputs = mutableMapOf<RoomId, String>()
 
-    suspend fun setRoom(room: RoomId, account: Account) {
+    fun setRoom(room: RoomId) {
         currentRoom.value?.let {
             roomInputs[it] =messageInput.text
         }
@@ -42,8 +41,7 @@ class ChatRecvSendView(
             messageInput.appendText(it)
         }
         currentRoom.set(room)
-        val messageManager = store.messages.get(room)
-        messageScroll.setRoom(messageManager.shownList, room)
+        messageScroll.roomIdObservable.set(room)
     }
 
     init {

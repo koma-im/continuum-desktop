@@ -1,14 +1,13 @@
 package link.continuum.desktop.gui.message
 
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.ContextMenu
-import javafx.scene.control.Label
-import javafx.scene.control.ListCell
-import javafx.scene.control.MenuItem
+import javafx.scene.control.*
 import javafx.scene.layout.Region
 import javafx.scene.text.Text
+import koma.Failure
 import koma.gui.view.window.chatroom.messaging.reading.display.EventSourceViewer
 import koma.gui.view.window.chatroom.messaging.reading.display.GuestAccessUpdateView
 import koma.gui.view.window.chatroom.messaging.reading.display.HistoryVisibilityEventView
@@ -18,11 +17,15 @@ import koma.koma_app.AppStore
 import koma.matrix.event.room_message.*
 import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.launch
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
+import link.continuum.desktop.database.FetchStatus
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.view.AccountContext
+import link.continuum.desktop.util.gui.alert
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 
@@ -32,7 +35,6 @@ private val sourceViewer by lazy { EventSourceViewer() }
 
 class FallbackCell():MessageCellContent<RoomEvent> {
     private val text= Text()
-    private var msg: RoomEventRow? = null
     override val root = HBox(5.0).apply {
         alignment = Pos.CENTER
         add(text)
@@ -55,13 +57,14 @@ open class MessageCell(
         private val context: AccountContext,
         protected val store: AppStore
 ): ListCell<RoomEventRow>() {
+    private val scope = MainScope()
     protected open val center: Region = StackPane()
-    private val loading = Label("Loading older messages...")
+    private val loading = LoadingStatus()
 
     val node = VBox(3.0).apply {
         hbox {
             alignment = Pos.CENTER
-            add(loading)
+            add(loading.root)
         }
     }
     protected val contextMenuShowSource = MenuItem("View Source").apply {
@@ -123,16 +126,14 @@ open class MessageCell(
         }
     }
     private fun updateEvent(message: RoomEventRow) {
-        loading.managedProperty().unbind()
-        loading.visibleProperty().unbind()
-        loading.showIf(false)
+        loading.clear()
         if(!message.preceding_stored) {
             logger.trace { "messages before ${message.event_id} are not stored yet" }
-            loading.showIf(true)
             val messageManager = store.messages.get(RoomId(item.room_id))
-            val status = messageManager.fetchPrecedingRows(message)
-            loading.managedProperty().bind(status)
-            loading.visibleProperty().bind(status)
+            scope.launch {
+                val status = messageManager.fetchPrecedingRows(message)
+                loading.update(status)
+            }
         }
         current = message
     }
@@ -149,5 +150,60 @@ open class MessageCell(
             menu.show(node, event.screenX, event.screenY)
             event.consume()
         }
+    }
+}
+
+class LoadingStatus {
+    private val icon = ProgressIndicator().apply {
+        style = iconStyle
+    }
+    private val label = Label("Waiting to loading messages...").apply {
+        alignment = Pos.CENTER
+    }
+    private var failure: Failure? = null
+    private val failButton = Hyperlink("Info")
+    val root = HBox(label, icon).apply {
+        spacing = 5.0
+        alignment = Pos.CENTER
+    }
+    private val status = SimpleObjectProperty<FetchStatus>(FetchStatus.NotStarted)
+    init {
+        failButton.setOnAction {
+            alert(Alert.AlertType.ERROR, "Failure", failure?.message)
+        }
+        status.addListener { _, _, newValue ->
+            val show = when(newValue) {
+                FetchStatus.NotStarted -> {
+                    label.text = "Waiting to loading messages..."
+                    root.children.setAll(label)
+                }
+                FetchStatus.Started -> {
+                    label.text = "Loading messages..."
+                    root.children.setAll(label, icon)
+                }
+                FetchStatus.Done -> false
+                is FetchStatus.Failed -> {
+                    failure = newValue.failure
+                    label.text = "Failed to load messages"
+                    root.children.setAll(label, failButton)
+                }
+            }
+            root.showIf(show)
+        }
+    }
+    fun clear(){
+        root.showIf(false)
+    }
+    fun update(status: SimpleObjectProperty<FetchStatus>) {
+        this.status.unbind()
+        this.status.set(status.value)
+        this.status.bind(status)
+        root.showIf(true)
+    }
+    companion object {
+        private val iconStyle = StyleBuilder {
+            fixWidth(1.em)
+            fixHeight(1.em)
+        }.toStyle()
     }
 }

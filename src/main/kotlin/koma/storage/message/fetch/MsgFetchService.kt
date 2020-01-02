@@ -3,7 +3,7 @@ package koma.storage.message.fetch
 import koma.Failure
 import koma.OtherFailure
 import koma.koma_app.appState
-import koma.matrix.Chunked
+import koma.matrix.MessageChunks
 import koma.matrix.event.context.ContextResponse
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
@@ -42,7 +42,7 @@ class FetchedBatch(
         val prevKey: String?
 ) {
     companion object {
-        fun fromChunkedBackward(chunked: Chunked<RawJson<RoomEvent>>): FetchedBatch {
+        fun fromChunkedBackward(chunked: MessageChunks): FetchedBatch {
             return FetchedBatch(
                     chunked.chunk.reversed(),
                     chunked.end

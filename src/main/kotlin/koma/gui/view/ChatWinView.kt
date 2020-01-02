@@ -72,7 +72,7 @@ class ChatView(roomList: ObservableList<RoomId>,
     }
     private suspend fun setRoom(room: RoomId) {
         debugAssertUiThread()
-        messagingView.setRoom(room, context.account)
+        messagingView.setRoom(room)
         rightColumn.setRoom(room, context.account)
         if (!initSelected) {
             initSelected= true

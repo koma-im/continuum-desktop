@@ -135,7 +135,7 @@ class MembershipChanges(
                 val uj = j.value.keys
                 val uL = leaves[u]?.keys?:return@forEach
                 val conflicts = uj.intersect(uL)
-                check(conflicts.isNotEmpty()) { "user $u joins $uj leaves $uL"}
+                check(conflicts.isEmpty()) { "user $u joins $uj leaves $uL, conflicts: $conflicts" }
             }
         }
         val roomToJoins = hashMapOf<RoomId, HashSet<UserId>>()

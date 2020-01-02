@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.33"
+version = "0.9.34"
 
 plugins {
     kotlin("jvm") version "1.3.60"
@@ -42,7 +42,7 @@ javafx {
 
 dependencies {
     val ktorVersion = "1.2.6"
-    implementation("io.github.koma-im:koma-library:0.9.19")
+    implementation("io.github.koma-im:koma-library:0.9.20")
     implementation("org.cache2k:cache2k-core:1.2.3.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")

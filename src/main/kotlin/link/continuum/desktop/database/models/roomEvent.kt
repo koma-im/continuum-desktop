@@ -9,16 +9,16 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 @Entity
+@Table(name = "room_chrono_events")
 interface RoomEventRow: Persistable {
     @get:Key
-    var event_id: String
+    var room_id: String
+    @get:Key
+    var server_time: Long
 
     @get:Key
-    var room_id: String
-
-    @get:Index("time_index")
-    @get:Column(nullable = false)
-    var server_time: Long
+    @get:Index("event_id_index")
+    var event_id: String
 
     /**
      * encoded event
@@ -57,7 +57,7 @@ fun RoomEventRow.getEvent(): RoomEvent? {
 }
 
 @Suppress("DEPRECATION")
-private fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): RoomEventRow {
+fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): RoomEventRow {
     val row = RoomEventRowEntity()
     row.room_id = roomId.id
     row.event_id = event.event_id
