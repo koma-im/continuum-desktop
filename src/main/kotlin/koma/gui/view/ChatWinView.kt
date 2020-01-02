@@ -60,7 +60,7 @@ class ChatView(roomList: ObservableList<RoomId>,
     val invitationsView = InvitationsView(scaling = scaling.toDouble())
 
 
-    val messagingView by lazy { ChatRecvSendView(context.account.server.okHttpClient, storage) }
+    val messagingView by lazy { ChatRecvSendView(context, storage) }
     val rightColumn by lazy { RightColumn(context, storage, root) }
 
     private var initSelected = false

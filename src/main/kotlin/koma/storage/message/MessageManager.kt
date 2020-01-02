@@ -13,6 +13,7 @@ import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
 import koma.matrix.pagination.FetchDirection
 import koma.matrix.room.Timeline
+import koma.matrix.room.naming.RoomId
 import koma.storage.message.fetch.fetchPreceding
 import koma.util.testFailure
 import kotlinx.coroutines.*
@@ -21,28 +22,26 @@ import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.toEventRowList
 import link.continuum.desktop.gui.UiDispatcher
 import link.continuum.desktop.gui.list.DedupList
-import link.continuum.desktop.Room
 import mu.KotlinLogging
-
 import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-class MessageManager(val room: Room,
+class MessageManager(val roomId: RoomId,
                      private val data: KotlinEntityDataStore<Persistable>) {
-    private val roomId = room.id
+    private val scope = MainScope()
     // added to UI, needs to be modified on FX thread
-    private val eventAll = DedupList<Pair<RoomEventRow, Room>, String>({it.first.event_id})
+    private val eventAll = DedupList<RoomEventRow, String> {it.event_id}
     val shownList = SortedList(eventAll.list) { e1, e2 ->
-        e1.first.server_time.compareTo(e2.first.server_time)
+        e1.server_time.compareTo(e2.server_time)
     }
 
     private var prevLatestRow: RoomEventRow? = null
 
     init {
-        GlobalScope.launch(Dispatchers.JavaFx) {
+        scope.launch {
             showLatest()
         }
     }
@@ -53,9 +52,9 @@ class MessageManager(val room: Room,
     fun getPrecedingRows(row: RoomEventRow) {
         val rows = data.select(RoomEventRow::class)
                 .where(RoomEventRow::server_time.lte(row.server_time)
-                        .and(RoomEventRow::room_id.eq(room.id.str)))
+                        .and(RoomEventRow::room_id.eq(roomId.full)))
                 .orderBy(RoomEventRow::server_time.asc()).limit(100).get().toList()
-        GlobalScope.launch(Dispatchers.JavaFx) {
+        scope.launch {
             addToUi(rows)
         }
     }
@@ -66,7 +65,7 @@ class MessageManager(val room: Room,
         check(Platform.isFxApplicationThread())
         val status = startedFetchJobs.computeIfAbsent(row.event_id to FetchDirection.Backward) {
             val loading = SimpleBooleanProperty(true)
-            GlobalScope.launch {
+            scope.launch {
                 val (success, failure, result) = fetchPreceding(row)
                 if (!result.testFailure(success, failure)) {
                     if (success.prevKey == row.preceding_batch) {
@@ -109,7 +108,7 @@ class MessageManager(val room: Room,
     private suspend fun addToUi(rows: List<RoomEventRow>) {
         val old = eventAll.size()
         withContext(Dispatchers.JavaFx) {
-            eventAll.addAll(rows.map { it to room })
+            eventAll.addAll(rows)
         }
         val newSize = eventAll.size()
         val add = newSize - old

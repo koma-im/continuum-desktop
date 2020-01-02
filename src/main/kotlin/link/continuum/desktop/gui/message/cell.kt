@@ -16,12 +16,13 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.koma_app.AppStore
 import koma.matrix.event.room_message.*
+import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.RoomEventRow
 import link.continuum.database.models.getEvent
-import link.continuum.desktop.Room
 import link.continuum.desktop.gui.*
+import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 
@@ -51,8 +52,9 @@ interface MessageCellContent<T> {
 @ObsoleteCoroutinesApi
 @ExperimentalCoroutinesApi
 open class MessageCell(
+        private val context: AccountContext,
         protected val store: AppStore
-): ListCell<Pair<RoomEventRow, Room>>() {
+): ListCell<RoomEventRow>() {
     protected open val center: Region = StackPane()
     private val loading = Label("Loading older messages...")
 
@@ -73,15 +75,15 @@ open class MessageCell(
     protected var current: RoomEventRow? = null
     private var currentContent: Any? = null
 
-    override fun updateItem(item: Pair<RoomEventRow, Room>?, empty: Boolean) {
+    override fun updateItem(item: RoomEventRow?, empty: Boolean) {
         super.updateItem(item, empty)
         releaseContentCell()
         if (empty || item == null) {
             graphic = null
             return
         }
-        val event = item.first.getEvent() ?: return
-        val server = item.second.account.server
+        val event = item.getEvent() ?: return
+        val server = context.account.server
         val content = when (event) {
             is MRoomMessage -> store.messageCells.take().apply {
                 update(event, server)
@@ -105,7 +107,7 @@ open class MessageCell(
             else add(content.root)
             Unit
         }
-        updateEvent(item.first, item.second)
+        updateEvent(item)
         graphic = node
     }
     private fun releaseContentCell() {
@@ -120,14 +122,15 @@ open class MessageCell(
             else -> error("Unexpected node $c")
         }
     }
-    protected fun updateEvent(message: RoomEventRow, room: Room) {
+    private fun updateEvent(message: RoomEventRow) {
         loading.managedProperty().unbind()
         loading.visibleProperty().unbind()
         loading.showIf(false)
         if(!message.preceding_stored) {
             logger.trace { "messages before ${message.event_id} are not stored yet" }
             loading.showIf(true)
-            val status = room.messageManager.fetchPrecedingRows(message)
+            val messageManager = store.messages.get(RoomId(item.room_id))
+            val status = messageManager.fetchPrecedingRows(message)
             loading.managedProperty().bind(status)
             loading.visibleProperty().bind(status)
         }

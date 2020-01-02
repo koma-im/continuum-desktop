@@ -6,8 +6,6 @@ import koma.matrix.room.naming.RoomId
 import koma.matrix.room.participation.RoomJoinRules
 import koma.matrix.room.visibility.HistoryVisibility
 import koma.matrix.room.visibility.RoomVisibility
-import koma.storage.message.MessageManager
-import kotlinx.coroutines.ObsoleteCoroutinesApi
 import link.continuum.database.models.*
 import link.continuum.desktop.database.RoomDataStorage
 
@@ -20,9 +18,6 @@ class Room(
         visibility: RoomVisibility? = null,
         var powerLevels: RoomPowerSettings = defaultRoomPowerSettings(id)
 ) {
-    @ObsoleteCoroutinesApi
-    val messageManager by lazy { MessageManager(this, dataStorage.data._dataStore ) }
-
     // whether it's listed in the public directory
     var visibility: RoomVisibility = RoomVisibility.Private
     var joinRule: RoomJoinRules = RoomJoinRules.Invite

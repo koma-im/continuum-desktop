@@ -9,17 +9,16 @@ import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.database.models.RoomEventRow
-import link.continuum.desktop.Room
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.message.MessageCell
+import link.continuum.desktop.gui.view.AccountContext
 import mu.KotlinLogging
-import okhttp3.OkHttpClient
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
-typealias EventItem =Pair<RoomEventRow, Room>
+typealias EventItem = RoomEventRow
 
 private class ViewRoomState(
         //timestamp of last read message
@@ -31,11 +30,11 @@ private class ViewRoomState(
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
 class MessagesListScrollPane(
-        private val km: OkHttpClient,
+        context: AccountContext,
         store: AppStore
 ): CoroutineScope by CoroutineScope(Dispatchers.Main)  {
     private val virtualList: KListView<EventItem, MessageCell> = KListView() {
-        MessageCell(store)
+        MessageCell(context, store)
     }.apply {
         view.styleClass.add("message-list-view")
     }
@@ -65,8 +64,8 @@ class MessagesListScrollPane(
             val first = virtualList.visibleFirst()
             if (first != null) {
                 val item = first
-                logger.debug { "room $cur has been read up to ${item.first.server_time}" }
-                roomStates[cur]?.readStamp = item.first.server_time
+                logger.debug { "room $cur has been read up to ${item.server_time}" }
+                roomStates[cur]?.readStamp = item.server_time
             } else {
                 logger.warn { "can't find first visible message in $cur" }
             }
@@ -82,7 +81,7 @@ class MessagesListScrollPane(
         } else {
             logger.debug { "viewing new room $roomId" }
             val s = ViewRoomState()
-            s.latestTime = msgs.lastOrNull()?.first?.server_time ?: 0
+            s.latestTime = msgs.lastOrNull()?.server_time ?: 0
             roomStates[roomId] = s
             scrollToBottom()
             msgs.addListener { e: ListChangeListener.Change<out EventItem> -> onAddedMessages(e, roomId) }
@@ -95,8 +94,8 @@ class MessagesListScrollPane(
         }
         logger.debug { "restoring read position $ts" }
         delay(20)
-        virtualList.scrollBinarySearch(ts, { it.first.server_time})
-        val actual = virtualList.visibleFirst()?.first?.server_time
+        virtualList.scrollBinarySearch(ts, { it.server_time})
+        val actual = virtualList.visibleFirst()?.server_time
         if (actual!= ts) {
             logger.debug { "read position restored to $actual" }
         }
@@ -121,9 +120,9 @@ class MessagesListScrollPane(
         var newer = 0
         while (e.next()) {
             if (e.wasAdded()) {
-                val added = e.addedSubList.map { it.first.server_time }
+                val added = e.addedSubList.map { it.server_time }
                 s.latestTime = max(s.latestTime, added.max() ?: 0)
-                newer += e.addedSubList.filter { it.first.server_time >= last }.count()
+                newer += e.addedSubList.filter { it.server_time >= last }.count()
             }
         }
         if (!s.following) return

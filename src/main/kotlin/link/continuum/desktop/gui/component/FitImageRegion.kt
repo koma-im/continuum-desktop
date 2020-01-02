@@ -46,7 +46,7 @@ suspend fun downloadImageSized(
     val img = bs.inputStream().use {
         Image(it)
     }
-    logger.debug { "downloaded original $mxc"}
+    logger.trace { "downloaded original $mxc"}
     return KResult.success(img)
 }
 

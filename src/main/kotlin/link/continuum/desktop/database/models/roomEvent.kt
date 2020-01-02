@@ -56,6 +56,7 @@ fun RoomEventRow.getEvent(): RoomEvent? {
     return this._event
 }
 
+@Suppress("DEPRECATION")
 private fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): RoomEventRow {
     val row = RoomEventRowEntity()
     row.room_id = roomId.id

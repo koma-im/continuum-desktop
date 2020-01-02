@@ -46,11 +46,12 @@ private suspend fun handle_joined_room(
         roomDatas.heroes.update(roomid, it, time)
     }
     val room = appData.roomStore.getOrCreate(roomid, account)
+    val messageManager = appData.messages.get(roomid)
     withContext(UiDispatcher) {
         data.state.events.forEach { room.applyUpdate(it, appStore = appData, membershipChanges = membershipChanges) }
         val timeline = data.timeline
         timeline.events.forEach { room.applyUpdate(it.value, appStore = appData, membershipChanges = membershipChanges) }
-        room.messageManager.appendTimeline(timeline)
+        messageManager.appendTimeline(timeline)
     }
     room.handle_ephemeral(data.ephemeral.events.mapNotNull { it.parse() })
     // TODO:  account_data

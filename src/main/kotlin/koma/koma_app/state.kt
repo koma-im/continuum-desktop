@@ -20,6 +20,7 @@ import kotlinx.coroutines.SupervisorJob
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.RoomMemberships
+import link.continuum.desktop.database.RoomMessages
 import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.FallbackCell
@@ -58,6 +59,10 @@ class AppData(
      */
     val roomStore = RoomDataStorage(database, this, userData)
     val roomMemberships = RoomMemberships(database)
+    /**
+     * map of room id to message manager
+     */
+    val messages = RoomMessages(database)
     val joinedRoom = DedupList<RoomId, RoomId> { it }
 
     fun joinRoom(roomId: RoomId){
