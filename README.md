@@ -69,6 +69,23 @@ Or, depending on the set-up, you may be able to launch Continuum with a double-c
 
 Note that the jar files are built for each platform as they contain natively compiled code.
 
+#### Option c: Use the source
+
+`git clone https://github.com/koma-im/continuum-desktop.git`
+
+In the source code directory, run `./gradlew shadowjar` to build a jar package that includes all dependencies.
+The output will be a single file in `build/libs/`, to launch it, use the `java` command:
+
+> java -jar build/libs/continuum-desktop-*-bundled.jar
+
+
+Alternatively, you can also run `./gradlew runtime`, and a release that does not depend on the java command will be built.
+The output is a directory `build/image/`, a launcher is in the subdirectory `bin`:
+
+> build/image/bin/continuum-desktop
+
+The launcher can be run from anywhere to launch Continuum.
+
 ### Signing in
 
 Use your matrix ID, such as `@jane:matrix.org` (Support for other forms of username coming soon) and your password to login
