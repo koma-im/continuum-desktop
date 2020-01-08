@@ -125,7 +125,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
                 .build()
         Globals.httpClient = client
         httpClient.complete(client)
-        val store = AppStore(db, settings)
+        val store = AppStore(db, kvStore, settings)
         appState.store = store
         return store
     }

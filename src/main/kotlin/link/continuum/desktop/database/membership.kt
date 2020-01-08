@@ -1,6 +1,5 @@
 package link.continuum.desktop.database
 
-import io.requery.kotlin.`in`
 import io.requery.kotlin.asc
 import io.requery.kotlin.eq
 import koma.koma_app.AppData
@@ -13,7 +12,6 @@ import link.continuum.desktop.gui.list.DedupList
 import link.continuum.desktop.util.whenDebugging
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
@@ -46,8 +44,6 @@ class MembershipChanges(
     private val data: KDataStore = appData.database
     private val joins = hashMapOf<UserId, HashMap<RoomId, Long>>()
     private val leaves = hashMapOf<UserId, HashMap<RoomId, Long>>()
-    private val ownerJoins = hashMapOf<RoomId, Long?>()
-    private val ownerLeaves = hashMapOf<RoomId, Long?>()
     fun addJoin(UserId: UserId, RoomId: RoomId, timestamp: Long) {
         val userJoins = joins.computeIfAbsent(UserId) { hashMapOf() }
         val recentJoin = userJoins[RoomId]
@@ -82,49 +78,6 @@ class MembershipChanges(
 
         userLeaves[RoomId] = timestamp
     }
-    fun ownerJoins(roomIds: List<RoomId>) {
-        val eventLeaves = leaves[owner]
-        if (eventLeaves != null) {
-            roomIds.forEach {
-                if (eventLeaves.contains(it)) {
-                    logger.info { "$owner is still in room $it, overriding state events" }
-                    eventLeaves.remove(it)
-                }
-            }
-        }
-        val eventJoins = joins[owner]
-        if (eventJoins != null) {
-            ownerJoins.putAll(eventJoins)
-        }
-        roomIds.forEach {
-            if (!ownerJoins.contains(it)) {
-                logger.debug { "adding owner joined room $it"}
-                ownerJoins[it] = null
-            }
-        }
-    }
-    suspend fun ownerLeaves(roomIds: Collection<RoomId>) {
-        val eventJoins = joins[owner]
-        if (eventJoins != null) {
-            roomIds.forEach {
-                if (eventJoins.containsKey(it)) {
-                    logger.info { "$owner has left room $it, overriding state events" }
-                    eventJoins.remove(it)
-                }
-            }
-        }
-        val eventLeaves = leaves[owner]
-        if (eventLeaves != null) {
-            ownerLeaves.putAll(eventLeaves)
-        }
-        roomIds.forEach {
-            if (!ownerLeaves.containsKey(it)) {
-                logger.debug { "adding owner $owner left room $it"}
-                ownerLeaves[it] = null
-            }
-        }
-    }
-
     /**
      * save to database and update UI data
      */
@@ -153,10 +106,6 @@ class MembershipChanges(
             }
         }
         withContext(Dispatchers.Main) {
-            appData.joinedRoom.removeAllById(ownerLeaves.keys)
-            ownerJoins.forEach {
-                appData.joinRoom(it.key)
-            }
             roomToLeaves.forEach {
                 val ml = appData.roomMemberships.get(it.key)
                 ml.removeAllById(it.value)
@@ -181,40 +130,5 @@ class MembershipChanges(
             }
         }
         data.runOp { upsert(s.asIterable()) }
-        val ownerRooms = ownerJoins.keys.plus(ownerLeaves.keys).map {it.full}
-        val records = data.runOp {
-            select(Membership::class)
-                    .where(Membership::room.eq(owner.full)
-                            .and(Membership::room.`in`(ownerRooms)))
-                    .get().groupBy {
-                        val recordTs = it.since ?: return@groupBy true
-                        val roomId = RoomId(it.room)
-                        recordTs <= (ownerJoins[roomId] ?: 0) || recordTs <= (ownerLeaves[roomId] ?: 0)
-                    }
-        }
-        val notUpdates = records[false]
-        if (notUpdates != null) {
-            logger.debug { "Membership in db is newer: $notUpdates" }
-        }
-        val ownerJoinMut = ownerJoins.toMutableMap()
-        val ownerLeaveMut = ownerLeaves.toMutableMap()
-        val ownerUpdates = records[true]
-        if (ownerUpdates != null) {
-            val newTimes = ownerUpdates.map {
-                val roomId = RoomId(it.room)
-                val j = if (ownerJoinMut.containsKey(roomId)) {
-                    ownerJoinMut
-                } else { ownerLeaveMut}.remove(roomId)
-                it.since = max(it.since ?: 0, j ?: 0)
-                it
-            }
-            data.runOp { upsert(newTimes) }
-        }
-        val newMemberships =ownerJoinMut.asSequence().map {
-            newMembership(roomId = it.key.full, userId = owner.full, timestamp = it.value, isJoin = true)
-        }.plus(ownerLeaveMut.asSequence().map {
-            newMembership(roomId = it.key.full, userId = owner.full, timestamp = it.value, isJoin = false)
-        })
-        data.runOp { upsert(newMemberships.asIterable()) }
     }
 }

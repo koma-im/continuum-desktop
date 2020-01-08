@@ -1,6 +1,5 @@
 package koma.gui.view
 
-import javafx.collections.ObservableList
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
@@ -13,7 +12,6 @@ import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
 import koma.koma_app.AppStore
-import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.desktop.action.SyncControl
@@ -33,7 +31,6 @@ private val logger = KotlinLogging.logger {}
  * Created by developer on 2017/6/17.
  */
 class ChatWindowBars(
-        roomList: ObservableList<RoomId>,
         account: Account,
         keyValueStore: KeyValueStore,
         parentJob: Job,
@@ -43,16 +40,19 @@ class ChatWindowBars(
     private val context = AccountContext(account)
     private val content = BorderPane()
     val root = NotificationPane(content)
-    val center = ChatView( roomList, context, store)
+    val center: ChatView
     private val roomFinder by lazy { RoomFinder(account) }
     private val prefWin by lazy { PreferenceWindow(keyValueStore.proxyList) }
-    val syncControl = SyncControl(
-            account,
-            appData = store,
-            parentJob = parentJob,
-            view = center
-    )
+    val syncControl: SyncControl
     init {
+        val roomList = keyValueStore.roomsOf(account.userId)
+        center = ChatView( roomList.joinedRoomList, context, store)
+        syncControl = SyncControl(
+                account,
+                appData = store,
+                parentJob = parentJob,
+                view = center
+        )
         with(content) {
             background = whiteBackGround
             center = this@ChatWindowBars.center.root

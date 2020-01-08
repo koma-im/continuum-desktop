@@ -76,7 +76,8 @@ suspend fun processEventsResult(syncRes: SyncResponse,
     syncRes.rooms.invite.forEach{ (rid, data) ->
         handleInvitedRoom(rid, data, view.invitationsView, account.server)
     }
-    membershipChanges.ownerJoins(syncRes.rooms.join.keys.map { RoomId(it) })
-    membershipChanges.ownerLeaves(syncRes.rooms.leave.keys)
+    val myRooms = appData.keyValueStore.roomsOf(self)
+    myRooms.join(syncRes.rooms.join.keys.map { RoomId(it) })
+    myRooms.leave(syncRes.rooms.leave.keys)
     membershipChanges.saveData()
 }

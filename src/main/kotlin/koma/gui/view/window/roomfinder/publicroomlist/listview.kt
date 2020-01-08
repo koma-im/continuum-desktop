@@ -137,7 +137,8 @@ class RoomListView(
     private val existing = ConcurrentHashMap.newKeySet<RoomId>()
 
     init {
-        existing.addAll(appData.joinedRoom.getIds())
+        val myRooms = appData.keyValueStore.roomsOf(account.userId)
+        existing.addAll(myRooms.joinedRoomList)
         with(root) {
             VBox.setVgrow(this, Priority.ALWAYS)
             cellFactory = Callback{

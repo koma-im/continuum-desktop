@@ -1,7 +1,6 @@
 package link.continuum.database.models
 
 import io.requery.*
-import io.requery.kotlin.eq
 import io.requery.sql.KotlinEntityDataStore
 import koma.matrix.UserId
 import koma.matrix.room.naming.RoomId
@@ -77,12 +76,4 @@ fun KDataStore.saveHeroes(roomId: RoomId, heroes: List<UserId>, ts: Long) {
         }
     }
     this.upsert(records)
-}
-
-/**
- * rooms the given user has joined
- */
-fun loadUserRooms(data: KDataStore, userId: UserId): List<RoomId> {
-    return data.select(Membership::class)
-            .where(Membership::person.eq(userId.str)).get().map { RoomId(it.room) }
 }

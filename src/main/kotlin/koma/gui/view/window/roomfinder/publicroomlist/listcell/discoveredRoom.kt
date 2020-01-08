@@ -18,8 +18,6 @@ import koma.matrix.DiscoveredRoom
 import koma.matrix.MatrixApi
 import koma.matrix.room.naming.RoomId
 import koma.network.media.parseMxc
-import koma.util.onFailure
-import koma.util.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +26,7 @@ import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.InitialIcon
 import link.continuum.desktop.gui.icon.avatar.downloadImageResized
+import link.continuum.desktop.util.debugAssert
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
 
@@ -133,17 +132,18 @@ fun CoroutineScope.joinById(roomid: RoomId, name: String, owner: Node,
                             api: MatrixApi,
                             store: AppStore = appState.store) {
     launch {
-        val rs = api.joinRoom(roomid)
-        rs.onSuccess {
-            launch(Dispatchers.JavaFx) { store.joinRoom(roomid) }
-        }
-        rs.onFailure {
+        val (success, failure, _) = api.joinRoom(roomid)
+        if (success != null)  {
+            val myRooms = store.keyValueStore.roomsOf(api.userId)
+            myRooms.join(listOf(roomid))
+        } else {
+            debugAssert(failure != null)
             launch(Dispatchers.JavaFx) {
                 Notifications.create()
                         .owner(owner)
                         .title("Failed to join room ${name}")
                         .position(Pos.CENTER)
-                        .text(it.message)
+                        .text(failure?.message)
                         .showWarning()
             }
         }

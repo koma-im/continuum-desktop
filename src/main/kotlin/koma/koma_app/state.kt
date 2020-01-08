@@ -11,17 +11,12 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_message.content.MTextViewNode
 import koma.gui.view.window.chatroom.messaging.reading.display.room_event.member.MRoomMemberViewNode
 import koma.matrix.MatrixApi
-import koma.matrix.room.naming.RoomId
 import koma.storage.persistence.settings.AppSettings
 import koma.storage.users.UserStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import link.continuum.desktop.database.KDataStore
-import link.continuum.desktop.database.RoomDataStorage
-import link.continuum.desktop.database.RoomMemberships
-import link.continuum.desktop.database.RoomMessages
-import link.continuum.desktop.gui.list.DedupList
+import link.continuum.desktop.database.*
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.gui.message.FallbackCell
 import link.continuum.desktop.gui.util.UiPool
@@ -45,6 +40,7 @@ typealias AppStore = AppData
  */
 class AppData(
         db: KotlinEntityDataStore<Persistable>,
+        val keyValueStore: KeyValueStore,
         val settings: AppSettings
 ) {
     val database = KDataStore(db)
@@ -63,11 +59,6 @@ class AppData(
      * map of room id to message manager
      */
     val messages = RoomMessages(database)
-    val joinedRoom = DedupList<RoomId, RoomId> { it }
-
-    fun joinRoom(roomId: RoomId){
-        joinedRoom.addIfAbsent(roomId) { it }
-    }
 
     // reuse components in ListView of events
     val messageCells = UiPool{ MRoomMessageViewNode(this) }
