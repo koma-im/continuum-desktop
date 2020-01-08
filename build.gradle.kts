@@ -36,7 +36,7 @@ allprojects {
 }
 
 javafx {
-    version = "12"
+    version = "13.0.1"
     modules = listOf("javafx.controls", "javafx.media", "javafx.fxml")
 }
 
