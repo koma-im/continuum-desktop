@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.*
 import javafx.scene.paint.Color
 import koma.controller.requests.membership.dialogInviteMember
+import koma.controller.requests.membership.forgetRoom
 import koma.controller.requests.membership.leaveRoom
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
@@ -188,6 +189,14 @@ class RoomFragment(private val data: RoomDataStorage,
             item("Leave").action {
                 val room = roomObservable.getOrNull()
                 room ?.let { leaveRoom(it, data.appData) }
+            }
+            item("Forget").action {
+                val room = roomObservable.getOrNull()
+                room ?.let {
+                    scope.launch {
+                        forgetRoom(context.account, it, data.appData)
+                    }
+                }
             }
 
         }

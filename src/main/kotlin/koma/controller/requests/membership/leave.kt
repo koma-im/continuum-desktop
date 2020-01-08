@@ -12,10 +12,33 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
+import link.continuum.desktop.util.Account
+import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
 
 private val logger = KotlinLogging.logger {}
+
+suspend fun forgetRoom(api: Account, roomId: RoomId, appData: AppData) {
+    logger.debug { "forgetting $roomId" }
+    debugAssertUiThread()
+    val roomname = roomId
+    val result = api.forgetRoom(roomId)
+    when {
+        result.isSuccess -> {
+            logger.debug { "forgot $roomname successfully" }
+        }
+        result.isFailure -> {
+            val ex = result.failureOrThrow()
+            Notifications.create()
+                    .title("Had error forgetting room $roomname")
+                    .text("$ex")
+                    .owner(JFX.primaryStage)
+                    .showWarning()
+        }
+    }
+
+}
 
 @ExperimentalCoroutinesApi
 fun leaveRoom(mxroom: RoomId, appData: AppData) {
