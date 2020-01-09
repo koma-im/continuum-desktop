@@ -7,15 +7,14 @@ import javafx.scene.control.TabPane
 import javafx.stage.Stage
 import javafx.stage.Window
 import koma.gui.view.window.preferences.tab.NetworkSettingsTab
-import koma.koma_app.appState
-import koma.storage.persistence.settings.AppSettings
+import koma.storage.persistence.settings.encoding.ProxyList
 import link.continuum.desktop.gui.VBox
 import link.continuum.desktop.gui.add
 
-class PreferenceWindow {
+class PreferenceWindow(proxyList: ProxyList) {
     val root = VBox()
 
-    private val nettab = NetworkSettingsTab(this)
+    private val nettab = NetworkSettingsTab(this, proxyList)
     private val stage = Stage()
     fun close() {
         stage.close()

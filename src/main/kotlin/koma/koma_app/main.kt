@@ -69,6 +69,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private val configDir: File
     private val keyValueStore = CompletableDeferred<KeyValueStore>()
     private val database = CompletableDeferred<KotlinEntityDataStore<Persistable>>()
+    private val httpClient = CompletableDeferred<OkHttpClient>()
     val startTime = MonoClock.markNow()
     init {
         JFX.application = this
@@ -111,19 +112,22 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 
     private suspend fun load(): AppStore {
         val db = database.await()
-        val settings = AppSettings(db)
+        val kvStore = keyValueStore.await()
+        val settings = AppSettings()
         log.debug("Database opened {}", startTime.elapsedNow())
-        val proxy = settings.proxyList.default()
+        val proxy = kvStore.proxyList.default()
         val cacheDir = getHttpCacheDir(configDir.canonicalPath)
         val addTrust = loadOptionalCert(configDir)
-        Globals.httpClient = KHttpClient.client.newBuilder()
-                .proxy(proxy.toJavaNet())
+        val client = KHttpClient.client.newBuilder()
+                .proxy(proxy)
                 .given(cacheDir) { cache(Cache(it, 800*1024*1024))}
                 .given(addTrust) {
                     val (s, m) = sslConfFromStream(it)
                     sslSocketFactory(s.socketFactory, m)
                 }
                 .build()
+        Globals.httpClient = client
+        httpClient.complete(client)
         val store = AppStore(db, settings)
         appState.store = store
         return store
@@ -168,7 +172,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
                 appStorage.await()?.let { appData ->
                     launch(Dispatchers.Main) {
                         log.debug("Updating UI with data {}", startTime.elapsedNow())
-                        startScreen.await().start(appData, Globals.httpClient)
+                        startScreen.await().start(appData, httpClient.await())
                         log.debug("UI updated at {}", startTime.elapsedNow())
                     }
                 }
@@ -194,8 +198,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         val a = db.letOp { getServerAddrs(it, u.server) }.firstOrNull()?: return false
         val s = HttpUrl.parse(a) ?: return false
         val t = db.letOp { getToken(it, u) }?: return false
-        store.settings
-        startChat(Globals.httpClient, u, t, s, map, store)
+        startChat(httpClient.await(), u, t, s, map, store)
         return true
     }
 }

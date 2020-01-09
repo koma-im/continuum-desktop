@@ -5,7 +5,7 @@ import javafx.collections.FXCollections
 import javafx.scene.control.ComboBox
 import javafx.scene.control.TextField
 import koma.Failure
-import koma.storage.persistence.settings.encoding.KProxy
+import koma.storage.persistence.settings.encoding.parseProxyTriple
 import koma.util.KResult
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.add
@@ -13,7 +13,7 @@ import link.continuum.desktop.gui.booleanBinding
 import java.net.Proxy
 
 
-class AddProxyField(){
+class AddProxyField {
     val root = HBox()
 
     private val type = ComboBox<Proxy.Type>()
@@ -22,8 +22,8 @@ class AddProxyField(){
 
     val isValid: BooleanBinding
 
-    fun getProxy(): KResult<KProxy, Failure> {
-        return KProxy.parse(type.value, host.text, port.text)
+    fun getProxy(): KResult<Proxy, Failure> {
+        return parseProxyTriple(type.value, host.text, port.text)
     }
 
     init {

@@ -10,11 +10,12 @@ import koma.gui.view.window.preferences.tab.network.NewProxy
 import koma.gui.view.window.preferences.tab.network.ProxyOption
 import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
-import koma.util.getOr
+import koma.storage.persistence.settings.encoding.ProxyList
 import link.continuum.desktop.gui.*
 
 class NetworkSettingsTab(
         parent: PreferenceWindow,
+        private val proxyList: ProxyList,
         private val settings: AppSettings = appState.store.settings
 ) {
     val root = VBox()
@@ -24,7 +25,7 @@ class NetworkSettingsTab(
     private val proxyField = AddProxyField()
 
     init {
-        val proxyOptions: List<ProxyOption> =  settings.proxyList.list().map { ExistingProxy(it) } + NewProxy()
+        val proxyOptions: List<ProxyOption> =  proxyList.list().map { ExistingProxy(it) } + NewProxy()
         select = ComboBox(FXCollections.observableArrayList(
                 proxyOptions
         ))
@@ -57,7 +58,7 @@ class NetworkSettingsTab(
         } else {
             proxyField.getProxy().getOrNull()?:return
         }
-        settings.proxyList = settings.proxyList.setDefault(proxy)
+        proxyList.setDefault(proxy)
     }
 }
 

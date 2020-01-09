@@ -62,7 +62,7 @@ class LoginScreen(
     }
     var password: PasswordField = TextFields.createClearablePasswordField()
 
-    private val prefWin by lazy { PreferenceWindow() }
+    private val prefWin by lazy { PreferenceWindow(keyValueStore.proxyList) }
     private val validation = ValidationSupport().apply {
         validationDecorator = object: GraphicValidationDecoration(){
             override fun createDecorationNode(message: ValidationMessage?): Node {
