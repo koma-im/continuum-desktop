@@ -17,12 +17,12 @@ import koma.matrix.room.naming.RoomId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.desktop.action.SyncControl
+import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
 import org.controlsfx.control.NotificationPane
-import org.h2.mvstore.MVMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -35,7 +35,7 @@ private val logger = KotlinLogging.logger {}
 class ChatWindowBars(
         roomList: ObservableList<RoomId>,
         account: Account,
-        keyValueMap: MVMap<String, String>,
+        keyValueStore: KeyValueStore,
         parentJob: Job,
         store: AppStore
 ) {
@@ -66,7 +66,7 @@ class ChatWindowBars(
                         prefWin.openModal(owner = JFX.primaryStage)
                     }
                     item("Sign out").action {
-                        keyValueMap.remove("active-account")
+                        keyValueStore.activeAccount.remove()
                         JFX.primaryStage.close()
                     }
                 }

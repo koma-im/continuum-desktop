@@ -13,11 +13,24 @@ import link.continuum.desktop.database.models.meta.DbColumns
 import mu.KotlinLogging
 import org.h2.jdbcx.JdbcConnectionPool
 import org.h2.jdbcx.JdbcDataSource
+import java.io.File
 import kotlin.time.ExperimentalTime
 import kotlin.time.MonoClock
 import link.continuum.desktop.database.models.meta.Models as DbModels
 
 private val logger = KotlinLogging.logger {}
+
+/**
+ * find and open database
+ */
+@ExperimentalTime
+fun loadDesktopDatabase(dir: File): KotlinEntityDataStore<Persistable>{
+    val desktop = dir.resolve("desktop")
+    desktop.mkdirs()
+    val dbPath = desktop.resolve("continuum-desktop").canonicalPath
+    val db = openStore(dbPath)
+    return  db
+}
 
 @ExperimentalTime
 fun openStore(dbPath: String, level: Int=1): KotlinEntityDataStore<Persistable> {

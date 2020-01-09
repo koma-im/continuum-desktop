@@ -1,5 +1,7 @@
 package koma.koma_app
 
+import io.requery.Persistable
+import io.requery.sql.KotlinEntityDataStore
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.control.Alert
@@ -8,17 +10,19 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.Text
 import javafx.stage.Stage
-import koma.gui.save_win_geometry
 import koma.gui.setSaneStageSize
 import koma.gui.view.window.start.StartScreen
 import koma.matrix.UserId
 import koma.network.client.okhttp.KHttpClient
 import koma.storage.config.server.cert_trust.sslConfFromStream
+import koma.storage.persistence.settings.AppSettings
 import koma.util.given
 import kotlinx.coroutines.*
+import link.continuum.database.loadDesktopDatabase
 import link.continuum.database.models.getServerAddrs
 import link.continuum.database.models.getToken
 import link.continuum.desktop.action.startChat
+import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.CatchingGroup
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.scene.ScalingPane
@@ -28,7 +32,6 @@ import link.continuum.desktop.util.gui.alert
 import okhttp3.Cache
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import org.h2.mvstore.MVMap
 import org.h2.mvstore.MVStore
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -64,7 +67,8 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private var stage: Stage? = null
     private val startScreen = CompletableDeferred<StartScreen>()
     private val configDir: File
-    private val kvStore = CompletableDeferred<MVStore>()
+    private val keyValueStore = CompletableDeferred<KeyValueStore>()
+    private val database = CompletableDeferred<KotlinEntityDataStore<Persistable>>()
     val startTime = MonoClock.markNow()
     init {
         JFX.application = this
@@ -75,7 +79,10 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         configDir.mkdirs()
         Thread.setDefaultUncaughtExceptionHandler(NoAlertErrorHandler())
         launch(Dispatchers.IO) {
-            kvStore.complete(MVStore.open(configDir.resolve("kvStore").toString()))
+            val mv = MVStore.open(configDir.resolve("kvStore").toString())
+            keyValueStore.complete(KeyValueStore(mv))
+            val db = loadDesktopDatabase(configDir)
+            database.complete(db)
         }
         launch(Dispatchers.Default) {
             try {
@@ -102,8 +109,9 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         }
     }
 
-    private fun load(): AppStore {
-        val (settings, db) = loadSettings(configDir)
+    private suspend fun load(): AppStore {
+        val db = database.await()
+        val settings = AppSettings(db)
         log.debug("Database opened {}", startTime.elapsedNow())
         val proxy = settings.proxyList.default()
         val cacheDir = getHttpCacheDir(configDir.canonicalPath)
@@ -129,8 +137,10 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             log.info("closing database")
             close()
         }
-        val kv = runBlocking { kvStore.await() }
-        stage?.let { save_win_geometry(it, kv) }
+        val kv = runBlocking { keyValueStore.await() }
+        stage?.let {
+            kv.saveStageSize(it)
+        }
         kv.close()
     }
 
@@ -138,8 +148,8 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         this.stage = stage
         JFX.primaryStage = stage
         launch(Dispatchers.Main) {
-            val kvs = kvStore.await()
-            setSaneStageSize(stage, kvs)
+            val keyValueStore = keyValueStore.await()
+            setSaneStageSize(stage, keyValueStore)
             log.debug("stage size set at {}", startTime.elapsedNow())
             val scalingPane = ScalingPane()
             JFX.primaryPane = scalingPane
@@ -149,17 +159,16 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             log.debug("Set the scene of stage at {}", startTime.elapsedNow())
             stage.show()
             log.debug("Called stage.show at {}", startTime.elapsedNow())
-            val map = kvs.openMap<String, String>("strings")
-            val acc = map["active-account"]
-            if (acc == null || !loadSignedIn(scalingPane, acc, map)) {
+            val acc = keyValueStore.activeAccount.getOrNull()
+            if (acc == null || !loadSignedIn(scalingPane, acc, keyValueStore)) {
                 val s = startScreen.await()
                 scalingPane.setChild(s.root)
                 log.debug("Root of the scene is set at {}", startTime.elapsedNow())
-                s.initialize(map)
-                appStorage.await()?.let {
+                s.initialize(keyValueStore)
+                appStorage.await()?.let { appData ->
                     launch(Dispatchers.Main) {
                         log.debug("Updating UI with data {}", startTime.elapsedNow())
-                        startScreen.await().start(it, Globals.httpClient)
+                        startScreen.await().start(appData, Globals.httpClient)
                         log.debug("UI updated at {}", startTime.elapsedNow())
                     }
                 }
@@ -174,7 +183,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         stage.isResizable = true
     }
 
-    private suspend fun loadSignedIn(pane: ScalingPane, user: String, map: MVMap<String, String>): Boolean {
+    private suspend fun loadSignedIn(pane: ScalingPane, user: String, map: KeyValueStore): Boolean {
         pane.setChild(Text("Continuum").apply {
             fill = Color.GRAY
             font = Font.font(48.0)

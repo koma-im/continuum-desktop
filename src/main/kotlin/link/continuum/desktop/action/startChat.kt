@@ -9,12 +9,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.withContext
 import link.continuum.database.models.loadUserRooms
 import link.continuum.database.models.updateAccountUsage
+import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.JFX
 import link.continuum.desktop.gui.UiDispatcher
 import mu.KotlinLogging
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import org.h2.mvstore.MVMap
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger {}
  */
 @ExperimentalCoroutinesApi
 suspend fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: HttpUrl,
-              keyValueMap: MVMap<String, String>,
+                      keyValueStore: KeyValueStore,
               appData: AppStore
 ) {
     val data = appData.database
@@ -34,7 +34,7 @@ suspend fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, u
     app.apiClient = account
     val userRooms = appData.joinedRoom.list
 
-    val primary = ChatWindowBars(userRooms, account, keyValueMap, app.job, appData)
+    val primary = ChatWindowBars(userRooms, account, keyValueStore, app.job, appData)
     JFX.primaryPane.setChild(primary.root)
     val rooms = data.letOp {
         loadUserRooms(it, userId)

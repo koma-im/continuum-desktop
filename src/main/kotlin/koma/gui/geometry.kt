@@ -2,24 +2,14 @@ package koma.gui
 
 import javafx.stage.Screen
 import javafx.stage.Stage
+import link.continuum.desktop.database.KeyValueStore
 import org.h2.mvstore.MVMap
-import org.h2.mvstore.MVStore
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
-fun save_win_geometry(stage: Stage, kvStore: MVStore) {
-    val prefs = kvStore.openMap<String, Double>("window-size-settings")
-    prefs.put("chat-stage-x", stage.x)
-    prefs.put("chat-stage-y", stage.y)
-    prefs.put("chat-stage-w", stage.width)
-    prefs.put("chat-stage-h", stage.height)
-}
-
 @ExperimentalTime
-fun setSaneStageSize(stage: Stage, kvStore: MVStore) {
-    val (prefs, t) = measureTimedValue {
-        kvStore.openMap<String, Double>("window-size-settings")
-    }
+fun setSaneStageSize(stage: Stage, kvStore: KeyValueStore) {
+    val prefs = kvStore.windowSizeMap
     val sx = prefs.get("chat-stage-x")
     val sy = prefs.get("chat-stage-y")
     setWidthHeight(stage, prefs)

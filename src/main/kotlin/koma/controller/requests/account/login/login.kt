@@ -17,10 +17,10 @@ import link.continuum.database.models.saveServerAddr
 import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KDataStore
+import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import org.h2.mvstore.MVMap
 
 /**
  * when the login button is clicked
@@ -29,7 +29,7 @@ import org.h2.mvstore.MVMap
 suspend fun onClickLogin(httpClient: OkHttpClient,
                          appData: AppStore,
                          userid: UserId, password: String, server: String,
-                         keyValueMap: MVMap<String, String>
+                         keyValueStore: KeyValueStore
 ) {
     val url = HttpUrl.parse(server)
     if (url == null) {
@@ -54,12 +54,12 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
         }
         t
     }
-    keyValueMap["active-account"] = userid.str
+    keyValueStore.activeAccount.put(userid.full)
     token ?: return
     withContext(Dispatchers.Main) {
         startChat(httpClient,
                 userid, token, url,
-                keyValueMap,
+                keyValueStore,
                 appData)
     }
 }
