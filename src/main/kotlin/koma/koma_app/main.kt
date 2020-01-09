@@ -70,6 +70,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private val keyValueStore = CompletableDeferred<KeyValueStore>()
     private val database = CompletableDeferred<KotlinEntityDataStore<Persistable>>()
     private val httpClient = CompletableDeferred<OkHttpClient>()
+    private val appData = CompletableDeferred<AppData>()
     val startTime = MonoClock.markNow()
     init {
         JFX.application = this
@@ -80,10 +81,22 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         configDir.mkdirs()
         Thread.setDefaultUncaughtExceptionHandler(NoAlertErrorHandler())
         launch(Dispatchers.IO) {
-            val mv = MVStore.open(configDir.resolve("kvStore").toString())
-            keyValueStore.complete(KeyValueStore(mv))
-            val db = loadDesktopDatabase(configDir)
-            database.complete(db)
+            try {
+                val mv = MVStore.open(configDir.resolve("kvStore").toString())
+                val kv = KeyValueStore(mv)
+                keyValueStore.complete(kv)
+                val db = loadDesktopDatabase(configDir)
+                database.complete(db)
+                appData.complete(load(db, kv))
+            }  catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    alert(Alert.AlertType.ERROR,
+                            "couldn't open configuration directory",
+                            "$e")
+                }
+                log.error("can't load data: $e")
+                e.printStackTrace()
+            }
         }
         launch(Dispatchers.Default) {
             try {
@@ -94,25 +107,9 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             log.debug("StartScreen created at {}", startTime.elapsedNow())
         }
     }
-    private val appStorage = async<AppStore?>(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
-        log.info("loading database")
-        try {
-            load()
-        } catch (e: Exception) {
-            launch(Dispatchers.Main) {
-                alert(Alert.AlertType.ERROR,
-                        "couldn't open configuration directory",
-                        "$e")
-            }
-            log.error("can't load data: $e")
-            e.printStackTrace()
-            null
-        }
-    }
 
-    private suspend fun load(): AppStore {
-        val db = database.await()
-        val kvStore = keyValueStore.await()
+    private fun load(db: KotlinEntityDataStore<Persistable>,
+                     kvStore: KeyValueStore): AppData {
         val settings = AppSettings()
         log.debug("Database opened {}", startTime.elapsedNow())
         val proxy = kvStore.proxyList.default()
@@ -136,8 +133,8 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     override fun stop() {
         super.stop()
         runBlocking {
-            appStorage.await()
-        }?.database?.run {
+            appData.await()
+        }.database.run {
             log.info("closing database")
             close()
         }
@@ -169,7 +166,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
                 scalingPane.setChild(s.root)
                 log.debug("Root of the scene is set at {}", startTime.elapsedNow())
                 s.initialize(keyValueStore)
-                appStorage.await()?.let { appData ->
+                appData.await().let { appData ->
                     launch(Dispatchers.Main) {
                         log.debug("Updating UI with data {}", startTime.elapsedNow())
                         startScreen.await().start(appData, httpClient.await())
@@ -192,7 +189,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             fill = Color.GRAY
             font = Font.font(48.0)
         })
-        val store = appStorage.await() ?: return false
+        val store = appData.await() ?: return false
         val db = store.database
         val u = UserId(user)
         val a = db.letOp { getServerAddrs(it, u.server) }.firstOrNull()?: return false
