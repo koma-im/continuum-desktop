@@ -73,7 +73,7 @@ class RegistrationWizard(
                 when (ex) {
                     is AuthFailure -> {
                         GlobalScope.launch(Dispatchers.JavaFx) {
-                            val a = Stage(register, ex.status)
+                            val a = Stage(register, ex.fail)
                             state = a
                             root.center = a.root
                         }

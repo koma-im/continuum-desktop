@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 version = "0.9.34"
 
 plugins {
-    kotlin("jvm") version "1.3.60"
-    kotlin("kapt") version "1.3.60"
+    kotlin("jvm") version "1.3.61"
+    kotlin("kapt") version "1.3.61"
     id("com.github.johnrengelman.shadow").version("4.0.4")
     id("java")
     id("maven")
@@ -41,13 +41,13 @@ javafx {
 }
 
 dependencies {
-    val ktorVersion = "1.2.6"
-    implementation("io.github.koma-im:koma-library:0.9.20")
-    implementation("org.cache2k:cache2k-core:1.2.3.Final")
+    val ktorVersion = "1.3.0"
+    implementation("io.github.koma-im:koma-library:0.9.21")
+    implementation("org.cache2k:cache2k-core:1.2.4.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
     implementation("de.jensd:fontawesomefx-commons:9.1.2")
-    implementation("org.controlsfx:controlsfx:11.0.0")
+    implementation("org.controlsfx:controlsfx:11.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.3")
     implementation("com.vdurmont:emoji-java:4.0.0")
@@ -55,7 +55,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.8.0-beta2")
     implementation("io.requery:requery-kotlin:1.6.1")
     implementation("io.requery:requery:1.6.1")
-    implementation("com.h2database:h2:1.4.199")
+    implementation("com.h2database:h2:1.4.200")
     implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime", "0.14.0")
     implementation("io.ktor", "ktor-client-okhttp", ktorVersion)
     implementation("io.ktor", "ktor-client-core", ktorVersion)
