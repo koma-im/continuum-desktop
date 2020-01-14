@@ -9,7 +9,6 @@ import javafx.scene.layout.Priority
 import javafx.util.StringConverter
 import koma.AuthFailure
 import koma.Failure
-import koma.koma_app.appState
 import koma.matrix.user.auth.AuthType
 import koma.matrix.user.auth.Register
 import koma.matrix.user.auth.RegisterdUser
@@ -22,7 +21,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.database.models.KDataStore
-import link.continuum.database.models.saveToken
+import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.gui.alert
 import mu.KotlinLogging
@@ -31,7 +30,10 @@ import koma.util.KResult as Result
 
 private val logger = KotlinLogging.logger {}
 
-class RegistrationWizard(private val data: KDataStore) {
+class RegistrationWizard(
+        data: KDataStore,
+        private val keyValueStore: KeyValueStore
+) {
 
     val root = BorderPane()
     private var state: WizardState = Start(data)
@@ -63,8 +65,7 @@ class RegistrationWizard(private val data: KDataStore) {
             val (newUser, ex, res) = cur.submit()?: return
             if (!res.testFailure(newUser, ex)) {
                 println("Successfully registered ${newUser.user_id}")
-                val k = appState.store.database
-                k.runOp { saveToken(this, newUser.user_id, newUser.access_token) }
+                keyValueStore.userToToken.put(newUser.user_id.full, newUser.access_token)
                 val s = Success(newUser, register.server, this)
                 state = s
                 uilaunch { root.center = s.root }

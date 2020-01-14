@@ -20,7 +20,6 @@ import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import link.continuum.database.models.getRecentUsers
-import link.continuum.database.models.getServerAddrs
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.*
@@ -183,7 +182,7 @@ class LoginScreen(
         scope.launch {
             for (u in userInput) {
                 val data = database?:continue
-                val a = suggestedServerAddr(data, UserId(u))
+                val a = suggestedServerAddr(keyValueStore, UserId(u))
                 if (userId.isFocused || serverCombo.text.isBlank()) {
                     serverCombo.text = a
                 }
@@ -192,10 +191,11 @@ class LoginScreen(
     }
 }
 
-private suspend fun suggestedServerAddr(data: KDataStore, userId: UserId): String {
+private fun suggestedServerAddr(keyValueStore: KeyValueStore,
+                                userId: UserId
+): String {
     val sn = userId.server
     if (sn.isBlank()) return "https://matrix.org"
-    data.runOp { getServerAddrs(this, sn)
-    }.firstOrNull()?.let { return it }
+    keyValueStore.serverToAddress.get(sn)?.let { return it }
     return "https://$sn"
 }

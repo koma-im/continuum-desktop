@@ -30,6 +30,8 @@ class KeyValueStore(
     val activeAccount = Entry("active-account", map1)
     val proxyList = ProxyList(proxies)
     private val accountRooms = ConcurrentHashMap<UserId, AccountRooms>()
+    val serverToAddress = mvStore.openMap<String, String>("server-to-address")
+    val userToToken = mvStore.openMap<String, String>("user-to-token")
     fun saveStageSize(stage: Stage) {
         val prefs = windowSizeMap
         prefs.put("chat-stage-x", stage.x)

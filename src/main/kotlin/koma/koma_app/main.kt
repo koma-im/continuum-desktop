@@ -19,8 +19,6 @@ import koma.storage.persistence.settings.AppSettings
 import koma.util.given
 import kotlinx.coroutines.*
 import link.continuum.database.loadDesktopDatabase
-import link.continuum.database.models.getServerAddrs
-import link.continuum.database.models.getToken
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.CatchingGroup
@@ -184,18 +182,17 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         stage.isResizable = true
     }
 
-    private suspend fun loadSignedIn(pane: ScalingPane, user: String, map: KeyValueStore): Boolean {
+    private suspend fun loadSignedIn(pane: ScalingPane, user: String, kvs: KeyValueStore): Boolean {
         pane.setChild(Text("Continuum").apply {
             fill = Color.GRAY
             font = Font.font(48.0)
         })
-        val store = appData.await() ?: return false
-        val db = store.database
+        val store = appData.await()
         val u = UserId(user)
-        val a = db.letOp { getServerAddrs(it, u.server) }.firstOrNull()?: return false
+        val a = kvs.serverToAddress.get(u.server) ?: return false
         val s = HttpUrl.parse(a) ?: return false
-        val t = db.letOp { getToken(it, u) }?: return false
-        startChat(httpClient.await(), u, t, s, map, store)
+        val t =kvs.userToToken.get(u.full)?: return false
+        startChat(httpClient.await(), u, t, s, kvs, store)
         return true
     }
 }

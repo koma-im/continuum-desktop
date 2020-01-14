@@ -43,19 +43,6 @@ interface UserAvatar: Persistable {
     var since: Long
 }
 
-@Entity
-interface UserToken: Persistable {
-    /**
-     * user id like @user:matrix.org
-     */
-    @get:Key
-    @get:Column(length = Int.MAX_VALUE)
-    var owner: String
-
-    @get:Column(nullable = false, length = Int.MAX_VALUE)
-    var token: String
-}
-
 /**
  * recently used accounts
  */
@@ -99,19 +86,6 @@ fun saveUserNick(data: KDataStore, userId: UserId, nick: String, timestamp: Long
     t.nickname = nick
     t.since = timestamp
     data.insert(t)
-}
-
-fun saveToken(data: KDataStore, userId: UserId, token: String) {
-    logger.debug { "saving token of user $userId" }
-    val t = UserTokenEntity()
-    t.owner = userId.str
-    t.token = token
-    data.upsert(t)
-}
-
-
-fun getToken(data: KDataStore, userId: UserId): String? {
-    return data.select(UserToken::class).where(UserToken::owner.eq(userId.str)).get().firstOrNull()?.token
 }
 
 fun getLatestNick(data: KDataStore, userId: UserId): UserNickname? {

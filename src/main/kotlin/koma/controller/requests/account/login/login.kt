@@ -12,11 +12,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import link.continuum.database.models.getToken
-import link.continuum.database.models.saveServerAddr
-import link.continuum.database.models.saveToken
 import link.continuum.desktop.action.startChat
-import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
@@ -37,15 +33,12 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
                 "$server not parsed")
         return
     }
-    val data = appData.database
-    data.runOp {
-        saveServerAddr(this, userid.server, server)
-    }
-    val server = Server(url, httpClient)
+    keyValueStore.serverToAddress.put(userid.server, server)
+    val client = Server(url, httpClient)
     val token = if (!password.isBlank()) {
-        getTokenWithPassword(userid, password, data, server)
+        getTokenWithPassword(userid, password, keyValueStore, client)
     } else {
-        val t = data.runOp { getToken(this, userid) }
+        val t =keyValueStore.userToToken.get(userid.full)
         if (t == null) {
             GlobalScope.launch(Dispatchers.JavaFx) {
                 alert(Alert.AlertType.ERROR, "Failed to login as $userid",
@@ -69,15 +62,13 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
  * saves the token to disk
  */
 private suspend fun getTokenWithPassword(userid: UserId, password: String,
-                                         data: KDataStore,
+                                         keyValueStore: KeyValueStore,
                                          server: Server): String? {
     val (it, ex, result) = server.login(UserPassword(user = userid.user, password = password))
     if (!result.testFailure(it, ex)) {
         val u = it.user_id
         val t = it.access_token
-        data.runOp {
-            saveToken(this, u, t)
-        }
+        keyValueStore.userToToken.put(u.full, t)
         return t
     } else {
         val mes = ex.toString()

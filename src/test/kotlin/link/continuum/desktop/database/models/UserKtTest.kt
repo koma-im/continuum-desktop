@@ -3,6 +3,8 @@ package link.continuum.desktop.database.models
 import koma.matrix.UserId
 import link.continuum.database.models.*
 import link.continuum.database.openStore
+import link.continuum.desktop.database.KeyValueStore
+import org.h2.mvstore.MVStore
 import org.junit.jupiter.api.AfterAll
 import java.nio.file.Files
 import kotlin.test.Test
@@ -13,10 +15,11 @@ import kotlin.time.ExperimentalTime
 internal class UserKtTest {
     @Test
     fun testInsertUser() {
-        val userId = UserId("@user:matrix.org")
-        saveToken(data, userId, "SECRET_TOKEN")
-        assertEquals(getToken(data, userId), "SECRET_TOKEN")
-
+        val mvStore = MVStore.open(dir.resolve("mv").toString())
+        val keyValueStore = KeyValueStore(mvStore)
+        val m = keyValueStore.userToToken
+        m["@user:matrix.org"] = "SECRET_TOKEN"
+        assertEquals("SECRET_TOKEN", m["@user:matrix.org"])
     }
 
     @Test
