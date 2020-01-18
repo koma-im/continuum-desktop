@@ -35,7 +35,7 @@ class RoomListView(
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder(context.account).open()
+                    RoomFinder(context.account, data.appData).open()
                 }
             }
             button("Create") {

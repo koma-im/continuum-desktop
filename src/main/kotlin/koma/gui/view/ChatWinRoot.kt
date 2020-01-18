@@ -41,7 +41,7 @@ class ChatWindowBars(
     private val content = BorderPane()
     val root = NotificationPane(content)
     val center: ChatView
-    private val roomFinder by lazy { RoomFinder(account) }
+    private val roomFinder by lazy { RoomFinder(account, store) }
     private val prefWin by lazy { PreferenceWindow(keyValueStore.proxyList) }
     val syncControl: SyncControl
     init {
