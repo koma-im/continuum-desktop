@@ -87,9 +87,7 @@ class ChatWindowBars(
                     menu("Debug") {
                         item("Force sync") {
                             action {
-                                scope.launch {
-                                    syncControl.start(full_sync = true)
-                                }
+                                syncControl.restartInitial()
                             }
                         }
                     }

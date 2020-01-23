@@ -17,6 +17,9 @@ import okhttp3.HttpUrl
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * need to be on the main thread
+ */
 internal fun handleInvitedRoom(
         roomId: RoomId, data: InvitedRoom,
         view: InvitationsView,

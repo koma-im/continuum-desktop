@@ -15,6 +15,9 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * not necessarily on the main thread
+ */
 fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
     events.forEach { message ->
         when (message) {
@@ -24,7 +27,7 @@ fun Room.handle_ephemeral(events: List<EphemeralEvent>) {
 }
 
 /**
- * call on UI thread
+ * not necessarily on UI thread
  */
 @ExperimentalCoroutinesApi
 suspend fun Room.applyUpdate(
