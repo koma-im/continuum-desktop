@@ -3,15 +3,12 @@ package koma.controller.requests.account.login
 import javafx.scene.control.Alert
 import koma.InvalidData
 import koma.Server
-import koma.koma_app.AppStore
+import koma.koma_app.AppData
 import koma.matrix.UserId
 import koma.matrix.UserPassword
 import koma.util.testFailure
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.javafx.JavaFx
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.util.gui.alert
@@ -23,7 +20,7 @@ import okhttp3.OkHttpClient
  * accept text of text fields as parameters
  */
 suspend fun onClickLogin(httpClient: OkHttpClient,
-                         appData: AppStore,
+                         appData: Deferred<AppData>,
                          userid: UserId, password: String, server: String,
                          keyValueStore: KeyValueStore
 ) {

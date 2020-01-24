@@ -27,11 +27,31 @@ class KeyValueStore(
     val windowSizeMap = mvStore.openMap<String, Double>("window-size-settings")
     private val map1 = mvStore.openMap<String, String>("strings")
     private val proxies = mvStore.openMap<String,Long>("proxies")
+    /**
+     * the one currently signed-in account, if not null
+     */
     val activeAccount = Entry("active-account", map1)
     val proxyList = ProxyList(proxies)
     private val accountRooms = ConcurrentHashMap<UserId, AccountRooms>()
     val serverToAddress = mvStore.openMap<String, String>("server-to-address")
     val userToToken = mvStore.openMap<String, String>("user-to-token")
+    private val recentUsers = mvStore.openMap<Long, String>("timestamp-user")
+    fun updateAccountUsage(userId: UserId) {
+        val stale = recentUsers.size - 5
+        if (stale > 0) {
+            recentUsers.keyIterator(0).asSequence().take(stale).toList().forEach {
+                recentUsers.remove(it)
+            }
+        }
+        val prevUse = recentUsers.entries.find {
+            it.value == userId.full
+        }
+        if (prevUse != null) recentUsers.remove(prevUse.key)
+        recentUsers.put(System.currentTimeMillis(), userId.full)
+    }
+    fun getRecentUsers(): List<UserId> {
+        return recentUsers.entries.sortedByDescending { it.key }.map { UserId(it.value) }
+    }
     fun saveStageSize(stage: Stage) {
         val prefs = windowSizeMap
         prefs.put("chat-stage-x", stage.x)

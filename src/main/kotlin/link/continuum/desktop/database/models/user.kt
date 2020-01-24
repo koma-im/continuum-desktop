@@ -43,22 +43,6 @@ interface UserAvatar: Persistable {
     var since: Long
 }
 
-/**
- * recently used accounts
- */
-@Entity
-interface AccountUsage: Persistable {
-    /**
-     * user id like @user:matrix.org
-     */
-    @get:Key
-    @get:Column(length = Int.MAX_VALUE)
-    var owner: String
-
-    @get:Column(nullable = false)
-    var usage: Long
-}
-
 @Entity
 interface SyncBatchKey: Persistable {
     /**
@@ -93,18 +77,6 @@ fun getLatestNick(data: KDataStore, userId: UserId): UserNickname? {
             .where(UserNickname::owner.eq(userId.str))
             .orderBy(UserNickname::since.desc())
             .get().firstOrNull()
-}
-
-fun getRecentUsers(data: KDataStore): List<UserId> {
-    return data.select(AccountUsage::class)
-            .orderBy(AccountUsage::usage.desc()).limit(10).get().map { UserId(it.owner) }
-}
-
-fun updateAccountUsage(data: KDataStore, userId: UserId) {
-    val r: AccountUsage = AccountUsageEntity()
-    r.owner = userId.str
-    r.usage = System.currentTimeMillis()
-    data.upsert(r)
 }
 
 fun saveSyncBatchKey(data: KDataStore, userId: UserId, batch: String) {

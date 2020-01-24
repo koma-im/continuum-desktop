@@ -10,23 +10,19 @@ import koma.controller.requests.membership.leaveRoom
 import koma.gui.view.listview.RoomListView
 import koma.gui.view.window.chatroom.messaging.ChatRecvSendView
 import koma.gui.view.window.chatroom.roominfo.RoomInfoDialog
-import koma.koma_app.AppStore
+import koma.koma_app.AppData
 import koma.koma_app.appState.apiClient
 import koma.matrix.room.naming.RoomId
 import koma.network.media.parseMxc
 import koma.util.testFailure
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import link.continuum.desktop.Room
-import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.database.hashColor
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.icon.avatar.Avatar2L
@@ -34,11 +30,11 @@ import link.continuum.desktop.gui.list.InvitationsView
 import link.continuum.desktop.gui.view.AccountContext
 import link.continuum.desktop.gui.view.RightColumn
 import link.continuum.desktop.observable.MutableObservable
-import link.continuum.desktop.util.debugAssertUiThread
 import link.continuum.desktop.util.getOrNull
 import mu.KotlinLogging
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
 
@@ -51,35 +47,29 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class ChatView(roomList: ObservableList<RoomId>,
                private val context: AccountContext,
-               storage: AppStore,
-               scaling: Float = storage.settings.scaling
+               storage: Deferred<AppData>
 ) {
     private val scope = MainScope()
     val root = SplitPane ()
 
-    val roomListView = RoomListView(roomList, context, storage.roomStore)
-    val invitationsView = InvitationsView(scaling = scaling.toDouble())
-
-
-    val messagingView by lazy { ChatRecvSendView(context, storage) }
-    val rightColumn by lazy { RightColumn(context, storage, root) }
-
-    private var initSelected = false
+    val roomListView = RoomListView(roomList, context, storage)
+    val invitationsView = InvitationsView(scaling = 1.0)
 
     private val roomActor = scope.actor<RoomId>(capacity = Channel.CONFLATED) { // <--- Changed here
-        for (event in channel) {
-            setRoom(event)
-        }
-    }
-    private suspend fun setRoom(room: RoomId) {
-        debugAssertUiThread()
-        messagingView.setRoom(room)
-        rightColumn.setRoom(room, context.account)
-        if (!initSelected) {
-            initSelected= true
-            root.items.add(rightColumn.root)
-            root.items.set(1, messagingView.root)
-            root.setDividerPosition(1, .9)
+        var initSelected = false
+        val appData = storage.await()
+        val messagingView = ChatRecvSendView(context, appData)
+        val rightColumnDeferred = scope.async(start = CoroutineStart.LAZY) { RightColumn(context, appData, root) }
+        for (room in channel) {
+            messagingView.setRoom(room)
+            val rightColumn = rightColumnDeferred.await()
+            rightColumn.setRoom(room, context.account)
+            if (!initSelected) {
+                initSelected= true
+                root.items.add(rightColumn.root)
+                root.items.set(1, messagingView.root)
+                root.setDividerPosition(1, .9)
+            }
         }
     }
     init {
@@ -154,29 +144,22 @@ private fun CoroutineScope.fixRoomName(room: Room) {
 }
 
 @ExperimentalCoroutinesApi
-class RoomFragment(private val data: RoomDataStorage,
+class RoomFragment(private val deferredAppData: Deferred<AppData>,
                    private val context: AccountContext
 ): ListCell<RoomId>() {
     private val scope = MainScope()
     private val roomObservable = MutableObservable<RoomId>()
     private val avatar = Avatar2L()
     private val nameLabel = Label()
-    override fun updateItem(item: RoomId?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty || item == null) {
-            graphic = null
-            return
-        }
-        roomObservable.set(item)
-        graphic = root
-    }
 
     private val root = HBox(10.0).apply {
         minWidth = 1.0
         prefWidth = 1.0
         alignment = Pos.CENTER_LEFT
         contextMenu = ContextMenu().apply {
-            item("Room Info").action { openInfoView() }
+            item("Room Info").action {
+                scope.launch { openInfoView() }
+            }
             item("Invite Member"){
                 action {
                     val room = roomObservable.getOrNull()
@@ -188,13 +171,19 @@ class RoomFragment(private val data: RoomDataStorage,
             items.add(SeparatorMenuItem())
             item("Leave").action {
                 val room = roomObservable.getOrNull()
-                room ?.let { leaveRoom(it, data.appData) }
+                room ?.let {
+                    scope.launch(Dispatchers.Default) {
+                        val appData = deferredAppData.await()
+                        leaveRoom(it, appData)
+                    }
+                }
             }
             item("Forget").action {
                 val room = roomObservable.getOrNull()
                 room ?.let {
                     scope.launch {
-                        forgetRoom(context.account, it, data.appData)
+                        val appData = deferredAppData.await()
+                        forgetRoom(context.account, it, appData)
                     }
                 }
             }
@@ -203,8 +192,9 @@ class RoomFragment(private val data: RoomDataStorage,
         add(avatar.root)
         add(nameLabel)
     }
-
-    init {
+    private val startObserving = scope.async(start = CoroutineStart.LAZY) {
+        logger.trace { "start observing room" }
+        val data = deferredAppData.await().roomStore
         val selected = MutableObservable<Boolean>(false)
         selectedProperty().addListener { _, _, newValue -> selected.set(newValue) }
         val roomColor = roomObservable.map { it.hashColor() }
@@ -244,10 +234,25 @@ class RoomFragment(private val data: RoomDataStorage,
                 }.launchIn(scope)
     }
 
-    private fun openInfoView() {
+    override fun updateItem(item: RoomId?, empty: Boolean) {
+        super.updateItem(item, empty)
+        if (empty || item == null) {
+            graphic = null
+            return
+        }
+        if (!startObserving.isActive) {
+            nameLabel.text = "room"
+            startObserving.start()
+        }
+        roomObservable.set(item)
+        graphic = root
+    }
+
+    private suspend fun openInfoView() {
         val room = item ?: return
         val user = apiClient?.userId ?: return
-        RoomInfoDialog(data, context, room, user).openWindow(owner = JFX.primaryStage)
+        val data = deferredAppData.await()
+        RoomInfoDialog(data.roomStore, context, room, user).openWindow(owner = JFX.primaryStage)
     }
 }
 

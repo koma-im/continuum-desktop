@@ -82,8 +82,10 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             try {
                 val mv = MVStore.open(configDir.resolve("kvStore").toString())
                 val kv = KeyValueStore(mv)
+                log.debug("KeyValueStore opened at {}", startTime.elapsedNow())
                 keyValueStore.complete(kv)
                 val db = loadDesktopDatabase(configDir)
+                log.debug("Database opened {}", startTime.elapsedNow())
                 database.complete(db)
                 appData.complete(load(db, kv))
             }  catch (e: Exception) {
@@ -109,7 +111,6 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private fun load(db: KotlinEntityDataStore<Persistable>,
                      kvStore: KeyValueStore): AppData {
         val settings = AppSettings()
-        log.debug("Database opened {}", startTime.elapsedNow())
         val proxy = kvStore.proxyList.default()
         val cacheDir = getHttpCacheDir(configDir.canonicalPath)
         val addTrust = loadOptionalCert(configDir)
@@ -130,17 +131,17 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
 
     override fun stop() {
         super.stop()
-        runBlocking {
-            appData.await()
-        }.database.run {
+        if (appData.isCompleted && !appData.isCancelled) {
             log.info("closing database")
-            close()
+            appData.getCompleted().database.close()
         }
-        val kv = runBlocking { keyValueStore.await() }
-        stage?.let {
-            kv.saveStageSize(it)
+        if (keyValueStore.isCompleted && !keyValueStore.isCancelled) {
+            val kv =  keyValueStore.getCompleted()
+            stage?.let {
+                kv.saveStageSize(it)
+            }
+            kv.close()
         }
-        kv.close()
     }
 
     override fun start(stage: Stage) {
@@ -163,13 +164,11 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
                 val s = startScreen.await()
                 scalingPane.setChild(s.root)
                 log.debug("Root of the scene is set at {}", startTime.elapsedNow())
-                s.initialize(keyValueStore)
-                appData.await().let { appData ->
-                    launch(Dispatchers.Main) {
-                        log.debug("Updating UI with data {}", startTime.elapsedNow())
-                        startScreen.await().start(appData, httpClient.await())
-                        log.debug("UI updated at {}", startTime.elapsedNow())
-                    }
+                s.initialize(keyValueStore, appData)
+                launch(Dispatchers.Main) {
+                    log.debug("Updating UI with data {}", startTime.elapsedNow())
+                    startScreen.await().login.await().start(httpClient.await())
+                    log.debug("UI updated at {}", startTime.elapsedNow())
                 }
             }
             stage.title = "Continuum"
@@ -187,12 +186,11 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
             fill = Color.GRAY
             font = Font.font(48.0)
         })
-        val store = appData.await()
         val u = UserId(user)
         val a = kvs.serverToAddress.get(u.server) ?: return false
         val s = HttpUrl.parse(a) ?: return false
         val t =kvs.userToToken.get(u.full)?: return false
-        startChat(httpClient.await(), u, t, s, kvs, store)
+        startChat(httpClient.await(), u, t, s, kvs, appData)
         return true
     }
 }

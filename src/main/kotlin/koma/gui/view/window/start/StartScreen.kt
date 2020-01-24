@@ -2,8 +2,10 @@ package koma.gui.view.window.start
 
 import javafx.geometry.Pos
 import koma.gui.view.LoginScreen
+import koma.koma_app.AppData
 import koma.koma_app.AppStore
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.StackPane
@@ -23,8 +25,8 @@ class StartScreen(
 ) {
 
     val root = StackPane()
-    private val login = CompletableDeferred<LoginScreen>()
-    fun initialize(keyValueStore: KeyValueStore) {
+    val login = CompletableDeferred<LoginScreen>()
+    fun initialize(keyValueStore: KeyValueStore, deferredAppData: Deferred<AppData>) {
         debugAssertUiThread()
         val innerBox = HBox().apply {
             alignment = Pos.CENTER
@@ -37,12 +39,8 @@ class StartScreen(
             isVisible = false
         }
         root.children.add(mask)
-        val l = LoginScreen(keyValueStore, mask)
+        val l = LoginScreen(keyValueStore, deferredAppData, mask)
         innerBox.children.add(l.root)
         login.complete(l)
-    }
-
-    suspend fun start(appStore: AppStore, httpClient: OkHttpClient) {
-        login.await().start(appStore, httpClient)
     }
 }

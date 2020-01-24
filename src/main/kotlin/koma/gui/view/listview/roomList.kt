@@ -8,7 +8,11 @@ import javafx.scene.layout.Priority
 import koma.controller.requests.room.createRoomInteractive
 import koma.gui.view.RoomFragment
 import koma.gui.view.window.roomfinder.RoomFinder
+import koma.koma_app.AppData
 import koma.matrix.room.naming.RoomId
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import link.continuum.desktop.database.RoomDataStorage
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.view.AccountContext
@@ -16,8 +20,9 @@ import link.continuum.desktop.gui.view.AccountContext
 class RoomListView(
         roomlist: ObservableList<RoomId>,
         private val context: AccountContext,
-        private val data: RoomDataStorage
+        private val data: Deferred<AppData>
 ) {
+    private val scope = MainScope()
     val root = ListView(roomlist)
 
     init {
@@ -35,7 +40,9 @@ class RoomListView(
                 // using a large value to make it as wide as the widest
                 maxWidth = 200.0
                 action {
-                    RoomFinder(context.account, data.appData).open()
+                    scope.launch {
+                        RoomFinder(context.account, data.await()).open()
+                    }
                 }
             }
             button("Create") {

@@ -1,16 +1,13 @@
 package link.continuum.desktop.action
 
 import koma.controller.events.processEventsResult
-import koma.controller.sync.MatrixSyncReceiver
 import koma.gui.view.ChatView
-import koma.koma_app.AppStore
+import koma.koma_app.AppData
 import koma.matrix.MatrixApi
 import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import link.continuum.database.models.getSyncBatchKey
 import link.continuum.database.models.saveSyncBatchKey
 import mu.KotlinLogging
@@ -26,24 +23,25 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 class SyncControl(
         val apiClient: MatrixApi,
-        private val appData: AppStore,
+        private val deferredAppData: Deferred<AppData>,
         parentJob: Job,
         private val view: ChatView
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.Default + parentJob)
     private val synchronizer = FlowSynchronizer(apiClient)
     init{
-        startProcessing()
         coroutineScope.launch {
+            val appData = deferredAppData.await()
             val batch_key = appData.database.letOp { getSyncBatchKey(it, apiClient.userId)  }
             synchronizer.start(batch_key)
+            startProcessing(appData)
         }
     }
 
     fun restartInitial() = synchronizer.restartInitial()
 
     @ObsoleteCoroutinesApi
-    private fun startProcessing() {
+    private fun startProcessing(appData: AppData) {
         synchronizer.syncFlow.onEach {
             val (s, f, r) = it
             if (!r.testFailure(s, f)) {

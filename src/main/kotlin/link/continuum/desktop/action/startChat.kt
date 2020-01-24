@@ -2,11 +2,12 @@ package link.continuum.desktop.action
 
 import koma.Server
 import koma.gui.view.ChatWindowBars
+import koma.koma_app.AppData
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import link.continuum.database.models.updateAccountUsage
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.JFX
 import mu.KotlinLogging
@@ -22,9 +23,9 @@ private val logger = KotlinLogging.logger {}
 @ExperimentalCoroutinesApi
 suspend fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, url: HttpUrl,
                       keyValueStore: KeyValueStore,
-              appData: AppStore
+                      appData: Deferred<AppData>
 ) {
-    val data = appData.database
+
     val app = appState
     val server = Server(url, httpClient)
     val account  = server.account(userId, token)
@@ -32,8 +33,5 @@ suspend fun startChat(httpClient: OkHttpClient, userId: UserId, token: String, u
 
     val primary = ChatWindowBars(account, keyValueStore, app.job, appData)
     JFX.primaryPane.setChild(primary.root)
-    data.letOp {
-        updateAccountUsage(it, userId)
-    }
-
+    keyValueStore.updateAccountUsage(userId)
 }

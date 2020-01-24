@@ -14,12 +14,12 @@ import javafx.scene.text.Text
 import javafx.util.StringConverter
 import koma.controller.requests.account.login.onClickLogin
 import koma.gui.view.window.preferences.PreferenceWindow
+import koma.koma_app.AppData
 import koma.koma_app.AppStore
 import koma.koma_app.appState
 import koma.matrix.UserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import link.continuum.database.models.getRecentUsers
 import link.continuum.desktop.database.KDataStore
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.gui.*
@@ -43,6 +43,7 @@ private val logger = KotlinLogging.logger {}
  */
 class LoginScreen(
         private val keyValueStore: KeyValueStore,
+        private val deferredAppData : Deferred<AppData>,
         private val mask: MaskerPane
 ) {
     private val scope = MainScope()
@@ -80,19 +81,14 @@ class LoginScreen(
         }
     }
     private var job: Job? = null
-    private var database: KDataStore? = null
     private var httpClient: OkHttpClient? = null
-    fun start(appStore: AppStore, httpClient: OkHttpClient) {
+    fun start(httpClient: OkHttpClient) {
         debugAssertUiThread()
         this.httpClient = httpClient
         root.isDisable = false
-        val data = appStore.database
-        this.database = data
-        scope.launch {
-            val recentUsers = data.runOp { getRecentUsers(this) }
-            userId.itemsProperty().get().setAll(recentUsers)
-            userId.selectionModel.selectFirst()
-        }
+        val recentUsers = keyValueStore.getRecentUsers()
+        userId.itemsProperty().get().setAll(recentUsers)
+        userId.selectionModel.selectFirst()
     }
     init {
         val grid = GridPane()
@@ -152,7 +148,7 @@ class LoginScreen(
                             val d = appState.store
                             onClickLogin(
                                     c,
-                                    d,
+                                    deferredAppData,
                                     userId.value,
                                     password.text,
                                     serverCombo.text,
@@ -181,7 +177,6 @@ class LoginScreen(
         }
         scope.launch {
             for (u in userInput) {
-                val data = database?:continue
                 val a = suggestedServerAddr(keyValueStore, UserId(u))
                 if (userId.isFocused || serverCombo.text.isBlank()) {
                     serverCombo.text = a

@@ -11,6 +11,7 @@ import koma.gui.view.window.preferences.PreferenceWindow
 import koma.gui.view.window.roomfinder.RoomFinder
 import koma.gui.view.window.userinfo.actions.chooseUpdateUserAvatar
 import koma.gui.view.window.userinfo.actions.updateMyAlias
+import koma.koma_app.AppData
 import koma.koma_app.AppStore
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -34,22 +35,26 @@ class ChatWindowBars(
         account: Account,
         keyValueStore: KeyValueStore,
         parentJob: Job,
-        store: AppStore
+        appData: Deferred<AppData>
 ) {
     private val scope = CoroutineScope(SupervisorJob(parentJob) + Dispatchers.Main)
     private val context = AccountContext(account)
     private val content = BorderPane()
     val root = NotificationPane(content)
     val center: ChatView
-    private val roomFinder by lazy { RoomFinder(account, store) }
+    private val roomFinder = scope.async(start = CoroutineStart.LAZY) {
+        logger.error { "opening room directory" }
+        val store = appData.await()
+        RoomFinder(account, store)
+    }
     private val prefWin by lazy { PreferenceWindow(keyValueStore.proxyList) }
     val syncControl: SyncControl
     init {
         val roomList = keyValueStore.roomsOf(account.userId)
-        center = ChatView( roomList.joinedRoomList, context, store)
+        center = ChatView( roomList.joinedRoomList, context, appData)
         syncControl = SyncControl(
                 account,
-                appData = store,
+                appData,
                 parentJob = parentJob,
                 view = center
         )
@@ -60,7 +65,7 @@ class ChatWindowBars(
                 menu("File") {
                     item("Create Room").action { createRoomInteractive() }
                     item("Join Room") {
-                        setOnAction { roomFinder.open() }
+                        setOnAction { openRoomDirectory() }
                     }
                     item("Preferences").action {
                         prefWin.openModal(owner = JFX.primaryStage)
@@ -82,7 +87,7 @@ class ChatWindowBars(
                 contextMenu = ContextMenu(
                         MenuItem("Update my avatar").apply { setOnAction { chooseUpdateUserAvatar() } },
                         MenuItem("Update my name").apply { setOnAction {  updateMyAlias() }},
-                        MenuItem("Join Room").apply { setOnAction { roomFinder.open() }}
+                        MenuItem("Join Room").apply { setOnAction { openRoomDirectory() }}
                 ).apply {
                     menu("Debug") {
                         item("Force sync") {
@@ -93,6 +98,12 @@ class ChatWindowBars(
                     }
                 }
             }
+        }
+    }
+
+    private fun openRoomDirectory() {
+        scope.launch {
+            roomFinder.await().open()
         }
     }
 }
