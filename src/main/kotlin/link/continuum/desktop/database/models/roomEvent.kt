@@ -12,12 +12,14 @@ private val logger = KotlinLogging.logger {}
 @Table(name = "room_chrono_events")
 interface RoomEventRow: Persistable {
     @get:Key
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var room_id: String
     @get:Key
     var server_time: Long
 
     @get:Key
     @get:Index("event_id_index")
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var event_id: String
 
     /**
@@ -38,9 +40,11 @@ interface RoomEventRow: Persistable {
     /**
      * pagination token to fetch following events
      */
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var following_batch: String?
     @get:Column(nullable = false)
     var preceding_stored: Boolean
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var preceding_batch: String?
 }
 

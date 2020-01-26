@@ -78,8 +78,10 @@ fun defaultRoomPowerSettings(id: RoomId): RoomPowerSettings {
 @Entity
 interface RoomAliasList: Persistable  {
     @get:Key
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var roomId: String
 
+    @get:Column(length = Int.MAX_VALUE, nullable = false)
     var aliases: String
     var since: Long
 }
