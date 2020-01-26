@@ -91,7 +91,10 @@ class FlowSynchronizer(
         logger.info { "start syncing, force initial sync is $it" }
     }.flatMapLatest {
         if (it) since = null
-        startSyncing()
+        client.syncFlow(since=since).onEach {
+            val (success, _) = it
+            if (success != null) since = success.next_batch
+        }
     }.buffer(4)
     init {
         scope.launch {
@@ -109,27 +112,5 @@ class FlowSynchronizer(
      */
     fun restartInitial() {
         startSignal.offer(true)
-    }
-    private suspend fun startSyncing() = flow {
-        var timeout = 10.seconds
-        while (true) {
-            val startTime = MonoClock.markNow()
-            val (syncRes, error, result) =  client.sync(since, timeout = timeout)
-            emit(result)
-            if (syncRes!=null) {
-                since = syncRes.next_batch
-                timeout = 50.seconds
-            } else {
-                check(error != null)
-                timeout = 1.seconds
-                logger.warn { "Sync failure: $error" }
-                val minInterval = 1.seconds // limit rate of retries
-                val dur = startTime.elapsedNow()
-                if (dur < minInterval) {
-                    val remaining = minInterval - dur
-                    delay(remaining.toLongMilliseconds())
-                }
-            }
-        }
     }
 }
