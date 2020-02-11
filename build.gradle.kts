@@ -6,11 +6,11 @@ version = "0.9.37"
 plugins {
     kotlin("jvm") version "1.3.61"
     kotlin("kapt") version "1.3.61"
-    id("com.github.johnrengelman.shadow").version("4.0.4")
+    id("com.github.johnrengelman.shadow").version("5.2.0")
     id("java")
     id("maven")
     id("application")
-    id("org.beryx.runtime") version "1.3.0"
+    id("org.beryx.runtime") version "1.8.0"
     id("org.openjfx.javafxplugin").version("0.0.5")
 }
 
