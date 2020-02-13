@@ -40,11 +40,11 @@ interface RoomEventRow: Persistable {
     /**
      * pagination token to fetch following events
      */
-    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    @get:Column(length = Int.MAX_VALUE, nullable = true)
     var following_batch: String?
     @get:Column(nullable = false)
     var preceding_stored: Boolean
-    @get:Column(length = Int.MAX_VALUE, nullable = false)
+    @get:Column(length = Int.MAX_VALUE, nullable = true)
     var preceding_batch: String?
 }
 
