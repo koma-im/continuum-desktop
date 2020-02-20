@@ -12,7 +12,6 @@ import koma.matrix.room.visibility.HistoryVisibility
 import koma.util.formatJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.message.MessageCellContent
 import link.continuum.desktop.gui.util.Recyclable

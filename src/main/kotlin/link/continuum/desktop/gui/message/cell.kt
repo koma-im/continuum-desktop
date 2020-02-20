@@ -21,7 +21,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.launch
 import link.continuum.database.models.RoomEventRow
-import link.continuum.database.models.getEvent
 import link.continuum.desktop.database.FetchStatus
 import link.continuum.desktop.gui.*
 import link.continuum.desktop.gui.view.AccountContext

@@ -4,70 +4,72 @@ import io.requery.*
 import koma.matrix.event.room_message.RoomEvent
 import koma.matrix.json.RawJson
 import koma.matrix.room.naming.RoomId
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonElementSerializer
+import link.continuum.database.jsonMain
 import mu.KotlinLogging
+import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
 
+abstract class DeserializableEventRecord {
+    abstract val json: String
+    protected var _event: RoomEvent? = null
+    fun getEvent(): RoomEvent? {
+        val e = _event
+        if (e != null) return e
+        val decoded = jsonMain.parse(RoomEvent.serializer(), json)
+        _event = decoded
+        return decoded
+    }
+    fun initializeEvent(event: RoomEvent) {
+        this._event = event
+    }
+}
+
 @Entity
 @Table(name = "room_chrono_events")
-interface RoomEventRow: Persistable {
+abstract class RoomEventRow: Persistable, DeserializableEventRecord() {
     @get:Key
     @get:Column(length = Int.MAX_VALUE, nullable = false)
-    var room_id: String
+    abstract var room_id: String
     @get:Key
-    var server_time: Long
+    abstract var server_time: Long
 
     @get:Key
     @get:Index("event_id_index")
     @get:Column(length = Int.MAX_VALUE, nullable = false)
-    var event_id: String
+    abstract var event_id: String
 
     /**
      * encoded event
      */
     @get:Column(nullable = false, length = Int.MAX_VALUE)
-    var json: String
-
-    @Deprecated("internal field")
-    @get:Transient
-    var _event: RoomEvent?
+    abstract override var json: String
 
     /**
      * whether the message that comes after this one is in the db
      */
     @get:Column(nullable = false)
-    var following_stored: Boolean
+    abstract var following_stored: Boolean
     /**
      * pagination token to fetch following events
      */
     @get:Column(length = Int.MAX_VALUE, nullable = true)
-    var following_batch: String?
+    abstract var following_batch: String?
     @get:Column(nullable = false)
-    var preceding_stored: Boolean
+    abstract var preceding_stored: Boolean
     @get:Column(length = Int.MAX_VALUE, nullable = true)
-    var preceding_batch: String?
+    abstract var preceding_batch: String?
 }
 
-/**
- * get decoded event
- */
-@Suppress("DEPRECATION")
-fun RoomEventRow.getEvent(): RoomEvent? {
-    this._event = this._event ?: RoomEvent.parseOrNull(this.json)
-    if (this._event == null) {
-        logger.warn { "event ${this.event_id} decoding failure"}
-    }
-    return this._event
-}
-
-@Suppress("DEPRECATION")
 fun newRoomEventRow(event: RoomEvent, roomId: RoomId, json: String): RoomEventRow {
     val row = RoomEventRowEntity()
     row.room_id = roomId.id
     row.event_id = event.event_id
-    row._event = event
-    row.server_time = event.origin_server_ts
     row.json = json
+    row.initializeEvent(event)
+    row.server_time = event.origin_server_ts
     row.following_stored = true
     row.preceding_stored = true
     return row

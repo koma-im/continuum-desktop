@@ -7,6 +7,8 @@ import io.requery.sql.KotlinConfiguration
 import io.requery.sql.KotlinEntityDataStore
 import io.requery.sql.SchemaModifier
 import io.requery.sql.TableCreationMode
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import link.continuum.database.models.Membership
 import link.continuum.database.models.Models
 import link.continuum.desktop.database.models.meta.DbColumns
@@ -19,6 +21,15 @@ import kotlin.time.MonoClock
 import link.continuum.desktop.database.models.meta.Models as DbModels
 
 private val logger = KotlinLogging.logger {}
+
+private val jsonConfiguration = JsonConfiguration.Stable.copy(
+        strictMode = false, // allow unknown keys,
+        prettyPrint = true,
+        indent = "  "
+)
+
+internal val jsonMain = Json(jsonConfiguration)
+
 
 /**
  * find and open database
