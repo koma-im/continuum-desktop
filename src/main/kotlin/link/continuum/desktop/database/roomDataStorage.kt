@@ -15,7 +15,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.internal.StringSerializer
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.list
@@ -83,7 +84,7 @@ class RoomDataStorage(
     val latestAliasList = LatestFlowMap(
             save = { roomId: RoomId, s: List<String>, l: Long ->
                 val ser = try {
-                    json.stringify(StringSerializer.list, s)
+                    json.stringify(String.serializer().list, s)
                 } catch (e: Exception) {
                     return@LatestFlowMap
                 }
@@ -98,7 +99,7 @@ class RoomDataStorage(
                         .where(RoomAliasList::roomId.eq(roomId.full))
                         .get().firstOrNull() } ?: return@LatestFlowMap  0L to listOf()
                 val aliases = try {
-                    json.parse(StringSerializer.list, rec.aliases)
+                    json.parse(String.serializer().list, rec.aliases)
                 } catch (e: Exception) {
                     return@LatestFlowMap 0L to listOf()
                 }

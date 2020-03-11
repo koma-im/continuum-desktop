@@ -3,6 +3,7 @@ package link.continuum.desktop.events
 import koma.matrix.room.InvitedRoom
 import koma.matrix.room.naming.RoomId
 import kotlinx.serialization.UnstableDefault
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.internal.MapLikeSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -15,8 +16,9 @@ internal class InvitationDeserialization {
     @UnstableDefault
     @Test
     fun test1() {
-        val j =Json(JsonConfiguration.Default.copy(strictMode = false))
-        val serializer = (RoomId.serializer() to InvitedRoom.serializer()).map
+        val j =Json(JsonConfiguration.Default.copy(ignoreUnknownKeys = true))
+        val t = (RoomId.serializer() to InvitedRoom.serializer())
+        val serializer = MapSerializer(t.first, t.second)
         val data =j.parse(serializer, invite)
         val (room, invite) = data!!.toList().first()
         val invitation = InviteData(invite, room)

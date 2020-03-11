@@ -23,7 +23,7 @@ import link.continuum.desktop.database.models.meta.Models as DbModels
 private val logger = KotlinLogging.logger {}
 
 private val jsonConfiguration = JsonConfiguration.Stable.copy(
-        strictMode = false, // allow unknown keys,
+        ignoreUnknownKeys = true,
         prettyPrint = true,
         indent = "  "
 )
