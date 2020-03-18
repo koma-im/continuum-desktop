@@ -158,12 +158,12 @@ class WebContentNode(private val link: String,
         node.border = Border(BorderStroke(
                 Color.LIGHTGRAY,
                 BorderStrokeStyle.SOLID,
-                CornerRadii(0.5, true),
+                CornerRadii(3.0, false),
                 BorderWidths(1.0)
         ))
         node.background = Background(BackgroundFill(
                 Color.TRANSPARENT,
-                CornerRadii(0.5, true),
+                CornerRadii(3.0, false),
                 Insets.EMPTY))
 
         node.add(view.node)
