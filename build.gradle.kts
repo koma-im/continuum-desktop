@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.39"
+version = "0.9.40"
 
 plugins {
     kotlin("jvm") version "1.3.70"
@@ -11,7 +11,7 @@ plugins {
     id("maven")
     id("application")
     id("org.beryx.runtime") version "1.8.0"
-    id("org.openjfx.javafxplugin").version("0.0.5")
+    id("org.openjfx.javafxplugin").version("0.0.8")
 }
 
 allprojects {
@@ -36,7 +36,7 @@ allprojects {
 }
 
 javafx {
-    version = "13.0.1"
+    version = "14"
     modules = listOf("javafx.controls", "javafx.media", "javafx.fxml")
 }
 
@@ -47,7 +47,7 @@ dependencies {
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
     implementation("de.jensd:fontawesomefx-commons:9.1.2")
-    implementation("org.controlsfx:controlsfx:11.0.1")
+    implementation("org.controlsfx:controlsfx:11.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.3")
     implementation("com.vdurmont:emoji-java:4.0.0")
