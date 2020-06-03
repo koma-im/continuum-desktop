@@ -1,11 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.40"
+version = "0.9.41"
 
 plugins {
-    kotlin("jvm") version "1.3.70"
-    kotlin("kapt") version "1.3.70"
+    kotlin("jvm") version "1.4-M2"
+    kotlin("kapt") version "1.4-M2"
     id("com.github.johnrengelman.shadow").version("5.2.0")
     id("java")
     id("maven")
@@ -23,6 +23,8 @@ allprojects {
         maven("https://dl.bintray.com/jerady/maven")
         maven("https://jitpack.io")
         maven("https://repo.maven.apache.org/maven2")
+        maven ("https://dl.bintray.com/kotlin/kotlin-eap")
+        maven ("https://kotlin.bintray.com/kotlinx")
     }
 
     dependencies {
@@ -41,22 +43,24 @@ javafx {
 }
 
 dependencies {
-    val ktorVersion = "1.3.1"
-    implementation("io.github.koma-im:koma-library:0.9.23")
+    val ktorVersion = "1.3.2"
+    val coroutineVer = "1.3.7"
+    val serialVer = "0.20.0-1.4-M2"
+    implementation("io.github.koma-im:koma-library:0.9.25")
     implementation("org.cache2k:cache2k-core:1.2.4.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")
     implementation("de.jensd:fontawesomefx-commons:9.1.2")
     implementation("org.controlsfx:controlsfx:11.0.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:1.3.3")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", coroutineVer)
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", coroutineVer)
     implementation("com.vdurmont:emoji-java:4.0.0")
     implementation("org.slf4j:slf4j-api:1.8.0-beta2")
     implementation("org.slf4j:slf4j-simple:1.8.0-beta2")
     implementation("io.requery:requery-kotlin:1.6.1")
     implementation("io.requery:requery:1.6.1")
     implementation("com.h2database:h2:1.4.200")
-    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime", "0.20.0")
+    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime", serialVer)
     implementation("io.ktor", "ktor-client-okhttp", ktorVersion)
     implementation("io.ktor", "ktor-client-core", ktorVersion)
 
