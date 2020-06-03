@@ -145,10 +145,12 @@ interface UserPower: Persistable {
 }
 
 fun getRoomMemberPower(data: KDataStore, roomId: RoomId, userId: UserId): Float {
+    val c= UserPower::person.eq(userId.str)
+    val c1 = RoomPowerSettings::roomId.eq(roomId.id)
     return data.select(UserPower::class).where(UserPower::room.eq(roomId.id)
-            .and(UserPower::person.eq(userId.str))).get().firstOrNull()?.power?.toFloat() ?: run {
+            .and(c)).get().firstOrNull()?.power?.toFloat() ?: run {
         logger.debug { "no power level set for $userId in $roomId, querying room default" }
-        data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()?.usersDefault
+        data.select(RoomPowerSettings::class).where(c1).get().firstOrNull()?.usersDefault
     }?: run {
         logger.debug { "no default power level set for user in $roomId, using default" }
         0f
@@ -157,7 +159,8 @@ fun getRoomMemberPower(data: KDataStore, roomId: RoomId, userId: UserId): Float 
 
 fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId): Boolean {
     val u = getRoomMemberPower(data, roomId, userId)
-    val req = data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()
+    val c = RoomPowerSettings::roomId.eq(roomId.id)
+    val req = data.select(RoomPowerSettings::class).where(c).get().firstOrNull()
             ?.stateDefault ?:run {
         logger.debug { "no default power level set for state events in $roomId, using default 0" }
         0f
@@ -167,10 +170,12 @@ fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId): Boo
 
 fun getChangeStateAllowed(data: KDataStore, roomId: RoomId, userId: UserId, type: String): Boolean {
     val u = getRoomMemberPower(data, roomId, userId)
+    val c1 = EventPower::eventType.eq(type)
+    val c2 = RoomPowerSettings::roomId.eq(roomId.id)
     val req = data.select(EventPower::class).where(EventPower::room.eq(roomId.id)
-            .and(EventPower::eventType.eq(type))).get().firstOrNull()?.power?.toFloat() ?: run {
+            .and(c1)).get().firstOrNull()?.power?.toFloat() ?: run {
         logger.debug { "no power level set for state event $type in $roomId, querying room default" }
-        data.select(RoomPowerSettings::class).where(RoomPowerSettings::roomId.eq(roomId.id)).get().firstOrNull()?.stateDefault
+        data.select(RoomPowerSettings::class).where(c2).get().firstOrNull()?.stateDefault
     } ?:run {
         logger.debug { "no default power level set for state event $type in $roomId, using default" }
         0f
@@ -207,8 +212,9 @@ fun saveUserPowerLevels(data: KDataStore, roomId: RoomId, levels: Map<UserId, Fl
 
 fun saveRoomName(data: KDataStore, roomId: RoomId,
                  nick: String?, timestamp: Long) {
+    val c = RoomName::since.eq(timestamp)
     val d = data.select(RoomName::class) where (RoomName::roomId.eq(roomId.str)
-            and RoomName::since.eq(timestamp)
+            and c
             )
     val e = d.get().firstOrNull()
     if (e != null && e.roomName == nick) {
@@ -223,8 +229,9 @@ fun saveRoomName(data: KDataStore, roomId: RoomId,
 }
 
 fun getLatestRoomName(data: KDataStore, roomId: RoomId): Pair<Long, Optional<String>>? {
+    val c = RoomName::roomId.eq(roomId.str)
      data.select(RoomName::class)
-            .where(RoomName::roomId.eq(roomId.str))
+            .where(c)
             .orderBy(RoomName::since.desc())
             .get().use {
                  it.iterator(0, 1).use {
@@ -247,9 +254,10 @@ fun getLatestRoomName(data: KDataStore, roomId: RoomId): Pair<Long, Optional<Str
 
 
 fun saveRoomAvatar(data: KDataStore, roomId: RoomId, avatar: String?, timestamp: Long) {
+    val c = RoomAvatar::since.eq(timestamp)
     val d = data.select(RoomAvatar::class) where (
             RoomAvatar::roomId.eq(roomId.str)
-            and RoomAvatar::since.eq(timestamp)
+            and c
             )
     val e = d.get().firstOrNull()
     if (e != null && e.avatar == avatar) {
@@ -264,8 +272,9 @@ fun saveRoomAvatar(data: KDataStore, roomId: RoomId, avatar: String?, timestamp:
 }
 
 fun getLatestAvatar(data: KDataStore, roomId: RoomId): Pair<Long, Optional<String>>? {
+    val c = RoomAvatar::roomId.eq(roomId.str)
     return data.select(RoomAvatar::class)
-            .where(RoomAvatar::roomId.eq(roomId.str))
+            .where(c)
             .orderBy(RoomAvatar::since.desc())
             .get().use { it.firstOrNull() }?.let {
                 it.since to it.avatar.toOption()

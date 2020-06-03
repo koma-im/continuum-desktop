@@ -72,8 +72,9 @@ private fun getDbColumns(dataSource: JdbcConnectionPool): Map<String, HashSet<St
             KotlinConfiguration(dataSource = dataSource, model = DbModels.H2INFO)
     )
     val existingColumns = hashMapOf<String, HashSet<String>>()
+    val c = DbColumns::tableSchema.eq("PUBLIC")
     s0.select(DbColumns::class)
-            .where(DbColumns::tableSchema.eq("PUBLIC"))
+            .where(c)
             .get().forEach {
                 existingColumns.computeIfAbsent(it.tableName.toLowerCase()) {
                     hashSetOf()

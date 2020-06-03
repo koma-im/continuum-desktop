@@ -36,7 +36,8 @@ internal class RoomKtTest {
         data.close()
 
         val d1 = openStore(dir.toString())
-        val s1 = d1.select(RoomSettings::class).where(RoomSettings::roomId.eq(room0.id)).get().first()
+        val c1 = RoomSettings::roomId.eq(room0.id)
+        val s1 = d1.select(RoomSettings::class).where(c1).get().first()
         assertEquals(HistoryVisibility.Invited, s1.historyVisibility)
         assertEquals(RoomJoinRules.Invite, s1.joinRule)
         assertEquals(RoomVisibility.Private, s1.visibility)
@@ -47,7 +48,8 @@ internal class RoomKtTest {
         val room0 = RoomId("matrix.org", "room0")
         val u0 = UserId("@user0:matrix.org")
         saveUserPowerLevels(data, room0, mapOf(u0 to 6f))
-        val p = data.select(UserPower::class).where(UserPower::person.eq(u0.str).and(UserPower::room.eq(room0.id))).get().firstOrNull()?.power
+        val c1 = UserPower::room.eq(room0.id)
+        val p = data.select(UserPower::class).where(UserPower::person.eq(u0.str).and(c1)).get().firstOrNull()?.power
         assertEquals(6, p)
     }
 

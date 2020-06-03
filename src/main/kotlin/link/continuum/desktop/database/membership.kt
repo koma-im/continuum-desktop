@@ -22,8 +22,8 @@ class RoomMemberships(private val data: KDataStore) {
             memberships.computeIfAbsent(roomId) {
                 async {
                     val membersList = DedupList<UserId, UserId> {it}
-                    val members = data.runOp { select(Membership::class).where(
-                            Membership::room.eq(roomId.id))
+                    val c1 = Membership::room.eq(roomId.id)
+                    val members = data.runOp { select(Membership::class).where(c1)
                             .orderBy(Membership::since.asc())
                             .limit(200).get().map { UserId(it.person) } }
                     logger.debug { "loaded ${members.size} members in $roomId" }

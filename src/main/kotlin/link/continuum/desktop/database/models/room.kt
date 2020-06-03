@@ -19,15 +19,14 @@ suspend fun loadRoom(dataStorage: RoomDataStorage, roomId: RoomId,
     logger.debug { "Loading room with id $roomId" }
     val data = dataStorage.data
     val settings = data.runOp {
-        select(RoomSettings::class).where(
-                RoomSettings::roomId.eq(roomId.id)
-        ).get().firstOrNull()
+        val c= RoomSettings::roomId.eq(roomId.id)
+        select(RoomSettings::class).where(c).get().firstOrNull()
     } onNull {
         logger.warn { "no settings stored for room $roomId" }
     }
-    val powers = data.runOp { select(RoomPowerSettings::class).where(
-            RoomPowerSettings::roomId.eq(roomId.id)
-    ).get().firstOrNull() } onNull  {
+    val c = RoomPowerSettings::roomId.eq(roomId.id)
+    val powers = data.runOp { select(RoomPowerSettings::class).where(c).get().firstOrNull()
+    } onNull  {
         logger.warn { "no power settings stored for room $roomId" }
     }
     val room = Room(roomId, dataStorage,

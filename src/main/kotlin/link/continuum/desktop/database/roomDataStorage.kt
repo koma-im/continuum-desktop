@@ -19,7 +19,6 @@ import kotlinx.serialization.builtins.list
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.list
 import link.continuum.database.models.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.models.loadRoom
@@ -75,7 +74,9 @@ class RoomDataStorage(
                 data.runOp { upsert(rec) }
             },
             init = {
-                data.runOp { select(RoomCanonicalAlias::class).where(RoomCanonicalAlias::roomId.eq(it.full))
+                data.runOp {
+                    val c = RoomCanonicalAlias::roomId.eq(it.full)
+                    select(RoomCanonicalAlias::class).where(c)
                         .get().firstOrNull() ?.let {
                             it.since to it.alias.toOption()
                         }
@@ -95,8 +96,9 @@ class RoomDataStorage(
                 data.runOp { upsert(rec) }
             },
             init = {roomId ->
+                val c = RoomAliasList::roomId.eq(roomId.full)
                 val rec = data.runOp {select(RoomAliasList::class)
-                        .where(RoomAliasList::roomId.eq(roomId.full))
+                        .where(c)
                         .get().firstOrNull() } ?: return@LatestFlowMap  0L to listOf()
                 val aliases = try {
                     json.parse(String.serializer().list, rec.aliases)
@@ -131,8 +133,9 @@ class RoomDataStorage(
     val heroes = LatestFlowMap(save = { room: RoomId, heroes: List<UserId>, l: Long ->
         data.runOp { saveHeroes(room, heroes, l) }
     }, init = { room: RoomId ->
+        val c = RoomHero::room.eq(room.id)
         val records = data.runOp { select(RoomHero::class)
-                .where(RoomHero::room.eq(room.id))
+                .where(c)
                 .orderBy(RoomHero::since.desc())
                 .limit(5).get().toList()
         }
@@ -141,11 +144,10 @@ class RoomDataStorage(
             (first.since ?: 0L) to records.map { UserId(it.hero) }
         } else {
             val mems = data.runOp {
+                val c1 = Membership::joiningRoom.isNull()
+                val c2 = Membership::joiningRoom.eq(true)
                 select(Membership::class).where(
-                        Membership::room.eq(room.id)
-                                .and(
-                                        Membership::joiningRoom.eq(true)
-                                                .or(Membership::joiningRoom.isNull()))
+                        Membership::room.eq(room.id).and(c2.or(c1))
                 ).orderBy(Membership::since.asc()).limit(5).get().map { it.person }
             }
             logger.info { "no known heros in $room, using $mems"}

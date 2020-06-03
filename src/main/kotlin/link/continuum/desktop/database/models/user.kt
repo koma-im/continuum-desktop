@@ -57,9 +57,11 @@ interface SyncBatchKey: Persistable {
 }
 
 fun saveUserNick(data: KDataStore, userId: UserId, nick: String, timestamp: Long) {
+    val c0 = UserNickname::nickname.eq(nick)
+    val c1 = UserNickname::since.eq(timestamp)
     val d = data.select(UserNickname::class) where (UserNickname::owner.eq(userId.str)
-            and UserNickname::nickname.eq(nick)
-            and UserNickname::since.eq(timestamp)
+            and c0
+            and c1
             )
     if (d.get().firstOrNull() != null) {
         logger.trace { "already saved nickname $nick of user $userId with time $timestamp" }
@@ -73,8 +75,9 @@ fun saveUserNick(data: KDataStore, userId: UserId, nick: String, timestamp: Long
 }
 
 fun getLatestNick(data: KDataStore, userId: UserId): UserNickname? {
+    val c = UserNickname::owner.eq(userId.str)
     return data.select(UserNickname::class)
-            .where(UserNickname::owner.eq(userId.str))
+            .where(c)
             .orderBy(UserNickname::since.desc())
             .get().firstOrNull()
 }
@@ -89,15 +92,18 @@ fun saveSyncBatchKey(data: KDataStore, userId: UserId, batch: String) {
 
 
 fun getSyncBatchKey(data: KDataStore, userId: UserId): String? {
-    val k = data.select(SyncBatchKey::class).where(SyncBatchKey::owner.eq(userId.str)).get().firstOrNull()?.batch
+    val c = SyncBatchKey::owner.eq(userId.str)
+    val k = data.select(SyncBatchKey::class).where(c).get().firstOrNull()?.batch
     logger.debug { "loaded sync batch key of user $userId: $k" }
     return k
 }
 
 fun saveUserAvatar(data: KDataStore, userId: UserId, avatar: String, timestamp: Long) {
+    val c0 =  UserAvatar::avatar.eq(avatar)
+    val c1 = UserAvatar::since.eq(timestamp)
     val d = data.select(UserAvatar::class) where (UserAvatar::key.eq(userId.str)
-            and UserAvatar::avatar.eq(avatar)
-            and UserAvatar::since.eq(timestamp)
+            and c0
+            and c1
             )
     if (d.get().firstOrNull() != null) {
         logger.trace { "already saved Avatar $avatar of user $userId with time $timestamp" }
@@ -111,8 +117,9 @@ fun saveUserAvatar(data: KDataStore, userId: UserId, avatar: String, timestamp: 
 }
 
 fun getLatestAvatar(data: KDataStore, userId: UserId): UserAvatar? {
+    val  c = UserAvatar::key.eq(userId.str)
     return data.select(UserAvatar::class)
-            .where(UserAvatar::key.eq(userId.str))
+            .where(c)
             .orderBy(UserAvatar::since.desc())
             .get().firstOrNull()
 }

@@ -30,7 +30,8 @@ class KDataStore(
                 is DbMsg.LoadEvents -> {
                     var condition: Logical<*, *> = RoomEventRow::room_id.eq(msg.roomId)
                     if (msg.upto!=null) {
-                        condition = condition.and(RoomEventRow::server_time.lte(msg.upto))
+                        val c1 = RoomEventRow::server_time.lte(msg.upto)
+                        condition = condition.and(c1)
                     }
                     val r = _dataStore.select(RoomEventRow::class).where(condition)
                             .orderBy(RoomEventRow::server_time.desc()).limit(msg.limit).get().reversed()

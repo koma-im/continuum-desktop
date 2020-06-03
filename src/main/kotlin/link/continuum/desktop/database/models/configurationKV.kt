@@ -52,7 +52,8 @@ inline fun<reified T: Serializable> dbkv(data: KotlinEntityDataStore<Persistable
     return KeyValueEntry<T>(
             default = default,
             _load = { name ->
-                val b = data.select(DbKeyValue::class).where(DbKeyValue::key.eq(name)).get().firstOrNull()
+                val c = DbKeyValue::key.eq(name)
+                val b = data.select(DbKeyValue::class).where(c).get().firstOrNull()
                 b ?:return@KeyValueEntry null
                 deserialize<T>(b.bytes)
             },
