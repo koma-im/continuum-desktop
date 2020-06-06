@@ -41,7 +41,7 @@ class ChatRecvSendView(
             messageInput.appendText(it)
         }
         currentRoom.set(room)
-        messageScroll.roomIdObservable.set(room)
+        messageScroll.roomIdObservable.set(value = room)
     }
 
     init {

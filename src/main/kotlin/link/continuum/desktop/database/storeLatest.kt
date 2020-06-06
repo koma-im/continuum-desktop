@@ -3,10 +3,11 @@ package link.continuum.desktop.database
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import link.continuum.desktop.observable.MutableObservable
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -25,9 +26,9 @@ open class LatestFlowMap<K, V>(
     suspend fun update(key: K, value: V, time: Long) {
         getUpdatable(key).update(key, value, time)
     }
-    fun receiveUpdates(key: K): Flow<V> {
+    fun receiveUpdates(key: K): Flow<V?> {
         val up = getUpdatable(key)
-        return up.observable.flow()
+        return up.observable
     }
     private fun getUpdatable(key: K): UpdatableValue {
         return flows.computeIfAbsent(key) { UpdatableValue().also {
@@ -40,13 +41,14 @@ open class LatestFlowMap<K, V>(
     private inner class UpdatableValue() {
         private val mutex = Mutex()
         private var timestamp = 0L
-        val observable = MutableObservable<V>()
+        private  val _observable = MutableStateFlow<V?>(null)
+        val observable: StateFlow<V?> get() =  _observable
         suspend fun update(key: K, value: V, time: Long) {
             mutex.withLock {
                 if (time < timestamp) return
-                if (timestamp == time && observable.getOrNull() == value) return
+                if (timestamp == time && _observable.value == value) return
                 timestamp = time
-                observable.set(value)
+                _observable.value = value
                 save(key, value, time)
             }
         }

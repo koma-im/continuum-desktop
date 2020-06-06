@@ -2,10 +2,9 @@ package koma.gui.view.window.chatroom.messaging.reading.display.room_event.util
 
 import javafx.geometry.Pos
 import javafx.scene.control.Label
-import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -32,7 +31,7 @@ class StateEventUserView(
     private val nameLabel: Label
     private val itemId = MutableObservable<Pair<UserId, MediaServer>>()
     fun updateUser(userId: UserId, mediaServer: MediaServer) {
-        itemId.set(userId to mediaServer)
+        itemId.set(value = userId to mediaServer)
     }
     init {
         root.add(avatarView.root)
@@ -45,12 +44,14 @@ class StateEventUserView(
         }
         root.add(l)
 
-        itemId.flow().flatMapLatest {
+        itemId.flow()
+                .flatMapLatest {
             store.getNameUpdates(it.first)
         }.onEach {
             nameLabel.text = it
         }.launchIn(scope)
-        itemId.flow().onEach {
+        itemId.flow()
+                .onEach {
             avatarView.updateUser(it.first, it.second)
             nameLabel.textFill = store.getUserColor(it.first)
         }.launchIn(scope)

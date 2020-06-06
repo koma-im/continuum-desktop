@@ -59,7 +59,7 @@ class RoomAliasForm(room: RoomId, user: UserId,
         }
         val canonAlias = SimpleStringProperty()
         dataStorage.latestCanonAlias.receiveUpdates(room).onEach {
-            val n = it.getOrNull()
+            val n = it?.getOrNull()
             canonAlias.set(n)
             stage.title = "Update Aliases of $n"
         }.launchIn(scope)

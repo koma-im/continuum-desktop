@@ -79,7 +79,9 @@ class MEmoteViewNode(
     }
 
     init {
-        userIdFlow.flow().flatMapLatest {
+        userIdFlow
+                .flow()
+                .flatMapLatest {
             userData.getNameUpdates(it)
         }.onEach {
             userLabel.text = it

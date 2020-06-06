@@ -50,7 +50,7 @@ class RoomInfoDialog(
             scope.cancel()
         }
         datas.latestAvatarUrl.receiveUpdates(room).onEach {
-            roomicon.updateUrl(it.getOrNull(), context.account.server)
+            roomicon.updateUrl(it?.getOrNull(), context.account.server)
         }.launchIn(scope)
         val color = room.hashColor()
         var name: String? = null

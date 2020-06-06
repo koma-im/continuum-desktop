@@ -156,17 +156,17 @@ class RoomDataStorage(
     })
     fun latestDisplayName(id: RoomId): Flow<String> {
         return latestName.receiveUpdates(id).flatMapLatest {
-            val name = it.getOrNull()
+            val name = it?.getOrNull()
             if (name != null) {
                 flowOf(name)
             } else {
                 latestCanonAlias.receiveUpdates(id).flatMapLatest {
-                    val canon = it.getOrNull()
+                    val canon = it?.getOrNull()
                     if (canon != null) {
                         flowOf(canon)
                     } else {
                         latestAliasList.receiveUpdates(id).flatMapLatest {
-                            val first = it.firstOrNull()
+                            val first = it?.firstOrNull()
                             if (first != null) {
                                 flowOf(first)
                             } else {
@@ -187,7 +187,7 @@ private fun roomDisplayName(
 ): Flow<String> {
     return flow {
         emit(room.localstr)
-        emitAll(heroes.receiveUpdates(room).flatMapLatest {
+        emitAll(heroes.receiveUpdates(room).filterNotNull().flatMapLatest {
             logger.info { "generating room name from heros $it" }
             combine(it.map { userDatas.getNameUpdates(it) }) {
                 val n = it.filterNotNull().joinToString(", ")

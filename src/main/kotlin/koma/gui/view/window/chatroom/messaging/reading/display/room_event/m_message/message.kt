@@ -15,6 +15,7 @@ import koma.matrix.event.room_message.MRoomMessage
 import koma.matrix.event.room_message.chat.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -66,7 +67,8 @@ class MRoomMessageViewNode(
                 }
             }
         }
-        senderId.flow().flatMapLatest {
+        senderId.flow()
+                .flatMapLatest {
             store.userData.getNameUpdates(it)
         }.onEach {
             senderLabel.text = it
@@ -76,7 +78,7 @@ class MRoomMessageViewNode(
     override fun update(message: MRoomMessage, server: Server) {
         item = message
         releaseContentNode()
-        senderId.set(message.sender)
+        senderId.set(value = message.sender)
         timeView.updateTime(message.origin_server_ts)
         avatarView.updateUser(message.sender, server)
         senderLabel.fill = userData.getUserColor(message.sender)
@@ -91,7 +93,7 @@ class MRoomMessageViewNode(
     fun update(message: NotificationResponse.Event, server: Server, msg: M_Message) {
         item = null
         releaseContentNode()
-        senderId.set(message.sender)
+        senderId.set(value = message.sender)
         timeView.updateTime(message.origin_server_ts)
         avatarView.updateUser(message.sender, server)
         senderLabel.fill = userData.getUserColor(message.sender)

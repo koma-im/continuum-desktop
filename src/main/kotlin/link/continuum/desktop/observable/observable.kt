@@ -1,46 +1,36 @@
 package link.continuum.desktop.observable
 
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 
 // experimental
 
-open class Observable<T>() {
-    protected val channel = ConflatedBroadcastChannel<T>()
-    fun get() = channel.value
-    fun getOrNull() = channel.valueOrNull
+inline class Observable<T: Any>(
+        private val channel: MutableStateFlow<T?> = MutableStateFlow<T?>(null)
+) {
+    val value: T?
+        get() = channel.value
+    fun get(): T = channel.value as T
+    fun getOrNull() = channel.value
     fun flow(): Flow<T> {
-        val f= flow<T> {
-            val s = channel.openSubscription()
-            try {
-                emitAll(s)
-            } finally {
-                s.cancel()
+        val f = flow {
+            var started = false
+            channel.collect {
+                if (!started) {
+                    started = true
+                    if (it == null) return@collect
+                }
+                emit(it!!)
             }
         }
         return f
     }
-
-    fun<R> map(mapper: suspend (T) -> R) = Mapped(this, mapper)
-
-    class Mapped<T, R>(private val original: Observable<T>,
-                       private val mapper: suspend (T) -> R
-                       ) {
-        fun flow(): Flow<R> = original.flow().map(mapper)
+    fun set(value: T) {
+        channel.value = value
     }
 }
 
-class MutableObservable<T>(): Observable<T>() {
-    constructor(value: T) : this() {
-        channel.offer(value)
-    }
-    fun set(value: T) {
-        channel.offer(value)
-    }
-    fun close() {
-        channel.close()
-    }
+typealias  MutableObservable<T> = Observable<T>
+
+fun<T> MutableStateFlow<T>.set(value: T) {
+    this.value = value
 }

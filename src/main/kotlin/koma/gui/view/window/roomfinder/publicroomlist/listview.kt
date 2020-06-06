@@ -27,8 +27,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.*
-import link.continuum.desktop.observable.MutableObservable
-import link.continuum.desktop.observable.Observable
 import link.continuum.desktop.util.Account
 import mu.KotlinLogging
 import org.controlsfx.control.Notifications
@@ -56,14 +54,14 @@ class PublicRoomsView(private val account: Account,
     private val scope = MainScope()
     val ui = VBox(5.0)
 
-    val input: Observable<String> = MutableObservable<String>("")
+    private val _input = MutableStateFlow("")
+    val input: StateFlow<String> get() = _input
     private val roomListView: RoomListView
 
     init {
         val field = TextFields.createClearableTextField() as CustomTextField
         field.textProperty().addListener { _, _, newValue ->
-            input as MutableObservable<String>
-            input.set(newValue)
+            _input.value = newValue
         }
         roomListView = RoomListView(input, account, appData)
         VBox.setVgrow(ui, Priority.ALWAYS)
@@ -71,16 +69,16 @@ class PublicRoomsView(private val account: Account,
         field.promptText = "#example:matrix.org"
         val joinByAliasButton = Button("Join by Room Alias").apply {
             showIf(false)
-            setOnAction { joinRoomByAlias(input.get()) }
+            setOnAction { joinRoomByAlias(input.value) }
         }
         val joinByIdButton = Button("Join by Room ID").apply {
             showIf(false)
             setOnAction {
-                val inputid = input.get()
+                val inputid = input.value
                 scope.joinById(RoomId(inputid), inputid, this, account, appData)
             }
         }
-        input.flow().onEach {
+        input.onEach {
             val inputStartAlias = it.startsWith('#')
             joinByAliasButton.showIf(inputStartAlias)
             val inputIsAlias = canBeValidRoomAlias(it)
@@ -124,7 +122,7 @@ class PublicRoomsView(private val account: Account,
 
 
 class RoomListView(
-        input: Observable<String>,
+        input: StateFlow<String>,
         private val account: Account,
         appData: AppStore
 ) {
@@ -161,8 +159,7 @@ class RoomListView(
         }
         needLoadMore.offer(Unit)
 
-        input.flow()
-                .onEach {
+        input.onEach {
                     logger.trace { "input: $it." }
                     updateFilter(it.trim())
                 }.debounce(200).distinctUntilChanged().flatMapLatest {

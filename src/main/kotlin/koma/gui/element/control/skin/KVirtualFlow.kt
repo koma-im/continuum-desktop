@@ -25,13 +25,13 @@ import koma.gui.element.control.KListView
 import koma.gui.element.control.KVirtualScrollBar
 import koma.gui.element.control.Utils
 import koma.koma_app.Globals
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import link.continuum.desktop.gui.CatchingGroup
 import link.continuum.desktop.gui.ParentReflection
-import link.continuum.desktop.observable.MutableObservable
 import link.continuum.desktop.util.ArrayLinkedList
 import mu.KotlinLogging
 import java.util.*
-import link.continuum.desktop.observable.Observable as KObservable
 
 private val logger = KotlinLogging.logger {}
 /**
@@ -321,8 +321,9 @@ class KVirtualFlow<I, T>(
 
             return null
         }
+    private  val _firstVisibleIndex = MutableStateFlow<Int?>(null)
+    val firstVisibleIndexObservable: StateFlow<Int?> get() =  _firstVisibleIndex
 
-    val firstVisibleIndexObservable: KObservable<Int?> = MutableObservable<Int?>(null)
     /**
      * Locates and returns the first non-empty IndexedCell that is partially or
      * completely visible. This really only ever returns null if there are no
@@ -1651,8 +1652,7 @@ class KVirtualFlow<I, T>(
         if (getPosition() != lengthBar.value) {
             lengthBar.value = getPosition()
         }
-        firstVisibleIndexObservable as MutableObservable
-        firstVisibleIndexObservable.set(firstVisibleCell?.index)
+        _firstVisibleIndex.value = firstVisibleCell?.index
     }
 
     /**

@@ -18,10 +18,7 @@ import koma.util.testFailure
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.actor
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.hashColor
 import link.continuum.desktop.gui.*
@@ -34,7 +31,6 @@ import link.continuum.desktop.util.getOrNull
 import mu.KotlinLogging
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
 
@@ -162,7 +158,7 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
             }
             item("Invite Member"){
                 action {
-                    val room = roomObservable.getOrNull()
+                    val room = roomObservable.value
                     room?.let {
                         dialogInviteMember(it)
                     } ?: logger.warn { "No room selected" }
@@ -170,7 +166,7 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
             }
             items.add(SeparatorMenuItem())
             item("Leave").action {
-                val room = roomObservable.getOrNull()
+                val room = roomObservable.value
                 room ?.let {
                     scope.launch(Dispatchers.Default) {
                         val appData = deferredAppData.await()
@@ -179,7 +175,7 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
                 }
             }
             item("Forget").action {
-                val room = roomObservable.getOrNull()
+                val room = roomObservable.value
                 room ?.let {
                     scope.launch {
                         val appData = deferredAppData.await()
@@ -195,10 +191,10 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
     private val startObserving = scope.async(start = CoroutineStart.LAZY) {
         logger.trace { "start observing room" }
         val data = deferredAppData.await().roomStore
-        val selected = MutableObservable<Boolean>(false)
-        selectedProperty().addListener { _, _, newValue -> selected.set(newValue) }
-        val roomColor = roomObservable.map { it.hashColor() }
-        roomColor.flow().onEach {
+        val selected = MutableStateFlow<Boolean>(false)
+        selectedProperty().addListener { _, _, newValue -> selected.value = newValue }
+        val roomColor = roomObservable.flow().map { it?.hashColor()  }
+        roomColor.filterNotNull().onEach {
             avatar.initialIcon.updateColor(it)
         }.launchIn(scope)
 
@@ -216,7 +212,7 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
                 .launchIn(scope)
 
         // reverse text brightness when selected
-        val textColor = selected.flow().combine(roomColor.flow()) { sel, c ->
+        val textColor = selected.combine(roomColor) { sel, c ->
             if (sel) Color.WHITE else c
         }
         textColor.onEach {
@@ -230,7 +226,7 @@ class RoomFragment(private val deferredAppData: Deferred<AppData>,
                 .flatMapLatest {
                     data.latestAvatarUrl.receiveUpdates(it)
                 }.onEach {
-                    avatar.updateUrl(it.getOrNull(), context.account.server)
+                    avatar.updateUrl(it?.getOrNull(), context.account.server)
                 }.launchIn(scope)
     }
 

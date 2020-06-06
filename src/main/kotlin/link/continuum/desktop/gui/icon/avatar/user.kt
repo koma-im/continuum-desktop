@@ -1,21 +1,21 @@
 package link.continuum.desktop.gui.icon.avatar
 
 import javafx.scene.layout.Region
+import javafx.scene.paint.Color
 import koma.Server
 import koma.matrix.UserId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.observable.MutableObservable
+import link.continuum.desktop.observable.set
 import link.continuum.desktop.util.http.MediaServer
 import mu.KotlinLogging
 import java.util.concurrent.atomic.AtomicInteger
 
 private val logger = KotlinLogging.logger {}
-private val counter = AtomicInteger(0)
 
 class AvatarView(
         private val userData: UserDataStore
@@ -25,25 +25,41 @@ class AvatarView(
         get() = avatar.root
 
     private val scope = MainScope()
-    private val user = MutableObservable<Pair<UserId, Server>>()
+    private lateinit var server: MediaServer
+    private val user = MutableStateFlow<UserId?>(null)
 
     init {
-        logger.debug { "creating AvatarView ${counter.getAndIncrement()}" }
-
-        user.flow().flatMapLatest {
-            userData.getNameUpdates(it.first)
+        user.dropWhile {
+            it == null
         }.onEach {
-            val color = userData.getUserColor(user.get().first)
-            if ( it != null) avatar.updateName(it, color)
+            if (it == null) {
+                avatar.initialIcon.updateColor(Color.GRAY)
+                avatar.initialIcon.updateString("")
+            } else {
+                val color = userData.getUserColor(it)
+                avatar.initialIcon.updateColor(color)
+            }
+        }.filterNotNull().flatMapLatest {
+            userData.getNameUpdates(it)
+        }.onEach {
+            avatar.initialIcon.updateString(it ?: "")
         }.launchIn(scope)
-        user.flow().flatMapLatest {
-            userData.getAvatarUrlUpdates(it.first)
+
+        user.dropWhile {
+            it == null
         }.onEach {
-            avatar.updateUrl(it, user.get().second)
+            if (it == null) {
+                avatar.imageView.setMxc(null, server)
+            }
+        }.filterNotNull().flatMapLatest {
+            userData.getAvatarUrlUpdates(it)
+        }.onEach {
+            avatar.updateUrl(it, server)
         }.launchIn(scope)
     }
 
     fun updateUser(userId: UserId, server: MediaServer) {
-        user.set(userId to server)
+        this.server = server
+        user.set(userId)
     }
 }

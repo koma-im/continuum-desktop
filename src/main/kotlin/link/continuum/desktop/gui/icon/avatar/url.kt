@@ -26,10 +26,10 @@ abstract class UrlAvatar(
         override fun getBaselineOffset(): Double = height * 0.75
     }
     val initialIcon = InitialIcon()
-    private val imageView = FitImageRegion()
+    val imageView = FitImageRegion()
 
     init {
-        imageView.imageProperty.flow().onEach {
+        imageView.imageProperty.onEach {
             val noImage = it == null
             initialIcon.root.apply {
                 isVisible = noImage
@@ -42,6 +42,7 @@ abstract class UrlAvatar(
         root.add(imageView)
     }
 
+    @Deprecated("")
     fun updateName(name: String, color: Color) {
         debugAssertUiThread()
         this.initialIcon.updateItem(name, color)

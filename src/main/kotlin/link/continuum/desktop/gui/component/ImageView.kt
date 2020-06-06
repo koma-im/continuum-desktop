@@ -7,12 +7,10 @@ import koma.network.media.MHUrl
 import koma.util.testFailure
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import link.continuum.desktop.gui.prop
 import link.continuum.desktop.observable.MutableObservable
+import link.continuum.desktop.observable.set
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -31,11 +29,11 @@ class MxcImageView {
         urlFlow.set(mxc to server)
     }
     init {
-        urlFlow.flow()
-                .distinctUntilChanged { old, new -> old.first == new.first }
+        urlFlow.flow().distinctUntilChanged { old, new -> old.first == new.first }
                 .onEach {
                     (root as ImageView).image = null
                 }
+                .filterNotNull()
                 .mapLatest {
                     val w = 32.0.coerceAtLeast(fitWidth)
                     val h = 32.0.coerceAtLeast(fitHeight)

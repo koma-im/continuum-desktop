@@ -11,8 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import link.continuum.database.models.RoomEventRow
 import link.continuum.desktop.gui.HBox
 import link.continuum.desktop.gui.VBox
@@ -105,8 +104,9 @@ class MessagesListScrollPane(
         VBox.setVgrow(root, Priority.ALWAYS)
         HBox.setHgrow(virtualList.view, Priority.ALWAYS)
         var msgm: MessageManager? = null
-        roomIdObservable.map { store.messages.get(it) to it
-        }.flow().onEach {
+        roomIdObservable.flow().map {
+            store.messages.get(it) to it
+        }.onEach {
             val m = it.first
             msgm = m
             if (m.shownList.isEmpty()) {
@@ -115,7 +115,7 @@ class MessagesListScrollPane(
             setList(m.shownList, it.second)
             delay(100)
         }.launchIn(scope)
-        listView.flow.firstVisibleIndexObservable.flow().onEach {
+        listView.flow.firstVisibleIndexObservable.onEach {
             val m = msgm ?: return@onEach
             if (!(listView.items === m.shownList)) {
                 logger.warn { "listView.items and current list does not match"}

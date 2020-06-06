@@ -35,7 +35,7 @@ class MemberCell(
     private val avatarView = AvatarView(store)
     private val name: Label
 
-    private val itemId = MutableObservable<SelectUser>()
+    private val itemId = MutableObservable<UserId>()
     init {
 
         root.apply {
@@ -52,7 +52,7 @@ class MemberCell(
         itemId.flow().flatMapLatest {
             store.getNameUpdates(it)
         }.onEach {
-            logger.debug { "updating name in user list: ${itemId.getOrNull()} is $it" }
+            logger.debug { "updating name in user list: ${itemId.value} is $it" }
             check(Platform.isFxApplicationThread())
             name.text = it
         }.launchIn(scope)

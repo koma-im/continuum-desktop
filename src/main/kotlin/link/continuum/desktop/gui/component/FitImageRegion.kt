@@ -9,12 +9,9 @@ import koma.util.KResult
 import koma.util.testFailure
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import link.continuum.desktop.observable.MutableObservable
+import link.continuum.desktop.observable.set
 import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
@@ -57,11 +54,12 @@ class FitImageRegion(
         cover: Boolean = true
 ): Region() {
     private val scope = MainScope()
-    val urlFlow = MutableObservable<Pair<MHUrl?, Server>>()
-    val imageProperty = MutableObservable<Image?>()
+    private lateinit var  server: Server
+    val urlFlow = MutableStateFlow<MHUrl?>(null)
+    val imageProperty = MutableStateFlow<Image?>(null)
     var image
-        get() = imageProperty.get()
-        set(value) {imageProperty.set(value)}
+        get() = imageProperty.value
+        set(value) {imageProperty.value =  value}
 
     /**
      * null url clears the image
@@ -70,27 +68,29 @@ class FitImageRegion(
             mxc: MHUrl?,
             server: Server
     ) {
-        urlFlow.set(mxc to server)
+        this.server = server
+        urlFlow.set(mxc)
     }
     init {
         scope.launch {
-            urlFlow.flow()
-                    .distinctUntilChanged { old, new -> old.first == new.first }
-                    .collectLatest {
-                        val u = it.first ?: run {
-                            imageProperty.set(null)
-                            return@collectLatest
-                        }
+            urlFlow.onEach {
+                if (it == null) {
+                    imageProperty.set(null)
+                }
+            }
+                    .filterNotNull()
+                    .distinctUntilChanged()
+                    .collectLatest { u ->
                         val r = this@FitImageRegion
                         val w = r.width.coerceAtLeast(32.0)
                         val h = r.height.coerceAtLeast(32.0)
                         logger.trace { "Image view size $w $h" }
-                        val (img, _, _) = downloadImageSized(u, it.second, w, h)
+                        val (img, _, _) = downloadImageSized(u, server, w, h)
                         img ?: return@collectLatest
                         imageProperty.set(img)
                     }
         }
-        imageProperty.flow().onEach {
+        imageProperty.onEach {
             if (image == null) {
                 backgroundProperty().set(null)
                 return@onEach
