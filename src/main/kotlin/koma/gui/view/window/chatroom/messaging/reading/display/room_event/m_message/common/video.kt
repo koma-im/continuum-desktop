@@ -13,7 +13,10 @@ import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.desktop.gui.action
 import link.continuum.desktop.gui.add
+import mu.KotlinLogging
 import okhttp3.HttpUrl
+
+private val logger = KotlinLogging.logger {}
 
 private val settings: AppSettings = appState.store.settings
 
@@ -48,11 +51,15 @@ class VideoElement(val url: HttpUrl): ViewNode {
     }
 
     private fun playVideo() {
-        val media = Media(url.toString())
-        val player = MediaPlayer(media)
-        player.isAutoPlay = false
-        mediaView.mediaPlayer = player
-        player.play()
+        runCatching {
+            val media = Media(url.toString())
+            val player = MediaPlayer(media)
+            player.isAutoPlay = false
+            mediaView.mediaPlayer = player
+            player.play()
+        }.onFailure {
+            logger.warn { "media $url causes error $it" }
+        }
     }
 }
 
