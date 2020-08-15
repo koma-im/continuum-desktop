@@ -6,6 +6,7 @@ import koma.gui.view.window.chatroom.messaging.reading.display.room_event.m_mess
 import koma.matrix.UserId
 import link.continuum.desktop.gui.message.richtext.parseRichXml
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.w3c.dom.Document
@@ -50,9 +51,9 @@ internal class CustomHtmlKtTest {
 
     @Test
     fun testParseRichText() {
-        val h = HttpUrl.parse("https://matrix.to/#/@john:example.org")!!
-        assertEquals("/@john:example.org", h.fragment())
-        assertEquals(listOf(""), h.pathSegments())
+        val h = "https://matrix.to/#/@john:example.org".toHttpUrlOrNull()!!
+        assertEquals("/@john:example.org", h.fragment)
+        assertEquals(listOf(""), h.pathSegments)
         val s = "<a href=\"https://matrix.to/#/@john:example.org\">JohnD </a>: morning"
         val richtext = s.parseRichXml()
         val link = richtext!![0]

@@ -27,7 +27,7 @@ suspend fun downloadHttp(
     val r = client.newCall(req).await()
     if (r.isFailure) return Err(r.failureOrThrow())
     val res = r.getOrThrow()
-    val b = res.body()
+    val b = res.body
     if (!res.isSuccessful || b == null) {
         return fmtErr { "failed to get response body for $url" }
     }

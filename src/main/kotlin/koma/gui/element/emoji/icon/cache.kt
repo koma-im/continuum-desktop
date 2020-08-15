@@ -7,6 +7,7 @@ import koma.koma_app.appState
 import koma.storage.persistence.settings.AppSettings
 import link.continuum.desktop.util.cache.ImgCacheProc
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import java.io.InputStream
 import kotlin.streams.toList
 
@@ -27,7 +28,7 @@ fun getEmojiCode(emoji: String): String {
 }
 
 private fun getCdnEmojiUrl(code: String): HttpUrl {
-    return  HttpUrl.parse("https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/png/$code.png")!!
+    return  "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.7/assets/png/$code.png".toHttpUrlOrNull()!!
 }
 
 private fun processEmoji(

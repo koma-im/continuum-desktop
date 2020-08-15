@@ -18,7 +18,7 @@ abstract class DeserializableEventRecord {
     fun getEvent(): RoomEvent? {
         val e = _event
         if (e != null) return e
-        val decoded = jsonMain.parse(RoomEvent.serializer(), json)
+        val decoded = jsonMain.decodeFromString(RoomEvent.serializer(), json)
         _event = decoded
         return decoded
     }
