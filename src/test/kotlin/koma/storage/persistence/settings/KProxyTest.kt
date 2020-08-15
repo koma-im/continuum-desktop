@@ -3,12 +3,11 @@ package koma.storage.persistence.settings
 import koma.storage.persistence.settings.encoding.toCSV
 import koma.storage.persistence.settings.encoding.toProxyResult
 import koma.util.getOrThrow
-import kotlinx.serialization.UnstableDefault
 import java.net.Proxy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@UnstableDefault
+
 internal class KProxyTest {
 
     @Test

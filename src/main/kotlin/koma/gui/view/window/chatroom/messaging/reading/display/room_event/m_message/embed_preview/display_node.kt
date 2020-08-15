@@ -35,6 +35,7 @@ import link.continuum.desktop.gui.list.user.UserDataStore
 import link.continuum.desktop.util.debugAssert
 import link.continuum.desktop.util.debugAssertUiThread
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 private val settings: AppSettings = appState.store.settings
 
@@ -143,12 +144,12 @@ class WebContentNode(private val link: String,
     }
 
     private fun findPreview(): ViewNode? {
-        val url = HttpUrl.parse(link)
+        val url = link.toHttpUrlOrNull()
         url ?: return null
-        val site = url.host()
+        val site = url.host
         val sview = siteViewConstructors.get(site)?.let { view -> view(url) }
 
-        val filename = url.pathSegments().last()
+        val filename = url.pathSegments.last()
         val ext = filename.substringAfter('.')
         val view = sview ?: mediaViewers.get(ext, url)
         return view

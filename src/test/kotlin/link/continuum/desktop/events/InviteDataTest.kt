@@ -2,24 +2,26 @@ package link.continuum.desktop.events
 
 import koma.matrix.room.InvitedRoom
 import koma.matrix.room.naming.RoomId
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.internal.MapLikeSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.list
 import kotlinx.serialization.map
+import kotlinx.serialization.parse
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 internal class InvitationDeserialization {
-    @UnstableDefault
+
     @Test
     fun test1() {
-        val j =Json(JsonConfiguration.Default.copy(ignoreUnknownKeys = true))
+        val j =Json{
+            ignoreUnknownKeys =true
+        }
         val t = (RoomId.serializer() to InvitedRoom.serializer())
         val serializer = MapSerializer(t.first, t.second)
-        val data =j.parse(serializer, invite)
+        val data = j.decodeFromString(serializer, invite)
         val (room, invite) = data!!.toList().first()
         val invitation = InviteData(invite, room)
         assertEquals("#welc2:example.com", invitation.roomDisplayName)

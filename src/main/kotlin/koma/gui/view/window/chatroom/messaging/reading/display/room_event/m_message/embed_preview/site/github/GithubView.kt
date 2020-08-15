@@ -7,7 +7,7 @@ import link.continuum.desktop.gui.text
 import okhttp3.HttpUrl
 
 fun createGithubView(url: HttpUrl): GithubView? {
-    val ps = url.pathSegments()
+    val ps = url.pathSegments
     val owner = ps.getOrNull(0) ?: return null
     val repo = ps.getOrNull(1) ?: return null
     return GithubView(owner, repo)

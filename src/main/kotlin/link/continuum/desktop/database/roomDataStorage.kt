@@ -15,10 +15,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import kotlinx.serialization.parse
 import link.continuum.database.models.*
 import link.continuum.desktop.Room
 import link.continuum.desktop.database.models.loadRoom
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 private val logger = KotlinLogging.logger {}
 
-private val json = Json(JsonConfiguration.Stable)
+private val json = Json { allowStructuredMapKeys = true }
 
 fun RoomId.hashColor(): Color {
     return hashStringColorDark(this.full)
@@ -85,7 +86,7 @@ class RoomDataStorage(
     val latestAliasList = LatestFlowMap(
             save = { roomId: RoomId, s: List<String>, l: Long ->
                 val ser = try {
-                    json.stringify(String.serializer().list, s)
+                    json.encodeToString(ListSerializer(String.serializer()), s)
                 } catch (e: Exception) {
                     return@LatestFlowMap
                 }
@@ -101,7 +102,7 @@ class RoomDataStorage(
                         .where(c)
                         .get().firstOrNull() } ?: return@LatestFlowMap  0L to listOf()
                 val aliases = try {
-                    json.parse(String.serializer().list, rec.aliases)
+                    json.decodeFromString(ListSerializer(String.serializer()), rec.aliases)
                 } catch (e: Exception) {
                     return@LatestFlowMap 0L to listOf()
                 }

@@ -14,14 +14,14 @@ import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane
-import kotlin.time.ClockMark
 import kotlin.time.ExperimentalTime
+import kotlin.time.TimeMark
 
 private val logger = KotlinLogging.logger {}
 
 @ExperimentalTime
 class StartScreen(
-        private val startTime: ClockMark
+        private val startTime: TimeMark
 ) {
 
     val root = StackPane()

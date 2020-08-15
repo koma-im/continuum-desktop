@@ -26,6 +26,7 @@ import link.continuum.desktop.gui.*
 import link.continuum.desktop.util.debugAssertUiThread
 import mu.KotlinLogging
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import org.controlsfx.control.MaskerPane
 import org.controlsfx.control.decoration.Decoration
@@ -111,7 +112,7 @@ class LoginScreen(
                 return@createPredicateValidator p0.user.isNotBlank() && p0.server.isNotBlank()
             }, "User ID should be of the form @user:matrix.org"))
             validation.registerValidator(serverCombo, Validator.createPredicateValidator({ s: String? ->
-                s?.let { HttpUrl.parse(it) } != null
+                s?.let { it.toHttpUrlOrNull() } != null
             }, "Server should be a valid HTTP/HTTPS URL"))
         }
         with(root) {

@@ -13,6 +13,7 @@ import link.continuum.desktop.action.startChat
 import link.continuum.desktop.database.KeyValueStore
 import link.continuum.desktop.util.gui.alert
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 
 /**
@@ -24,7 +25,7 @@ suspend fun onClickLogin(httpClient: OkHttpClient,
                          userid: UserId, password: String, server: String,
                          keyValueStore: KeyValueStore
 ) {
-    val url = HttpUrl.parse(server)
+    val url = server.toHttpUrlOrNull()
     if (url == null) {
         alert(Alert.AlertType.ERROR, "Invalid server url",
                 "$server not parsed")

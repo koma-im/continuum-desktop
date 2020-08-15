@@ -1,11 +1,12 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-version = "0.9.42"
+version = "0.9.45"
+val ktv = "1.4.0-rc"
 
 plugins {
-    kotlin("jvm") version "1.4-M2"
-    kotlin("kapt") version "1.4-M2"
+    id("org.jetbrains.kotlin.jvm") version "1.4.0-rc"
+    id("org.jetbrains.kotlin.kapt") version "1.4.0-rc"
     id("com.github.johnrengelman.shadow").version("5.2.0")
     id("java")
     id("maven")
@@ -23,8 +24,6 @@ allprojects {
         maven("https://dl.bintray.com/jerady/maven")
         maven("https://jitpack.io")
         maven("https://repo.maven.apache.org/maven2")
-        maven ("https://dl.bintray.com/kotlin/kotlin-eap")
-        maven ("https://kotlin.bintray.com/kotlinx")
     }
 
     dependencies {
@@ -43,10 +42,10 @@ javafx {
 }
 
 dependencies {
-    val ktorVersion = "1.3.2"
-    val coroutineVer = "1.3.7"
-    val serialVer = "0.20.0-1.4-M2"
-    implementation("io.github.koma-im:koma-library:0.9.25")
+    val ktorVersion = "1.3.2-$ktv"
+    val serialVer = "1.0-M1-$ktv"
+    val coroutineVer = "1.3.8-$ktv"
+    implementation("io.github.koma-im:koma-library:0.9.27")
     implementation("org.cache2k:cache2k-core:1.2.4.Final")
     implementation("de.jensd:fontawesomefx-fontawesome:4.7.0-9.1.2")
     implementation("de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2")

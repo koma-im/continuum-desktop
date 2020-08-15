@@ -28,7 +28,8 @@ import link.continuum.desktop.util.disk.path.getConfigDir
 import link.continuum.desktop.util.disk.path.loadOptionalCert
 import link.continuum.desktop.util.gui.alert
 import okhttp3.Cache
-import okhttp3.HttpUrl
+
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import org.h2.mvstore.MVStore
 import org.slf4j.LoggerFactory
@@ -37,7 +38,7 @@ import java.lang.invoke.MethodHandles
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.time.ExperimentalTime
-import kotlin.time.MonoClock
+import kotlin.time.TimeSource.Monotonic
 
 @ExperimentalTime
 fun main(args: Array<String>) {
@@ -54,7 +55,7 @@ fun main(args: Array<String>) {
     appState.coroutineScope.cancel()
     appState.job.cancel()
     // should work because instances all share the same dispatcher
-    KHttpClient.client.dispatcher().executorService().shutdownNow()
+    KHttpClient.client.dispatcher.executorService.shutdownNow()
 }
 
 
@@ -69,7 +70,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
     private val database = CompletableDeferred<KotlinEntityDataStore<Persistable>>()
     private val httpClient = CompletableDeferred<OkHttpClient>()
     private val appData = CompletableDeferred<AppData>()
-    val startTime = MonoClock.markNow()
+    val startTime = Monotonic.markNow()
     init {
         JFX.application = this
         val arg = System.getenv()["CONTINUUM_DIR"]
@@ -188,7 +189,7 @@ class KomaApp : Application(), CoroutineScope by CoroutineScope(Dispatchers.Defa
         })
         val u = UserId(user)
         val a = kvs.serverToAddress.get(u.server) ?: return false
-        val s = HttpUrl.parse(a) ?: return false
+        val s = a.toHttpUrlOrNull() ?: return false
         val t =kvs.userToToken.get(u.full)?: return false
         startChat(httpClient.await(), u, t, s, kvs, appData)
         return true

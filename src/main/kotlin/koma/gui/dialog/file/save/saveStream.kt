@@ -33,7 +33,7 @@ fun downloadFileAs(url: HttpUrl,
 }
 
 fun HttpUrl.guessFileName(): String {
-    val ps = this.encodedPathSegments()
+    val ps = this.encodedPathSegments
     val ls = ps.getOrNull(ps.lastIndex)
     return ls ?: ""
 }
