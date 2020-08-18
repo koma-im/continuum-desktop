@@ -9,7 +9,7 @@ if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
   fi
   chmod +x linuxdeploy-x86_64.AppImage
   cd ..
-  gradle runtime
+  ./gradlew runtime
   mkdir -p build/image/usr/bin
   cd build/image/usr/bin
   ln -sb ../../bin/* .
